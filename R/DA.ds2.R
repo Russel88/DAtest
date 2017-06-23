@@ -1,0 +1,28 @@
+#' DESeq2
+#'
+#' From:
+#' https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8
+#' Manual geometric means calculated to avoid errors, see https://github.com/joey711/phyloseq/issues/387
+
+#' @export
+
+DA.ds2 <- function(otu_table, outcome){
+  
+  library(DESeq2, quietly = TRUE)
+  outcomedf <- data.frame(outcome = factor(outcome))
+  row.names(outcomedf) <- colnames(otu_table)
+  x <- DESeqDataSetFromMatrix(countData = as.data.frame(otu_table), colData = outcomedf , design = ~ outcome)
+  gm_mean = function(x, na.rm=TRUE){
+    exp(sum(log(x[x > 0]), na.rm=na.rm) / length(x))
+  }
+  geoMeans = apply(counts(x), 1, gm_mean)
+  x = estimateSizeFactors(x, geoMeans = geoMeans)
+  x <- DESeq(x)
+  res <- as.data.frame(results(x)@listData)
+  colnames(res)[5] <- "pval"
+  res$OTU <- results(x)@rownames
+  res$Method <- "DESeq2"
+
+  return(res)  
+}
+
