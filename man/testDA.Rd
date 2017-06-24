@@ -7,7 +7,7 @@
 testDA(otu_table, predictor, R = 5, tests = c("wil", "ttt", "ltt", "ltt2",
   "neb", "erq", "ere", "msf", "zig", "ds2", "per", "bay", "adx"),
   spikeMethod = "mult", effectSize = 2, k = 5, cores = (detectCores() -
-  1), rng.seed = 123, delta1 = 1, delta2 = 0.001,
+  1), rng.seed = 123, p.adj = "fdr", delta1 = 1, delta2 = 0.001,
   noOfIterations = 10000, margin = 50, testStat = function(case, control)
   {     log((mean(case) + 1)/(mean(control) + 1)) }, mc.samples = 64)
 }
@@ -29,6 +29,8 @@ testDA(otu_table, predictor, R = 5, tests = c("wil", "ttt", "ltt", "ltt2",
 \item{cores}{Integer. Number of cores to use for parallel computing. Default one less than available}
 
 \item{rng.seed}{Numeric. Seed for reproducibility. Default 123}
+
+\item{p.adj}{Character. Method for pvalue adjustment. Default "fdr"}
 
 \item{delta1}{Numeric. The pseudocount for the Log t.test method. Default 1}
 

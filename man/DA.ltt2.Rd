@@ -5,7 +5,7 @@
 \title{Log t-test2}
 \usage{
 DA.ltt2(otu_table, outcome, delta = 0.001, testStat = function(case,
-  control) {     log((mean(case) + 1)/(mean(control) + 1)) })
+  control) {     log((mean(case) + 1)/(mean(control) + 1)) }, p.adj)
 }
 \description{
 Log t-test2

@@ -4,7 +4,7 @@
 \alias{DA.neb}
 \title{Negative binomial glm}
 \usage{
-DA.neb(otu_table, outcome)
+DA.neb(otu_table, outcome, p.adj)
 }
 \description{
 Negative binomial glm

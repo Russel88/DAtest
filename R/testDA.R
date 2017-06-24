@@ -10,13 +10,13 @@
 #' @param k Integer. Number of OTUs to spike in each tertile. k=5: 15 OTUs in total. Default 5
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available
 #' @param rng.seed Numeric. Seed for reproducibility. Default 123
+#' @param p.adj Character. Method for pvalue adjustment. Default "fdr"
 #' @param delta1 Numeric. The pseudocount for the Log t.test method. Default 1
 #' @param delta2 Numeric. The pseudocount for the Log t.test2 method. Default 0.001
 #' @param noOfIterations Integer. How many iterations should be run for the permutation test. Default 10000
 #' @param margin Integer. The margin of when to stop iterating for non-significant OTUs for the permutation test. Default 50
 #' @param testStat Function. The test statistic function for the permutation test (also in output of ttt, ltt, ltt2 and wil). Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))
 #' @param mc.samples Integer. Monte Carlo samples for ALDEx2. Default 64
-
 #' @details Currently implemented methods:
 #' \itemize{
 #'  \item wil - Wilcoxon Rank Sum on relative abundances
@@ -45,7 +45,7 @@
 #' @importFrom parallel detectCores
 #' @export
 
-testDA <- function(otu_table, predictor, R = 5, tests = c("wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2","per","bay","adx"), spikeMethod = "mult", effectSize = 2, k = 5, cores = (detectCores()-1), rng.seed = 123, delta1 = 1, delta2 = 0.001, noOfIterations = 10000, margin = 50, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, mc.samples = 64){
+testDA <- function(otu_table, predictor, R = 5, tests = c("wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2","per","bay","adx"), spikeMethod = "mult", effectSize = 2, k = 5, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", delta1 = 1, delta2 = 0.001, noOfIterations = 10000, margin = 50, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, mc.samples = 64){
 
   if(sum(colSums(otu_table) == 0) > 0) stop("Some samples are empty!")
   if(ncol(otu_table) != length(predictor)) stop("Number of samples in OTU table does not match length of predictor")
@@ -88,19 +88,19 @@ testDA <- function(otu_table, predictor, R = 5, tests = c("wil","ttt","ltt","ltt
     results <- foreach(i = tests, .export = noquote(paste0("DA.",tests)), .options.snow = opts) %dopar% {
       
       res.sub <- switch(i,
-                        wil = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand,testStat)),
-                        ttt = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand,testStat)),
-                        ltt = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand,delta1,testStat)),
-                        ltt2 = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand,delta2,testStat)),
-                        neb = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand)),
-                        erq = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand)),
-                        ere = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand)),
-                        msf = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand)),
-                        zig = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand)),
-                        ds2 = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand)),
-                        per = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand,noOfIterations,rng.seed,margin,testStat)),
-                        bay = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand)),
-                        adx = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand,mc.samples)))
+                        wil = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand,testStat, p.adj)),
+                        ttt = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand,testStat, p.adj)),
+                        ltt = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand,delta1,testStat, p.adj)),
+                        ltt2 = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand,delta2,testStat, p.adj)),
+                        neb = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand, p.adj)),
+                        erq = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand, p.adj)),
+                        ere = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand, p.adj)),
+                        msf = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand, p.adj)),
+                        zig = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand, p.adj)),
+                        ds2 = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand, p.adj)),
+                        per = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand,noOfIterations,rng.seed,margin,testStat, p.adj)),
+                        bay = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand, p.adj)),
+                        adx = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand,mc.samples, p.adj)))
       
       
       return(res.sub)
@@ -117,6 +117,8 @@ testDA <- function(otu_table, predictor, R = 5, tests = c("wil","ttt","ltt","ltt
       colnames(adx.w) <- colnames(adx.t)
       adx.t$pval <- as.numeric(as.data.frame(results["adx"])$adx.we.ep)
       adx.w$pval <- as.numeric(as.data.frame(results["adx"])$adx.wi.ep)
+      adx.t$pval.adj <- p.adjust(adx.t$pval, method = p.adj)
+      adx.w$pval.adj <- p.adjust(adx.w$pval, method = p.adj)
       adx.t$Method <- "ALDEx2 t-test"
       adx.w$Method <- "ALDEx2 wilcoxon"
       results["adx"] <- NULL

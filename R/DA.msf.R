@@ -5,7 +5,7 @@
 
 #' @export
 
-DA.msf <- function(otu_table, outcome){
+DA.msf <- function(otu_table, outcome, p.adj){
 
   library(metagenomeSeq, quietly = TRUE)
   otu_table <- as.data.frame.matrix(otu_table)
@@ -18,6 +18,7 @@ DA.msf <- function(otu_table, outcome){
   temp_table <- temp_table[!is.na(row.names(temp_table)),]
   temp_table$OTU <- rownames(temp_table)
   colnames(temp_table)[7] <- "pval"
+  temp_table$pval.adj <- p.adjust(temp_table$pval, method = p.adj)
   temp_table$Method <- "MetagenomeSeq Feature"  
 
   return(temp_table)

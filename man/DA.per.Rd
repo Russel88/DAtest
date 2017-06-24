@@ -6,7 +6,7 @@
 \usage{
 DA.per(otu_table, outcome, noOfIterations = 10000,
   seed = as.numeric(Sys.time()), margin = 50, testStat = function(case,
-  control) {     log((mean(case) + 1)/(mean(control) + 1)) })
+  control) {     log((mean(case) + 1)/(mean(control) + 1)) }, p.adj)
 }
 \description{
 Modified version of the one from:

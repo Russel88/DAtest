@@ -5,7 +5,7 @@
 \title{Wilcox test}
 \usage{
 DA.wil(otu_table, outcome, testStat = function(case, control) {    
-  log((mean(case) + 1)/(mean(control) + 1)) })
+  log((mean(case) + 1)/(mean(control) + 1)) }, p.adj)
 }
 \description{
 Wilcox test

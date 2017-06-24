@@ -4,7 +4,7 @@
 \alias{DA.msf}
 \title{MetagenomeSeq Feature model}
 \usage{
-DA.msf(otu_table, outcome)
+DA.msf(otu_table, outcome, p.adj)
 }
 \description{
 From:

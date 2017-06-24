@@ -3,7 +3,7 @@
 #' @import MASS
 #' @export
 
-DA.neb <- function(otu_table, outcome){
+DA.neb <- function(otu_table, outcome, p.adj){
  
   library(MASS, quietly = TRUE)
   
@@ -23,6 +23,7 @@ DA.neb <- function(otu_table, outcome){
   }
   res <- as.data.frame(t(as.data.frame(apply(otu_table,1,negbin))))
   colnames(res) <- c("Estimate","Std.Error","z value","pval")
+  res$pval.adj <- p.adjust(res$pval, method = p.adj)
   res$OTU <- rownames(res)
   res$Method <- "Negbinom"
   return(res)

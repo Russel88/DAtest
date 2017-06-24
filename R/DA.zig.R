@@ -5,7 +5,7 @@
 
 #' @export
 
-DA.zig <- function(otu_table, outcome){
+DA.zig <- function(otu_table, outcome, p.adj){
   
   library(metagenomeSeq, quietly = TRUE)
   
@@ -21,6 +21,7 @@ DA.zig <- function(otu_table, outcome){
   #if("pvalues" %in% names(temp_table)) res.zig <- data.frame(pval = temp_table$pvalues)
   #if("pValue" %in% names(temp_table)) res.zig <- data.frame(pval = temp_table$pValue)
   colnames(temp_table)[8] <- "pval"
+  temp_table$pval.adj <- p.adjust(temp_table$pval, method = p.adj)
   temp_table$OTU <- rownames(temp_table)
   temp_table$Method <- "MetagenomeSeq ZIG"
   return(temp_table)

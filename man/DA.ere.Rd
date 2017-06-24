@@ -4,7 +4,7 @@
 \alias{DA.ere}
 \title{EdgeR}
 \usage{
-DA.ere(otu_table, outcome)
+DA.ere(otu_table, outcome, p.adj)
 }
 \description{
 From:

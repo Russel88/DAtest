@@ -4,7 +4,7 @@
 \alias{DA.zig}
 \title{MetageonomeSeq ZIG}
 \usage{
-DA.zig(otu_table, outcome)
+DA.zig(otu_table, outcome, p.adj)
 }
 \description{
 From

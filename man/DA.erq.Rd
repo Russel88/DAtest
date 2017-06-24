@@ -4,7 +4,7 @@
 \alias{DA.erq}
 \title{EdgeR quasi-likelihood}
 \usage{
-DA.erq(otu_table, outcome)
+DA.erq(otu_table, outcome, p.adj)
 }
 \description{
 EdgeR quasi-likelihood

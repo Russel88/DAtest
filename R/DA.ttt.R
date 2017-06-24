@@ -2,7 +2,7 @@
 
 #' @export
 
-DA.ttt <- function(otu_table, outcome, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}){
+DA.ttt <- function(otu_table, outcome, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, p.adj){
   
   tt <- function(x){
     tryCatch(t.test(x ~ outcome)$p.value, error = function(e){NA}) 
@@ -10,7 +10,7 @@ DA.ttt <- function(otu_table, outcome, testStat = function(case,control){log((me
   
   otu.rel <- apply(otu_table,2,function(x) x/sum(x))
   res <- data.frame(pval = apply(otu.rel,1,tt))
-  
+  res$pval.adj <- p.adjust(res$pval, method = p.adj)
   # Teststat
   outcome.num <- as.numeric(as.factor(outcome))-1
   testfun <- function(x){

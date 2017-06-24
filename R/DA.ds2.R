@@ -6,7 +6,7 @@
 
 #' @export
 
-DA.ds2 <- function(otu_table, outcome){
+DA.ds2 <- function(otu_table, outcome, p.adj){
   
   library(DESeq2, quietly = TRUE)
   outcomedf <- data.frame(outcome = factor(outcome))
@@ -20,6 +20,7 @@ DA.ds2 <- function(otu_table, outcome){
   x <- DESeq(x)
   res <- as.data.frame(results(x)@listData)
   colnames(res)[5] <- "pval"
+  res$pval.adj <- p.adjust(res$pval, method = p.adj)
   res$OTU <- results(x)@rownames
   res$Method <- "DESeq2"
 

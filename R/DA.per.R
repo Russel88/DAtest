@@ -6,7 +6,7 @@
 
 #' @export
 
-DA.per <- function(otu_table, outcome, noOfIterations = 10000, seed = as.numeric(Sys.time()), margin = 50, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}){
+DA.per <- function(otu_table, outcome, noOfIterations = 10000, seed = as.numeric(Sys.time()), margin = 50, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, p.adj){
 
   outcome <- as.numeric(as.factor(outcome))-1
   
@@ -63,6 +63,7 @@ DA.per <- function(otu_table, outcome, noOfIterations = 10000, seed = as.numeric
     FC[i]        <- realStat
   }
   output_df <- data.frame(OTU = row.names(otu_table), pval = p, FC, coverage)
+  output_df$pval.adj <- p.adjust(output_df$pval, method = p.adj)
   output_df$Method <- "Permutation"
   return(output_df)
 }

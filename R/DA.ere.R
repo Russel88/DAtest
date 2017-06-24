@@ -5,7 +5,7 @@
 
 #' @export
 
-DA.ere <- function(otu_table, outcome){
+DA.ere <- function(otu_table, outcome, p.adj){
   
   library(edgeR, quietly = TRUE)
   otu_table <- as.data.frame(otu_table)
@@ -14,6 +14,7 @@ DA.ere <- function(otu_table, outcome){
   x <- estimateTagwiseDisp(estimateCommonDisp(x))
   ta <- exactTest(x)[[1]]
   colnames(ta)[3] <- "pval"
+  ta$pval.adj <- p.adjust(ta$pval, method = p.adj)
   ta$OTU <- rownames(ta)
   ta$Method <- "EdgeR exact"
  
