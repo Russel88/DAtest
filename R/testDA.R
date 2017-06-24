@@ -3,7 +3,7 @@
 #' Calculating false positive rates and AUC for various differential abundance methods
 #' @param otu_table Matrix or data.frame. OTU table with taxa as rows
 #' @param predictor Factor. The outcome of interest. Should have two levels, e.g. case and control
-#' @param R Integer. Number of times to run the models. Default 5
+#' @param R Integer. Number of times to run the tests. Default 3
 #' @param tests Character. Which tests to include. Default all
 #' @param spikeMethod Character. Multiplicative ("mult") or additive ("add") spike-in. Default "mult"
 #' @param effectSize Integer. The effect size for the spike-ins. Default 2
@@ -13,12 +13,20 @@
 #' @param p.adj Character. Method for pvalue adjustment. Default "fdr"
 #' @param delta1 Numeric. The pseudocount for the Log t.test method. Default 1
 #' @param delta2 Numeric. The pseudocount for the Log t.test2 method. Default 0.001
-#' @param noOfIterations Integer. How many iterations should be run for the permutation test. Default 10000
+#' @param noOfIterations Integer. How many iterations should be run for the permutation test. Default 1000
 #' @param margin Integer. The margin of when to stop iterating for non-significant OTUs for the permutation test. Default 50
 #' @param testStat Function. The test statistic function for the permutation test (also in output of ttt, ltt, ltt2 and wil). Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))
 #' @param mc.samples Integer. Monte Carlo samples for ALDEx2. Default 64
+#' @param sig Numeric. Alpha used in ANCOM. Default 0.05
+#' @param multcorr Integer. Correction used in ANCOM. Default 3 (no correction)
+#' @param tau Numeric. Tuning parameter for ANCOM. Default 0.02
+#' @param theta Numeric. Tuning parameter for ANCOM. Default 0.1
+#' @param repeated Logical. Are there repeated measures? Only for ANCOM. Default FALSE
 #' @details Currently implemented methods:
 #' \itemize{
+#'  \item per - Permutation test with user defined test statistic
+#'  \item bay - baySeq
+#'  \item adx - ALDEx t-test and wilcoxon
 #'  \item wil - Wilcoxon Rank Sum on relative abundances
 #'  \item ttt - Welch t.test on relative abundances
 #'  \item ltt - Welch t.test, but reads are first transformed with log(abundance + delta1) then turned into relative abundances
@@ -29,11 +37,11 @@
 #'  \item msf - MetagenomeSeq feature model
 #'  \item zig - MetagenomeSeq zero-inflated gaussian
 #'  \item ds2 - DESeq2
-#'  \item per - Permutation test with user defined test statistic
-#'  \item bay - baySeq
-#'  \item adx - ALDEx t-test and wilcoxon
+#'  \item anc - ANCOM. This test is not run by default because it is slow. This test does not output pvalues; for comparison with the other methods, detected OTUs are set to a pvalue of 0, all else are set to 1.
 #' }
-
+#' Is it too slow? Remove "anc" from test argument
+#' Still too slow? Remove "bay", "adx" and "neb".
+#' "per" is also somewhat slow, but is usually one of the methods performing well.
 #' @return A list of results:
 #' \itemize{
 #'  \item summary - A summary of the results
@@ -45,7 +53,7 @@
 #' @importFrom parallel detectCores
 #' @export
 
-testDA <- function(otu_table, predictor, R = 5, tests = c("wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2","per","bay","adx"), spikeMethod = "mult", effectSize = 2, k = 5, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", delta1 = 1, delta2 = 0.001, noOfIterations = 10000, margin = 50, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, mc.samples = 64){
+testDA <- function(otu_table, predictor, R = 3, tests = c("per","bay","adx","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2"), spikeMethod = "mult", effectSize = 2, k = 5, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", delta1 = 1, delta2 = 0.001, noOfIterations = 1000, margin = 50, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, mc.samples = 64, sig = 0.05, multcorr = 3, tau = 0.02, theta = 0.1, repeated = FALSE){
 
   if(sum(colSums(otu_table) == 0) > 0) stop("Some samples are empty!")
   if(ncol(otu_table) != length(predictor)) stop("Number of samples in OTU table does not match length of predictor")
@@ -100,7 +108,8 @@ testDA <- function(otu_table, predictor, R = 5, tests = c("wil","ttt","ltt","ltt
                         ds2 = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand, p.adj)),
                         per = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand,noOfIterations,rng.seed,margin,testStat, p.adj)),
                         bay = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand, p.adj)),
-                        adx = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand,mc.samples, p.adj)))
+                        adx = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand,mc.samples, p.adj)),
+                        anc = do.call(get(noquote(paste0("DA.",i))),list(otu_table,rand,sig,multcorr, tau, theta, repeated)))
       
       
       return(res.sub)

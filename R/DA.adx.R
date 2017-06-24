@@ -2,7 +2,7 @@
 
 #' @export
 
-DA.adx <- function(otu_table, outcome, mc.samples, p.adj){
+DA.adx <- function(otu_table, outcome, mc.samples = 128, p.adj){
   
   library(ALDEx2, quietly = TRUE)
   

@@ -16,19 +16,23 @@ plotDA <- function(DA){
     theme_bw() +
     coord_cartesian(ylim = c(0,1)) +
     geom_hline(yintercept = 0.05, colour = "red") +
-    geom_boxplot() +
+    geom_point() +
+    stat_summary(fun.y = median, fun.ymin = median, fun.ymax = median,geom = "crossbar",colour="red") +
     ylab("False Positive Rate") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
     xlab(NULL) +
-    theme(axis.text.x = element_blank())
+    theme(axis.text.x = element_blank(),
+          panel.grid.minor = element_blank())
   
   p2 <- ggplot(DA$table, aes(Method, AUC)) +
     theme_bw() +
     coord_cartesian(ylim = c(min(DA$table$AUC),1)) +
     geom_hline(yintercept = 0.5, colour = "red") +
-    geom_boxplot() +
+    geom_point() +
+    stat_summary(fun.y = median, fun.ymin = median, fun.ymax = median,geom = "crossbar",colour="red") +
     ylab("Area Under the Curve") +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+          panel.grid.minor = element_blank()) +
     xlab(NULL)
   
   suppressWarnings(plot_grid(p1, p2, nrow=2))

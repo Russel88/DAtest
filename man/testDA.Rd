@@ -4,19 +4,20 @@
 \alias{testDA}
 \title{Comparing differential abundance methods by FPR and AUC}
 \usage{
-testDA(otu_table, predictor, R = 5, tests = c("wil", "ttt", "ltt", "ltt2",
-  "neb", "erq", "ere", "msf", "zig", "ds2", "per", "bay", "adx"),
+testDA(otu_table, predictor, R = 3, tests = c("per", "bay", "adx", "wil",
+  "ttt", "ltt", "ltt2", "neb", "erq", "ere", "msf", "zig", "ds2"),
   spikeMethod = "mult", effectSize = 2, k = 5, cores = (detectCores() -
   1), rng.seed = 123, p.adj = "fdr", delta1 = 1, delta2 = 0.001,
-  noOfIterations = 10000, margin = 50, testStat = function(case, control)
-  {     log((mean(case) + 1)/(mean(control) + 1)) }, mc.samples = 64)
+  noOfIterations = 1000, margin = 50, testStat = function(case, control) {
+      log((mean(case) + 1)/(mean(control) + 1)) }, mc.samples = 64,
+  sig = 0.05, multcorr = 3, tau = 0.02, theta = 0.1, repeated = FALSE)
 }
 \arguments{
 \item{otu_table}{Matrix or data.frame. OTU table with taxa as rows}
 
 \item{predictor}{Factor. The outcome of interest. Should have two levels, e.g. case and control}
 
-\item{R}{Integer. Number of times to run the models. Default 5}
+\item{R}{Integer. Number of times to run the tests. Default 3}
 
 \item{tests}{Character. Which tests to include. Default all}
 
@@ -36,13 +37,23 @@ testDA(otu_table, predictor, R = 5, tests = c("wil", "ttt", "ltt", "ltt2",
 
 \item{delta2}{Numeric. The pseudocount for the Log t.test2 method. Default 0.001}
 
-\item{noOfIterations}{Integer. How many iterations should be run for the permutation test. Default 10000}
+\item{noOfIterations}{Integer. How many iterations should be run for the permutation test. Default 1000}
 
 \item{margin}{Integer. The margin of when to stop iterating for non-significant OTUs for the permutation test. Default 50}
 
 \item{testStat}{Function. The test statistic function for the permutation test (also in output of ttt, ltt, ltt2 and wil). Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))}
 
 \item{mc.samples}{Integer. Monte Carlo samples for ALDEx2. Default 64}
+
+\item{sig}{Numeric. Alpha used in ANCOM. Default 0.05}
+
+\item{multcorr}{Integer. Correction used in ANCOM. Default 3 (no correction)}
+
+\item{tau}{Numeric. Tuning parameter for ANCOM. Default 0.02}
+
+\item{theta}{Numeric. Tuning parameter for ANCOM. Default 0.1}
+
+\item{repeated}{Logical. Are there repeated measures? Only for ANCOM. Default FALSE}
 }
 \value{
 A list of results:
@@ -58,6 +69,9 @@ Calculating false positive rates and AUC for various differential abundance meth
 \details{
 Currently implemented methods:
 \itemize{
+ \item per - Permutation test with user defined test statistic
+ \item bay - baySeq
+ \item adx - ALDEx t-test and wilcoxon
  \item wil - Wilcoxon Rank Sum on relative abundances
  \item ttt - Welch t.test on relative abundances
  \item ltt - Welch t.test, but reads are first transformed with log(abundance + delta1) then turned into relative abundances
@@ -68,8 +82,9 @@ Currently implemented methods:
  \item msf - MetagenomeSeq feature model
  \item zig - MetagenomeSeq zero-inflated gaussian
  \item ds2 - DESeq2
- \item per - Permutation test with user defined test statistic
- \item bay - baySeq
- \item adx - ALDEx t-test and wilcoxon
+ \item anc - ANCOM. This test is not run by default because it is slow. This test does not output pvalues; for comparison with the other methods, detected OTUs are set to a pvalue of 0, all else are set to 1.
 }
+Is it too slow? Remove "anc" from test argument
+Still too slow? Remove "bay", "adx" and "neb".
+"per" is also somewhat slow, but is usually one of the methods performing well.
 }

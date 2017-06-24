@@ -24,6 +24,12 @@ amplicon data analysis methods used in microbiome studies. *Microbiome*
     biocLite("baySeq")
     biocLite("ALDEx2")
 
+#### ANCOM
+
+ANCOM has to be installed from an [external
+source](https://www.niehs.nih.gov/research/resources/software/biostatistics/ancom/index.cfm)
+ANCOM is not included by default in the test.
+
 ### How to compare methods:
 
 A good method has a "False Positive Rate" (FPR) at 0.05 or below and an
