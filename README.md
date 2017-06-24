@@ -1,5 +1,5 @@
 DAtest
-------
+======
 
 This is a package for comparing different differential abundance methods
 used in both microbiome and RNA-seq analysis.
@@ -10,7 +10,8 @@ false discoveries and count transformation sensitivity in 16S rRNA gene
 amplicon data analysis methods used in microbiome studies. *Microbiome*
 (2016)](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8)
 
-### Installation of packages
+Installation of packages
+------------------------
 
     library(devtools)
     install_github("Russel88/DAtest")
@@ -24,13 +25,14 @@ amplicon data analysis methods used in microbiome studies. *Microbiome*
     biocLite("baySeq")
     biocLite("ALDEx2")
 
-#### ANCOM
+##### ANCOM
 
 ANCOM has to be installed from an [external
-source](https://www.niehs.nih.gov/research/resources/software/biostatistics/ancom/index.cfm)
-ANCOM is not included by default in the test.
+source,](https://www.niehs.nih.gov/research/resources/software/biostatistics/ancom/index.cfm)
+and is not included by default in the test.
 
-### How to compare methods:
+How to compare methods:
+-----------------------
 
 A good method has a "False Positive Rate" (FPR) at 0.05 or below and an
 "Area Under the Curve" (AUC) as high as possible.
@@ -47,13 +49,14 @@ otu\_table).
 
 **Print the output:**
 
-    mytest$summary
+    summary(mytest)
 
 **Plot the output:**
 
-    plotDA(mytest)
+    plot(mytest)
 
-### How to run real data:
+How to run real data:
+---------------------
 
 All tests can easily be run with the original data. E.g. edgeR exact
 test:
