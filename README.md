@@ -25,8 +25,6 @@ Installation of packages
     biocLite("baySeq")
     biocLite("ALDEx2")
 
-##### ANCOM
-
 ANCOM has to be installed from an [external
 source,](https://www.niehs.nih.gov/research/resources/software/biostatistics/ancom/index.cfm)
 and is not included by default in the test.

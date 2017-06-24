@@ -44,7 +44,6 @@
 #' "per" is also somewhat slow, but is usually one of the methods performing well.
 #' @return An object of class DA, which contains a list of results:
 #' \itemize{
-#'  \item summary - A summary of the results
 #'  \item table - FPR, AUC and spike detection rate for each run
 #'  \item results - A complete list of output from all the methods. Example: Get wilcoxon results from 2. run as such: $results[[2]]["wil"]
 #' }
@@ -129,7 +128,7 @@ testDA <- function(otu_table, predictor, R = 3, tests = c("per","bay","adx","wil
       adx.t$pval.adj <- p.adjust(adx.t$pval, method = p.adj)
       adx.w$pval.adj <- p.adjust(adx.w$pval, method = p.adj)
       adx.t$Method <- "ALDEx2 t-test"
-      adx.w$Method <- "ALDEx2 wilcoxon"
+      adx.w$Method <- "ALDEx2 wilcox"
       results["adx"] <- NULL
       res.names <- names(results)
       results <- c(results,list(adx.t),list(adx.w))

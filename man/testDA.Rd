@@ -58,7 +58,6 @@ testDA(otu_table, predictor, R = 3, tests = c("per", "bay", "adx", "wil",
 \value{
 An object of class DA, which contains a list of results:
 \itemize{
- \item summary - A summary of the results
  \item table - FPR, AUC and spike detection rate for each run
  \item results - A complete list of output from all the methods. Example: Get wilcoxon results from 2. run as such: $results[[2]]["wil"]
 }
