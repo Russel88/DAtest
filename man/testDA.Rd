@@ -56,7 +56,7 @@ testDA(otu_table, predictor, R = 3, tests = c("per", "bay", "adx", "wil",
 \item{repeated}{Logical. Are there repeated measures? Only for ANCOM. Default FALSE}
 }
 \value{
-A list of results:
+An object of class DA, which contains a list of results:
 \itemize{
  \item summary - A summary of the results
  \item table - FPR, AUC and spike detection rate for each run

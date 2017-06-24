@@ -5,19 +5,20 @@
 #' 
 #' @export
 
-plotDA <- function(DA){
+plot.DA <- function(DA){
   
   require(ggplot2, quietly = TRUE)
   require(cowplot, quietly = TRUE)
   
-  DA$table$Method <- factor(DA$table$Method, levels = DA$summary[order(DA$summary$AUC, decreasing = TRUE),"Method"])
+  auc.median <- aggregate(AUC ~ Method, data = DA$table, FUN = median)
+  DA$table$Method <- factor(DA$table$Method, levels = auc.median[order(auc.median$AUC, decreasing = TRUE),"Method"])
   
   p1 <- ggplot(DA$table, aes(Method, FPR)) +
     theme_bw() +
     coord_cartesian(ylim = c(0,1)) +
     geom_hline(yintercept = 0.05, colour = "red") +
     geom_point() +
-    stat_summary(fun.y = median, fun.ymin = median, fun.ymax = median,geom = "crossbar",colour="red") +
+    stat_summary(fun.y = median, fun.ymin = median, fun.ymax = median,geom = "crossbar",colour="red",width=0.75) +
     ylab("False Positive Rate") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
     xlab(NULL) +
@@ -29,7 +30,7 @@ plotDA <- function(DA){
     coord_cartesian(ylim = c(min(DA$table$AUC),1)) +
     geom_hline(yintercept = 0.5, colour = "red") +
     geom_point() +
-    stat_summary(fun.y = median, fun.ymin = median, fun.ymax = median,geom = "crossbar",colour="red") +
+    stat_summary(fun.y = median, fun.ymin = median, fun.ymax = median,geom = "crossbar",colour="red",width=0.75) +
     ylab("Area Under the Curve") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
           panel.grid.minor = element_blank()) +

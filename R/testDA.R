@@ -42,7 +42,7 @@
 #' Is it too slow? Remove "anc" from test argument
 #' Still too slow? Remove "bay", "adx" and "neb".
 #' "per" is also somewhat slow, but is usually one of the methods performing well.
-#' @return A list of results:
+#' @return An object of class DA, which contains a list of results:
 #' \itemize{
 #'  \item summary - A summary of the results
 #'  \item table - FPR, AUC and spike detection rate for each run
@@ -187,15 +187,11 @@ testDA <- function(otu_table, predictor, R = 3, tests = c("per","bay","adx","wil
   }
   
   output.results <- do.call(rbind,lapply(final.results, function(x) x[[1]]))
+  output.all.results <- lapply(final.results, function(x) x[[2]])
   
-  output.summary.fpr <- aggregate(FPR ~ Method, data = output.results, FUN = function(x) round(median(x),3))
-  output.summary.auc <- aggregate(AUC ~ Method, data = output.results, FUN = function(x) round(median(x),3))
-  output.summary.sdr <- aggregate(Spike.detect.rate ~ Method, data = output.results, FUN = function(x) round(median(x),3))
-  output.summary <- merge(merge(output.summary.fpr,output.summary.auc, by = "Method"),output.summary.sdr, by = "Method")
-    output.all.results <- lapply(final.results, function(x) x[[2]])
-  
-  return(list(summary = output.summary, table = output.results, results = output.all.results))
-  
+  out <- list(table = output.results, results = output.all.results)
+  class(out) <- "DA"
+  return(out)
 }
 
 
