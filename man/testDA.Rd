@@ -4,7 +4,7 @@
 \alias{testDA}
 \title{Comparing differential abundance methods by FPR and AUC}
 \usage{
-testDA(otu_table, predictor, R = 3, tests = c("per", "bay", "adx", "enn",
+testDA(count_table, predictor, R = 3, tests = c("per", "bay", "adx", "enn",
   "wil", "ttt", "ltt", "ltt2", "neb", "erq", "ere", "msf", "zig", "ds2"),
   spikeMethod = "mult", effectSize = 2, k = 5, cores = (detectCores() -
   1), rng.seed = 123, p.adj = "fdr", delta1 = 1, delta2 = 0.001,
@@ -14,7 +14,7 @@ testDA(otu_table, predictor, R = 3, tests = c("per", "bay", "adx", "enn",
   TMM.option = 1)
 }
 \arguments{
-\item{otu_table}{Matrix or data.frame. OTU table with taxa as rows}
+\item{count_table}{Matrix or data.frame. Table with taxa/genes as rows and samples as columns}
 
 \item{predictor}{Factor. The outcome of interest. Should have two levels, e.g. case and control}
 

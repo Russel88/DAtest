@@ -4,7 +4,7 @@
 \alias{allDA}
 \title{Run many differential abundance methods}
 \usage{
-allDA(otu_table, predictor, tests = c("per", "bay", "adx", "enn", "wil",
+allDA(count_table, predictor, tests = c("per", "bay", "adx", "enn", "wil",
   "ttt", "ltt", "ltt2", "neb", "erq", "ere", "msf", "zig", "ds2"),
   cores = (detectCores() - 1), rng.seed = 123, p.adj = "fdr",
   delta1 = 1, delta2 = 0.001, noOfIterations = 10000, margin = 50,
@@ -13,7 +13,7 @@ allDA(otu_table, predictor, tests = c("per", "bay", "adx", "enn", "wil",
   theta = 0.1, repeated = FALSE, TMM.option = 1)
 }
 \arguments{
-\item{otu_table}{Matrix or data.frame. OTU table with taxa as rows}
+\item{count_table}{Matrix or data.frame. Table with taxa/genes as rows and samples as columns}
 
 \item{predictor}{Factor. The outcome of interest. Should have two levels, e.g. case and control}
 
