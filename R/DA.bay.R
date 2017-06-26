@@ -21,9 +21,9 @@ DA.bay <- function(otu_table, outcome, p.adj){
   tc <- tc[,c(1,rev(ncol(tc)-0:4))]
   
   if(is.null(tc$ordering))
-    output_df <- data.frame(OTU = as.character(tc$annotation), pval = 1 - tc$Likelihood, pval.adj = p.adjust(pval = 1 - tc$Likelihood, method = p.adj))
+    output_df <- data.frame(OTU = as.character(tc$annotation), pval = 1 - tc$Likelihood, pval.adj = p.adjust(1 - tc$Likelihood, method = p.adj))
   if(!is.null(tc$ordering))
-    output_df <- data.frame(OTU = as.character(tc$annotation), pval = 1 - tc$Likelihood, pval.adj = p.adjust(pval = 1 - tc$Likelihood, method = p.adj), ordering = tc$ordering)
+    output_df <- data.frame(OTU = as.character(tc$annotation), pval = 1 - tc$Likelihood, pval.adj = p.adjust(1 - tc$Likelihood, method = p.adj), ordering = tc$ordering)
   
   
   output_df$Method <- "baySeq"
