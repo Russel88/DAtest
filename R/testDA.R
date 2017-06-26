@@ -42,7 +42,6 @@
 #'  \item anc - ANCOM. This test is not run by default because it is slow. This test does not output pvalues; for comparison with the other methods, detected OTUs are set to a pvalue of 0, all else are set to 1.
 #' }
 #' Is it too slow? Remove "anc" from test argument
-#' Still too slow? Remove "bay", "adx", "enn" and "neb".
 #' "per" is also somewhat slow, but is usually one of the methods performing well.
 #' @return An object of class DA, which contains a list of results:
 #' \itemize{
@@ -108,7 +107,7 @@ testDA <- function(count_table, predictor, R = 3, tests = c("per","bay","adx","e
                         zig = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand, p.adj)),
                         ds2 = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand, p.adj)),
                         per = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,noOfIterations,rng.seed,margin,testStat, p.adj)),
-                        bay = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand)),
+                        bay = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand, p.adj)),
                         adx = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,mc.samples, p.adj)),
                         enn = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,TMM.option,p.adj)),
                         anc = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,sig,multcorr, tau, theta, repeated)))

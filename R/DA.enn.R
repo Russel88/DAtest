@@ -177,7 +177,7 @@ DA.enn <- function(otu_table, outcome, TMM.option = 1, p.adj){
 
   }
   
-  res <- TwoStage_Package(otu_table,outcome,TMM.option)
+  res <- tryCatch(TwoStage_Package(otu_table,sample(outcome),TMM.option = 1),error = function(e) NULL)
   
   otus <- data.frame(OTU = rownames(otu_table))
   

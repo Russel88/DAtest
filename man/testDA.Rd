@@ -88,6 +88,5 @@ Currently implemented methods:
  \item anc - ANCOM. This test is not run by default because it is slow. This test does not output pvalues; for comparison with the other methods, detected OTUs are set to a pvalue of 0, all else are set to 1.
 }
 Is it too slow? Remove "anc" from test argument
-Still too slow? Remove "bay", "adx", "enn" and "neb".
 "per" is also somewhat slow, but is usually one of the methods performing well.
 }
