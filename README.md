@@ -74,26 +74,28 @@ found by several methods
 Implemented methods:
 --------------------
 
-per - [Permutation test with user defined test
-statistic](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8)
-bay -
-[baySeq](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-11-422)
-adx - [ALDEx t-test and
-wilcoxon](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0067019)
-wil - Wilcoxon Rank Sum on relative abundances ttt - Welch t.test on
-relative abundances ltt - Welch t.test, but reads are first transformed
-with log(abundance + delta) then turned into relative abundances ltt2 -
-Welch t.test, but with relative abundances transformed with log(relative
-abundance + delta) neb - Negative binomial GLM with log of library size
-as offset erq - [EdgeR - Quasi
-likelihood](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2796818/) ere -
-[EdgeR - Exact
-test](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2796818/) msf -
-[MetagenomeSeq feature
-model](https://bioconductor.org/packages/release/bioc/html/metagenomeSeq.html)
-zig - [MetagenomeSeq zero-inflated
-gaussian](https://www.nature.com/nmeth/journal/v10/n12/full/nmeth.2658.html)
-ds2 -
-[DESeq2](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0550-8)
-enn - [ENNB](https://cals.arizona.edu/~anling/software.htm) anc -
-[ANCOM](https://www.ncbi.nlm.nih.gov/pubmed/26028277)
+-   per - [Permutation test with user defined test
+    statistic](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8)
+-   bay -
+    [baySeq](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-11-422)
+-   adx - [ALDEx t-test and
+    wilcoxon](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0067019)
+-   wil - Wilcoxon Rank Sum on relative abundances
+-   ttt - Welch t.test on relative abundances
+-   ltt - Welch t.test, but reads are first transformed with
+    log(abundance + delta) then turned into relative abundances
+-   ltt2 - Welch t.test, but with relative abundances transformed with
+    log(relative abundance + delta)
+-   neb - Negative binomial GLM with log of library size as offset
+-   erq - [EdgeR - Quasi
+    likelihood](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2796818/)
+-   ere - [EdgeR - Exact
+    test](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2796818/)
+-   msf - [MetagenomeSeq feature
+    model](https://bioconductor.org/packages/release/bioc/html/metagenomeSeq.html)
+-   zig - [MetagenomeSeq zero-inflated
+    gaussian](https://www.nature.com/nmeth/journal/v10/n12/full/nmeth.2658.html)
+-   ds2 -
+    [DESeq2](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0550-8)
+-   enn - [ENNB](https://cals.arizona.edu/~anling/software.htm)
+-   anc - [ANCOM](https://www.ncbi.nlm.nih.gov/pubmed/26028277)
