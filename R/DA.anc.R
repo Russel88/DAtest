@@ -13,8 +13,11 @@ DA.anc <- function(otu_table, outcome, sig = 0.05, multcorr = 3, tau = 0.02, the
 
   df <- data.frame(OTU = rownames(otu_table),
                    W = res[[1]],
-                   pval = 1)  
+                   pval = 1,
+                   pval.adj = 1)  
   df[df$OTU %in% res[[2]],"pval"] <- 0
+  df[df$OTU %in% res[[2]],"pval.adj"] <- 0
+  
   df$Method <- "ANCOM"
   
   return(df)  

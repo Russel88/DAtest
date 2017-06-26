@@ -4,7 +4,7 @@
 \alias{DA.bay}
 \title{baySeq}
 \usage{
-DA.bay(otu_table, outcome, p.adj)
+DA.bay(otu_table, outcome)
 }
 \description{
 From
