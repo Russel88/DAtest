@@ -2,7 +2,7 @@ DAtest
 ======
 
 This is a package for comparing different differential abundance methods
-used in both microbiome and RNA-seq analysis.
+used in microbial marker-gene and RNA-seq analysis.
 
 Most scripts, including the spike-in for estimating AUC, is borrowed
 from: [Thorsen J, Brejnrod A et al. Large-scale benchmarking reveals
@@ -28,10 +28,6 @@ Installation of packages
 ANCOM has to be installed from an [external
 source,](https://www.niehs.nih.gov/research/resources/software/biostatistics/ancom/index.cfm)
 and is not included by default in the test.
-
-RAIDA has to be installed from an [external
-source,](https://cals.arizona.edu/~anling/sbg/software.htm) and is not
-included by default in the test.
 
 How to compare methods:
 -----------------------
