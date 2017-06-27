@@ -39,7 +39,7 @@
 #'  \item zig - MetagenomeSeq zero-inflated gaussian
 #'  \item ds2 - DESeq2
 #'  \item enn - ENNB: Two-stage procedure from https://cals.arizona.edu/~anling/software.htm
-#'  \item anc - ANCOM. This test is not run by default because it is slow. This test does not output pvalues; for comparison with the other methods, detected OTUs are set to a pvalue of 0, all else are set to 1.
+#'  \item anc - ANCOM. This test does not output pvalues; for comparison with the other methods, detected OTUs are set to a pvalue of 0, all else are set to 1.
 #' }
 #' Is it too slow? Remove "anc" from test argument
 #' "per" is also somewhat slow, but is usually one of the methods performing well.
@@ -53,10 +53,20 @@
 #' @importFrom parallel detectCores
 #' @export
 
-testDA <- function(count_table, predictor, R = 3, tests = c("per","bay","adx","enn","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2"), spikeMethod = "mult", effectSize = 2, k = 5, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", delta1 = 1, delta2 = 0.001, noOfIterations = 10000, margin = 50, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, mc.samples = 64, sig = 0.05, multcorr = 3, tau = 0.02, theta = 0.1, repeated = FALSE, TMM.option = 1){
+testDA <- function(count_table, predictor, R = 3, tests = c("anc","per","bay","adx","enn","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2"), spikeMethod = "mult", effectSize = 2, k = 5, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", delta1 = 1, delta2 = 0.001, noOfIterations = 10000, margin = 50, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, mc.samples = 64, sig = 0.05, multcorr = 3, tau = 0.02, theta = 0.1, repeated = FALSE, TMM.option = 1){
 
   if(sum(colSums(count_table) == 0) > 0) stop("Some samples are empty!")
   if(ncol(count_table) != length(predictor)) stop("Number of samples in count_table does not match length of predictor")
+  
+  # Prune test argument
+  if(!"baySeq" %in% rownames(installed.packages())) tests <- tests[tests != "bay"]
+  if(!"ALDEx2" %in% rownames(installed.packages())) tests <- tests[tests != "adx"] 
+  if(!"MASS" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("neb","enn")]
+  if(!"edgeR" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("ere","erq","enn")]
+  if(!"metagenomeSeq" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("msf","zig")]
+  if(!"DESeq2" %in% rownames(installed.packages())) tests <- tests[tests != "ds2"]
+  if(!"ancom.R" %in% rownames(installed.packages())) tests <- tests[tests != "anc"]  
+  if(!"glmnet" %in% rownames(installed.packages())) tests <- tests[tests != "enn"] 
   
   set.seed(rng.seed)
   

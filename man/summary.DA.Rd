@@ -2,13 +2,15 @@
 % Please edit documentation in R/internal.DA.R
 \name{summary.DA}
 \alias{summary.DA}
-\title{Summary and print of results from testDA}
+\title{Summary of results from testDA}
 \usage{
-\method{summary}{DA}(DA)
+\method{summary}{DA}(DA, sort = "AUC")
 }
 \arguments{
 \item{DA}{The output from the testDA function}
+
+\item{sort}{Sort methods by c("AUC","FPR","Spike.detect.rate")}
 }
 \description{
-Summary and print of results from testDA
+Summary of results from testDA
 }

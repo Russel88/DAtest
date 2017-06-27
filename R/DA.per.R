@@ -43,7 +43,7 @@ DA.per <- function(otu_table, outcome, noOfIterations = 10000, seed = as.numeric
       
       if(j %in% 10^(1:100)){
         nullStatTemp <- Wnull[1:j]
-        ptemp <- mean(abs(nullStatTemp) >= abs(realStat))
+        ptemp <- sum(abs(nullStatTemp) >= abs(realStat))/(noOfIterations+1)
         if(ptemp > (margin*(1/j))){
           nullStat <- Wnull[1:j]
           coverage[i] <- j
@@ -56,7 +56,7 @@ DA.per <- function(otu_table, outcome, noOfIterations = 10000, seed = as.numeric
       }
     }
     
-    p[i]         <- mean(abs(nullStat) >= abs(realStat))
+    p[i]         <- sum(abs(nullStat) >= abs(realStat))/(noOfIterations+1)
     if(p[i] == 0){ #only at level of support
       p[i] <- 1/noOfIterations
     }

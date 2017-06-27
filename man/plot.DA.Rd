@@ -4,10 +4,12 @@
 \alias{plot.DA}
 \title{Plotting results from testDA}
 \usage{
-\method{plot}{DA}(DA)
+\method{plot}{DA}(DA, sort = "AUC")
 }
 \arguments{
 \item{DA}{The output from the testDA function}
+
+\item{sort}{Sort methods by c("AUC","FPR","Spike.detect.rate")}
 }
 \description{
 Plotting results from testDA

@@ -4,8 +4,8 @@
 \alias{allDA}
 \title{Run many differential abundance methods}
 \usage{
-allDA(count_table, predictor, tests = c("per", "bay", "adx", "enn", "wil",
-  "ttt", "ltt", "ltt2", "neb", "erq", "ere", "msf", "zig", "ds2"),
+allDA(count_table, predictor, tests = c("anc", "per", "bay", "adx", "enn",
+  "wil", "ttt", "ltt", "ltt2", "neb", "erq", "ere", "msf", "zig", "ds2"),
   cores = (detectCores() - 1), rng.seed = 123, p.adj = "fdr",
   delta1 = 1, delta2 = 0.001, noOfIterations = 10000, margin = 50,
   testStat = function(case, control) {     log((mean(case) + 1)/(mean(control)
@@ -29,9 +29,9 @@ allDA(count_table, predictor, tests = c("per", "bay", "adx", "enn", "wil",
 
 \item{delta2}{Numeric. The pseudocount for the Log t.test2 method. Default 0.001}
 
-\item{noOfIterations}{Integer. How many iterations should be run for the permutation test. Default 10000}
+\item{noOfIterations}{Integer. How many iterations should be run for the permutation tests. Default 10000}
 
-\item{margin}{Integer. The margin of when to stop iterating for non-significant OTUs for the permutation test. Default 50}
+\item{margin}{Integer. The margin of when to stop iterating for non-significant OTUs for the permutation tests. Default 50}
 
 \item{testStat}{Function. The test statistic function for the permutation test (also in output of ttt, ltt, ltt2 and wil). Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))}
 
@@ -76,7 +76,7 @@ Currently implemented methods:
  \item zig - MetagenomeSeq zero-inflated gaussian
  \item ds2 - DESeq2
  \item enn - ENNB: Two-stage procedure from https://cals.arizona.edu/~anling/software.htm
- \item anc - ANCOM. This test is not run by default because it is slow. This test does not output pvalues; for comparison with the other methods, detected OTUs are set to a pvalue of 0, all else are set to 1.
+ \item anc - ANCOM. This test does not output pvalues; for comparison with the other methods, detected OTUs are set to a pvalue of 0, all else are set to 1.
 }
 Is it too slow? Remove "anc" from test argument
 "per" is also somewhat slow, but is usually one of the methods performing well.

@@ -1,17 +1,29 @@
 #' Plotting results from testDA
 #'
 #' @param DA The output from the testDA function
+#' @param sort Sort methods by c("AUC","FPR","Spike.detect.rate")
 #' @import ggplot2 cowplot
 #' 
 #' @export
 
-plot.DA <- function(DA){
+plot.DA <- function(DA, sort = "AUC"){
   
   require(ggplot2, quietly = TRUE)
   require(cowplot, quietly = TRUE)
   
-  auc.median <- aggregate(AUC ~ Method, data = DA$table, FUN = median)
-  DA$table$Method <- factor(DA$table$Method, levels = auc.median[order(auc.median$AUC, decreasing = TRUE),"Method"])
+  if(sort == "AUC") {
+    auc.median <- aggregate(AUC ~ Method, data = DA$table, FUN = median)
+    DA$table$Method <- factor(DA$table$Method, levels = auc.median[order(auc.median$AUC, decreasing = TRUE),"Method"])
+  }
+  if(sort == "FPR") {
+    fpr.median <- aggregate(FPR ~ Method, data = DA$table, FUN = median)
+    DA$table$Method <- factor(DA$table$Method, levels = fpr.median[order(fpr.median$FPR, decreasing = FALSE),"Method"])
+  }
+  if(sort == "Spike.detect.rate") {
+    spr.median <- aggregate(Spike.detect.rate ~ Method, data = DA$table, FUN = median)
+    DA$table$Method <- factor(DA$table$Method, levels = fpr.median[order(fpr.median$Spike.detect.rate, decreasing = TRUE),"Method"])
+  }
+    
   
   p1 <- ggplot(DA$table, aes(Method, FPR)) +
     theme_bw() +
@@ -27,15 +39,31 @@ plot.DA <- function(DA){
   
   p2 <- ggplot(DA$table, aes(Method, AUC)) +
     theme_bw() +
-    coord_cartesian(ylim = c(min(DA$table$AUC),1)) +
+    coord_cartesian(ylim = c(min(DA$table$AUC, 0.45),1)) +
     geom_hline(yintercept = 0.5, colour = "red") +
     geom_point() +
     stat_summary(fun.y = median, fun.ymin = median, fun.ymax = median,geom = "crossbar",colour="red",width=0.75) +
     ylab("Area Under the Curve") +
+    theme(axis.text.x = element_blank(),
+          panel.grid.minor = element_blank()) +
+    xlab(NULL) +
+    scale_y_continuous(labels=function(x) sprintf("%.2f", x))
+  
+  p3 <- ggplot(DA$table, aes(Method, Spike.detect.rate)) +
+    theme_bw() +
+    coord_cartesian(ylim = c(0,1)) +
+    geom_point() +
+    stat_summary(fun.y = median, fun.ymin = median, fun.ymax = median,geom = "crossbar",colour="red",width=0.75) +
+    ylab("Spike-In Detection Rate") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
           panel.grid.minor = element_blank()) +
     xlab(NULL)
   
-  suppressWarnings(plot_grid(p1, p2, nrow=2))
+  pp <- ggdraw() +
+    draw_plot(p1, 0, .7, 1, .3) +
+    draw_plot(p2, 0, .4, 1, .3) +
+    draw_plot(p3, 0, 0, 1, .4)
+  
+  suppressWarnings(pp)
   
 }

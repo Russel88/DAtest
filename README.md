@@ -16,7 +16,7 @@ Installation of packages
     library(devtools)
     install_github("Russel88/DAtest")
 
-#### The following are needed for full functionality
+#### The following are needed for *full* functionality
 
     source("https://bioconductor.org/biocLite.R")
     biocLite("DESeq2")
@@ -26,14 +26,14 @@ Installation of packages
     biocLite("ALDEx2")
 
 ANCOM has to be installed from an [external
-source,](https://www.niehs.nih.gov/research/resources/software/biostatistics/ancom/index.cfm)
-and is not included by default in the test.
+source.](https://www.niehs.nih.gov/research/resources/software/biostatistics/ancom/index.cfm)
 
 How to compare methods:
 -----------------------
 
-A good method has a "False Positive Rate" (FPR) at 0.05 or below and an
-"Area Under the Curve" (AUC) as high as possible.
+A good method has a "False Positive Rate" (FPR) at ~0.05 or below, an
+"Area Under the Curve" (AUC) as high as possible, and a "Spike Detection
+Rate" (Spike.detect.rate) as high as possible.
 
 **Run the test:**
 
@@ -45,13 +45,17 @@ predictor is the outcome of interest, e.g. a factor denoting whether
 samples are cases or controls (in the same order as columns in
 count\_table).
 
-**Print the output:**
-
-    summary(mytest)
-
 **Plot the output:**
 
-    plot(mytest)
+    plot(mytest, sort = "AUC")
+
+**Print the output:** Medians for each method:
+
+    summary(mytest, sort = "AUC")
+
+Results from all the runs:
+
+    print(mytest)
 
 How to run real data:
 ---------------------

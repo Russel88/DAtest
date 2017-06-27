@@ -9,8 +9,8 @@
 #' @param p.adj Character. Method for pvalue adjustment. Default "fdr"
 #' @param delta1 Numeric. The pseudocount for the Log t.test method. Default 1
 #' @param delta2 Numeric. The pseudocount for the Log t.test2 method. Default 0.001
-#' @param noOfIterations Integer. How many iterations should be run for the permutation test. Default 10000
-#' @param margin Integer. The margin of when to stop iterating for non-significant OTUs for the permutation test. Default 50
+#' @param noOfIterations Integer. How many iterations should be run for the permutation tests. Default 10000
+#' @param margin Integer. The margin of when to stop iterating for non-significant OTUs for the permutation tests. Default 50
 #' @param testStat Function. The test statistic function for the permutation test (also in output of ttt, ltt, ltt2 and wil). Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))
 #' @param mc.samples Integer. Monte Carlo samples for ALDEx2. Default 64
 #' @param sig Numeric. Alpha used in ANCOM. Default 0.05
@@ -35,7 +35,7 @@
 #'  \item zig - MetagenomeSeq zero-inflated gaussian
 #'  \item ds2 - DESeq2
 #'  \item enn - ENNB: Two-stage procedure from https://cals.arizona.edu/~anling/software.htm
-#'  \item anc - ANCOM. This test is not run by default because it is slow. This test does not output pvalues; for comparison with the other methods, detected OTUs are set to a pvalue of 0, all else are set to 1.
+#'  \item anc - ANCOM. This test does not output pvalues; for comparison with the other methods, detected OTUs are set to a pvalue of 0, all else are set to 1.
 #' }
 #' Is it too slow? Remove "anc" from test argument
 #' "per" is also somewhat slow, but is usually one of the methods performing well.
@@ -49,7 +49,7 @@
 #' @importFrom parallel detectCores
 #' @export
 
-allDA <- function(count_table, predictor, tests = c("per","bay","adx","enn","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2"), cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", delta1 = 1, delta2 = 0.001, noOfIterations = 10000, margin = 50, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, mc.samples = 64, sig = 0.05, multcorr = 3, tau = 0.02, theta = 0.1, repeated = FALSE, TMM.option = 1){
+allDA <- function(count_table, predictor, tests = c("anc","per","bay","adx","enn","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2"), cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", delta1 = 1, delta2 = 0.001, noOfIterations = 10000, margin = 50, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, mc.samples = 64, sig = 0.05, multcorr = 3, tau = 0.02, theta = 0.1, repeated = FALSE, TMM.option = 1){
 
   if(sum(colSums(count_table) == 0) > 0) stop("Some samples are empty!")
   if(ncol(count_table) != length(predictor)) stop("Number of samples in count_table does not match length of predictor")
@@ -60,6 +60,16 @@ allDA <- function(count_table, predictor, tests = c("per","bay","adx","enn","wil
   library(doSNOW, quietly = TRUE)
   library(foreach, quietly = TRUE)
   library(pROC, quietly = TRUE)
+  
+  # Prune test argument
+  if(!"baySeq" %in% rownames(installed.packages())) tests <- tests[tests != "bay"]
+  if(!"ALDEx2" %in% rownames(installed.packages())) tests <- tests[tests != "adx"] 
+  if(!"MASS" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("neb","enn")]
+  if(!"edgeR" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("ere","erq","enn")]
+  if(!"metagenomeSeq" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("msf","zig")]
+  if(!"DESeq2" %in% rownames(installed.packages())) tests <- tests[tests != "ds2"]
+  if(!"ancom.R" %in% rownames(installed.packages())) tests <- tests[tests != "anc"]  
+  if(!"glmnet" %in% rownames(installed.packages())) tests <- tests[tests != "enn"] 
   
   # Remove OTUs not present in any samples
   count_table <- count_table[rowSums(count_table) > 0,]
