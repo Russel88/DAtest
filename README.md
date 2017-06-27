@@ -49,7 +49,9 @@ count\_table).
 
     plot(mytest, sort = "AUC")
 
-**Print the output:** Medians for each method:
+**Print the output:**
+
+Medians for each method:
 
     summary(mytest, sort = "AUC")
 
