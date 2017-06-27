@@ -6,12 +6,20 @@
 
 #' @export
 
-DA.ds2 <- function(otu_table, outcome, p.adj){
+DA.ds2 <- function(otu_table, outcome, paired = NULL, p.adj){
   
   library(DESeq2, quietly = TRUE)
-  outcomedf <- data.frame(outcome = factor(outcome))
-  row.names(outcomedf) <- colnames(otu_table)
-  x <- DESeqDataSetFromMatrix(countData = as.data.frame(otu_table), colData = outcomedf , design = ~ outcome)
+  if(is.null(paired)){
+    outcomedf <- data.frame(outcome = factor(outcome))
+    row.names(outcomedf) <- colnames(otu_table)
+    x <- DESeqDataSetFromMatrix(countData = as.data.frame(otu_table), colData = outcomedf , design = ~ outcome)
+  } else {
+    outcomedf <- data.frame(outcome = factor(outcome),
+                            paired = factor(paired))
+    row.names(outcomedf) <- colnames(otu_table)
+    x <- DESeqDataSetFromMatrix(countData = as.data.frame(otu_table), colData = outcomedf , design = ~ paired + outcome)
+  }
+  
   gm_mean = function(x, na.rm=TRUE){
     exp(sum(log(x[x > 0]), na.rm=na.rm) / length(x))
   }

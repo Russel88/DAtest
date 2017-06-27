@@ -6,10 +6,15 @@
 
 #' @export
 
-DA.per <- function(otu_table, outcome, noOfIterations = 10000, seed = as.numeric(Sys.time()), margin = 50, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, p.adj){
+DA.per <- function(otu_table, outcome, paired = NULL, noOfIterations = 10000, seed = as.numeric(Sys.time()), margin = 50, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))}, p.adj){
 
-  outcome <- as.numeric(as.factor(outcome))-1
+  if(!is.null(paired)){
+    otu_table <- otu_table[,order(paired)]
+    outcome <- outcome[order(paired)]
+    testStat <- testStat.pair
+  }
   
+  outcome <- as.numeric(as.factor(outcome))-1
   otu_table <- apply(otu_table, 2, function(x) x/sum(x))
   
   set.seed(seed)
@@ -17,8 +22,14 @@ DA.per <- function(otu_table, outcome, noOfIterations = 10000, seed = as.numeric
   
   # Create shuffled outcomes
   shuffledOutcomesList <- list()
-  for (k in 1:noOfIterations){
-    shuffledOutcomesList[[k]] <- sample(outcome)
+  if(is.null(paired)){
+    for (k in 1:noOfIterations){
+      shuffledOutcomesList[[k]] <- sample(outcome)
+    }
+  } else {
+    for (k in 1:noOfIterations){
+      shuffledOutcomesList[[k]] <- unlist(lapply(1:(length(outcome)/2),function(x) sample(c(0,1))))
+    }
   }
   
   iterations <- nrow(otu_table)

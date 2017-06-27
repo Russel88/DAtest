@@ -4,7 +4,7 @@
 \alias{DA.ds2}
 \title{DESeq2}
 \usage{
-DA.ds2(otu_table, outcome, p.adj)
+DA.ds2(otu_table, outcome, paired = NULL, p.adj)
 }
 \description{
 From:

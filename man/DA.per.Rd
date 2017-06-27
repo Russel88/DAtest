@@ -4,9 +4,11 @@
 \alias{DA.per}
 \title{Permutation test}
 \usage{
-DA.per(otu_table, outcome, noOfIterations = 10000,
+DA.per(otu_table, outcome, paired = NULL, noOfIterations = 10000,
   seed = as.numeric(Sys.time()), margin = 50, testStat = function(case,
-  control) {     log((mean(case) + 1)/(mean(control) + 1)) }, p.adj)
+  control) {     log((mean(case) + 1)/(mean(control) + 1)) },
+  testStat.pair = function(case, control) {     mean(log((case + 1)/(control +
+  1))) }, p.adj)
 }
 \description{
 Modified version of the one from:

@@ -45,6 +45,13 @@ predictor is the outcome of interest, e.g. a factor denoting whether
 samples are cases or controls (in the same order as columns in
 count\_table).
 
+*The tests can be run in a paired version:*
+
+E.g. if SubjectID is a factor denoting the pairing of the samples (in
+the same order as columns in the otu\_table):
+
+    mytest <- testDA(count_table,predictor,paired=SubjectID)
+
 **Plot the output:**
 
     plot(mytest, sort = "AUC")

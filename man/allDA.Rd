@@ -4,18 +4,21 @@
 \alias{allDA}
 \title{Run many differential abundance methods}
 \usage{
-allDA(count_table, predictor, tests = c("anc", "per", "bay", "adx", "enn",
-  "wil", "ttt", "ltt", "ltt2", "neb", "erq", "ere", "msf", "zig", "ds2"),
-  cores = (detectCores() - 1), rng.seed = 123, p.adj = "fdr",
+allDA(count_table, predictor, paired = NULL, tests = c("anc", "per", "bay",
+  "adx", "enn", "wil", "ttt", "ltt", "ltt2", "neb", "erq", "ere", "msf", "zig",
+  "ds2"), cores = (detectCores() - 1), rng.seed = 123, p.adj = "fdr",
   delta1 = 1, delta2 = 0.001, noOfIterations = 10000, margin = 50,
   testStat = function(case, control) {     log((mean(case) + 1)/(mean(control)
-  + 1)) }, mc.samples = 64, sig = 0.05, multcorr = 3, tau = 0.02,
-  theta = 0.1, repeated = FALSE, TMM.option = 1)
+  + 1)) }, testStat.pair = function(case, control) {     mean(log((case +
+  1)/(control + 1))) }, mc.samples = 64, sig = 0.05, multcorr = 3,
+  tau = 0.02, theta = 0.1, repeated = FALSE, TMM.option = 1)
 }
 \arguments{
 \item{count_table}{Matrix or data.frame. Table with taxa/genes as rows and samples as columns}
 
 \item{predictor}{Factor. The outcome of interest. Should have two levels, e.g. case and control}
+
+\item{paired}{Factor. Subject ID for running paired analysis. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq" and "ds2"}
 
 \item{tests}{Character. Which tests to include. Default all}
 
@@ -34,6 +37,8 @@ allDA(count_table, predictor, tests = c("anc", "per", "bay", "adx", "enn",
 \item{margin}{Integer. The margin of when to stop iterating for non-significant OTUs for the permutation tests. Default 50}
 
 \item{testStat}{Function. The test statistic function for the permutation test (also in output of ttt, ltt, ltt2 and wil). Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))}
+
+\item{testStat.pair}{Function. The test statistic function for the paired permutation test (also in output of ttt, ltt, ltt2 and wil). Should take two vectors as arguments. Default is a log fold change: mean(log((case abundances+1)/(control abundances+1)))}
 
 \item{mc.samples}{Integer. Monte Carlo samples for ALDEx2. Default 64}
 
