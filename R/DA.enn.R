@@ -2,7 +2,7 @@
 #' @import glmnet MASS
 #' @export
 
-DA.enn <- function(otu_table, outcome, TMM.option = 1, p.adj){
+DA.enn <- function(count_table, outcome, TMM.option = 1, p.adj){
   
   #################################################################################
   #                                                                               #
@@ -177,17 +177,17 @@ DA.enn <- function(otu_table, outcome, TMM.option = 1, p.adj){
 
   }
   
-  res <- tryCatch(TwoStage_Package(otu_table,sample(outcome),TMM.option = 1),error = function(e) NULL)
+  res <- tryCatch(TwoStage_Package(count_table,sample(outcome),TMM.option = 1),error = function(e) NULL)
   
-  otus <- data.frame(OTU = rownames(otu_table))
+  features <- data.frame(Feature = rownames(count_table))
   
   if(is.null(res)){
-    output <- otus
+    output <- features
     output$pval <- 1
     output$pval.adj <- 1
   } else {
-    colnames(res)[c(1,6:7)] <- c("OTU","pval","pval.adj")
-    output <- merge(res,otus, by="OTU", all = TRUE)
+    colnames(res)[c(1,6:7)] <- c("Feature","pval","pval.adj")
+    output <- merge(res,features, by="Feature", all = TRUE)
     output[is.na(output$pval),"pval"] <- 1
     output$pval.adj <- p.adjust(output$pval, method = p.adj)
   }

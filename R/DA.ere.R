@@ -5,17 +5,17 @@
 
 #' @export
 
-DA.ere <- function(otu_table, outcome, p.adj){
+DA.ere <- function(count_table, outcome, p.adj){
   
   library(edgeR, quietly = TRUE)
-  otu_table <- as.data.frame(otu_table)
-  x <- DGEList(counts = otu_table, group = outcome, genes = data.frame(OTU = row.names(otu_table)))
+  otu_table <- as.data.frame(count_table)
+  x <- DGEList(counts = count_table, group = outcome, genes = data.frame(Feature = row.names(count_table)))
   x <- edgeR::calcNormFactors(x)
   x <- estimateTagwiseDisp(estimateCommonDisp(x))
   ta <- exactTest(x)[[1]]
   colnames(ta)[3] <- "pval"
   ta$pval.adj <- p.adjust(ta$pval, method = p.adj)
-  ta$OTU <- rownames(ta)
+  ta$Feature <- rownames(ta)
   ta$Method <- "EdgeR exact"
  
   return(ta) 

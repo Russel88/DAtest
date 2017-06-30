@@ -4,9 +4,10 @@
 \alias{DA.ttt}
 \title{t-test}
 \usage{
-DA.ttt(otu_table, outcome, testStat = function(case, control) {    
+DA.ttt(count_table, outcome, testStat = function(case, control) {    
   log((mean(case) + 1)/(mean(control) + 1)) }, testStat.pair = function(case,
-  control) {     mean(log((case + 1)/(control + 1))) }, paired = NULL, p.adj)
+  control) {     mean(log((case + 1)/(control + 1))) }, paired = NULL, p.adj,
+  relative = TRUE)
 }
 \description{
 t-test

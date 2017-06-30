@@ -4,7 +4,7 @@
 \alias{DA.adx}
 \title{Aldex t.test and wilcox}
 \usage{
-DA.adx(otu_table, outcome, mc.samples = 128, p.adj)
+DA.adx(count_table, outcome, mc.samples = 128, p.adj)
 }
 \description{
 Aldex t.test and wilcox

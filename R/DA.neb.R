@@ -3,13 +3,13 @@
 #' @import MASS lme4
 #' @export
 
-DA.neb <- function(otu_table, outcome, paired = NULL, p.adj){
+DA.neb <- function(count_table, outcome, paired = NULL, p.adj){
  
   library(MASS, quietly = TRUE)
   library(lme4, quietly = TRUE)
   
-  libSize <- colSums(otu_table)
-  otu_table <- as.data.frame.matrix(otu_table)
+  libSize <- colSums(count_table)
+  count_table <- as.data.frame.matrix(count_table)
   
   if(is.null(paired)){
     negbin <- function(x){
@@ -37,10 +37,10 @@ DA.neb <- function(otu_table, outcome, paired = NULL, p.adj){
     }
   }
   
-  res <- as.data.frame(t(as.data.frame(apply(otu_table,1,negbin))))
+  res <- as.data.frame(t(as.data.frame(apply(count_table,1,negbin))))
   colnames(res) <- c("Estimate","Std.Error","z value","pval")
   res$pval.adj <- p.adjust(res$pval, method = p.adj)
-  res$OTU <- rownames(res)
+  res$Feature <- rownames(res)
   res$Method <- "Negbinom"
   return(res)
   

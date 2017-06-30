@@ -6,18 +6,18 @@
 
 #' @export
 
-DA.ds2 <- function(otu_table, outcome, paired = NULL, p.adj){
+DA.ds2 <- function(count_table, outcome, paired = NULL, p.adj){
   
   library(DESeq2, quietly = TRUE)
   if(is.null(paired)){
     outcomedf <- data.frame(outcome = factor(outcome))
-    row.names(outcomedf) <- colnames(otu_table)
-    x <- DESeqDataSetFromMatrix(countData = as.data.frame(otu_table), colData = outcomedf , design = ~ outcome)
+    row.names(outcomedf) <- colnames(count_table)
+    x <- DESeqDataSetFromMatrix(countData = as.data.frame(count_table), colData = outcomedf , design = ~ outcome)
   } else {
     outcomedf <- data.frame(outcome = factor(outcome),
                             paired = factor(paired))
-    row.names(outcomedf) <- colnames(otu_table)
-    x <- DESeqDataSetFromMatrix(countData = as.data.frame(otu_table), colData = outcomedf , design = ~ paired + outcome)
+    row.names(outcomedf) <- colnames(count_table)
+    x <- DESeqDataSetFromMatrix(countData = as.data.frame(count_table), colData = outcomedf , design = ~ paired + outcome)
   }
   
   gm_mean = function(x, na.rm=TRUE){
@@ -29,7 +29,7 @@ DA.ds2 <- function(otu_table, outcome, paired = NULL, p.adj){
   res <- as.data.frame(results(x)@listData)
   colnames(res)[5] <- "pval"
   res$pval.adj <- p.adjust(res$pval, method = p.adj)
-  res$OTU <- results(x)@rownames
+  res$Feature <- results(x)@rownames
   res$Method <- "DESeq2"
 
   return(res)  

@@ -5,52 +5,56 @@
 
 #' @export
 
-spikein <- function(otu_table, outcome, spikeMethod = "mult", effectSize = 2, k){
+spikein <- function(count_table, outcome, spikeMethod = "mult", effectSize = 2, k, relative = TRUE){
+  
+  if(relative == FALSE & spikeMethod == "mult") stop("Cannot use multiplicative spike-in if relative is FALSE")
   
   if(effectSize == 1) spikeMethod <- "none"
 
-  otu_table <- as.data.frame(otu_table)
+  count_table <- as.data.frame(count_table)
   outcome <- as.numeric(as.factor(outcome))-1
   
-  # Choose OTUs to spike
-  propotu <- apply(otu_table,2,function(x) x/sum(x))
-  otu_abundances <- sort(rowSums(propotu)/ncol(propotu))
+  # Choose Features to spike
+  propcount <- apply(count_table,2,function(x) x/sum(x))
+  count_abundances <- sort(rowSums(propcount)/ncol(propcount))
 
-  # Only spike OTUs present in cases
-  approved_otu_abundances <- otu_abundances[ 
-    names(otu_abundances) %in% row.names( otu_table[ rowSums(otu_table[,outcome == 1]) > 0, outcome == 1] ) ]
-  lower_tert <- names(approved_otu_abundances[approved_otu_abundances < quantile(approved_otu_abundances,1/3)])
-  mid_tert <- names(approved_otu_abundances[approved_otu_abundances >= quantile(approved_otu_abundances,1/3) & approved_otu_abundances < quantile(approved_otu_abundances,2/3)])
-  upper_tert <- names(approved_otu_abundances[approved_otu_abundances >= quantile(approved_otu_abundances,2/3)])
-  spiked_otus <- c( 	sample(lower_tert, k)	,
+  # Only spike Features present in cases
+  approved_count_abundances <- count_abundances[ 
+    names(count_abundances) %in% row.names( count_table[ rowSums(count_table[,outcome == 1]) > 0, outcome == 1] ) ]
+  lower_tert <- names(approved_count_abundances[approved_count_abundances < quantile(approved_count_abundances,1/3)])
+  mid_tert <- names(approved_count_abundances[approved_count_abundances >= quantile(approved_count_abundances,1/3) & approved_count_abundances < quantile(approved_count_abundances,2/3)])
+  upper_tert <- names(approved_count_abundances[approved_count_abundances >= quantile(approved_count_abundances,2/3)])
+  spike_features <- c( 	sample(lower_tert, k)	,
                      sample(mid_tert, k)		,
                      sample(upper_tert,k)	)
-  spiked_otu_index <- which(row.names(otu_table) %in% spiked_otus)
+  spike_feature_index <- which(row.names(count_table) %in% spike_features)
   
-  # Spike OTUs either by addition or multiplication
-  oldSums <- colSums(otu_table)
+  # Spike Features either by addition or multiplication
+  oldSums <- colSums(count_table)
 
   if(spikeMethod == "mult"){
-    otu_table[spiked_otu_index,outcome==1] <- otu_table[spiked_otu_index, outcome==1] * effectSize
+    count_table[spike_feature_index,outcome==1] <- count_table[spike_feature_index, outcome==1] * effectSize
   }
   
+  
+  
   if(spikeMethod == "add"){
-    nonzeroMeans <- lapply(spiked_otu_index, function(j){
-      v <- propotu[j,]
+    nonzeroMeans <- lapply(spike_feature_index, function(j){
+      v <- propcount[j,]
       v <- v[v != 0]
       mean(v)
     })
-    cases <- otu_table[,outcome == 1]
+    cases <- count_table[,outcome == 1]
     caseDepth <- colSums(cases)
     addlist <- lapply(nonzeroMeans, function(l) l*caseDepth*effectSize)
     addcounts <- do.call(rbind, addlist)
-    addcounts[cases[spiked_otu_index,] == 0] <- 0
-    cases[spiked_otu_index,] <- cases[spiked_otu_index,]+addcounts
-    otu_table[,outcome == 1] <- cases	
+    addcounts[cases[spike_feature_index,] == 0] <- 0
+    cases[spike_feature_index,] <- cases[spike_feature_index,]+addcounts
+    count_table[,outcome == 1] <- cases	
   }
   
-  newSums <- colSums(otu_table)
-  otu_table<- round(t(t(otu_table) * oldSums/newSums))
-  list(otu_table,spiked_otus)
+  newSums <- colSums(count_table)
+  if(relative) count_table <- round(t(t(count_table) * oldSums/newSums))
+  list(count_table,spike_features)
   
 }

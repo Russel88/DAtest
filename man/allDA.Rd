@@ -4,21 +4,25 @@
 \alias{allDA}
 \title{Run many differential abundance methods}
 \usage{
-allDA(count_table, predictor, paired = NULL, tests = c("anc", "per", "bay",
-  "adx", "enn", "wil", "ttt", "ltt", "ltt2", "neb", "erq", "ere", "msf", "zig",
-  "ds2"), cores = (detectCores() - 1), rng.seed = 123, p.adj = "fdr",
-  delta1 = 1, delta2 = 0.001, noOfIterations = 10000, margin = 50,
-  testStat = function(case, control) {     log((mean(case) + 1)/(mean(control)
-  + 1)) }, testStat.pair = function(case, control) {     mean(log((case +
-  1)/(control + 1))) }, mc.samples = 64, sig = 0.05, multcorr = 3,
-  tau = 0.02, theta = 0.1, repeated = FALSE, TMM.option = 1)
+allDA(count_table, predictor, paired = NULL, relative = TRUE,
+  tests = c("anc", "per", "bay", "adx", "enn", "wil", "ttt", "ltt", "ltt2",
+  "neb", "erq", "ere", "msf", "zig", "ds2", "lim"), cores = (detectCores() -
+  1), rng.seed = 123, p.adj = "fdr", delta1 = 1, delta2 = 0.001,
+  noOfIterations = 10000, margin = 50, testStat = function(case, control)
+  {     log((mean(case) + 1)/(mean(control) + 1)) },
+  testStat.pair = function(case, control) {     mean(log((case + 1)/(control +
+  1))) }, mc.samples = 64, sig = 0.05, multcorr = 3, tau = 0.02,
+  theta = 0.1, repeated = FALSE, TMM.option = 1, log.lim = FALSE,
+  delta.lim = 1)
 }
 \arguments{
-\item{count_table}{Matrix or data.frame. Table with taxa/genes as rows and samples as columns}
+\item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
 
 \item{predictor}{Factor. The outcome of interest. Should have two levels, e.g. case and control}
 
 \item{paired}{Factor. Subject ID for running paired analysis. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq" and "ds2"}
+
+\item{relative}{Logical. Should abundances be made relative? Only has effect for "ttt", "wil", "per" and "lim". Default TRUE}
 
 \item{tests}{Character. Which tests to include. Default all (See below for details)}
 
@@ -34,7 +38,7 @@ allDA(count_table, predictor, paired = NULL, tests = c("anc", "per", "bay",
 
 \item{noOfIterations}{Integer. How many iterations should be run for the permutation tests. Default 10000}
 
-\item{margin}{Integer. The margin of when to stop iterating for non-significant OTUs for the permutation tests. Default 50}
+\item{margin}{Integer. The margin of when to stop iterating for non-significant Features for the permutation tests. Default 50}
 
 \item{testStat}{Function. The test statistic function for the permutation test (also in output of ttt, ltt, ltt2 and wil). Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))}
 
@@ -53,6 +57,10 @@ allDA(count_table, predictor, paired = NULL, tests = c("anc", "per", "bay",
 \item{repeated}{Logical. Are there repeated measures? Only for ANCOM. Default FALSE}
 
 \item{TMM.option}{1 or 2. For "enn". Option "1" is for an approach using the mean of the    effective library sizes as a reference library size in TMM normalization; option "2" represents an approach to regenerating counts with a common dispersion. Default 1}
+
+\item{log.lim}{Logical. For "lim". Should abundances be log transformed (before relative abundances if relative = TRUE). Default FALSE}
+
+\item{delta.lim}{Pseudocount for "lim" log transformation. Default 1}
 }
 \value{
 A list of results:
@@ -81,7 +89,7 @@ Currently implemented methods:
  \item zig - MetagenomeSeq zero-inflated gaussian
  \item ds2 - DESeq2
  \item enn - ENNB: Two-stage procedure from https://cals.arizona.edu/~anling/software.htm
- \item anc - ANCOM. This test does not output pvalues; for comparison with the other methods, detected OTUs are set to a pvalue of 0, all else are set to 1.
+ \item anc - ANCOM. This test does not output pvalues; for comparison with the other methods, detected Features are set to a pvalue of 0, all else are set to 1.
 }
 Is it too slow? Remove "anc" from test argument.
 

@@ -4,7 +4,7 @@
 \alias{DA.ltt2}
 \title{Log t-test2}
 \usage{
-DA.ltt2(otu_table, outcome, delta = 0.001, testStat = function(case,
+DA.ltt2(count_table, outcome, delta = 0.001, testStat = function(case,
   control) {     log((mean(case) + 1)/(mean(control) + 1)) },
   testStat.pair = function(case, control) {     mean(log((case + 1)/(control +
   1))) }, paired = NULL, p.adj)

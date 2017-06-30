@@ -4,9 +4,10 @@
 \alias{DA.wil}
 \title{Wilcox test}
 \usage{
-DA.wil(otu_table, outcome, testStat = function(case, control) {    
+DA.wil(count_table, outcome, testStat = function(case, control) {    
   log((mean(case) + 1)/(mean(control) + 1)) }, testStat.pair = function(case,
-  control) {     mean(log((case + 1)/(control + 1))) }, paired = NULL, p.adj)
+  control) {     mean(log((case + 1)/(control + 1))) }, paired = NULL, p.adj,
+  relative = TRUE)
 }
 \description{
 Wilcox test

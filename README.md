@@ -2,7 +2,8 @@ DAtest
 ======
 
 This is a package for comparing different differential abundance methods
-used in microbial marker-gene and RNA-seq analysis.
+used in microbial marker-gene, RNA-seq analysis and protein abundance
+analysis.
 
 Most scripts, including the spike-in for estimating AUC, is borrowed
 from: [Thorsen J, Brejnrod A et al. Large-scale benchmarking reveals
@@ -24,6 +25,7 @@ Installation of packages
     biocLite("metagenomeSeq")
     biocLite("baySeq")
     biocLite("ALDEx2")
+    biocLite("limma")
 
 ANCOM has to be installed from an [external
 source.](https://www.niehs.nih.gov/research/resources/software/biostatistics/ancom/index.cfm)
@@ -118,12 +120,14 @@ Implemented methods:
     as covariate)
 -   enn - [ENNB](https://cals.arizona.edu/~anling/software.htm)
 -   anc - [ANCOM](https://www.ncbi.nlm.nih.gov/pubmed/26028277)
+-   lim -
+    [LIMMA](https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true)
 
 ### Paired permutation test
 
-A paired permutaition test is implemented specifically for this package.
+A paired permutation test is implemented specifically for this package.
 The test is similar to the original, but with a different test statistic
-and permutaition scheme. The permutations are constrained in the paired
+and permutation scheme. The permutations are constrained in the paired
 version such that the outcome is only permuted within each level of the
 paired argument (e.g. subjects). The test statistic first finds the
 log-ratio between the two outcome levels (e.g. case and control) for

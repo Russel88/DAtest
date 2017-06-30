@@ -1,9 +1,10 @@
 #' Run many differential abundance methods
 #'
 #' Run many differential abundance tests at a time
-#' @param count_table Matrix or data.frame. Table with taxa/genes as rows and samples as columns
+#' @param count_table Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns
 #' @param predictor Factor. The outcome of interest. Should have two levels, e.g. case and control
 #' @param paired Factor. Subject ID for running paired analysis. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq" and "ds2"
+#' @param relative Logical. Should abundances be made relative? Only has effect for "ttt", "wil", "per" and "lim". Default TRUE
 #' @param tests Character. Which tests to include. Default all (See below for details)
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available
 #' @param rng.seed Numeric. Seed for reproducibility. Default 123
@@ -11,7 +12,7 @@
 #' @param delta1 Numeric. The pseudocount for the Log t.test method. Default 1
 #' @param delta2 Numeric. The pseudocount for the Log t.test2 method. Default 0.001
 #' @param noOfIterations Integer. How many iterations should be run for the permutation tests. Default 10000
-#' @param margin Integer. The margin of when to stop iterating for non-significant OTUs for the permutation tests. Default 50
+#' @param margin Integer. The margin of when to stop iterating for non-significant Features for the permutation tests. Default 50
 #' @param testStat Function. The test statistic function for the permutation test (also in output of ttt, ltt, ltt2 and wil). Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))
 #' @param testStat.pair Function. The test statistic function for the paired permutation test (also in output of ttt, ltt, ltt2 and wil). Should take two vectors as arguments. Default is a log fold change: mean(log((case abundances+1)/(control abundances+1)))
 #' @param mc.samples Integer. Monte Carlo samples for ALDEx2. Default 64
@@ -21,6 +22,8 @@
 #' @param theta Numeric. Tuning parameter for ANCOM. Default 0.1
 #' @param repeated Logical. Are there repeated measures? Only for ANCOM. Default FALSE
 #' @param TMM.option 1 or 2. For "enn". Option "1" is for an approach using the mean of the	effective library sizes as a reference library size in TMM normalization; option "2" represents an approach to regenerating counts with a common dispersion. Default 1
+#' @param log.lim Logical. For "lim". Should abundances be log transformed (before relative abundances if relative = TRUE). Default FALSE
+#' @param delta.lim Pseudocount for "lim" log transformation. Default 1
 #' @details Currently implemented methods:
 #' \itemize{
 #'  \item per - Permutation test with user defined test statistic
@@ -37,7 +40,7 @@
 #'  \item zig - MetagenomeSeq zero-inflated gaussian
 #'  \item ds2 - DESeq2
 #'  \item enn - ENNB: Two-stage procedure from https://cals.arizona.edu/~anling/software.htm
-#'  \item anc - ANCOM. This test does not output pvalues; for comparison with the other methods, detected OTUs are set to a pvalue of 0, all else are set to 1.
+#'  \item anc - ANCOM. This test does not output pvalues; for comparison with the other methods, detected Features are set to a pvalue of 0, all else are set to 1.
 #' }
 #' Is it too slow? Remove "anc" from test argument.
 #' 
@@ -52,7 +55,7 @@
 #' @importFrom parallel detectCores
 #' @export
 
-allDA <- function(count_table, predictor, paired = NULL, tests = c("anc","per","bay","adx","enn","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2"), cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", delta1 = 1, delta2 = 0.001, noOfIterations = 10000, margin = 50, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))}, mc.samples = 64, sig = 0.05, multcorr = 3, tau = 0.02, theta = 0.1, repeated = FALSE, TMM.option = 1){
+allDA <- function(count_table, predictor, paired = NULL, relative = TRUE, tests = c("anc","per","bay","adx","enn","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2","lim"), cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", delta1 = 1, delta2 = 0.001, noOfIterations = 10000, margin = 50, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))}, mc.samples = 64, sig = 0.05, multcorr = 3, tau = 0.02, theta = 0.1, repeated = FALSE, TMM.option = 1, log.lim = FALSE, delta.lim = 1){
 
   if(sum(colSums(count_table) == 0) > 0) stop("Some samples are empty!")
   if(ncol(count_table) != length(predictor)) stop("Number of samples in count_table does not match length of predictor")
@@ -74,12 +77,13 @@ allDA <- function(count_table, predictor, paired = NULL, tests = c("anc","per","
   if(!"DESeq2" %in% rownames(installed.packages())) tests <- tests[tests != "ds2"]
   if(!"ancom.R" %in% rownames(installed.packages())) tests <- tests[tests != "anc"]  
   if(!"glmnet" %in% rownames(installed.packages())) tests <- tests[tests != "enn"] 
+  if(!"limma" %in% rownames(installed.packages())) tests <- tests[tests != "lim"] 
   
   if(!is.null(paired)){
-    tests <- tests[!tests %in% c("bay","adx","anc","enn","ere","msf","zig")]
+    tests <- tests[!tests %in% c("bay","adx","anc","enn","ere","msf","zig","lim")]
   } 
   
-  # Remove OTUs not present in any samples
+  # Remove Features not present in any samples
   count_table <- count_table[rowSums(count_table) > 0,]
   
   ### Run tests
@@ -99,8 +103,8 @@ allDA <- function(count_table, predictor, paired = NULL, tests = c("anc","per","
   results <- foreach(i = tests, .export = noquote(paste0("DA.",tests)), .options.snow = opts) %dopar% {
     
     res.sub <- switch(i,
-                      wil = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,testStat,testStat.pair,paired, p.adj)),
-                      ttt = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,testStat,testStat.pair,paired, p.adj)),
+                      wil = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,testStat,testStat.pair,paired, p.adj, relative)),
+                      ttt = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,testStat,testStat.pair,paired, p.adj, relative)),
                       ltt = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,delta1,testStat,testStat.pair,paired, p.adj)),
                       ltt2 = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,delta2,testStat,testStat.pair,paired, p.adj)),
                       neb = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,paired, p.adj)),
@@ -109,11 +113,12 @@ allDA <- function(count_table, predictor, paired = NULL, tests = c("anc","per","
                       msf = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor, p.adj)),
                       zig = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor, p.adj)),
                       ds2 = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,paired, p.adj)),
-                      per = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,paired,noOfIterations,rng.seed,margin,testStat,testStat.pair, p.adj)),
+                      per = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,paired,noOfIterations,rng.seed,margin,testStat,testStat.pair, p.adj, relative)),
                       bay = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor, p.adj)),
                       adx = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,mc.samples, p.adj)),
                       enn = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,TMM.option,p.adj)),
-                      anc = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,sig,multcorr, tau, theta, repeated)))
+                      anc = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,sig,multcorr, tau, theta, repeated)),
+                      lim = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,p.adj,relative,log.lim,delta.lim)))
     
     res.sub[is.na(res.sub$pval),"pval"] <- 1
     res.sub[is.na(res.sub$pval.adj),"pval.adj"] <- 1
@@ -143,15 +148,15 @@ allDA <- function(count_table, predictor, paired = NULL, tests = c("anc","per","
   }
   
   # Positives
-  Pos.raw <- sapply(results,function(x) x[x$pval < 0.05,"OTU"])
-  Pos.adj <- sapply(results,function(x) x[x$pval.adj < 0.05,"OTU"])
+  Pos.raw <- sapply(results,function(x) x[x$pval < 0.05,"Feature"])
+  Pos.adj <- sapply(results,function(x) x[x$pval.adj < 0.05,"Feature"])
 
-  otus <- row.names(count_table)
-  counts <- sapply(otus, function(y) sum(unlist(sapply(Pos.raw, function(x) x %in% y)))) / length(tests)
-  counts.adj <- sapply(otus, function(y) sum(unlist(sapply(Pos.adj, function(x) x %in% y)))) / length(tests)
+  features <- row.names(count_table)
+  counts <- sapply(features, function(y) sum(unlist(sapply(Pos.raw, function(x) x %in% y)))) / length(tests)
+  counts.adj <- sapply(features, function(y) sum(unlist(sapply(Pos.adj, function(x) x %in% y)))) / length(tests)
   
   # Combine and return
-  df.combined <- data.frame(OTU = otus,
+  df.combined <- data.frame(Feature = features,
                             Detect.rate.raw = counts,
                             Detect.rate.adj = counts.adj)
   rownames(df.combined) <- NULL

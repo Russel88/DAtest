@@ -4,7 +4,7 @@
 \alias{DA.ere}
 \title{EdgeR}
 \usage{
-DA.ere(otu_table, outcome, p.adj)
+DA.ere(count_table, outcome, p.adj)
 }
 \description{
 From:

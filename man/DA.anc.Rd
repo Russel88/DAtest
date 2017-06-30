@@ -4,7 +4,7 @@
 \alias{DA.anc}
 \title{ANCOM}
 \usage{
-DA.anc(otu_table, outcome, sig = 0.05, multcorr = 3, tau = 0.02,
+DA.anc(count_table, outcome, sig = 0.05, multcorr = 3, tau = 0.02,
   theta = 0.1, repeated = FALSE)
 }
 \description{

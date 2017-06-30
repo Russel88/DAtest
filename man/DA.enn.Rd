@@ -4,7 +4,7 @@
 \alias{DA.enn}
 \title{ENNB from https://cals.arizona.edu/~anling/}
 \usage{
-DA.enn(otu_table, outcome, TMM.option = 1, p.adj)
+DA.enn(count_table, outcome, TMM.option = 1, p.adj)
 }
 \description{
 ENNB from https://cals.arizona.edu/~anling/

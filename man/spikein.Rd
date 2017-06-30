@@ -4,7 +4,8 @@
 \alias{spikein}
 \title{Spike-in}
 \usage{
-spikein(otu_table, outcome, spikeMethod = "mult", effectSize = 2, k)
+spikein(count_table, outcome, spikeMethod = "mult", effectSize = 2, k,
+  relative = TRUE)
 }
 \description{
 Modified version of the one from:

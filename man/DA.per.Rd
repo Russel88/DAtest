@@ -4,18 +4,17 @@
 \alias{DA.per}
 \title{Permutation test}
 \usage{
-DA.per(otu_table, outcome, paired = NULL, noOfIterations = 10000,
+DA.per(count_table, outcome, paired = NULL, noOfIterations = 10000,
   seed = as.numeric(Sys.time()), margin = 50, testStat = function(case,
   control) {     log((mean(case) + 1)/(mean(control) + 1)) },
   testStat.pair = function(case, control) {     mean(log((case + 1)/(control +
-  1))) }, p.adj)
+  1))) }, p.adj, relative = TRUE)
 }
 \description{
 Modified version of the one from:
 https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8.
+#' P-values are now two-sided, and test statistic is a simple log fold change
 }
 \details{
-Pvalues are now two-sided, and test statistic is a simple log fold change
-
-A paired permutaition test is implemented specifically for this package. The test is similar to the original, but with a different test statistic and permutaition scheme. The permutations are constrained in the paired version such that the outcome is only permuted within each level of the paired argument (e.g. subjects). The test statistic first finds the log-ratio between the two outcome levels (e.g. case and control) for each level of the paired argument and the final statistic is the mean of these log-ratios.
+A paired permutation test is implemented specifically for this package. The test is similar to the original, but with a different test statistic and permutation scheme. The permutations are constrained in the paired version such that the outcome is only permuted within each level of the paired argument (e.g. subjects). The test statistic first finds the log-ratio between the two outcome levels (e.g. case and control) for each level of the paired argument and the final statistic is the mean of these log-ratios.
 }

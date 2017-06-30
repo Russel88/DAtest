@@ -2,23 +2,26 @@
 #'
 #' Modified version of the one from:
 #' https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8.
+#' #' P-values are now two-sided, and test statistic is a simple log fold change
 #' 
-#' Pvalues are now two-sided, and test statistic is a simple log fold change
-#' 
-#' A paired permutaition test is implemented specifically for this package. The test is similar to the original, but with a different test statistic and permutaition scheme. The permutations are constrained in the paired version such that the outcome is only permuted within each level of the paired argument (e.g. subjects). The test statistic first finds the log-ratio between the two outcome levels (e.g. case and control) for each level of the paired argument and the final statistic is the mean of these log-ratios.
+#' A paired permutation test is implemented specifically for this package. The test is similar to the original, but with a different test statistic and permutation scheme. The permutations are constrained in the paired version such that the outcome is only permuted within each level of the paired argument (e.g. subjects). The test statistic first finds the log-ratio between the two outcome levels (e.g. case and control) for each level of the paired argument and the final statistic is the mean of these log-ratios.
 
 #' @export
 
-DA.per <- function(otu_table, outcome, paired = NULL, noOfIterations = 10000, seed = as.numeric(Sys.time()), margin = 50, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))}, p.adj){
+DA.per <- function(count_table, outcome, paired = NULL, noOfIterations = 10000, seed = as.numeric(Sys.time()), margin = 50, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))}, p.adj, relative = TRUE){
 
   if(!is.null(paired)){
-    otu_table <- otu_table[,order(paired)]
+    count_table <- count_table[,order(paired)]
     outcome <- outcome[order(paired)]
     testStat <- testStat.pair
   }
   
   outcome <- as.numeric(as.factor(outcome))-1
-  otu_table <- apply(otu_table, 2, function(x) x/sum(x))
+  if(relative){
+    count.rel <- apply(count_table,2,function(x) x/sum(x))
+  } else {
+    count.rel <- count_table
+  }
   
   set.seed(seed)
   nullStatList <- list()
@@ -35,24 +38,24 @@ DA.per <- function(otu_table, outcome, paired = NULL, noOfIterations = 10000, se
     }
   }
   
-  iterations <- nrow(otu_table)
+  iterations <- nrow(count_table)
   p <- numeric(iterations)
   FC <- numeric(iterations)
   coverage <- numeric(iterations)
   
   for(i in 1:iterations){
     
-    otu_row      <- as.numeric(otu_table[i,])
+    count_row      <- as.numeric(count_table[i,])
     
-    real_case    <- otu_row[outcome==1]
-    real_control <- otu_row[outcome==0]
+    real_case    <- count_row[outcome==1]
+    real_control <- count_row[outcome==0]
     realStat     <- testStat(real_case,real_control) 
     
     Wnull <- numeric(noOfIterations)
     
     for(j in 1:noOfIterations){
-      case     <- otu_row[shuffledOutcomesList[[j]]==1]
-      control  <- otu_row[shuffledOutcomesList[[j]]==0]
+      case     <- count_row[shuffledOutcomesList[[j]]==1]
+      control  <- count_row[shuffledOutcomesList[[j]]==0]
       Wnull[j] <- testStat(case,control)
       
       if(j %in% 10^(1:100)){
@@ -76,7 +79,7 @@ DA.per <- function(otu_table, outcome, paired = NULL, noOfIterations = 10000, se
     }
     FC[i]        <- realStat
   }
-  output_df <- data.frame(OTU = row.names(otu_table), pval = p, FC, coverage)
+  output_df <- data.frame(Feature = row.names(count_table), pval = p, FC, coverage)
   output_df$pval.adj <- p.adjust(output_df$pval, method = p.adj)
   output_df$Method <- "Permutation"
   return(output_df)

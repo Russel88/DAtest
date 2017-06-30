@@ -4,8 +4,8 @@
 \alias{DA.ltt}
 \title{Log t-test}
 \usage{
-DA.ltt(otu_table, outcome, delta = 1, testStat = function(case, control) {  
-    log((mean(case) + 1)/(mean(control) + 1)) },
+DA.ltt(count_table, outcome, delta = 1, testStat = function(case, control) {
+      log((mean(case) + 1)/(mean(control) + 1)) },
   testStat.pair = function(case, control) {     mean(log((case + 1)/(control +
   1))) }, paired = NULL, p.adj)
 }

@@ -2,11 +2,11 @@
 
 #' @export
 
-DA.erq <- function(otu_table, outcome, paired = NULL, p.adj){
+DA.erq <- function(count_table, outcome, paired = NULL, p.adj){
   
   library(edgeR, quietly = TRUE)
-  otu_table <- as.data.frame(otu_table)
-  y <- DGEList(counts=otu_table,genes = data.frame(OTU = row.names(otu_table)))
+  otu_table <- as.data.frame(count_table)
+  y <- DGEList(counts=count_table,genes = data.frame(Feature = row.names(count_table)))
   y <- edgeR::calcNormFactors(y)
   if(is.null(paired)){
     design <- model.matrix(~outcome)
@@ -19,7 +19,7 @@ DA.erq <- function(otu_table, outcome, paired = NULL, p.adj){
   ta <- qlf$table
   colnames(ta)[4] <- "pval"
   ta$pval.adj <- p.adjust(ta$pval, method = p.adj)
-  ta$OTU <- rownames(ta)
+  ta$Feature <- rownames(ta)
   ta$Method <- "EdgeR qll"
   
   return(ta)
