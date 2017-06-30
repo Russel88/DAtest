@@ -89,6 +89,7 @@ Implemented methods:
 
 -   per - [Permutation test with user defined test
     statistic](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8)
+    (See below for description of the paired permutation test)
 -   bay -
     [baySeq](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-11-422)
 -   adx - [ALDEx t-test and
@@ -99,9 +100,12 @@ Implemented methods:
     log(abundance + delta) then turned into relative abundances
 -   ltt2 - Welch t.test, but with relative abundances transformed with
     log(relative abundance + delta)
--   neb - Negative binomial GLM with log of library size as offset
+-   neb - Negative binomial GLM with log of library size as offset (The
+    paired version is a mixed-effect model)
 -   erq - [EdgeR - Quasi
     likelihood](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2796818/)
+    (The paired version is a model with the paired variable
+    as covariate)
 -   ere - [EdgeR - Exact
     test](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2796818/)
 -   msf - [MetagenomeSeq feature
@@ -110,5 +114,18 @@ Implemented methods:
     gaussian](https://www.nature.com/nmeth/journal/v10/n12/full/nmeth.2658.html)
 -   ds2 -
     [DESeq2](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0550-8)
+    (The paired version is a model with the paired variable
+    as covariate)
 -   enn - [ENNB](https://cals.arizona.edu/~anling/software.htm)
 -   anc - [ANCOM](https://www.ncbi.nlm.nih.gov/pubmed/26028277)
+
+### Paired permutation test
+
+A paired permutaition test is implemented specifically for this package.
+The test is similar to the original, but with a different test statistic
+and permutaition scheme. The permutations are constrained in the paired
+version such that the outcome is only permuted within each level of the
+paired argument (e.g. subjects). The test statistic first finds the
+log-ratio between the two outcome levels (e.g. case and control) for
+each level of the paired argument and the final statistic is the mean of
+these log-ratios.

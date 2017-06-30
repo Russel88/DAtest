@@ -1,10 +1,10 @@
 #' Run many differential abundance methods
 #'
-#' Run many differntial abundance tests at a time
+#' Run many differential abundance tests at a time
 #' @param count_table Matrix or data.frame. Table with taxa/genes as rows and samples as columns
 #' @param predictor Factor. The outcome of interest. Should have two levels, e.g. case and control
 #' @param paired Factor. Subject ID for running paired analysis. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq" and "ds2"
-#' @param tests Character. Which tests to include. Default all
+#' @param tests Character. Which tests to include. Default all (See below for details)
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available
 #' @param rng.seed Numeric. Seed for reproducibility. Default 123
 #' @param p.adj Character. Method for pvalue adjustment. Default "fdr"
@@ -20,7 +20,7 @@
 #' @param tau Numeric. Tuning parameter for ANCOM. Default 0.02
 #' @param theta Numeric. Tuning parameter for ANCOM. Default 0.1
 #' @param repeated Logical. Are there repeated measures? Only for ANCOM. Default FALSE
-#' @param TMM.option 1 or 2. For "enn". Option of "1" is for an approach using the mean of the	effective library sizes as a reference library size in TMM normalization; option "2" represents an approach to regenerating counts with a common dispersion. Default 1
+#' @param TMM.option 1 or 2. For "enn". Option "1" is for an approach using the mean of the	effective library sizes as a reference library size in TMM normalization; option "2" represents an approach to regenerating counts with a common dispersion. Default 1
 #' @details Currently implemented methods:
 #' \itemize{
 #'  \item per - Permutation test with user defined test statistic
@@ -39,7 +39,8 @@
 #'  \item enn - ENNB: Two-stage procedure from https://cals.arizona.edu/~anling/software.htm
 #'  \item anc - ANCOM. This test does not output pvalues; for comparison with the other methods, detected OTUs are set to a pvalue of 0, all else are set to 1.
 #' }
-#' Is it too slow? Remove "anc" from test argument
+#' Is it too slow? Remove "anc" from test argument.
+#' 
 #' "per" is also somewhat slow, but is usually one of the methods performing well.
 #' @return A list of results:
 #' \itemize{

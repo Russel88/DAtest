@@ -5,13 +5,13 @@
 #' @param predictor Factor. The outcome of interest. Should have two levels, e.g. case and control
 #' @param R Integer. Number of times to run the tests. Default 3
 #' @param paired Factor. Subject ID for running paired analysis. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq" and "ds2"
-#' @param tests Character. Which tests to include. Default all
+#' @param tests Character. Which tests to include. Default all (See below for details)
 #' @param spikeMethod Character. Multiplicative ("mult") or additive ("add") spike-in. Default "mult"
 #' @param effectSize Integer. The effect size for the spike-ins. Default 2
 #' @param k Integer. Number of OTUs to spike in each tertile. k=5: 15 OTUs in total. Default 5
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available
 #' @param rng.seed Numeric. Seed for reproducibility. Default 123
-#' @param p.adj Character. Method for pvalue adjustment. Default "fdr"
+#' @param p.adj Character. Method for pvalue adjustment. Default "fdr" (Does not affect AUC, FPR or Spike.detect.rate, these use raw p-values)
 #' @param delta1 Numeric. The pseudocount for the Log t.test method. Default 1
 #' @param delta2 Numeric. The pseudocount for the Log t.test2 method. Default 0.001
 #' @param noOfIterations Integer. How many iterations should be run for the permutation test. Default 10000
@@ -24,7 +24,7 @@
 #' @param tau Numeric. Tuning parameter for ANCOM. Default 0.02
 #' @param theta Numeric. Tuning parameter for ANCOM. Default 0.1
 #' @param repeated Logical. Are there repeated measures? Only for ANCOM. Default FALSE
-#' @param TMM.option 1 or 2. For "enn". Option of "1" is for an approach using the mean of the	effective library sizes as a reference library size in TMM normalization; option "2" represents an approach to regenerating counts with a common dispersion. Default 1
+#' @param TMM.option 1 or 2. For "enn". Option "1" is for an approach using the mean of the	effective library sizes as a reference library size in TMM normalization; option "2" represents an approach to regenerating counts with a common dispersion. Default 1
 #' @details Currently implemented methods:
 #' \itemize{
 #'  \item per - Permutation test with user defined test statistic
@@ -43,7 +43,8 @@
 #'  \item enn - ENNB: Two-stage procedure from https://cals.arizona.edu/~anling/software.htm
 #'  \item anc - ANCOM. This test does not output pvalues; for comparison with the other methods, detected OTUs are set to a pvalue of 0, all else are set to 1.
 #' }
-#' Is it too slow? Remove "anc" from test argument
+#' Is it too slow? Remove "anc" from test argument.
+#' 
 #' "per" is also somewhat slow, but is usually one of the methods performing well.
 #' @return An object of class DA, which contains a list of results:
 #' \itemize{

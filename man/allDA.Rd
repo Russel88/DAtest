@@ -20,7 +20,7 @@ allDA(count_table, predictor, paired = NULL, tests = c("anc", "per", "bay",
 
 \item{paired}{Factor. Subject ID for running paired analysis. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq" and "ds2"}
 
-\item{tests}{Character. Which tests to include. Default all}
+\item{tests}{Character. Which tests to include. Default all (See below for details)}
 
 \item{cores}{Integer. Number of cores to use for parallel computing. Default one less than available}
 
@@ -52,7 +52,7 @@ allDA(count_table, predictor, paired = NULL, tests = c("anc", "per", "bay",
 
 \item{repeated}{Logical. Are there repeated measures? Only for ANCOM. Default FALSE}
 
-\item{TMM.option}{1 or 2. For "enn". Option of "1" is for an approach using the mean of the    effective library sizes as a reference library size in TMM normalization; option "2" represents an approach to regenerating counts with a common dispersion. Default 1}
+\item{TMM.option}{1 or 2. For "enn". Option "1" is for an approach using the mean of the    effective library sizes as a reference library size in TMM normalization; option "2" represents an approach to regenerating counts with a common dispersion. Default 1}
 }
 \value{
 A list of results:
@@ -62,7 +62,7 @@ A list of results:
 }
 }
 \description{
-Run many differntial abundance tests at a time
+Run many differential abundance tests at a time
 }
 \details{
 Currently implemented methods:
@@ -83,6 +83,7 @@ Currently implemented methods:
  \item enn - ENNB: Two-stage procedure from https://cals.arizona.edu/~anling/software.htm
  \item anc - ANCOM. This test does not output pvalues; for comparison with the other methods, detected OTUs are set to a pvalue of 0, all else are set to 1.
 }
-Is it too slow? Remove "anc" from test argument
+Is it too slow? Remove "anc" from test argument.
+
 "per" is also somewhat slow, but is usually one of the methods performing well.
 }

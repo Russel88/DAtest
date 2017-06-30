@@ -1,8 +1,11 @@
 #' Permutation test
 #'
 #' Modified version of the one from:
-#' https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8
-#' Pvalues are now two-sided, and test statistic is log fold change
+#' https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8.
+#' 
+#' Pvalues are now two-sided, and test statistic is a simple log fold change
+#' 
+#' A paired permutaition test is implemented specifically for this package. The test is similar to the original, but with a different test statistic and permutaition scheme. The permutations are constrained in the paired version such that the outcome is only permuted within each level of the paired argument (e.g. subjects). The test statistic first finds the log-ratio between the two outcome levels (e.g. case and control) for each level of the paired argument and the final statistic is the mean of these log-ratios.
 
 #' @export
 
