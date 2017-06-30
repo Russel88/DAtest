@@ -54,6 +54,10 @@ the same order as columns in the otu\_table):
 
     mytest <- testDA(count_table,predictor,paired=SubjectID)
 
+*Or without relative abundances, e.g. for normalized protein abundance:*
+
+    mytest <- testDA(count_table,predictor,relative=FALSE,spikeMethod="add",tests=c("ttt","lim","wil","per"),testStat = function(case,control) {mean(case)-mean(control)})
+
 **Plot the output:**
 
     plot(mytest, sort = "AUC")
