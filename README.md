@@ -2,8 +2,7 @@ DAtest
 ======
 
 This is a package for comparing different differential abundance methods
-used in microbial marker-gene, RNA-seq analysis and protein abundance
-analysis.
+used in microbial marker-gene, RNA-seq and protein abundance analysis.
 
 Most scripts, including the spike-in for estimating AUC, is borrowed
 from: [Thorsen J, Brejnrod A et al. Large-scale benchmarking reveals
@@ -50,7 +49,7 @@ count\_table).
 *The tests can be run in a paired version:*
 
 E.g. if SubjectID is a factor denoting the pairing of the samples (in
-the same order as columns in the otu\_table):
+the same order as columns in the count\_table):
 
     mytest <- testDA(count_table,predictor,paired=SubjectID)
 
@@ -61,6 +60,13 @@ the same order as columns in the otu\_table):
 **Plot the output:**
 
     plot(mytest, sort = "AUC")
+
+Plot the p-value distributions. They should preferably be unifrom
+between 0 and 1
+
+    plot(mytest, p = TRUE)
+
+See ?plot.DA for details
 
 **Print the output:**
 
