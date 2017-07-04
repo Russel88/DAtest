@@ -2,9 +2,10 @@ DAtest
 ======
 
 This is a package for comparing different differential abundance methods
-used in microbial marker-gene, RNA-seq and protein abundance analysis.
+used in microbial marker-gene (e.g. 16S rRNA), RNA-seq and protein
+abundance analysis.
 
-Most scripts, including the spike-in for estimating AUC, is borrowed
+Many scripts, including the spike-in for estimating AUC, is borrowed
 from: [Thorsen J, Brejnrod A et al. Large-scale benchmarking reveals
 false discoveries and count transformation sensitivity in 16S rRNA gene
 amplicon data analysis methods used in microbiome studies. *Microbiome*
@@ -17,6 +18,8 @@ Installation of packages
     install_github("Russel88/DAtest")
 
 #### The following are needed for *full* functionality
+
+But the package will work without them
 
     source("https://bioconductor.org/biocLite.R")
     biocLite("DESeq2")
@@ -40,7 +43,8 @@ Rate" (Spike.detect.rate) as high as possible.
 
     mytest <- testDA(count_table,predictor)
 
-count\_table is a table with taxa/genes as rows and samples as columns.
+count\_table is a table with taxa/genes/proteins as rows and samples as
+columns.
 
 predictor is the outcome of interest, e.g. a factor denoting whether
 samples are cases or controls (in the same order as columns in
@@ -61,12 +65,12 @@ the same order as columns in the count\_table):
 
     plot(mytest, sort = "AUC")
 
-Plot the p-value distributions. They should preferably be unifrom
-between 0 and 1
+Plot the p-value distributions. Raw p-values should have a uniform
+(flat) distribution between 0 and 1. If adj = TRUE, adjusted p-values
+will be plotted, and there should not be any below 0.05 (assuming an
+alpha = 0.05).
 
     plot(mytest, p = TRUE)
-
-See ?plot.DA for details
 
 **Print the output:**
 
