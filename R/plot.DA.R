@@ -21,7 +21,7 @@ plot.DA <- function(DA, sort = "AUC", p = FALSE, bins = 50, adj = FALSE){
     if(adj){
       ggplot(df.all, aes(pval.adj)) +
         theme_bw() +
-        geom_histogram(bins=50) +
+        geom_histogram(bins=bins) +
         facet_wrap(~Method, scales = "free_y") +
         ylab("Density") +
         xlab("Adjusted P-value")
@@ -29,7 +29,7 @@ plot.DA <- function(DA, sort = "AUC", p = FALSE, bins = 50, adj = FALSE){
     } else {
       ggplot(df.all, aes(pval)) +
         theme_bw() +
-        geom_histogram(bins=50) +
+        geom_histogram(bins=bins) +
         facet_wrap(~Method, scales = "free_y") +
         ylab("Density") +
         xlab("P-value")
