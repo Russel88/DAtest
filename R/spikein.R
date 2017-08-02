@@ -21,12 +21,12 @@ spikein <- function(count_table, outcome, spikeMethod = "mult", effectSize = 2, 
   # Only spike Features present in cases
   approved_count_abundances <- count_abundances[ 
     names(count_abundances) %in% row.names( count_table[ rowSums(count_table[,outcome == 1]) > 0, outcome == 1] ) ]
+  
   lower_tert <- names(approved_count_abundances[approved_count_abundances < quantile(approved_count_abundances,1/3)])
   mid_tert <- names(approved_count_abundances[approved_count_abundances >= quantile(approved_count_abundances,1/3) & approved_count_abundances < quantile(approved_count_abundances,2/3)])
   upper_tert <- names(approved_count_abundances[approved_count_abundances >= quantile(approved_count_abundances,2/3)])
-  spike_features <- c( 	sample(lower_tert, k)	,
-                     sample(mid_tert, k)		,
-                     sample(upper_tert,k)	)
+  
+  spike_features <- c(sample(lower_tert, k[1]), sample(mid_tert, k[2]), sample(upper_tert,k[3]))
   spike_feature_index <- which(row.names(count_table) %in% spike_features)
   
   # Spike Features either by addition or multiplication

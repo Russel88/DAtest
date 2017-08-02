@@ -1,20 +1,20 @@
 #' Comparing differential abundance methods by FPR and AUC
 #'
-#' Calculating false positive rates and AUC for various differential abundance methods
+#' Calculating false positive rates and AUC (Area Under the receiver operator Curve) for various differential abundance methods
 #' @param count_table Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns
-#' @param predictor Factor. The outcome of interest. Should have two levels, e.g. case and control
+#' @param predictor Factor. The outcome of interest. E.g. case and control. If the predictor has more than two levels, only the 2. level will be spiked.
 #' @param R Integer. Number of times to run the tests. Default 3
 #' @param paired Factor. Subject ID for running paired analysis. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq" and "ds2"
-#' @param relative Logical. Should abundances be made relative? Only has effect for "ttt", "wil", "per" and "lim". Default TRUE
+#' @param relative Logical. Should abundances be made relative? Only has effect for "ttt", "wil", "per", "aov", "kru" and "lim". Default TRUE
 #' @param tests Character. Which tests to include. Default all (See below for details)
 #' @param spikeMethod Character. Multiplicative ("mult") or additive ("add") spike-in. Default "mult"
 #' @param effectSize Integer. The effect size for the spike-ins. Default 2
-#' @param k Integer. Number of Features to spike in each tertile. k=5: 15 Features in total. Default 5
+#' @param k Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). k=c(5,10,15): 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default c(5,5,5)
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available
 #' @param rng.seed Numeric. Seed for reproducibility. Default 123
 #' @param p.adj Character. Method for pvalue adjustment. Default "fdr" (Does not affect AUC, FPR or Spike.detect.rate, these use raw p-values)
-#' @param delta1 Numeric. The pseudocount for the Log t.test method. Default 1
-#' @param delta2 Numeric. The pseudocount for the Log t.test2 method. Default 0.001
+#' @param delta1 Numeric. The pseudocount for the Log t.test/ANOVA method. Default 1
+#' @param delta2 Numeric. The pseudocount for the Log t.test2/ANOVA2 method. Default 0.001
 #' @param noOfIterations Integer. How many iterations should be run for the permutation test. Default 10000
 #' @param margin Integer. The margin of when to stop iterating for non-significant Features for the permutation test. Default 50
 #' @param testStat Function. The test statistic function for the permutation test (also in output of ttt, ltt, ltt2 and wil). Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))
@@ -45,7 +45,11 @@
 #'  \item ds2 - DESeq2
 #'  \item enn - ENNB: Two-stage procedure from https://cals.arizona.edu/~anling/software.htm
 #'  \item anc - ANCOM. This test does not output pvalues; for comparison with the other methods, detected Features are set to a pvalue of 0, all else are set to 1.
-#'  \item lim - LIMMA. Moderated t-test based on emperical bayes
+#'  \item lim - LIMMA. Moderated linear models based on emperical bayes
+#'  \item kru - Kruskal-Wallis on relative abundances
+#'  \item aov - ANOVA on relative abundances
+#'  \item lao - ANOVA, but reads are first transformed with log(abundance + delta1) then turned into relative abundances
+#'  \item lao2 - ANOVA, but with relative abundances transformed with log(relative abundance + delta2)
 #' }
 #' Is it too slow? Remove "anc" from test argument.
 #' 
@@ -60,10 +64,13 @@
 #' @importFrom parallel detectCores
 #' @export
 
-testDA <- function(count_table, predictor, R = 3, paired = NULL, relative = TRUE, tests = c("anc","per","bay","adx","enn","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2","lim"), spikeMethod = "mult", effectSize = 2, k = 5, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", delta1 = 1, delta2 = 0.001, noOfIterations = 10000, margin = 50, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))}, mc.samples = 64, sig = 0.05, multcorr = 3, tau = 0.02, theta = 0.1, repeated = FALSE, TMM.option = 1, log.lim = FALSE, delta.lim = 1){
+testDA <- function(count_table, predictor, R = 3, paired = NULL, relative = TRUE, tests = c("anc","per","bay","adx","enn","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2","lim","aov","lao","lao2","kru"), spikeMethod = "mult", effectSize = 2, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", delta1 = 1, delta2 = 0.001, noOfIterations = 10000, margin = 50, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))}, mc.samples = 64, sig = 0.05, multcorr = 3, tau = 0.02, theta = 0.1, repeated = FALSE, TMM.option = 1, log.lim = FALSE, delta.lim = 1){
 
+  library(foreach, quietly = TRUE)
+  
   if(sum(colSums(count_table) == 0) > 0) stop("Some samples are empty!")
   if(ncol(count_table) != length(predictor)) stop("Number of samples in count_table does not match length of predictor")
+  if(length(levels(as.factor(predictor))) < 2) stop("Predictor should have at least two levels")
   
   # Prune test argument
   if(!"baySeq" %in% rownames(installed.packages())) tests <- tests[tests != "bay"]
@@ -78,17 +85,24 @@ testDA <- function(count_table, predictor, R = 3, paired = NULL, relative = TRUE
   if(!"limma" %in% rownames(installed.packages())) tests <- tests[tests != "lim"] 
   
   if(!is.null(paired)){
-    tests <- tests[!tests %in% c("bay","adx","anc","enn","ere","msf","zig","lim")]
+    tests <- tests[!tests %in% c("bay","adx","anc","enn","ere","msf","zig","aov","lao","lao2","kru")]
   } 
   
+  if(length(levels(as.factor(predictor))) > 2){
+    tests <- tests[tests %in% c("neb","erq","ds2","lim","aov","lao","lao2","kru")]
+  } else {
+    tests <- tests[!tests %in% c("aov","lao","lao2","kru")]
+  }
+  
   set.seed(rng.seed)
+  message(paste("Seed is set to",rng.seed))
   
   final.results <- foreach(r = 1:R) %do% {
     
     library(parallel, quietly = TRUE)
     library(doSNOW, quietly = TRUE)
-    library(foreach, quietly = TRUE)
     library(pROC, quietly = TRUE)
+    library(foreach, quietly = TRUE)
     
     message(paste0(r,". Run:"))
     
@@ -134,7 +148,11 @@ testDA <- function(count_table, predictor, R = 3, paired = NULL, relative = TRUE
                         adx = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,mc.samples, p.adj)),
                         enn = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,TMM.option,p.adj)),
                         anc = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,sig,multcorr, tau, theta, repeated)),
-                        lim = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,p.adj,relative,log.lim,delta.lim)))
+                        lim = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,p.adj,relative,paired,log.lim,delta.lim)),
+                        kru = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand, p.adj, relative)),
+                        aov = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand, p.adj, relative)),
+                        lao = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,delta1, p.adj)),
+                        lao2 = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,delta2, p.adj)))
       
       res.sub[is.na(res.sub$pval),"pval"] <- 1
       res.sub[is.na(res.sub$pval.adj),"pval.adj"] <- 1
@@ -163,6 +181,16 @@ testDA <- function(count_table, predictor, R = 3, paired = NULL, relative = TRUE
       names(results) <- c(res.names,"adx.t","adx.w")
     }
 
+    # Insert spiked column
+    newnames <- names(results)
+    results <- foreach(rsp = 1:length(results)) %do% {
+      temp <- results[[rsp]]
+      temp$Spiked <- "No"
+      temp[temp$Feature %in% spiked[[2]],"Spiked"] <- "Yes"
+      return(temp)
+    }
+    names(results) <- newnames
+    
     # Confusion matrix
     totalPos <- sapply(results,function(x) nrow(x[x$pval < 0.05,]))
     totalNeg <- sapply(results,function(x) nrow(x[x$pval >= 0.05,])) 
@@ -184,7 +212,7 @@ testDA <- function(count_table, predictor, R = 3, paired = NULL, relative = TRUE
     
     
     # Spike detection rate
-    sdrs <- sapply(1:length(results), function(x) truePos[x] / (k*3))
+    sdrs <- sapply(1:length(results), function(x) truePos[x] / sum(k))
     
     # AUC
     aucs <- sapply(1:length(results), function(x) {

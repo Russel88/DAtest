@@ -36,15 +36,15 @@ How to compare methods:
 -----------------------
 
 A good method has a "False Positive Rate" (FPR) at ~0.05 or below, an
-"Area Under the Curve" (AUC) as high as possible, and a "Spike Detection
-Rate" (Spike.detect.rate) as high as possible.
+"Area Under the (Receiver Operator) Curve" (AUC) as high as possible,
+and a "Spike Detection Rate" (Spike.detect.rate) as high as possible.
 
 **Run the test:**
 
     mytest <- testDA(count_table,predictor)
 
-count\_table is a table with taxa/genes/proteins as rows and samples as
-columns.
+count\_table is a matrix or data.frame with taxa/genes/proteins as rows
+and samples as columns.
 
 predictor is the outcome of interest, e.g. a factor denoting whether
 samples are cases or controls (in the same order as columns in
@@ -136,6 +136,12 @@ Implemented methods:
 -   anc - [ANCOM](https://www.ncbi.nlm.nih.gov/pubmed/26028277)
 -   lim -
     [LIMMA](https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true)
+-   kru - Kruskal-Wallis test on relative abundances
+-   aov - ANOVA on relative abundances
+-   lao - ANOVA, but reads are first transformed with log(abundance +
+    delta) then turned into relative abundances
+-   lao2 - ANOVA, but with relative abundances transformed with
+    log(relative abundance + delta)
 
 ### Paired permutation test
 

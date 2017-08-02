@@ -4,7 +4,8 @@
 \alias{DA.lim}
 \title{LIMMA}
 \usage{
-DA.lim(count_table, outcome, p.adj, relative, log = FALSE, delta = 1)
+DA.lim(count_table, outcome, p.adj, relative, paired = NULL, log = FALSE,
+  delta = 1)
 }
 \description{
 Some is borrowed from:

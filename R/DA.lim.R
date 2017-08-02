@@ -5,7 +5,7 @@
 
 #' @export
 
-DA.lim <- function(count_table, outcome, p.adj, relative, log = FALSE, delta = 1){
+DA.lim <- function(count_table, outcome, p.adj, relative, paired = NULL, log = FALSE, delta = 1){
   
   library(limma, quietly = TRUE)
   
@@ -16,12 +16,12 @@ DA.lim <- function(count_table, outcome, p.adj, relative, log = FALSE, delta = 1
   } else {
     count.rel <- count_table
   }
-
-  design <- model.matrix(~outcome)
+  
+  if(is.null(paired)) design <- model.matrix(~outcome) else design <- model.matrix(~as.factor(paired)+outcome)
   n <- dim(count.rel)[1]
   fit <- lmFit(count.rel, design)
   fit.eb <- eBayes(fit)
-  Estimate <- fit.eb$coefficients[, 2]
+  if(is.null(paired)) Estimate <- fit.eb$coefficients else Estimate <- fit.eb$coefficients[,c(1,(length(levels(as.factor(paired)))+1):ncol(fit.eb$coefficients))]
   df.residual <- fit.eb$df.residual
   df.prior <- rep(fit.eb$df.prior, n)
   s2.prior <- rep(fit.eb$s2.prior, n)
