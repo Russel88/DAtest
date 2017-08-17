@@ -50,6 +50,13 @@ predictor is the outcome of interest, e.g. a factor denoting whether
 samples are cases or controls (in the same order as columns in
 count\_table).
 
+predictor can be a factor with more than two levels, in which case only
+the second level is spiked, and if methods output several p-values, only
+the p-value associated with the second level is used.
+
+predictor can also be numeric, in which case it is spiked as followed:
+newAbundances = oldAbundances \* (effectSize \* predictor)
+
 *The tests can be run in a paired version:*
 
 E.g. if SubjectID is a factor denoting the pairing of the samples (in
@@ -142,6 +149,11 @@ Implemented methods:
     delta) then turned into relative abundances
 -   lao2 - ANOVA, but with relative abundances transformed with
     log(relative abundance + delta)
+-   lrm - Linear regression on relative abundances
+-   llm - Linear regression, but reads are first transformed with
+    log(abundance + delta) then turned into relative abundances
+-   llm2 - Linear regression, but with relative abundances transformed
+    with log(relative abundance + delta)
 
 ### Paired permutation test
 

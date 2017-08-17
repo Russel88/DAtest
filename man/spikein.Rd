@@ -5,7 +5,7 @@
 \title{Spike-in}
 \usage{
 spikein(count_table, outcome, spikeMethod = "mult", effectSize = 2, k,
-  relative = TRUE)
+  relative = TRUE, num.pred = FALSE)
 }
 \description{
 Modified version of the one from:

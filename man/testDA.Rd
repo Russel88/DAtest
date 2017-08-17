@@ -6,9 +6,9 @@
 \usage{
 testDA(count_table, predictor, R = 3, paired = NULL, relative = TRUE,
   tests = c("anc", "per", "bay", "adx", "enn", "wil", "ttt", "ltt", "ltt2",
-  "neb", "erq", "ere", "msf", "zig", "ds2", "lim", "aov", "lao", "lao2", "kru"),
-  spikeMethod = "mult", effectSize = 2, k = c(5, 5, 5),
-  cores = (detectCores() - 1), rng.seed = 123, p.adj = "fdr",
+  "neb", "erq", "ere", "msf", "zig", "ds2", "lim", "aov", "lao", "lao2", "kru",
+  "lrm", "llm", "llm2"), spikeMethod = "mult", effectSize = 2, k = c(5, 5,
+  5), cores = (detectCores() - 1), rng.seed = 123, p.adj = "fdr",
   delta1 = 1, delta2 = 0.001, noOfIterations = 10000, margin = 50,
   testStat = function(case, control) {     log((mean(case) + 1)/(mean(control)
   + 1)) }, testStat.pair = function(case, control) {     mean(log((case +
@@ -41,9 +41,9 @@ testDA(count_table, predictor, R = 3, paired = NULL, relative = TRUE,
 
 \item{p.adj}{Character. Method for pvalue adjustment. Default "fdr" (Does not affect AUC, FPR or Spike.detect.rate, these use raw p-values)}
 
-\item{delta1}{Numeric. The pseudocount for the Log t.test/ANOVA method. Default 1}
+\item{delta1}{Numeric. The pseudocount for the Log t.test/ANOVA/llm method. Default 1}
 
-\item{delta2}{Numeric. The pseudocount for the Log t.test2/ANOVA2 method. Default 0.001}
+\item{delta2}{Numeric. The pseudocount for the Log t.test2/ANOVA2/lmm2 method. Default 0.001}
 
 \item{noOfIterations}{Integer. How many iterations should be run for the permutation test. Default 10000}
 
@@ -104,6 +104,9 @@ Currently implemented methods:
  \item aov - ANOVA on relative abundances
  \item lao - ANOVA, but reads are first transformed with log(abundance + delta1) then turned into relative abundances
  \item lao2 - ANOVA, but with relative abundances transformed with log(relative abundance + delta2)
+ \item lrm - Linear regression on relative abundances
+ \item llm - Linear regression, but reads are first transformed with log(abundance + delta1) then turned into relative abundances
+ \item llm2 - Linear regression, but with relative abundances transformed with log(relative abundance + delta2)
 }
 Is it too slow? Remove "anc" from test argument.
 

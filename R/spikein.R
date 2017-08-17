@@ -5,12 +5,13 @@
 
 #' @export
 
-spikein <- function(count_table, outcome, spikeMethod = "mult", effectSize = 2, k, relative = TRUE){
+spikein <- function(count_table, outcome, spikeMethod = "mult", effectSize = 2, k, relative = TRUE, num.pred = FALSE){
   
   if(relative == FALSE & spikeMethod == "mult") stop("Cannot use multiplicative spike-in if relative is FALSE")
+  if(num.pred == TRUE & spikeMethod == "add") stop("Cannot use additive spike-in if predictor is numeric")
   
   if(effectSize == 1) spikeMethod <- "none"
-
+  
   count_table <- as.data.frame(count_table)
   outcome <- as.numeric(as.factor(outcome))-1
   
@@ -33,10 +34,13 @@ spikein <- function(count_table, outcome, spikeMethod = "mult", effectSize = 2, 
   oldSums <- colSums(count_table)
 
   if(spikeMethod == "mult"){
-    count_table[spike_feature_index,outcome==1] <- count_table[spike_feature_index, outcome==1] * effectSize
+    if(num.pred){
+      outcome <- as.numeric(outcome)
+      count_table[spike_feature_index,] <- count_table[spike_feature_index, ] * (effectSize * outcome)
+    } else {
+      count_table[spike_feature_index,outcome==1] <- count_table[spike_feature_index, outcome==1] * effectSize
+    }
   }
-  
-  
   
   if(spikeMethod == "add"){
     nonzeroMeans <- lapply(spike_feature_index, function(j){

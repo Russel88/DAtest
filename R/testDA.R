@@ -13,8 +13,8 @@
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available
 #' @param rng.seed Numeric. Seed for reproducibility. Default 123
 #' @param p.adj Character. Method for pvalue adjustment. Default "fdr" (Does not affect AUC, FPR or Spike.detect.rate, these use raw p-values)
-#' @param delta1 Numeric. The pseudocount for the Log t.test/ANOVA method. Default 1
-#' @param delta2 Numeric. The pseudocount for the Log t.test2/ANOVA2 method. Default 0.001
+#' @param delta1 Numeric. The pseudocount for the Log t.test/ANOVA/llm method. Default 1
+#' @param delta2 Numeric. The pseudocount for the Log t.test2/ANOVA2/lmm2 method. Default 0.001
 #' @param noOfIterations Integer. How many iterations should be run for the permutation test. Default 10000
 #' @param margin Integer. The margin of when to stop iterating for non-significant Features for the permutation test. Default 50
 #' @param testStat Function. The test statistic function for the permutation test (also in output of ttt, ltt, ltt2 and wil). Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))
@@ -50,6 +50,9 @@
 #'  \item aov - ANOVA on relative abundances
 #'  \item lao - ANOVA, but reads are first transformed with log(abundance + delta1) then turned into relative abundances
 #'  \item lao2 - ANOVA, but with relative abundances transformed with log(relative abundance + delta2)
+#'  \item lrm - Linear regression on relative abundances
+#'  \item llm - Linear regression, but reads are first transformed with log(abundance + delta1) then turned into relative abundances
+#'  \item llm2 - Linear regression, but with relative abundances transformed with log(relative abundance + delta2)
 #' }
 #' Is it too slow? Remove "anc" from test argument.
 #' 
@@ -64,7 +67,7 @@
 #' @importFrom parallel detectCores
 #' @export
 
-testDA <- function(count_table, predictor, R = 3, paired = NULL, relative = TRUE, tests = c("anc","per","bay","adx","enn","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2","lim","aov","lao","lao2","kru"), spikeMethod = "mult", effectSize = 2, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", delta1 = 1, delta2 = 0.001, noOfIterations = 10000, margin = 50, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))}, mc.samples = 64, sig = 0.05, multcorr = 3, tau = 0.02, theta = 0.1, repeated = FALSE, TMM.option = 1, log.lim = FALSE, delta.lim = 1){
+testDA <- function(count_table, predictor, R = 3, paired = NULL, relative = TRUE, tests = c("anc","per","bay","adx","enn","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2","lim","aov","lao","lao2","kru","lrm","llm","llm2"), spikeMethod = "mult", effectSize = 2, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", delta1 = 1, delta2 = 0.001, noOfIterations = 10000, margin = 50, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))}, mc.samples = 64, sig = 0.05, multcorr = 3, tau = 0.02, theta = 0.1, repeated = FALSE, TMM.option = 1, log.lim = FALSE, delta.lim = 1){
 
   library(foreach, quietly = TRUE)
   
@@ -82,16 +85,20 @@ testDA <- function(count_table, predictor, R = 3, paired = NULL, relative = TRUE
   if(!"DESeq2" %in% rownames(installed.packages())) tests <- tests[tests != "ds2"]
   if(!"ancom.R" %in% rownames(installed.packages())) tests <- tests[tests != "anc"]  
   if(!"glmnet" %in% rownames(installed.packages())) tests <- tests[tests != "enn"] 
-  if(!"limma" %in% rownames(installed.packages())) tests <- tests[tests != "lim"] 
-  
+  if(!"limma" %in% rownames(installed.packages())) tests <- tests[tests != "lim"]
+
   if(!is.null(paired)){
     tests <- tests[!tests %in% c("bay","adx","anc","enn","ere","msf","zig","aov","lao","lao2","kru")]
   } 
   
   if(length(levels(as.factor(predictor))) > 2){
-    tests <- tests[tests %in% c("neb","erq","ds2","lim","aov","lao","lao2","kru")]
+    tests <- tests[tests %in% c("neb","erq","ds2","lim","aov","lao","lao2","kru","lrm","llm","llm2")]
   } else {
-    tests <- tests[!tests %in% c("aov","lao","lao2","kru")]
+    tests <- tests[!tests %in% c("aov","lao","lao2","kru","lrm","llm","llm2")]
+  }
+  
+  if(is.numeric(predictor)){
+    tests <- tests[tests %in% c("neb","erq","ds2","lim","lrm","llm","llm2")]
   }
   
   set.seed(rng.seed)
@@ -113,7 +120,12 @@ testDA <- function(count_table, predictor, R = 3, paired = NULL, relative = TRUE
     count_table <- count_table[rowSums(count_table) > 0,]
     
     # Spikein
-    spiked <- spikein(count_table, rand, spikeMethod, effectSize,  k, relative)
+    if(is.numeric(predictor)){
+      num.pred <- TRUE
+    } else {
+      num.pred <- FALSE
+    }
+    spiked <- spikein(count_table, rand, spikeMethod, effectSize,  k, relative, num.pred)
     count_table <- spiked[[1]]
     
     ### Run tests
@@ -152,7 +164,10 @@ testDA <- function(count_table, predictor, R = 3, paired = NULL, relative = TRUE
                         kru = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand, p.adj, relative)),
                         aov = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand, p.adj, relative)),
                         lao = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,delta1, p.adj)),
-                        lao2 = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,delta2, p.adj)))
+                        lao2 = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,delta2, p.adj)),
+                        lrm = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,paired, p.adj)),
+                        llm = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,paired, p.adj, delta1)),
+                        llm2 = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,paired, p.adj, delta2)))
       
       res.sub[is.na(res.sub$pval),"pval"] <- 1
       res.sub[is.na(res.sub$pval.adj),"pval.adj"] <- 1

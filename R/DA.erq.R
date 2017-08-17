@@ -15,9 +15,16 @@ DA.erq <- function(count_table, outcome, paired = NULL, p.adj){
   }
   y <- estimateDisp(y,design)
   fit <- glmQLFit(y,design)
-  qlf <- glmQLFTest(fit,coef=seq(2,length(levels(as.factor(outcome)))))
-  ta <- qlf$table
-  colnames(ta)[(length(levels(as.factor(outcome)))+2)] <- "pval"
+  if(is.numeric(outcome)){
+    qlf <- glmQLFTest(fit,coef=2)
+    ta <- qlf$table
+    colnames(ta)[4] <- "pval"
+  } else {
+    qlf <- glmQLFTest(fit,coef=seq(2,length(levels(as.factor(outcome)))))
+    ta <- qlf$table
+    colnames(ta)[(length(levels(as.factor(outcome)))+2)] <- "pval"
+  }
+
   ta$pval.adj <- p.adjust(ta$pval, method = p.adj)
   ta$Feature <- rownames(ta)
   ta$Method <- "EdgeR qll"
