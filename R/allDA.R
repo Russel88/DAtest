@@ -138,14 +138,14 @@ allDA <- function(count_table, predictor, paired = NULL, relative = TRUE, tests 
                       adx = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,mc.samples, p.adj)),
                       enn = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,TMM.option,p.adj)),
                       anc = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,sig,multcorr, tau, theta, repeated)),
-                      lim = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,p.adj,relative,paired,log.lim,delta.lim)),
-                      kru = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand, p.adj, relative)),
-                      aov = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand, p.adj, relative)),
-                      lao = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,delta1, p.adj)),
-                      lao2 = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,delta2, p.adj)),
-                      lrm = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,paired, p.adj)),
-                      llm = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,paired, p.adj, delta1)),
-                      llm2 = do.call(get(noquote(paste0("DA.",i))),list(count_table,rand,paired, p.adj, delta2)))
+                      lim = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,p.adj,relative,paired,log.lim,delta.lim)),
+                      kru = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor, p.adj, relative)),
+                      aov = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor, p.adj, relative)),
+                      lao = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,delta1, p.adj)),
+                      lao2 = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,delta2, p.adj)),
+                      lrm = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,paired, p.adj)),
+                      llm = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,paired, p.adj, delta1)),
+                      llm2 = do.call(get(noquote(paste0("DA.",i))),list(count_table,predictor,paired, p.adj, delta2)))
     
     res.sub[is.na(res.sub$pval),"pval"] <- 1
     res.sub[is.na(res.sub$pval.adj),"pval.adj"] <- 1
