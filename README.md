@@ -11,8 +11,8 @@ The methodology goes as follows:
 -   Spike in data for some randomly chosen features, such that they are
     associated with the shuffled predictor
 -   Apply methods, and check:
--   whether they can find the spike-ins
--   whether the false positive rate is controlled
+    -   whether they can find the spike-ins
+    -   whether the false positive rate is controlled
 
 Many scripts, including the spike-in for estimating AUC, is borrowed
 from: [Thorsen J, Brejnrod A et al. Large-scale benchmarking reveals
