@@ -114,7 +114,11 @@ testDA <- function(count_table, predictor, R = 3, paired = NULL, relative = TRUE
     message(paste0(r,". Run:"))
     
     # Shuffle predictor
-    rand <- sample(predictor)
+    if(is.null(paired)){
+      rand <- sample(predictor)
+    } else {
+      rand <- unsplit(lapply(split(outcome,paired), sample), paired)
+    }
     
     # Remove Features not present in any samples
     count_table <- count_table[rowSums(count_table) > 0,]

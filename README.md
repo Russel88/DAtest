@@ -5,6 +5,15 @@ This is a package for comparing different differential abundance methods
 used in microbial marker-gene (e.g. 16S rRNA), RNA-seq and protein
 abundance analysis.
 
+The methodology goes as follows:
+
+-   Shuffle predictor variable
+-   Spike in data for some randomly chosen features, such that they are
+    associated with the shuffled predictor
+-   Apply methods, and check:
+-   whether they can find the spike-ins
+-   whether the false positive rate is controlled
+
 Many scripts, including the spike-in for estimating AUC, is borrowed
 from: [Thorsen J, Brejnrod A et al. Large-scale benchmarking reveals
 false discoveries and count transformation sensitivity in 16S rRNA gene
@@ -63,6 +72,9 @@ E.g. if SubjectID is a factor denoting the pairing of the samples (in
 the same order as columns in the count\_table):
 
     mytest <- testDA(count_table,predictor,paired=SubjectID)
+
+When a *paired* argument is provided, the predictor is shuffled within
+the levels of the *paired* factor.
 
 *Or without relative abundances, e.g. for normalized protein abundance:*
 
