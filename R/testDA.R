@@ -117,7 +117,7 @@ testDA <- function(count_table, predictor, R = 3, paired = NULL, relative = TRUE
     if(is.null(paired)){
       rand <- sample(predictor)
     } else {
-      rand <- unsplit(lapply(split(outcome,paired), sample), paired)
+      rand <- unsplit(lapply(split(predictor,paired), sample), paired)
     }
     
     # Remove Features not present in any samples
