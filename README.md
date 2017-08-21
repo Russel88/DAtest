@@ -64,7 +64,7 @@ the second level is spiked, and if methods output several p-values, only
 the p-value associated with the second level is used.
 
 predictor can also be numeric, in which case it is spiked as followed:
-newAbundances = oldAbundances \* (effectSize \* predictor)
+newAbundances = oldAbundances \* (effectSize ^ predictor/sum(predictor))
 
 *The tests can be run in a paired version:*
 
