@@ -18,9 +18,9 @@ allDA(count_table, predictor, paired = NULL, relative = TRUE,
 \arguments{
 \item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
 
-\item{predictor}{Factor. The outcome of interest. E.g. case and control}
+\item{predictor}{Factor or Numeric. The outcome of interest. E.g. case and control. If the predictor has more than two levels, only the 2. level will be spiked. If the predictor is numeric it will be treated as such in the analyses}
 
-\item{paired}{Factor. Subject ID for running paired analysis. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq" and "ds2"}
+\item{paired}{Factor. Subject ID for running paired analysis. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm" and "llm2"}
 
 \item{relative}{Logical. Should abundances be made relative? Only has effect for "ttt", "wil", "per", "aov", "kru" and "lim". Default TRUE}
 
@@ -32,9 +32,9 @@ allDA(count_table, predictor, paired = NULL, relative = TRUE,
 
 \item{p.adj}{Character. Method for pvalue adjustment. Default "fdr"}
 
-\item{delta1}{Numeric. The pseudocount for the Log t.test/ANOVA/llm method. Default 1}
+\item{delta1}{Numeric. The pseudocount for the log t.test/log ANOVA/llm method. Default 1}
 
-\item{delta2}{Numeric. The pseudocount for the Log t.test2/ANOVA2/llm2 method. Default 0.001}
+\item{delta2}{Numeric. The pseudocount for the log t.test2/log ANOVA2/llm2 method. Default 0.001}
 
 \item{noOfIterations}{Integer. How many iterations should be run for the permutation tests. Default 10000}
 
@@ -101,5 +101,5 @@ Currently implemented methods:
 }
 Is it too slow? Remove "anc" from test argument.
 
-"per" is also somewhat slow, but is usually one of the methods performing well.
+"per" is also somewhat slow, but is usually one of the methods performing well with large sample sizes.
 }

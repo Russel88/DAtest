@@ -2,15 +2,15 @@
 #'
 #' Run many differential abundance tests at a time
 #' @param count_table Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns
-#' @param predictor Factor. The outcome of interest. E.g. case and control
-#' @param paired Factor. Subject ID for running paired analysis. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq" and "ds2"
+#' @param predictor Factor or Numeric. The outcome of interest. E.g. case and control. If the predictor has more than two levels, only the 2. level will be spiked. If the predictor is numeric it will be treated as such in the analyses
+#' @param paired Factor. Subject ID for running paired analysis. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm" and "llm2"
 #' @param relative Logical. Should abundances be made relative? Only has effect for "ttt", "wil", "per", "aov", "kru" and "lim". Default TRUE
 #' @param tests Character. Which tests to include. Default all (See below for details)
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available
 #' @param rng.seed Numeric. Seed for reproducibility. Default 123
 #' @param p.adj Character. Method for pvalue adjustment. Default "fdr"
-#' @param delta1 Numeric. The pseudocount for the Log t.test/ANOVA/llm method. Default 1
-#' @param delta2 Numeric. The pseudocount for the Log t.test2/ANOVA2/llm2 method. Default 0.001
+#' @param delta1 Numeric. The pseudocount for the log t.test/log ANOVA/llm method. Default 1
+#' @param delta2 Numeric. The pseudocount for the log t.test2/log ANOVA2/llm2 method. Default 0.001
 #' @param noOfIterations Integer. How many iterations should be run for the permutation tests. Default 10000
 #' @param margin Integer. The margin of when to stop iterating for non-significant Features for the permutation tests. Default 50
 #' @param testStat Function. The test statistic function for the permutation test (also in output of ttt, ltt, ltt2 and wil). Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))
@@ -52,7 +52,7 @@
 #' }
 #' Is it too slow? Remove "anc" from test argument.
 #' 
-#' "per" is also somewhat slow, but is usually one of the methods performing well.
+#' "per" is also somewhat slow, but is usually one of the methods performing well with large sample sizes.
 #' @return A list of results:
 #' \itemize{
 #'  \item table - Summary of results

@@ -36,7 +36,7 @@ spikein <- function(count_table, outcome, spikeMethod = "mult", effectSize = 2, 
   if(spikeMethod == "mult"){
     if(num.pred){
       outcome <- as.numeric(outcome)
-      count_table[spike_feature_index,] <- count_table[spike_feature_index, ] * (effectSize ^ (outcome/sum(outcome)))
+      count_table[spike_feature_index,] <- count_table[spike_feature_index, ] * (effectSize ^ outcome)
     } else {
       count_table[spike_feature_index,outcome==1] <- count_table[spike_feature_index, outcome==1] * effectSize
     }

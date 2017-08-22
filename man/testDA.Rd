@@ -4,7 +4,7 @@
 \alias{testDA}
 \title{Comparing differential abundance methods by FPR and AUC}
 \usage{
-testDA(count_table, predictor, R = 3, paired = NULL, relative = TRUE,
+testDA(count_table, predictor, R = 10, paired = NULL, relative = TRUE,
   tests = c("anc", "per", "bay", "adx", "enn", "wil", "ttt", "ltt", "ltt2",
   "neb", "erq", "ere", "msf", "zig", "ds2", "lim", "aov", "lao", "lao2", "kru",
   "lrm", "llm", "llm2"), spikeMethod = "mult", effectSize = 2, k = c(5, 5,
@@ -19,17 +19,17 @@ testDA(count_table, predictor, R = 3, paired = NULL, relative = TRUE,
 \arguments{
 \item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
 
-\item{predictor}{Factor. The outcome of interest. E.g. case and control. If the predictor has more than two levels, only the 2. level will be spiked.}
+\item{predictor}{Factor or Numeric. The outcome of interest. E.g. case and control. If the predictor has more than two levels, only the 2. level will be spiked. If the predictor is numeric it will be treated as such in the analyses}
 
-\item{R}{Integer. Number of times to run the tests. Default 3}
+\item{R}{Integer. Number of times to run the tests. Default 10}
 
-\item{paired}{Factor. Subject ID for running paired analysis. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq" and "ds2"}
+\item{paired}{Factor. Subject ID for running paired analysis. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm" and "llm2"}
 
 \item{relative}{Logical. Should abundances be made relative? Only has effect for "ttt", "wil", "per", "aov", "kru" and "lim". Default TRUE}
 
 \item{tests}{Character. Which tests to include. Default all (See below for details)}
 
-\item{spikeMethod}{Character. Multiplicative ("mult") or additive ("add") spike-in. Default "mult"}
+\item{spikeMethod}{Character. Multiplicative ("mult") or additive ("add") spike-in. Default "mult". Use "add" if relative = TRUE}
 
 \item{effectSize}{Integer. The effect size for the spike-ins. Default 2}
 
@@ -41,9 +41,9 @@ testDA(count_table, predictor, R = 3, paired = NULL, relative = TRUE,
 
 \item{p.adj}{Character. Method for pvalue adjustment. Default "fdr" (Does not affect AUC, FPR or Spike.detect.rate, these use raw p-values)}
 
-\item{delta1}{Numeric. The pseudocount for the Log t.test/ANOVA/llm method. Default 1}
+\item{delta1}{Numeric. The pseudocount for the log t.test/log ANOVA/llm method. Default 1}
 
-\item{delta2}{Numeric. The pseudocount for the Log t.test2/ANOVA2/lmm2 method. Default 0.001}
+\item{delta2}{Numeric. The pseudocount for the log t.test2/log ANOVA2/lmm2 method. Default 0.001}
 
 \item{noOfIterations}{Integer. How many iterations should be run for the permutation test. Default 10000}
 
@@ -110,5 +110,5 @@ Currently implemented methods:
 }
 Is it too slow? Remove "anc" from test argument.
 
-"per" is also somewhat slow, but is usually one of the methods performing well.
+"per" is also somewhat slow, but is usually one of the methods performing well with large sample sizes.
 }
