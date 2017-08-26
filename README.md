@@ -38,12 +38,12 @@ But the package will work without them
     biocLite("ALDEx2")
     biocLite("limma")
 
-ANCOM has to be installed from an [external
+\*ANCOM has to be installed from an [external
 source.](https://www.niehs.nih.gov/research/resources/software/biostatistics/ancom/index.cfm)
 + It depends on: shiny, doParallel, methods, stringr, exactRankTests and
 openxlsx
 
-RAIDA has to be installed from an [external
+\*RAIDA has to be installed from an [external
 source.](https://cals.arizona.edu/~anling/software/) + It depends on:
 MASS, protoclust, qvalue (biocLite("qvalue")) and limma
 (biocLite("limma"))
