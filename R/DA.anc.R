@@ -1,15 +1,18 @@
 #' ANCOM
 #'
+#' @param count_table Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns
+#' @param outcome Factor. The outcome of interest. E.g. case and control
+#' @param ... Additional arguments for the ANCOM function
 #' @export
 
-DA.anc <- function(count_table, outcome, sig = 0.05, multcorr = 3, tau = 0.02, theta = 0.1, repeated = FALSE){
+DA.anc <- function(count_table, outcome, ...){
   
   library(ancom.R, quietly = TRUE)
 
   input <- as.data.frame(t(count_table))
   input$Group <- outcome
   
-  res <- ANCOM(input, sig, multcorr, tau, theta, repeated) 
+  res <- ANCOM(input, ...) 
 
   df <- data.frame(Feature = rownames(count_table),
                    W = res[[1]],

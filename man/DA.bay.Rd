@@ -4,9 +4,32 @@
 \alias{DA.bay}
 \title{baySeq}
 \usage{
-DA.bay(count_table, outcome, p.adj)
+DA.bay(count_table, outcome, p.adj = "fdr", samplesize = 1e+05,
+  samplingSubset = NULL, equalDispersions = TRUE, estimation = "QL",
+  zeroML = FALSE, consensus = FALSE, ...)
+}
+\arguments{
+\item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
+
+\item{outcome}{Factor. The outcome of interest. E.g. case and control}
+
+\item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+
+\item{samplesize}{How large a sample should be taken in estimating the priors? Default 1e5}
+
+\item{samplingSubset}{If given, the priors will be sampled only from the subset specified. Default NULL}
+
+\item{equalDispersions}{Should we assume equal dispersions of data across all groups in the 'cD' object? Defaults to TRUE}
+
+\item{estimation}{Defaults to "QL", indicating quasi-likelihood estimation of priors. Currently, the only other possibilities are "ML", a maximum-likelihood method, and "edgeR", the moderated dispersion estimates produced by the 'edgeR' package}
+
+\item{zeroML}{Should parameters from zero data (rows that within a group are all zeros) be estimated using maximum likelihood methods (which will result in zeros in the parameters?}
+
+\item{consensus}{If TRUE, creates a consensus distribution rather than a separate distribution for each member of the groups structure in the 'cD' object}
+
+\item{...}{Additional arguments to the getLikelihoods function}
 }
 \description{
-From
+Implemented as in:
 https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8
 }

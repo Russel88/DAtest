@@ -4,17 +4,12 @@
 \alias{testDA}
 \title{Comparing differential abundance methods by FPR and AUC}
 \usage{
-testDA(count_table, predictor, R = 10, paired = NULL, relative = TRUE,
-  tests = c("anc", "per", "bay", "adx", "enn", "wil", "ttt", "ltt", "ltt2",
-  "neb", "erq", "ere", "msf", "zig", "ds2", "lim", "aov", "lao", "lao2", "kru",
-  "lrm", "llm", "llm2"), spikeMethod = "mult", effectSize = 2, k = c(5, 5,
-  5), cores = (detectCores() - 1), rng.seed = 123, p.adj = "fdr",
-  delta1 = 1, delta2 = 0.001, noOfIterations = 10000, margin = 50,
-  testStat = function(case, control) {     log((mean(case) + 1)/(mean(control)
-  + 1)) }, testStat.pair = function(case, control) {     mean(log((case +
-  1)/(control + 1))) }, mc.samples = 64, sig = 0.05, multcorr = 3,
-  tau = 0.02, theta = 0.1, repeated = FALSE, TMM.option = 1,
-  log.lim = FALSE, delta.lim = 1)
+testDA(count_table, predictor, R = 10, paired = NULL, tests = c("spe",
+  "anc", "per", "bay", "adx", "wil", "ttt", "ltt", "ltt2", "neb", "erq", "ere",
+  "msf", "zig", "ds2", "lim", "lli", "lli2", "aov", "lao", "lao2", "kru", "lrm",
+  "llm", "llm2", "rai"), relative = TRUE, spikeMethod = "mult",
+  effectSize = 2, k = c(5, 5, 5), cores = (detectCores() - 1),
+  rng.seed = 123, p.adj = "fdr", args = list(), verbose = FALSE)
 }
 \arguments{
 \item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
@@ -23,53 +18,27 @@ testDA(count_table, predictor, R = 10, paired = NULL, relative = TRUE,
 
 \item{R}{Integer. Number of times to run the tests. Default 10}
 
-\item{paired}{Factor. Subject ID for running paired analysis. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm" and "llm2"}
-
-\item{relative}{Logical. Should abundances be made relative? Only has effect for "ttt", "wil", "per", "aov", "kru" and "lim". Default TRUE}
+\item{paired}{Factor. Subject ID for running paired analysis. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli" and "lli2"}
 
 \item{tests}{Character. Which tests to include. Default all (See below for details)}
 
-\item{spikeMethod}{Character. Multiplicative ("mult") or additive ("add") spike-in. Default "mult". Use "add" if relative = TRUE}
+\item{relative}{Logical. Should abundances be made relative? Only has effect for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm" and "spe". Default TRUE}
+
+\item{spikeMethod}{Character. Multiplicative ("mult") or additive ("add") spike-in. Default "mult". Use "add" if count_table contains negative counts.}
 
 \item{effectSize}{Integer. The effect size for the spike-ins. Default 2}
 
 \item{k}{Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). k=c(5,10,15): 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default c(5,5,5)}
 
-\item{cores}{Integer. Number of cores to use for parallel computing. Default one less than available}
+\item{cores}{Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.}
 
 \item{rng.seed}{Numeric. Seed for reproducibility. Default 123}
 
 \item{p.adj}{Character. Method for pvalue adjustment. Default "fdr" (Does not affect AUC, FPR or Spike.detect.rate, these use raw p-values)}
 
-\item{delta1}{Numeric. The pseudocount for the log t.test/log ANOVA/llm method. Default 1}
+\item{args}{List. A list with lists of arguments passed to the different methods. See details for more.}
 
-\item{delta2}{Numeric. The pseudocount for the log t.test2/log ANOVA2/lmm2 method. Default 0.001}
-
-\item{noOfIterations}{Integer. How many iterations should be run for the permutation test. Default 10000}
-
-\item{margin}{Integer. The margin of when to stop iterating for non-significant Features for the permutation test. Default 50}
-
-\item{testStat}{Function. The test statistic function for the permutation test (also in output of ttt, ltt, ltt2 and wil). Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))}
-
-\item{testStat.pair}{Function. The test statistic function for the paired permutation test (also in output of ttt, ltt, ltt2 and wil). Should take two vectors as arguments. Default is a log fold change: mean(log((case abundances+1)/(control abundances+1)))}
-
-\item{mc.samples}{Integer. Monte Carlo samples for ALDEx2. Default 64}
-
-\item{sig}{Numeric. Alpha used in ANCOM. Default 0.05}
-
-\item{multcorr}{Integer. Correction used in ANCOM. Default 3 (no correction)}
-
-\item{tau}{Numeric. Tuning parameter for ANCOM. Default 0.02}
-
-\item{theta}{Numeric. Tuning parameter for ANCOM. Default 0.1}
-
-\item{repeated}{Logical. Are there repeated measures? Only for ANCOM. Default FALSE}
-
-\item{TMM.option}{1 or 2. For "enn". Option "1" is for an approach using the mean of the    effective library sizes as a reference library size in TMM normalization; option "2" represents an approach to regenerating counts with a common dispersion. Default 1}
-
-\item{log.lim}{Logical. For "lim". Should abundances be log transformed (before relative abundances if relative = TRUE). Default FALSE}
-
-\item{delta.lim}{Pseudocount for "lim" log transformation. Default 1}
+\item{verbose}{Logical. Print information during run}
 }
 \value{
 An object of class DA, which contains a list of results:
@@ -97,9 +66,10 @@ Currently implemented methods:
  \item msf - MetagenomeSeq feature model
  \item zig - MetagenomeSeq zero-inflated gaussian
  \item ds2 - DESeq2
- \item enn - ENNB: Two-stage procedure from https://cals.arizona.edu/~anling/software.htm
  \item anc - ANCOM. This test does not output pvalues; for comparison with the other methods, detected Features are set to a pvalue of 0, all else are set to 1.
  \item lim - LIMMA. Moderated linear models based on emperical bayes
+ \item lli - LIMMA, but reads are first transformed with log(abundance + delta1) then turned into relative abundances
+ \item lli2 - LIMMA, but with relative abundances transformed with log(relative abundance + delta2)
  \item kru - Kruskal-Wallis on relative abundances
  \item aov - ANOVA on relative abundances
  \item lao - ANOVA, but reads are first transformed with log(abundance + delta1) then turned into relative abundances
@@ -107,8 +77,47 @@ Currently implemented methods:
  \item lrm - Linear regression on relative abundances
  \item llm - Linear regression, but reads are first transformed with log(abundance + delta1) then turned into relative abundances
  \item llm2 - Linear regression, but with relative abundances transformed with log(relative abundance + delta2)
+ \item rai - RAIDA
+ \item spe - Spearman correlation
 }
 Is it too slow? Remove "anc" from test argument.
+"neb" is slow if there is a paired argument.
 
 "per" is also somewhat slow, but is usually one of the methods performing well with large sample sizes.
+
+Additional arguments can be passed to the internal functions with the "args" argument. 
+It should be structured as a list with elements named by the tests: 
+E.g. passing to the DA.per function that it should only run 1000 iterations: args = list(per=list(noOfIterations=1000)).
+Include that the log t.test should use a pseudocount of 0.1: args = list(per=list(noOfIterations=1000), ltt=list(delta=0.1)). 
+Additional arguments are simply seperated by commas.
+
+Below is an overview of which functions get the arguments that are passed to a specific test
+\itemize{
+ \item per - Passed to DA.per
+ \item bay - Passed to getPriors and getLikelihoods
+ \item adx - Passed to aldex
+ \item wil - Passed to wilcox.test and DA.wil
+ \item ttt - Passed to t.test and DA.ttt
+ \item ltt - Passed to t.test and DA.ltt
+ \item ltt2 - Passed to t.test and DA.ltt2
+ \item neb - Passed to glm.nb and glmer.nb
+ \item erq - Passed to exactTest
+ \item ere - Passed to glmQLFit
+ \item msf - Passed to fitFeatureModel
+ \item zig - Passed to fitZig
+ \item ds2 - Passed to DESeq
+ \item anc - Passed to ANCOM
+ \item lim - Passed to eBayes
+ \item lli - Passed to eBayes
+ \item lli2 - Passed to eBayes
+ \item kru - Passed to kruskal.test
+ \item aov - Passed to aov
+ \item lao - Passed to aov
+ \item lao2 - Passed to aov
+ \item lrm - Passed to lm and lme
+ \item llm - Passed to lm and lme
+ \item llm2 - Passed to lm and lme
+ \item rai - Passed to raida
+ \item spe - Passed to cor.test
+}
 }

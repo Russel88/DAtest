@@ -1,11 +1,19 @@
-#' Wilcox test
+#' Wilcoxon Rank Sum and Signed Rank Test
 
+#' @param count_table Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns
+#' @param outcome Factor. The outcome of interest. E.g. case and control
+#' @param paired Factor. Subject ID for running paired analysis
+#' @param relative Logical. Should count_table be normalized to relative abundances. Default TRUE
+#' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
+#' @param testStat Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))
+#' @param testStat.pair Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: mean(log((case abundances+1)/(control abundances+1)))
+#' @param ... Additional arguments for the wilcox.test function
 #' @export
 
-DA.wil <- function(count_table, outcome, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))}, paired = NULL, p.adj, relative = TRUE){
+DA.wil <- function(count_table, outcome, paired = NULL, relative = TRUE, p.adj = "fdr", testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))}, ...){
  
   wil <- function(x){
-    tryCatch(wilcox.test(x ~ outcome)$p.value, error = function(e){NA}) 
+    tryCatch(wilcox.test(x ~ outcome, ...)$p.value, error = function(e){NA}) 
   }
 
   if(!is.null(paired)){
@@ -13,7 +21,7 @@ DA.wil <- function(count_table, outcome, testStat = function(case,control){log((
     outcome <- outcome[order(paired)]
     testStat <- testStat.pair
     wil <- function(x){
-      tryCatch(wilcox.test(x ~ outcome, paired = TRUE)$p.value, error = function(e){NA}) 
+      tryCatch(wilcox.test(x ~ outcome, paired = TRUE, ...)$p.value, error = function(e){NA}) 
     }
   }
   

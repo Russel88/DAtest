@@ -4,8 +4,22 @@
 \alias{DA.lrm}
 \title{Linear regression}
 \usage{
-DA.lrm(count_table, outcome, paired = NULL, p.adj)
+DA.lrm(count_table, outcome, paired = NULL, relative = TRUE,
+  p.adj = "fdr", ...)
+}
+\arguments{
+\item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
+
+\item{outcome}{Factor. The outcome of interest. E.g. case and control}
+
+\item{paired}{Factor. Subject ID for running paired analysis}
+
+\item{relative}{Logical. Should count_table be normalized to relative abundances. Default TRUE}
+
+\item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+
+\item{...}{Additional arguments for the lm/lme functions}
 }
 \description{
-Linear regression
+Mixed-effect model is a paired argument is present, with the paired variable as random intercept
 }

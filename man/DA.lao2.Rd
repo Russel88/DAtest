@@ -2,10 +2,21 @@
 % Please edit documentation in R/DA.lao2.R
 \name{DA.lao2}
 \alias{DA.lao2}
-\title{Log ANOVA 2}
+\title{ANOVA}
 \usage{
-DA.lao2(count_table, outcome, delta = 0.001, p.adj)
+DA.lao2(count_table, outcome, p.adj = "fdr", delta = 0.001, ...)
+}
+\arguments{
+\item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
+
+\item{outcome}{Factor. The outcome of interest. E.g. case and control}
+
+\item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+
+\item{delta}{Numeric. Pseudocount for the log transformation. Default 0.001}
+
+\item{...}{Additional arguments for the aov functions}
 }
 \description{
-Log ANOVA 2
+With log transformation of relative abundances.
 }

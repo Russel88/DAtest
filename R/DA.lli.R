@@ -1,5 +1,6 @@
 #' LIMMA
 #'
+#' With log transformation for counts before normalization.
 #' Some implementation is borrowed from:
 #' http://www.biostat.jhsph.edu/~kkammers/software/eupa/R_guide.html
 #' @param count_table Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns
@@ -7,21 +8,20 @@
 #' @param paired Factor. Subject ID for running paired analysis
 #' @param relative Logical. Should count_table be normalized to relative abundances. Default TRUE
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
+#' @param delta Numeric. Pseudocount for log transformation. Default 1
 #' @export
 
-DA.lim <- function(count_table, outcome, paired = NULL, relative = TRUE, p.adj = "fdr", ...){
+DA.lli <- function(count_table, outcome, paired = NULL, relative = TRUE, p.adj = "fdr", delta = 1, ...){
   
   library(limma, quietly = TRUE)
   
-  if(relative){
-    count.rel <- apply(count_table,2,function(x) x/sum(x))
-  } else {
-    count.rel <- count_table
-  }
+  count_table <- log(count_table + delta)
+  
+  if(relative) count_table <- apply(count_table,2,function(x) x/sum(x))
   
   if(is.null(paired)) design <- model.matrix(~outcome) else design <- model.matrix(~as.factor(paired)+outcome)
-  n <- dim(count.rel)[1]
-  fit <- lmFit(count.rel, design)
+  n <- dim(count_table)[1]
+  fit <- lmFit(count_table, design)
   fit.eb <- eBayes(fit, ...)
   if(is.null(paired)) Estimate <- fit.eb$coefficients else Estimate <- fit.eb$coefficients[,c(1,(length(levels(as.factor(paired)))+1):ncol(fit.eb$coefficients))]
   df.residual <- fit.eb$df.residual
@@ -34,7 +34,7 @@ DA.lim <- function(count_table, outcome, paired = NULL, relative = TRUE, p.adj =
   pval.adj <- p.adjust(pval, method = p.adj)
   res <- data.frame(Estimate, t.stat, pval, pval.adj, df.residual, df.prior, s2.prior, s2, s2.post)
   res$Feature <- rownames(res)
-  res$Method <- "LIMMA"
+  res$Method <- "Log LIMMA"
 
   return(res)  
 }

@@ -1,14 +1,23 @@
-#' Permutation test
+#' Permutation test of user-defined test statistic
 #'
 #' Modified version of the one from:
 #' https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8.
 #' P-values are now two-sided, and test statistic is a simple log fold change
 #' 
 #' A paired permutation test is implemented specifically for this package. The test is similar to the original, but with a different test statistic and permutation scheme. The permutations are constrained in the paired version such that the outcome is only permuted within each level of the paired argument (e.g. subjects). The test statistic first finds the log-ratio between the two outcome levels (e.g. case and control) for each level of the paired argument and the final statistic is the mean of these log-ratios.
-
+#' 
+#' @param count_table Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns
+#' @param outcome Factor. The outcome of interest. E.g. case and control
+#' @param paired Factor. Subject ID for running paired analysis
+#' @param relative Logical. Should count_table be normalized to relative abundances. Default TRUE
+#' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
+#' @param testStat Function. Function for the test statistic. Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))
+#' @param testStat.pair Function. Function for test statistc for paired analysis. Should take two vectors as arguments. Default is a log fold change: mean(log((case abundances+1)/(control abundances+1)))
+#' @param noOfIterations Integer. Iterations for permutations. Default 10000
+#' @param margin Numeric. Margin for when to stop iterations if p-value is high and unlikely to become low
 #' @export
 
-DA.per <- function(count_table, outcome, paired = NULL, noOfIterations = 10000, seed = as.numeric(Sys.time()), margin = 50, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))}, p.adj, relative = TRUE){
+DA.per <- function(count_table, outcome, paired = NULL, relative = TRUE, p.adj = "fdr", testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))}, noOfIterations = 10000, margin = 50){
 
   if(!is.null(paired)){
     count_table <- count_table[,order(paired)]
@@ -23,7 +32,6 @@ DA.per <- function(count_table, outcome, paired = NULL, noOfIterations = 10000, 
     count.rel <- count_table
   }
   
-  set.seed(seed)
   nullStatList <- list()
   
   # Create shuffled outcomes

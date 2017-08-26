@@ -4,8 +4,14 @@
 \alias{DA.anc}
 \title{ANCOM}
 \usage{
-DA.anc(count_table, outcome, sig = 0.05, multcorr = 3, tau = 0.02,
-  theta = 0.1, repeated = FALSE)
+DA.anc(count_table, outcome, ...)
+}
+\arguments{
+\item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
+
+\item{outcome}{Factor. The outcome of interest. E.g. case and control}
+
+\item{...}{Additional arguments for the ANCOM function}
 }
 \description{
 ANCOM

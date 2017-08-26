@@ -1,10 +1,10 @@
 Package: DAtest
 Title: Comparing Differential Abundance methods
-Version: 0.0.0.9000
+Version: 1.0.0
 Authors@R: person("Jakob", "Russel", email = "russel2620@gmail.com", role = c("aut", "cre"))
 Description: What the title says.
 Depends: R (>= 3.2.5)
-Imports: foreach, doSNOW, snow, MASS, glmnet, pROC, ggplot2, cowplot, lme4
+Imports: foreach, doSNOW, snow, MASS, pROC, ggplot2, cowplot, lme4, nlme
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true

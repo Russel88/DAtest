@@ -4,10 +4,21 @@
 \alias{DA.ds2}
 \title{DESeq2}
 \usage{
-DA.ds2(count_table, outcome, paired = NULL, p.adj)
+DA.ds2(count_table, outcome, paired = NULL, p.adj = "fdr", ...)
+}
+\arguments{
+\item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
+
+\item{outcome}{Factor. The outcome of interest. E.g. case and control}
+
+\item{paired}{Factor. Subject ID for running paired analysis}
+
+\item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+
+\item{...}{Additional arguments for the DESeq function}
 }
 \description{
-From:
-https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8
+Implemented as in:
+https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8.
 Manual geometric means calculated to avoid errors, see https://github.com/joey711/phyloseq/issues/387
 }

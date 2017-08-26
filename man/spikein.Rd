@@ -5,9 +5,25 @@
 \title{Spike-in}
 \usage{
 spikein(count_table, outcome, spikeMethod = "mult", effectSize = 2, k,
-  relative = TRUE, num.pred = FALSE)
+  num.pred = FALSE)
+}
+\arguments{
+\item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
+
+\item{outcome}{Factor or Numeric. The outcome of interest. E.g. case and control. If the predictor has more than two levels, only the 2. level will be spiked. If the predictor is numeric it will be treated as such in the analyses}
+
+\item{spikeMethod}{Character. Multiplicative ("mult") or additive ("add") spike-in. Default "mult". Use "add" if there are negative values in count_table}
+
+\item{effectSize}{Integer. The effect size for the spike-ins. Default 2}
+
+\item{k}{Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). k=c(5,10,15): 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default c(5,5,5)}
+
+\item{num.pred}{Logical. Is the outcome numeric? Default FALSE}
 }
 \description{
+Internal function for the testDA function.
+}
+\details{
 Modified version of the one from:
-https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8
+https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8.
 }

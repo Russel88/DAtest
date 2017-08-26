@@ -4,7 +4,18 @@
 \alias{DA.erq}
 \title{EdgeR quasi-likelihood}
 \usage{
-DA.erq(count_table, outcome, paired = NULL, p.adj)
+DA.erq(count_table, outcome, paired = NULL, p.adj = "fdr", ...)
+}
+\arguments{
+\item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
+
+\item{outcome}{Factor. The outcome of interest. E.g. case and control}
+
+\item{paired}{Factor. Subject ID for running paired analysis}
+
+\item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+
+\item{...}{Additional arguments for the glmQLFit function}
 }
 \description{
 EdgeR quasi-likelihood

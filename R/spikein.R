@@ -1,15 +1,22 @@
 #' Spike-in
 #'
+#' Internal function for the testDA function.
+#' 
 #' Modified version of the one from:
-#' https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8
-
+#' https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8.
+#' 
+#' @param count_table Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns
+#' @param outcome Factor or Numeric. The outcome of interest. E.g. case and control. If the predictor has more than two levels, only the 2. level will be spiked. If the predictor is numeric it will be treated as such in the analyses
+#' @param spikeMethod Character. Multiplicative ("mult") or additive ("add") spike-in. Default "mult". Use "add" if there are negative values in count_table
+#' @param effectSize Integer. The effect size for the spike-ins. Default 2
+#' @param k Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). k=c(5,10,15): 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default c(5,5,5)
+#' @param num.pred Logical. Is the outcome numeric? Default FALSE
 #' @export
 
-spikein <- function(count_table, outcome, spikeMethod = "mult", effectSize = 2, k, relative = TRUE, num.pred = FALSE){
+spikein <- function(count_table, outcome, spikeMethod = "mult", effectSize = 2, k, num.pred = FALSE){
   
-  if(relative == FALSE & spikeMethod == "mult") stop("Cannot use multiplicative spike-in if relative is FALSE")
   if(num.pred == TRUE & spikeMethod == "add") stop("Cannot use additive spike-in if predictor is numeric")
-  
+  if(effectSize < 0) stop("Effect size should be positive")
   if(effectSize == 1) spikeMethod <- "none"
   
   count_table <- as.data.frame(count_table)

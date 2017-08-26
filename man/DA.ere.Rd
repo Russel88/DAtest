@@ -2,11 +2,20 @@
 % Please edit documentation in R/DA.ere.R
 \name{DA.ere}
 \alias{DA.ere}
-\title{EdgeR}
+\title{EdgeR exact test}
 \usage{
-DA.ere(count_table, outcome, p.adj)
+DA.ere(count_table, outcome, p.adj = "fdr", ...)
+}
+\arguments{
+\item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
+
+\item{outcome}{Factor. The outcome of interest. E.g. case and control}
+
+\item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+
+\item{...}{Additional arguments for the exactTest function}
 }
 \description{
-From:
+Implemented as in:
 https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8
 }

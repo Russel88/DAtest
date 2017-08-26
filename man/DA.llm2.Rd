@@ -2,10 +2,27 @@
 % Please edit documentation in R/DA.llm2.R
 \name{DA.llm2}
 \alias{DA.llm2}
-\title{Linear regression - log #2}
+\title{Linear regression}
 \usage{
-DA.llm2(count_table, outcome, paired = NULL, p.adj, delta = 0.001)
+DA.llm2(count_table, outcome, paired = NULL, p.adj = "fdr", delta = 0.001,
+  ...)
+}
+\arguments{
+\item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
+
+\item{outcome}{Factor. The outcome of interest. E.g. case and control}
+
+\item{paired}{Factor. Subject ID for running paired analysis}
+
+\item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+
+\item{delta}{Numeric. Pseudocount for the log transformation. Default 0.001}
+
+\item{...}{Additional arguments for the lm/lme functions}
+
+\item{relative}{Logical. Should count_table be normalized to relative abundances. Default TRUE}
 }
 \description{
-Linear regression - log #2
+With log transformation of relative abundances.
+Mixed-effect model is used when a paired argument is included, with the paired variable as a random intercept.
 }

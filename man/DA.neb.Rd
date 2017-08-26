@@ -4,8 +4,20 @@
 \alias{DA.neb}
 \title{Negative binomial glm}
 \usage{
-DA.neb(count_table, outcome, paired = NULL, p.adj)
+DA.neb(count_table, outcome, paired = NULL, p.adj = "fdr", ...)
+}
+\arguments{
+\item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
+
+\item{outcome}{Factor. The outcome of interest. E.g. case and control}
+
+\item{paired}{Factor. Subject ID for running paired analysis}
+
+\item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+
+\item{...}{Additional arguments for the glm.nb/glmer.nb functions}
 }
 \description{
-Negative binomial glm
+With log(librarySize) as offset.
+Mixed-effect model is used when a paired argument is included, with the paired variable as a random intercept.
 }

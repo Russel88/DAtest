@@ -4,7 +4,18 @@
 \alias{DA.aov}
 \title{ANOVA}
 \usage{
-DA.aov(count_table, outcome, p.adj, relative)
+DA.aov(count_table, outcome, relative = TRUE, p.adj = "fdr", ...)
+}
+\arguments{
+\item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
+
+\item{outcome}{Factor. The outcome of interest. E.g. case and control}
+
+\item{relative}{Logical. Should count_table be normalized to relative abundances. Default TRUE}
+
+\item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+
+\item{...}{Additional arguments for the aov function}
 }
 \description{
 ANOVA

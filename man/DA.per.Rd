@@ -2,13 +2,32 @@
 % Please edit documentation in R/DA.per.R
 \name{DA.per}
 \alias{DA.per}
-\title{Permutation test}
+\title{Permutation test of user-defined test statistic}
 \usage{
-DA.per(count_table, outcome, paired = NULL, noOfIterations = 10000,
-  seed = as.numeric(Sys.time()), margin = 50, testStat = function(case,
-  control) {     log((mean(case) + 1)/(mean(control) + 1)) },
-  testStat.pair = function(case, control) {     mean(log((case + 1)/(control +
-  1))) }, p.adj, relative = TRUE)
+DA.per(count_table, outcome, paired = NULL, relative = TRUE,
+  p.adj = "fdr", testStat = function(case, control) {     log((mean(case) +
+  1)/(mean(control) + 1)) }, testStat.pair = function(case, control) {    
+  mean(log((case + 1)/(control + 1))) }, noOfIterations = 10000,
+  margin = 50)
+}
+\arguments{
+\item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
+
+\item{outcome}{Factor. The outcome of interest. E.g. case and control}
+
+\item{paired}{Factor. Subject ID for running paired analysis}
+
+\item{relative}{Logical. Should count_table be normalized to relative abundances. Default TRUE}
+
+\item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+
+\item{testStat}{Function. Function for the test statistic. Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))}
+
+\item{testStat.pair}{Function. Function for test statistc for paired analysis. Should take two vectors as arguments. Default is a log fold change: mean(log((case abundances+1)/(control abundances+1)))}
+
+\item{noOfIterations}{Integer. Iterations for permutations. Default 10000}
+
+\item{margin}{Numeric. Margin for when to stop iterations if p-value is high and unlikely to become low}
 }
 \description{
 Modified version of the one from:

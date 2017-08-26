@@ -4,7 +4,14 @@
 \alias{DA.adx}
 \title{Aldex t.test and wilcox}
 \usage{
-DA.adx(count_table, outcome, mc.samples = 128, p.adj)
+DA.adx(count_table, outcome, ...)
+}
+\arguments{
+\item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
+
+\item{outcome}{Factor. The outcome of interest. E.g. case and control}
+
+\item{...}{Additional arguments for the aldex function}
 }
 \description{
 Aldex t.test and wilcox

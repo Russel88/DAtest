@@ -2,10 +2,24 @@
 % Please edit documentation in R/DA.lao.R
 \name{DA.lao}
 \alias{DA.lao}
-\title{Log ANOVA}
+\title{ANOVA}
 \usage{
-DA.lao(count_table, outcome, delta = 1, p.adj)
+DA.lao(count_table, outcome, relative = TRUE, p.adj = "fdr", delta = 1,
+  ...)
+}
+\arguments{
+\item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
+
+\item{outcome}{Factor. The outcome of interest. E.g. case and control}
+
+\item{relative}{Logical. Should count_table be normalized to relative abundances. Default TRUE}
+
+\item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+
+\item{delta}{Numeric. Pseudocount for the log transformation. Default 1}
+
+\item{...}{Additional arguments for the aov functions}
 }
 \description{
-Log ANOVA
+With log transformation of counts before normalization.
 }
