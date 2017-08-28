@@ -5,16 +5,31 @@ This is a package for comparing different differential abundance methods
 used in microbial marker-gene (e.g. 16S rRNA), RNA-seq and protein
 abundance analysis.
 
+There are many methods for testing differential abundance and no golden
+standard, but results can vary a lot between the different statistical
+methods. The false positive rate and the power of the different methods
+highly depends on the dataset. This package aims at aiding the analyst
+in choosing a method based on empirical testing.
+
 The method goes as follows:
 
--   Shuffle predictor variable
--   Spike in data for some randomly chosen features, such that they are
-    associated with the shuffled predictor
+-   Shuffle predictor variable (E.g. case vs. control)
+-   Spike in data for some randomly chosen features (OTU/gene/protein),
+    such that they are associated with the shuffled predictor
 -   Apply methods, and check:
     -   whether they can find the spike-ins
     -   whether the false positive rate is controlled
 
-Many scripts, including the spike-in for estimating AUC, is borrowed
+#### The workflow (details can be found below):
+
+-   Compare methods with testDA function
+    -   Check the results with `plot` or `summary`
+    -   Choose method that has high AUC and FPR not higher than ~0.05
+-   Run data with the chosen test with DA."test" function, where "test"
+    is the name of the test (see details with ?testDA)
+    -   Check out your final results. Done!
+
+Some scripts, including the spike-in for estimating AUC, is borrowed
 from: [Thorsen J, Brejnrod A et al. Large-scale benchmarking reveals
 false discoveries and count transformation sensitivity in 16S rRNA gene
 amplicon data analysis methods used in microbiome studies. *Microbiome*
@@ -100,8 +115,8 @@ Medians for each method:
 
     summary(mytest, sort = "AUC")
 
-How to run real data:
----------------------
+How to run real (unshuffled) data:
+----------------------------------
 
 All tests can easily be run with the original data. E.g. edgeR exact
 test:
@@ -128,7 +143,8 @@ Implemented methods:
     [baySeq](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-11-422)
 -   adx - [ALDEx t-test and
     wilcoxon](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0067019)
--   wil - Wilcoxon Rank Sum on relative abundances
+-   wil - Wilcoxon Rank Sum on relative abundances (Paired is a Wilcoxon
+    Signed Rank test)
 -   ttt - Welch t.test on relative abundances
 -   ltt - Welch t.test, but reads are first transformed with
     log(abundance + delta) then turned into relative abundances
@@ -153,13 +169,24 @@ Implemented methods:
 -   anc - [ANCOM](https://www.ncbi.nlm.nih.gov/pubmed/26028277)
 -   lim -
     [LIMMA](https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true)
+    (The paired version is a model with the paired variable
+    as covariate)
+-   lli -
+    [LIMMA](https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true),
+    but reads are first transformed with log(abundance + delta) then
+    turned into relative abundances
+-   lli2 -
+    [LIMMA](https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true),
+    but with relative abundances transformed with log(relative
+    abundance + delta)
 -   kru - Kruskal-Wallis test on relative abundances
 -   aov - ANOVA on relative abundances
 -   lao - ANOVA, but reads are first transformed with log(abundance +
     delta) then turned into relative abundances
 -   lao2 - ANOVA, but with relative abundances transformed with
     log(relative abundance + delta)
--   lrm - Linear regression on relative abundances
+-   lrm - Linear regression on relative abundances (The paired version
+    is a mixed-effect model)
 -   llm - Linear regression, but reads are first transformed with
     log(abundance + delta) then turned into relative abundances
 -   llm2 - Linear regression, but with relative abundances transformed
@@ -182,16 +209,15 @@ these log-ratios.
 Extra features
 --------------
 
-Plot the p-value distributions. Raw p-values should have a uniform
-(flat) distribution between 0 and 1.
+#### Plot the p-value distributions. Raw p-values should in theory have a uniform (flat) distribution between 0 and 1.
 
     plot(mytest, p = TRUE)
 
-Results from all the runs:
+#### Results from all the runs:
 
     print(mytest)
 
-See the output from the individual methods. E.g. "ere" first run:
+#### See the output from the individual methods. E.g. "ere" first run:
 
     View(mytest$results[[1]]["ere"])
 
