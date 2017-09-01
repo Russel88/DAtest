@@ -5,7 +5,7 @@
 \title{Spike-in}
 \usage{
 spikein(count_table, outcome, spikeMethod = "mult", effectSize = 2, k,
-  num.pred = FALSE)
+  num.pred = FALSE, relative = TRUE)
 }
 \arguments{
 \item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
@@ -19,6 +19,8 @@ spikein(count_table, outcome, spikeMethod = "mult", effectSize = 2, k,
 \item{k}{Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). k=c(5,10,15): 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default c(5,5,5)}
 
 \item{num.pred}{Logical. Is the outcome numeric? Default FALSE}
+
+\item{relative}{Logical. Are abundances relative? Default TRUE}
 }
 \description{
 Internal function for the testDA function.

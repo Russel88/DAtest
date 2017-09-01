@@ -5,11 +5,11 @@
 \title{Comparing differential abundance methods by FPR and AUC}
 \usage{
 testDA(count_table, predictor, R = 10, paired = NULL, tests = c("spe",
-  "anc", "per", "bay", "adx", "wil", "ttt", "ltt", "ltt2", "neb", "erq", "ere",
-  "msf", "zig", "ds2", "lim", "lli", "lli2", "aov", "lao", "lao2", "kru", "lrm",
-  "llm", "llm2", "rai"), relative = TRUE, spikeMethod = "mult",
-  effectSize = 2, k = c(5, 5, 5), cores = (detectCores() - 1),
-  rng.seed = 123, p.adj = "fdr", args = list(), verbose = FALSE)
+  "per", "bay", "adx", "wil", "ttt", "ltt", "ltt2", "neb", "erq", "ere", "msf",
+  "zig", "ds2", "lim", "lli", "lli2", "aov", "lao", "lao2", "kru", "lrm", "llm",
+  "llm2", "rai"), relative = TRUE, spikeMethod = "mult", effectSize = 2,
+  k = c(5, 5, 5), cores = (detectCores() - 1), rng.seed = 123,
+  p.adj = "fdr", args = list(), verbose = FALSE)
 }
 \arguments{
 \item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
@@ -66,7 +66,6 @@ Currently implemented methods:
  \item msf - MetagenomeSeq feature model
  \item zig - MetagenomeSeq zero-inflated gaussian
  \item ds2 - DESeq2
- \item anc - ANCOM. This test does not output pvalues; for comparison with the other methods, detected Features are set to a pvalue of 0, all else are set to 1.
  \item lim - LIMMA. Moderated linear models based on emperical bayes
  \item lli - LIMMA, but reads are first transformed with log(abundance + delta1) then turned into relative abundances
  \item lli2 - LIMMA, but with relative abundances transformed with log(relative abundance + delta2)
@@ -80,8 +79,7 @@ Currently implemented methods:
  \item rai - RAIDA
  \item spe - Spearman correlation
 }
-Is it too slow? Remove "anc" from test argument.
-"neb" is slow if there is a paired argument.
+"neb" can be slow if there is a paired argument.
 
 "per" is also somewhat slow, but is usually one of the methods performing well with large sample sizes.
 
@@ -106,7 +104,6 @@ Below is an overview of which functions get the arguments that are passed to a s
  \item msf - Passed to fitFeatureModel
  \item zig - Passed to fitZig
  \item ds2 - Passed to DESeq
- \item anc - Passed to ANCOM
  \item lim - Passed to eBayes
  \item lli - Passed to eBayes
  \item lli2 - Passed to eBayes

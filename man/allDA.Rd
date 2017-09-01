@@ -4,9 +4,9 @@
 \alias{allDA}
 \title{Run many differential abundance methods}
 \usage{
-allDA(count_table, predictor, paired = NULL, tests = c("spe", "anc", "per",
-  "bay", "adx", "wil", "ttt", "ltt", "ltt2", "neb", "erq", "ere", "msf", "zig",
-  "ds2", "lim", "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "rai"),
+allDA(count_table, predictor, paired = NULL, tests = c("spe", "per", "bay",
+  "adx", "wil", "ttt", "ltt", "ltt2", "neb", "erq", "ere", "msf", "zig", "ds2",
+  "lim", "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "rai"),
   relative = TRUE, cores = (detectCores() - 1), rng.seed = 123,
   p.adj = "fdr", args = list(), verbose = TRUE)
 }
@@ -57,7 +57,6 @@ Currently implemented methods:
  \item msf - MetagenomeSeq feature model
  \item zig - MetagenomeSeq zero-inflated gaussian
  \item ds2 - DESeq2
- \item anc - ANCOM. This test does not output pvalues; for comparison with the other methods, detected Features are set to a pvalue of 0, all else are set to 1.
  \item lim - LIMMA. Moderated linear models based on emperical bayes
  \item kru - Kruskal-Wallis on relative abundances
  \item aov - ANOVA on relative abundances
@@ -91,7 +90,6 @@ Below is an overview of which functions get the arguments that are passed to a s
  \item msf - Passed to fitFeatureModel
  \item zig - Passed to fitZig
  \item ds2 - Passed to DESeq
- \item anc - Passed to ANCOM
  \item lim - Passed to eBayes
  \item lli - Passed to eBayes
  \item lli2 - Passed to eBayes

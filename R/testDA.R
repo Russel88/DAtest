@@ -30,7 +30,6 @@
 #'  \item msf - MetagenomeSeq feature model
 #'  \item zig - MetagenomeSeq zero-inflated gaussian
 #'  \item ds2 - DESeq2
-#'  \item anc - ANCOM. This test does not output pvalues; for comparison with the other methods, detected Features are set to a pvalue of 0, all else are set to 1.
 #'  \item lim - LIMMA. Moderated linear models based on emperical bayes
 #'  \item lli - LIMMA, but reads are first transformed with log(abundance + delta1) then turned into relative abundances
 #'  \item lli2 - LIMMA, but with relative abundances transformed with log(relative abundance + delta2)
@@ -44,8 +43,7 @@
 #'  \item rai - RAIDA
 #'  \item spe - Spearman correlation
 #' }
-#' Is it too slow? Remove "anc" from test argument.
-#' "neb" is slow if there is a paired argument.
+#' "neb" can be slow if there is a paired argument.
 #' 
 #' "per" is also somewhat slow, but is usually one of the methods performing well with large sample sizes.
 #' 
@@ -70,7 +68,6 @@
 #'  \item msf - Passed to fitFeatureModel
 #'  \item zig - Passed to fitZig
 #'  \item ds2 - Passed to DESeq
-#'  \item anc - Passed to ANCOM
 #'  \item lim - Passed to eBayes
 #'  \item lli - Passed to eBayes
 #'  \item lli2 - Passed to eBayes
@@ -94,12 +91,15 @@
 #' @importFrom parallel detectCores
 #' @export
 
-testDA <- function(count_table, predictor, R = 10, paired = NULL, tests = c("spe","anc","per","bay","adx","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, spikeMethod = "mult", effectSize = 2, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), verbose = FALSE){
+testDA <- function(count_table, predictor, R = 10, paired = NULL, tests = c("spe","per","bay","adx","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, spikeMethod = "mult", effectSize = 2, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), verbose = FALSE){
 
   library(foreach, quietly = TRUE)
   
+  # Coerce data
+  if(!is.null(paired)) paired <- as.factor(paired)
+  count_table <- as.matrix(count_table)
+  
   # Checks
-  if(min(count_table) < 0 & is.numeric(predictor)) stop("Numeric predictor and negative values in count_table is currently not supported")
   if(min(count_table) < 0 & spikeMethod == "mult") stop("Additive spike-in should be used when count_table contains negative values")
   if(sum(colSums(count_table) == 0) > 0) stop("Some samples are empty!")
   if(ncol(count_table) != length(predictor)) stop("Number of samples in count_table does not match length of predictor")
@@ -113,13 +113,12 @@ testDA <- function(count_table, predictor, R = 10, paired = NULL, tests = c("spe
   if(!"edgeR" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("ere","erq")]
   if(!"metagenomeSeq" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("msf","zig")]
   if(!"DESeq2" %in% rownames(installed.packages())) tests <- tests[tests != "ds2"]
-  if(!"ancom.R" %in% rownames(installed.packages())) tests <- tests[tests != "anc"]  
   if(!"limma" %in% rownames(installed.packages())) tests <- tests[tests != "lim"]
   if(!"RAIDA" %in% rownames(installed.packages())) tests <- tests[tests != "rai"]
-  
+
   # Excluded tests that do not work with a paired argument
   if(!is.null(paired)){
-    tests <- tests[!tests %in% c("bay","adx","anc","ere","msf","zig","aov","lao","lao2","kru","rai","spe")]
+    tests <- tests[!tests %in% c("bay","adx","ere","msf","zig","aov","lao","lao2","kru","rai","spe")]
   } 
   
   # Only include some tests if there are more than two levels in predictor
@@ -140,7 +139,7 @@ testDA <- function(count_table, predictor, R = 10, paired = NULL, tests = c("spe
   
   # Exclude if relative is false
   if(relative == FALSE){
-    tests <- tests[!tests %in% c("ltt2","neb","erq","ere","msf","zig","bay","ds2","adx","anc","lli2","lao2","llm2","rai")]
+    tests <- tests[!tests %in% c("ltt2","neb","erq","ere","msf","zig","bay","ds2","adx","lli2","lao2","llm2","rai")]
   }
   
   if(verbose){
@@ -178,7 +177,7 @@ testDA <- function(count_table, predictor, R = 10, paired = NULL, tests = c("spe
     } else {
       num.pred <- FALSE
     }
-    spiked <- spikein(count_table, rand, spikeMethod, effectSize,  k, num.pred)
+    spiked <- spikein(count_table, rand, spikeMethod, effectSize,  k, num.pred, relative)
     count_table <- spiked[[1]]
     
     ### Run tests
@@ -222,7 +221,6 @@ testDA <- function(count_table, predictor, R = 10, paired = NULL, tests = c("spe
                         per = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired, relative, p.adj),per.args)),
                         bay = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired, p.adj),bay.args)),
                         adx = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand),adx.args)),
-                        anc = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand),anc.args)),
                         lim = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired,relative,p.adj),lim.args)),
                         lli = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired,relative,p.adj),lli.args)),
                         lli2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired,p.adj),lli2.args)),
@@ -262,7 +260,7 @@ testDA <- function(count_table, predictor, R = 10, paired = NULL, tests = c("spe
       results <- c(results,list(adx.t),list(adx.w))
       names(results) <- c(res.names,"adx.t","adx.w")
     }
-
+    
     # Insert spiked column
     newnames <- names(results)
     results <- foreach(rsp = 1:length(results)) %do% {

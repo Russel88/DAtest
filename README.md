@@ -24,10 +24,12 @@ The method goes as follows:
 
 -   Compare methods with testDA function
     -   Check the results with `plot` or `summary`
-    -   Choose method that has high AUC and FPR not higher than ~0.05
+    -   Choose method that has high AUC, and FPR not higher than ~0.05
 -   Run data with the chosen test with DA."test" function, where "test"
     is the name of the test (see details with ?testDA)
     -   Check out your final results. Done!
+
+### Citation
 
 Some scripts, including the spike-in for estimating AUC, is borrowed
 from: [Thorsen J, Brejnrod A et al. Large-scale benchmarking reveals
@@ -35,8 +37,18 @@ false discoveries and count transformation sensitivity in 16S rRNA gene
 amplicon data analysis methods used in microbiome studies. *Microbiome*
 (2016)](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8)
 
-Installation of packages
-------------------------
+Overview of this tutorial
+-------------------------
+
+-   [Installation of packages](#install)
+-   [How to compare methods](#how)
+-   [How to run real (unshuffled) data](#real)
+-   [Implemented methods](#methods)
+-   [Extra features](#extra)
+-   [Errors and issues](#errors)
+
+[Installation of packages](#install)
+------------------------------------
 
     library(devtools)
     install_github("Russel88/DAtest")
@@ -53,20 +65,17 @@ But the package will work without them
     biocLite("ALDEx2")
     biocLite("limma")
 
--   ANCOM has to be installed from an
-    [external source.](https://www.niehs.nih.gov/research/resources/software/biostatistics/ancom/index.cfm)
-    -   It depends on: shiny, doParallel, methods, stringr,
-        exactRankTests and openxlsx
 -   RAIDA has to be installed from an
     [external source.](https://cals.arizona.edu/~anling/software/)
     -   It depends on: MASS, protoclust, qvalue (biocLite("qvalue")) and
         limma (biocLite("limma"))
 
-How to compare methods:
------------------------
+[How to compare methods:](#how)
+-------------------------------
 
-First, all methods with a "False Positive Rate" (FPR) at ~0.05 or below
-can safely be used.
+First, all methods with a "False Positive Rate" (FPR) above ~0.05 has an
+inflated false positive rate, and the p-values can therefore not be
+trusted.
 
 Second, among methods with a low FPR, those with a high "Area Under the
 (Receiver Operator) Curve" (AUC) and "Spike Detection Rate"
@@ -105,6 +114,29 @@ the levels of the *paired* factor.
 
     mytest <- testDA(count_table,predictor,relative=FALSE)
 
+It might be an advantage to change to the test statistic of the
+permutation test for non-relative data, and this is highly recommended
+if the data contains negative values as the default log ratio then
+becomes nonsensical.
+
+Example (alternatively use medians, if data is highly non-normal):
+
+    testFun <- function(case,control){
+      mean(control) - mean(case)
+    }
+
+    testFun.pair <- function(case,control){
+      mean(control - case)
+    }
+
+    mytest <- testDA(count_table,predictor,relative=FALSE, 
+                     args = list(per = list(testStat=testFun, testStat.pair=testFun.pair)))
+
+Note that the output from ttt, ltt, ltt2 and wil also contains the log
+ratio fold change. This does not affect the results of the testDA
+function, but if any of these are used in the final analysis it should
+be changed if the data contains negative values.
+
 **Plot the output:**
 
     plot(mytest, sort = "AUC")
@@ -115,8 +147,8 @@ Medians for each method:
 
     summary(mytest, sort = "AUC")
 
-How to run real (unshuffled) data:
-----------------------------------
+[How to run real (unshuffled) data:](#real)
+-------------------------------------------
 
 All tests can easily be run with the original data. E.g. edgeR exact
 test:
@@ -133,8 +165,8 @@ found by several methods
 
     head(res.all$table)
 
-Implemented methods:
---------------------
+[Implemented methods:](#methods)
+--------------------------------
 
 -   per - [Permutation test with user defined test
     statistic](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8)
@@ -166,7 +198,6 @@ Implemented methods:
     [DESeq2](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0550-8)
     (The paired version is a model with the paired variable
     as covariate)
--   anc - [ANCOM](https://www.ncbi.nlm.nih.gov/pubmed/26028277)
 -   lim -
     [LIMMA](https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true)
     (The paired version is a model with the paired variable
@@ -206,8 +237,8 @@ log-ratio between the two outcome levels (e.g. case and control) for
 each level of the paired argument and the final statistic is the mean of
 these log-ratios.
 
-Extra features
---------------
+[Extra features](#extra)
+------------------------
 
 #### Plot the p-value distributions. Raw p-values should in theory have a uniform (flat) distribution between 0 and 1.
 
@@ -254,7 +285,6 @@ passed to a specific test:
 -   msf - Passed to fitFeatureModel
 -   zig - Passed to fitZig
 -   ds2 - Passed to DESeq
--   anc - Passed to ANCOM
 -   lim - Passed to eBayes
 -   lli - Passed to eBayes
 -   lli2 - Passed to eBayes
@@ -268,8 +298,8 @@ passed to a specific test:
 -   rai - Passed to raida
 -   spe - Passed to cor.test
 
-Errors and issues
------------------
+[Errors and issues](#errors)
+----------------------------
 
 If a method fails the following is usually printed: *Error in { : task 1
 failed - "task X failed"*. To find the method corresponding to X, run

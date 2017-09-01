@@ -26,7 +26,6 @@
 #'  \item msf - MetagenomeSeq feature model
 #'  \item zig - MetagenomeSeq zero-inflated gaussian
 #'  \item ds2 - DESeq2
-#'  \item anc - ANCOM. This test does not output pvalues; for comparison with the other methods, detected Features are set to a pvalue of 0, all else are set to 1.
 #'  \item lim - LIMMA. Moderated linear models based on emperical bayes
 #'  \item kru - Kruskal-Wallis on relative abundances
 #'  \item aov - ANOVA on relative abundances
@@ -60,7 +59,6 @@
 #'  \item msf - Passed to fitFeatureModel
 #'  \item zig - Passed to fitZig
 #'  \item ds2 - Passed to DESeq
-#'  \item anc - Passed to ANCOM
 #'  \item lim - Passed to eBayes
 #'  \item lli - Passed to eBayes
 #'  \item lli2 - Passed to eBayes
@@ -84,7 +82,7 @@
 #' @importFrom parallel detectCores
 #' @export
 
-allDA <- function(count_table, predictor, paired = NULL, tests = c("spe","anc","per","bay","adx","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2","lim","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), verbose = TRUE){
+allDA <- function(count_table, predictor, paired = NULL, tests = c("spe","per","bay","adx","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2","lim","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), verbose = TRUE){
 
   # Checks
   if(min(count_table) < 0 & is.numeric(predictor)) stop("Numeric predictor and negative values in count_table is currently not supported")
@@ -105,13 +103,12 @@ allDA <- function(count_table, predictor, paired = NULL, tests = c("spe","anc","
   if(!"edgeR" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("ere","erq")]
   if(!"metagenomeSeq" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("msf","zig")]
   if(!"DESeq2" %in% rownames(installed.packages())) tests <- tests[tests != "ds2"]
-  if(!"ancom.R" %in% rownames(installed.packages())) tests <- tests[tests != "anc"]  
   if(!"limma" %in% rownames(installed.packages())) tests <- tests[tests != "lim"]
   if(!"RAIDA" %in% rownames(installed.packages())) tests <- tests[tests != "rai"]
-  
+
   # Excluded tests that do not work with a paired argument
   if(!is.null(paired)){
-    tests <- tests[!tests %in% c("bay","adx","anc","ere","msf","zig","aov","lao","lao2","kru","rai","spe")]
+    tests <- tests[!tests %in% c("bay","adx","ere","msf","zig","aov","lao","lao2","kru","rai","spe")]
   } 
   
   # Only include some tests if there are more than two levels in predictor
@@ -132,7 +129,7 @@ allDA <- function(count_table, predictor, paired = NULL, tests = c("spe","anc","
   
   # Exclude if relative is false
   if(relative == FALSE){
-    tests <- tests[!tests %in% c("ltt2","neb","erq","ere","msf","zig","bay","ds2","adx","anc","lli2","lao2","llm2","rai")]
+    tests <- tests[!tests %in% c("ltt2","neb","erq","ere","msf","zig","bay","ds2","adx","lli2","lao2","llm2","rai")]
   }
   
   if(verbose){
@@ -188,7 +185,6 @@ allDA <- function(count_table, predictor, paired = NULL, tests = c("spe","anc","
                       per = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired, relative, p.adj),per.args)),
                       bay = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired, p.adj),bay.args)),
                       adx = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand),adx.args)),
-                      anc = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand),anc.args)),
                       lim = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired,relative,p.adj),lim.args)),
                       lli = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired,relative,p.adj),lli.args)),
                       lli2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired,p.adj),lli2.args)),
