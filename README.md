@@ -40,15 +40,16 @@ amplicon data analysis methods used in microbiome studies. *Microbiome*
 Overview of this tutorial
 -------------------------
 
--   [Installation of packages](#install)
--   [How to compare methods](#how)
--   [How to run real (unshuffled) data](#real)
--   [Implemented methods](#methods)
--   [Extra features](#extra)
--   [Errors and issues](#errors)
+-   [Installation of packages](#installation-of-packages)
+-   [How to compare methods](#how-to-compare-methods)
+-   [How to run real (unshuffled)
+    data](#how-to-run-real-(unshuffled)-data)
+-   [Implemented methods](#implemented-methods)
+-   [Extra features](#extra-features)
+-   [Errors and issues](#errors-and-issues)
 
-[Installation of packages](#install)
-------------------------------------
+Installation of packages
+========================
 
     library(devtools)
     install_github("Russel88/DAtest")
@@ -70,8 +71,8 @@ But the package will work without them
     -   It depends on: MASS, protoclust, qvalue (biocLite("qvalue")) and
         limma (biocLite("limma"))
 
-[How to compare methods:](#how)
--------------------------------
+How to compare methods
+======================
 
 First, all methods with a "False Positive Rate" (FPR) above ~0.05 has an
 inflated false positive rate, and the p-values can therefore not be
@@ -147,8 +148,8 @@ Medians for each method:
 
     summary(mytest, sort = "AUC")
 
-[How to run real (unshuffled) data:](#real)
--------------------------------------------
+How to run real (unshuffled) data
+=================================
 
 All tests can easily be run with the original data. E.g. edgeR exact
 test:
@@ -165,8 +166,8 @@ found by several methods
 
     head(res.all$table)
 
-[Implemented methods:](#methods)
---------------------------------
+Implemented methods
+===================
 
 -   per - [Permutation test with user defined test
     statistic](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8)
@@ -237,8 +238,8 @@ log-ratio between the two outcome levels (e.g. case and control) for
 each level of the paired argument and the final statistic is the mean of
 these log-ratios.
 
-[Extra features](#extra)
-------------------------
+Extra features
+==============
 
 #### Plot the p-value distributions. Raw p-values should in theory have a uniform (flat) distribution between 0 and 1.
 
@@ -252,7 +253,7 @@ these log-ratios.
 
     View(mytest$results[[1]]["ere"])
 
-#### Passing arguments to the different tests
+### Passing arguments to the different tests
 
 Additional arguments can be passed to the internal functions with the
 "args" argument. It should be structured as a list with elements named
@@ -298,8 +299,8 @@ passed to a specific test:
 -   rai - Passed to raida
 -   spe - Passed to cor.test
 
-[Errors and issues](#errors)
-----------------------------
+Errors and issues
+=================
 
 If a method fails the following is usually printed: *Error in { : task 1
 failed - "task X failed"*. To find the method corresponding to X, run
