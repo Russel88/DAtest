@@ -4,12 +4,12 @@
 \alias{DA.kru}
 \title{Kruskal-Wallis test}
 \usage{
-DA.kru(count_table, outcome, relative = TRUE, p.adj = "fdr", ...)
+DA.kru(data, outcome, relative = TRUE, p.adj = "fdr", ...)
 }
 \arguments{
-\item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
+\item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
-\item{outcome}{Factor. The outcome of interest. E.g. case and control}
+\item{outcome}{The outcome of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
 
 \item{relative}{Logical. Should count_table be normalized to relative abundances. Default TRUE}
 

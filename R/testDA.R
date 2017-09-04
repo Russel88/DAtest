@@ -1,10 +1,10 @@
 #' Comparing differential abundance methods by FPR and AUC
 #'
 #' Calculating false positive rates and AUC (Area Under the receiver operator Curve) for various differential abundance methods
-#' @param count_table Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns
-#' @param predictor Factor or Numeric. The outcome of interest. E.g. case and control. If the predictor has more than two levels, only the 2. level will be spiked. If the predictor is numeric it will be treated as such in the analyses
+#' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
+#' @param outcome The outcome of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the outcome is numeric it will be treated as such in the analyses
+#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli" and "lli2"
 #' @param R Integer. Number of times to run the tests. Default 10
-#' @param paired Factor. Subject ID for running paired analysis. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli" and "lli2"
 #' @param tests Character. Which tests to include. Default all (See below for details)
 #' @param relative Logical. Should abundances be made relative? Only has effect for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm" and "spe". Default TRUE
 #' @param spikeMethod Character. Multiplicative ("mult") or additive ("add") spike-in. Default "mult". Use "add" if count_table contains negative counts.
@@ -87,13 +87,27 @@
 #'  \item results - A complete list of output from all the methods. Example: Get wilcoxon results from 2. run as such: $results[[2]]["wil"]
 #' }
 #' 
-#' @import snow doSNOW foreach pROC
+#' @import snow doSNOW foreach
 #' @importFrom parallel detectCores
+#' @importFrom pROC roc
 #' @export
 
-testDA <- function(count_table, predictor, R = 10, paired = NULL, tests = c("spe","per","bay","adx","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, spikeMethod = "mult", effectSize = 2, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), verbose = FALSE){
+testDA <- function(data, outcome, paired = NULL, R = 10, tests = c("neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","ere","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, spikeMethod = "mult", effectSize = 2, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), verbose = FALSE){
 
-  library(foreach, quietly = TRUE)
+  # Extract from phyloseq
+  if(class(data) == "phyloseq"){
+    if(length(outcome) > 1 | length(paired) > 1) stop("When data is a phyloseq object outcome and paired should only contain the name of the variables in sample_data")
+    if(!outcome %in% sample_variables(data)) stop(paste(outcome,"is not present in sample_data(data)"))
+    if(!is.null(paired)){
+      if(!paired %in% sample_variables(data)) stop(paste(paired,"is not present in sample_data(data)"))
+    }
+    count_table <- otu_table(data)
+    if(!taxa_are_rows(data)) count_table <- t(count_table)
+    outcome <- suppressWarnings(as.matrix(sample_data(data)[,outcome]))
+    if(!is.null(paired)) paired <- suppressWarnings(as.matrix(sample_data(data)[,paired]))
+  } else {
+    count_table <- data
+  }
   
   # Coerce data
   if(!is.null(paired)) paired <- as.factor(paired)
@@ -102,45 +116,11 @@ testDA <- function(count_table, predictor, R = 10, paired = NULL, tests = c("spe
   # Checks
   if(min(count_table) < 0 & spikeMethod == "mult") stop("Additive spike-in should be used when count_table contains negative values")
   if(sum(colSums(count_table) == 0) > 0) stop("Some samples are empty!")
-  if(ncol(count_table) != length(predictor)) stop("Number of samples in count_table does not match length of predictor")
-  if(length(levels(as.factor(predictor))) < 2) stop("Predictor should have at least two levels")
+  if(ncol(count_table) != length(outcome)) stop("Number of samples in count_table does not match length of outcome")
+  if(length(levels(as.factor(outcome))) < 2) stop("outcome should have at least two levels")
   
-  # Prune test argument if packages are not installed
-  if(!"baySeq" %in% rownames(installed.packages())) tests <- tests[tests != "bay"]
-  if(!"ALDEx2" %in% rownames(installed.packages())) tests <- tests[tests != "adx"] 
-  if(!"MASS" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("neb")]
-  if(!"lme4" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("neb")]
-  if(!"edgeR" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("ere","erq")]
-  if(!"metagenomeSeq" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("msf","zig")]
-  if(!"DESeq2" %in% rownames(installed.packages())) tests <- tests[tests != "ds2"]
-  if(!"limma" %in% rownames(installed.packages())) tests <- tests[tests != "lim"]
-  if(!"RAIDA" %in% rownames(installed.packages())) tests <- tests[tests != "rai"]
-
-  # Excluded tests that do not work with a paired argument
-  if(!is.null(paired)){
-    tests <- tests[!tests %in% c("bay","adx","ere","msf","zig","aov","lao","lao2","kru","rai","spe")]
-  } 
-  
-  # Only include some tests if there are more than two levels in predictor
-  if(length(levels(as.factor(predictor))) > 2){
-    tests <- tests[tests %in% c("neb","erq","ds2","lim","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe")]
-  } else {
-  # Excluded tests if levels in predictor is exactly 2
-    tests <- tests[!tests %in% c("aov","lao","lao2","kru","lrm","llm","llm2","spe")]
-  }
-  
-  # Only include specific tests if predictor is numeric
-  if(is.numeric(predictor)){
-    tests <- tests[tests %in% c("neb","erq","ds2","lim","lrm","llm","llm2","spe")]
-  } else {
-  # Exclude if not numeric
-    tests <- tests[!tests %in% c("spe")]
-  }
-  
-  # Exclude if relative is false
-  if(relative == FALSE){
-    tests <- tests[!tests %in% c("ltt2","neb","erq","ere","msf","zig","bay","ds2","adx","lli2","lao2","llm2","rai")]
-  }
+  # Prune tests argument
+  tests <- prune.tests.DA(tests, outcome, paired, relative)
   
   if(verbose){
     message(paste("Tests are run in the following order:"))
@@ -154,112 +134,29 @@ testDA <- function(count_table, predictor, R = 10, paired = NULL, tests = c("spe
   if(verbose) message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
   count_table <- count_table[rowSums(count_table) > 0,]
   
-  final.results <- foreach(r = 1:R) %do% {
+  final.results <- foreach::foreach(r = 1:R) %do% {
 
-    library(parallel, quietly = TRUE)
-    library(doSNOW, quietly = TRUE)
-    library(pROC, quietly = TRUE)
-    library(foreach, quietly = TRUE)
-    
     message(paste0(r,". Run:"))
     
-    # Shuffle predictor
+    # Shuffle outcome
     if(is.null(paired)){
-      rand <- sample(predictor)
+      rand <- sample(outcome)
     } else {
-      rand <- unsplit(lapply(split(predictor,paired), sample), paired)
+      rand <- unsplit(lapply(split(outcome,paired), sample), paired)
     }
     
     # Spikein
-    if(is.numeric(predictor)){
+    if(is.numeric(outcome)){
       num.pred <- TRUE
-      if(verbose) print("Predictor is assumed to be numeric")
+      if(verbose) print("outcome is assumed to be numeric")
     } else {
       num.pred <- FALSE
     }
     spiked <- spikein(count_table, rand, spikeMethod, effectSize,  k, num.pred, relative)
     count_table <- spiked[[1]]
     
-    ### Run tests
-    # Progress bar
-    pb <- txtProgressBar(max = length(tests), style = 3)
-    progress <- function(n) setTxtProgressBar(pb, n)
-    opts <- list(progress = progress)
-    
-    # Start parallel
-    if(cores == 1) {
-      registerDoSEQ() 
-    } else {
-      cl <- makeCluster(cores, outfile = "")
-      registerDoSNOW(cl)
-    }
-    
-    results <- foreach(i = tests , .options.snow = opts) %dopar% {
-      
-      # Extract test arguments
-      if(!all(names(args) %in% tests)) stop("One or more names in list with additional arguments does not match names of tests")
-      for(j in seq_along(args)){
-        assign(paste0(names(args)[j],".args"),args[[j]],pos=1)
-      }
-      test.args <- paste0(tests,".args")
-      test.boo <- lapply(test.args,exists)
-      for(l in seq_along(test.args)){
-        if(test.boo[l] == FALSE) assign(test.args[l], list(),pos=1)
-      }
-    
-     res.sub <- switch(i,
-                        wil = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired, relative, p.adj),wil.args)),
-                        ttt = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired, relative, p.adj),ttt.args)),
-                        ltt = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired,relative, p.adj),ltt.args)),
-                        ltt2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired, p.adj),ltt2.args)),
-                        neb = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired, p.adj),neb.args)),
-                        erq = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired, p.adj),erq.args)),
-                        ere = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand, p.adj),ere.args)),
-                        msf = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand, p.adj),msf.args)),
-                        zig = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand, p.adj),zig.args)),
-                        ds2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired, p.adj),ds2.args)),
-                        per = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired, relative, p.adj),per.args)),
-                        bay = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired, p.adj),bay.args)),
-                        adx = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand),adx.args)),
-                        lim = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired,relative,p.adj),lim.args)),
-                        lli = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired,relative,p.adj),lli.args)),
-                        lli2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired,p.adj),lli2.args)),
-                        kru = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand, relative, p.adj),kru.args)),
-                        aov = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand, relative, p.adj),aov.args)),
-                        lao = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,relative, p.adj),lao.args)),
-                        lao2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand, p.adj),lao2.args)),
-                        lrm = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired, relative, p.adj),lrm.args)),
-                        llm = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired,relative, p.adj),llm.args)),
-                        llm2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,paired, p.adj),llm2.args)),
-                        rai = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,p.adj),rai.args)),
-                        spe = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,rand,relative,p.adj),spe.args)))
-      
-      res.sub[is.na(res.sub$pval),"pval"] <- 1
-      res.sub[is.na(res.sub$pval.adj),"pval.adj"] <- 1
-      
-      return(res.sub)
-      
-    }
-    if(cores != 1) stopCluster(cl)
-    names(results) <- tests
-
-    # Split ALDEx2 results in t.test and wilcoxon
-    if("adx" %in% tests){
-      adx.t <- as.data.frame(results["adx"])[,c(1:7,12)]
-      adx.w <- as.data.frame(results["adx"])[,c(1:7,12)]
-      colnames(adx.t) <- gsub("adx.","",colnames(adx.t))
-      colnames(adx.w) <- colnames(adx.t)
-      adx.t$pval <- as.numeric(as.data.frame(results["adx"])$adx.we.ep)
-      adx.w$pval <- as.numeric(as.data.frame(results["adx"])$adx.wi.ep)
-      adx.t$pval.adj <- p.adjust(adx.t$pval, method = p.adj)
-      adx.w$pval.adj <- p.adjust(adx.w$pval, method = p.adj)
-      adx.t$Method <- "ALDEx2 t-test"
-      adx.w$Method <- "ALDEx2 wilcox"
-      results["adx"] <- NULL
-      res.names <- names(results)
-      results <- c(results,list(adx.t),list(adx.w))
-      names(results) <- c(res.names,"adx.t","adx.w")
-    }
+    # Run tests
+    results <- run.tests.DA(count_table, rand, paired, tests, relative, p.adj, args, cores)
     
     # Insert spiked column
     newnames <- names(results)
@@ -299,7 +196,7 @@ testDA <- function(count_table, predictor, R = 10, paired = NULL, tests = c("spe
       if(effectSize != 1){
         test_roc <- NULL
         tryCatch(
-          test_roc <- roc(as.numeric(results[[x]]$Feature %in% spiked[[2]]) ~ results[[x]]$pval, auc=TRUE, direction = ">"),
+          test_roc <- pROC::roc(as.numeric(results[[x]]$Feature %in% spiked[[2]]) ~ results[[x]]$pval, auc=TRUE, direction = ">"),
           error = function(e) NULL)
         if(!is.null(test_roc)){
           as.numeric(test_roc$auc) 

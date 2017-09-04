@@ -4,18 +4,18 @@
 \alias{allDA}
 \title{Run many differential abundance methods}
 \usage{
-allDA(count_table, predictor, paired = NULL, tests = c("spe", "per", "bay",
-  "adx", "wil", "ttt", "ltt", "ltt2", "neb", "erq", "ere", "msf", "zig", "ds2",
-  "lim", "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "rai"),
-  relative = TRUE, cores = (detectCores() - 1), rng.seed = 123,
-  p.adj = "fdr", args = list(), verbose = TRUE)
+allDA(data, outcome, paired = NULL, tests = c("spe", "per", "bay", "adx",
+  "wil", "ttt", "ltt", "ltt2", "neb", "erq", "ere", "msf", "zig", "ds2", "lim",
+  "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "rai"), relative = TRUE,
+  cores = (detectCores() - 1), rng.seed = 123, p.adj = "fdr",
+  args = list(), verbose = FALSE)
 }
 \arguments{
-\item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
+\item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
-\item{predictor}{Factor or Numeric. The outcome of interest. E.g. case and control. If the predictor has more than two levels, only the 2. level will be spiked. If the predictor is numeric it will be treated as such in the analyses}
+\item{outcome}{The outcome of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the outcome is numeric it will be treated as such in the analyses}
 
-\item{paired}{Factor. Subject ID for running paired analysis. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli" and "lli2"}
+\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli" and "lli2"}
 
 \item{tests}{Character. Which tests to include. Default all (See below for details)}
 

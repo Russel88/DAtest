@@ -4,17 +4,17 @@
 \alias{DA.wil}
 \title{Wilcoxon Rank Sum and Signed Rank Test}
 \usage{
-DA.wil(count_table, outcome, paired = NULL, relative = TRUE,
-  p.adj = "fdr", testStat = function(case, control) {     log((mean(case) +
-  1)/(mean(control) + 1)) }, testStat.pair = function(case, control) {    
-  mean(log((case + 1)/(control + 1))) }, ...)
+DA.wil(data, outcome, paired = NULL, relative = TRUE, p.adj = "fdr",
+  testStat = function(case, control) {     log((mean(case) + 1)/(mean(control)
+  + 1)) }, testStat.pair = function(case, control) {     mean(log((case +
+  1)/(control + 1))) }, ...)
 }
 \arguments{
-\item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
+\item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
-\item{outcome}{Factor. The outcome of interest. E.g. case and control}
+\item{outcome}{The outcome of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
 
-\item{paired}{Factor. Subject ID for running paired analysis}
+\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
 
 \item{relative}{Logical. Should count_table be normalized to relative abundances. Default TRUE}
 

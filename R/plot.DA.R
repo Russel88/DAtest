@@ -1,21 +1,20 @@
 #' Plotting results from testDA
 #'
-#' @param DA The output from the testDA function
+#' @param x The output from the testDA function
 #' @param sort Sort methods by c("AUC","FPR","Spike.detect.rate")
 #' @param p Logical. Should the p-value distribution be plotted
 #' @param bins Integer. Number of bins in p-value histograms
 #' @param adj Logical. Whether the histograms should show adjusted p-values 
-#' @import ggplot2 cowplot
-#' 
+#' @param ... Additional plotting arguments
+#' @import ggplot2
+#' @importFrom cowplot ggdraw
+#' @importFrom cowplot draw_plot
 #' @export
 
-plot.DA <- function(DA, sort = "AUC", p = FALSE, bins = 50, adj = FALSE){
-  
-  require(ggplot2, quietly = TRUE)
-  require(cowplot, quietly = TRUE)
+plot.DA <- function(x, sort = "AUC", p = FALSE, bins = 20, adj = FALSE, ...){
   
   if(p){
-    pval.all <- lapply(DA$results, function(x) lapply(x, function(y) y[,c("pval","pval.adj","Method")]))
+    pval.all <- lapply(x$results, function(x) lapply(x, function(y) y[,c("pval","pval.adj","Method")]))
     df.all <- do.call(rbind, do.call(rbind,pval.all))
     
     if(adj){
@@ -38,19 +37,19 @@ plot.DA <- function(DA, sort = "AUC", p = FALSE, bins = 50, adj = FALSE){
   } else {
     
     if(sort == "AUC") {
-      auc.median <- aggregate(AUC ~ Method, data = DA$table, FUN = median)
-      DA$table$Method <- factor(DA$table$Method, levels = auc.median[order(auc.median$AUC, decreasing = TRUE),"Method"])
+      auc.median <- aggregate(AUC ~ Method, data = x$table, FUN = median)
+      x$table$Method <- factor(x$table$Method, levels = auc.median[order(auc.median$AUC, decreasing = TRUE),"Method"])
     }
     if(sort == "FPR") {
-      fpr.median <- aggregate(FPR ~ Method, data = DA$table, FUN = median)
-      DA$table$Method <- factor(DA$table$Method, levels = fpr.median[order(fpr.median$FPR, decreasing = FALSE),"Method"])
+      fpr.median <- aggregate(FPR ~ Method, data = x$table, FUN = median)
+      x$table$Method <- factor(x$table$Method, levels = fpr.median[order(fpr.median$FPR, decreasing = FALSE),"Method"])
     }
     if(sort == "Spike.detect.rate") {
-      spr.median <- aggregate(Spike.detect.rate ~ Method, data = DA$table, FUN = median)
-      DA$table$Method <- factor(DA$table$Method, levels = fpr.median[order(fpr.median$Spike.detect.rate, decreasing = TRUE),"Method"])
+      spr.median <- aggregate(Spike.detect.rate ~ Method, data = x$table, FUN = median)
+      x$table$Method <- factor(x$table$Method, levels = fpr.median[order(fpr.median$Spike.detect.rate, decreasing = TRUE),"Method"])
     }
     
-    p1 <- ggplot(DA$table, aes(Method, FPR)) +
+    p1 <- ggplot(x$table, aes(Method, FPR)) +
       theme_bw() +
       coord_cartesian(ylim = c(0,1)) +
       geom_hline(yintercept = 0.05, colour = "red") +
@@ -62,9 +61,9 @@ plot.DA <- function(DA, sort = "AUC", p = FALSE, bins = 50, adj = FALSE){
       theme(axis.text.x = element_blank(),
             panel.grid.minor = element_blank())
     
-    p2 <- ggplot(DA$table, aes(Method, AUC)) +
+    p2 <- ggplot(x$table, aes(Method, AUC)) +
       theme_bw() +
-      coord_cartesian(ylim = c(min(DA$table$AUC, 0.45),1)) +
+      coord_cartesian(ylim = c(min(x$table$AUC, 0.45),1)) +
       geom_hline(yintercept = 0.5, colour = "red") +
       geom_point() +
       stat_summary(fun.y = median, fun.ymin = median, fun.ymax = median,geom = "crossbar",colour="red",width=0.75) +
@@ -74,7 +73,7 @@ plot.DA <- function(DA, sort = "AUC", p = FALSE, bins = 50, adj = FALSE){
       xlab(NULL) +
       scale_y_continuous(labels=function(x) sprintf("%.2f", x))
     
-    p3 <- ggplot(DA$table, aes(Method, Spike.detect.rate)) +
+    p3 <- ggplot(x$table, aes(Method, Spike.detect.rate)) +
       theme_bw() +
       coord_cartesian(ylim = c(0,1)) +
       geom_point() +
@@ -84,10 +83,10 @@ plot.DA <- function(DA, sort = "AUC", p = FALSE, bins = 50, adj = FALSE){
             panel.grid.minor = element_blank()) +
       xlab(NULL)
     
-    pp <- ggdraw() +
-      draw_plot(p1, 0, .7, 1, .3) +
-      draw_plot(p2, 0, .4, 1, .3) +
-      draw_plot(p3, 0, 0, 1, .4)
+    pp <- cowplot::ggdraw(...) +
+      cowplot::draw_plot(p1, 0, .7, 1, .3) +
+      cowplot::draw_plot(p2, 0, .4, 1, .3) +
+      cowplot::draw_plot(p3, 0, 0, 1, .4)
     
     suppressWarnings(pp)
     

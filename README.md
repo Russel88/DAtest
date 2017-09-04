@@ -11,11 +11,11 @@ methods. The false positive rate and the power of the different methods
 highly depends on the dataset. This package aims at aiding the analyst
 in choosing a method based on empirical testing.
 
-The method goes as follows:
+#### The method goes as follows:
 
--   Shuffle predictor variable (E.g. case vs. control)
+-   Shuffle outcome variable (E.g. case vs. control)
 -   Spike in data for some randomly chosen features (OTU/gene/protein),
-    such that they are associated with the shuffled predictor
+    such that they are associated with the shuffled outcome
 -   Apply methods, and check:
     -   whether they can find the spike-ins
     -   whether the false positive rate is controlled
@@ -27,7 +27,7 @@ The method goes as follows:
     -   Choose method that has high AUC, and FPR not higher than ~0.05
 -   Run data with the chosen test with DA."test" function, where "test"
     is the name of the test (see details with ?testDA)
-    -   Check out your final results. Done!
+    -   Check out your final results.
 
 ### Citation
 
@@ -83,42 +83,54 @@ Second, among methods with a low FPR, those with a high "Area Under the
 (Spike.detect.rate) are likely to have more power to detect signal in
 the respective dataset.
 
-**Run the test:**
+Therefore, we want a method with a FPR ~0.05 or lower and a high AUC.
 
-    mytest <- testDA(count_table,predictor)
+#### **Run the test:**
 
-count\_table is a matrix or data.frame with taxa/genes/proteins as rows
+(if you have a phyloseq object, scroll down)
+
+    mytest <- testDA(data, outcome)
+
+data is either a matrix or data.frame with taxa/genes/proteins as rows
 and samples as columns.
 
-predictor is the outcome of interest, e.g. a factor denoting whether
-samples are cases or controls (in the same order as columns in
-count\_table).
+outcome is the outcome of interest, e.g. a factor denoting whether
+samples are cases or controls (in the same order as columns in data).
 
-predictor can be a factor with more than two levels, in which case only
+outcome can be a factor with more than two levels, in which case only
 the second level is spiked, and if methods output several p-values, only
 the p-value associated with the second level is used.
 
-predictor can also be numeric, in which case it is spiked as followed:
-newAbundances = oldAbundances \* (effectSize ^ predictor)
+outcome can also be numeric.
 
-#### *The tests can be run in a paired version:*
+#### *If you have a paired/blocked experimental design:*
 
-E.g. if SubjectID is a factor denoting the pairing of the samples (in
-the same order as columns in the count\_table):
+E.g. repeated samples from same patients, or control/treatments inside
+blocks.
 
-    mytest <- testDA(count_table,predictor,paired=SubjectID)
+The paired argument should be a factor with the ID of the
+patient/subject/block (in the same order as columns in data):
 
-When a *paired* argument is provided, the predictor is shuffled within
-the levels of the *paired* factor.
+    mytest <- testDA(data, outcome, paired = SubjectID)
 
-#### *Or without relative abundances, e.g. for normalized protein abundance:*
+When a *paired* argument is provided, the outcome is shuffled within the
+levels of the *paired* factor.
 
-    mytest <- testDA(count_table,predictor,relative=FALSE)
+Paired analysis can be very slow. If you simply can't wait to see the
+results remove "neb" from the tests argument.
 
-It might be an advantage to change to the test statistic of the
-permutation test for non-relative data, and this is highly recommended
-if the data contains negative values as the default log ratio then
-becomes nonsensical.
+#### *If you have non-relative abundances, e.g. for normalized protein abundance:*
+
+    mytest <- testDA(data, outcome, relative = FALSE)
+
+##### *If you have negative values in your abundance table:*
+
+    mytest <- testDA(data, outcome, relative = FALSE, spikeMethod = "add")
+
+It might be an advantage to change the test statistic of the permutation
+test for non-relative data, and this is highly recommended if the data
+contains negative values as the default log ratio then becomes
+nonsensical.
 
 Example (alternatively use medians, if data is highly non-normal):
 
@@ -130,7 +142,7 @@ Example (alternatively use medians, if data is highly non-normal):
       mean(control - case)
     }
 
-    mytest <- testDA(count_table,predictor,relative=FALSE, 
+    mytest <- testDA(data,outcome,relative=FALSE, 
                      args = list(per = list(testStat=testFun, testStat.pair=testFun.pair)))
 
 Note that the output from ttt, ltt, ltt2 and wil also contains the log
@@ -138,11 +150,20 @@ ratio fold change. This does not affect the results of the testDA
 function, but if any of these are used in the final analysis it should
 be changed if the data contains negative values.
 
+### If you have a phyloseq object:
+
+data can also be a phyloseq object. In this case, the outcome and paired
+arguments are the names of the variables in sample\_data(data):
+
+    mytest <- testDA(data, outcome = "Time", paired = "Patient")
+
 **Plot the output:**
+--------------------
 
     plot(mytest, sort = "AUC")
 
 **Print the output:**
+---------------------
 
 Medians for each method:
 
@@ -154,7 +175,7 @@ How to run real (unshuffled) data
 All tests can easily be run with the original data. E.g. edgeR exact
 test:
 
-    res.ere <- DA.ere(count_table,predictor)
+    res.ere <- DA.ere(data, outcome)
 
 All methods can be accessed in the same way; DA."test" where "test" is
 the abbreviation given in the details of the testDA function.
@@ -162,7 +183,7 @@ the abbreviation given in the details of the testDA function.
 Alternatively, run all (or several) methods and check which features are
 found by several methods
 
-    res.all <- allDA(count_table,predictor)
+    res.all <- allDA(data, outcome)
 
     head(res.all$table)
 

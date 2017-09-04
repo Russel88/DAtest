@@ -4,23 +4,20 @@
 \alias{DA.llm2}
 \title{Linear regression}
 \usage{
-DA.llm2(count_table, outcome, paired = NULL, p.adj = "fdr", delta = 0.001,
-  ...)
+DA.llm2(data, outcome, paired = NULL, p.adj = "fdr", delta = 0.001, ...)
 }
 \arguments{
-\item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
+\item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
-\item{outcome}{Factor. The outcome of interest. E.g. case and control}
+\item{outcome}{The outcome of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
 
-\item{paired}{Factor. Subject ID for running paired analysis}
+\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
 
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
 
 \item{delta}{Numeric. Pseudocount for the log transformation. Default 0.001}
 
 \item{...}{Additional arguments for the lm/lme functions}
-
-\item{relative}{Logical. Should count_table be normalized to relative abundances. Default TRUE}
 }
 \description{
 With log transformation of relative abundances.

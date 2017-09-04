@@ -4,10 +4,11 @@
 \alias{plot.DA}
 \title{Plotting results from testDA}
 \usage{
-\method{plot}{DA}(DA, sort = "AUC", p = FALSE, bins = 50, adj = FALSE)
+\method{plot}{DA}(x, sort = "AUC", p = FALSE, bins = 20, adj = FALSE,
+  ...)
 }
 \arguments{
-\item{DA}{The output from the testDA function}
+\item{x}{The output from the testDA function}
 
 \item{sort}{Sort methods by c("AUC","FPR","Spike.detect.rate")}
 
@@ -16,6 +17,8 @@
 \item{bins}{Integer. Number of bins in p-value histograms}
 
 \item{adj}{Logical. Whether the histograms should show adjusted p-values}
+
+\item{...}{Additional plotting arguments}
 }
 \description{
 Plotting results from testDA

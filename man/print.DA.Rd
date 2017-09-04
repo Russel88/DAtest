@@ -4,10 +4,12 @@
 \alias{print.DA}
 \title{Print results from testDA}
 \usage{
-\method{print}{DA}(DA)
+\method{print}{DA}(x, ...)
 }
 \arguments{
-\item{DA}{The output from the testDA function}
+\item{x}{The output from the testDA function}
+
+\item{...}{Additional printing arguments}
 }
 \description{
 Print results from testDA

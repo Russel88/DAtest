@@ -2,15 +2,26 @@
 #'
 #' Implemented as in:
 #' https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8
-#' @param count_table Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns
-#' @param predictor Factor. The outcome of interest. E.g. case and control
+#' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
+#' @param outcome The outcome of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
 #' @param ... Additional arguments for the fitZig function
 #' @export
 
-DA.zig <- function(count_table, outcome, p.adj = "fdr", ...){
+DA.zig <- function(data, outcome, p.adj = "fdr", ...){
   
-  library(metagenomeSeq, quietly = TRUE)
+  library(metagenomeSeq)
+  
+  # Extract from phyloseq
+  if(class(data) == "phyloseq"){
+    if(length(outcome) > 1) stop("When data is a phyloseq object outcome should only contain the name of the variables in sample_data")
+    if(!outcome %in% sample_variables(data)) stop(paste(outcome,"is not present in sample_data(data)"))
+    count_table <- otu_table(data)
+    if(!taxa_are_rows(data)) count_table <- t(count_table)
+    outcome <- suppressWarnings(as.matrix(sample_data(data)[,outcome]))
+  } else {
+    count_table <- data
+  }
   
   count_table <- as.data.frame.matrix(count_table)
   mgsdata <- newMRexperiment(counts = count_table)
@@ -27,6 +38,15 @@ DA.zig <- function(count_table, outcome, p.adj = "fdr", ...){
   temp_table$pval.adj <- p.adjust(temp_table$pval, method = p.adj)
   temp_table$Feature <- rownames(temp_table)
   temp_table$Method <- "MetagenomeSeq ZIG"
+  
+  if(class(data) == "phyloseq"){
+    if(!is.null(tax_table(data, errorIfNULL = FALSE))){
+      tax <- tax_table(data)
+      temp_table <- merge(temp_table, tax, by.x = "Feature", by.y = "row.names")
+      rownames(temp_table) <- NULL
+    } 
+  }
+  
   return(temp_table)
 }
 

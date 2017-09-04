@@ -4,12 +4,14 @@
 \alias{summary.DA}
 \title{Summary of results from testDA}
 \usage{
-\method{summary}{DA}(DA, sort = "AUC")
+\method{summary}{DA}(object, sort = "AUC", ...)
 }
 \arguments{
-\item{DA}{The output from the testDA function}
+\item{object}{The output from the testDA function}
 
 \item{sort}{Sort methods by c("AUC","FPR","Spike.detect.rate")}
+
+\item{...}{Additional printing arguments}
 }
 \description{
 Summary of results from testDA

@@ -4,12 +4,12 @@
 \alias{DA.ere}
 \title{EdgeR exact test}
 \usage{
-DA.ere(count_table, outcome, p.adj = "fdr", ...)
+DA.ere(data, outcome, p.adj = "fdr", ...)
 }
 \arguments{
-\item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
+\item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
-\item{outcome}{Factor. The outcome of interest. E.g. case and control}
+\item{outcome}{The outcome of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
 
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
 
