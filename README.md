@@ -103,6 +103,21 @@ the p-value associated with the second level is used.
 
 outcome can also be numeric.
 
+*The function automatically uses multiple CPUs for fast execution* The
+methods run in parallel, and by default the number of cores used is one
+less than available. This can be changed with the `cores` argument.
+`cores = 1` will turn off parallel computing. If the function is
+terminated before ending you might get the following warning:
+
+    closing unused connection X (...)
+
+This can safely be ignored.
+
+If you have terminated the function before it ended and your computer
+runs slow, you might wan't to call `closeAllConnections()`. **WARNING:**
+This might affect other R process you have running! Alternatively,
+restart R.
+
 #### *If you have a paired/blocked experimental design:*
 
 E.g. repeated samples from same patients, or control/treatments inside

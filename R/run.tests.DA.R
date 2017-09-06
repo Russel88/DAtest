@@ -13,6 +13,7 @@ run.tests.DA <- function(count_table, outcome, paired, tests, relative, p.adj, a
   } else {
     cl <- makeCluster(cores)
     registerDoSNOW(cl)
+    on.exit(stopCluster(cl))
   }
 
   results <- foreach(i = tests , .options.snow = opts) %dopar% {
@@ -61,7 +62,6 @@ run.tests.DA <- function(count_table, outcome, paired, tests, relative, p.adj, a
     return(res.sub)
   
   }
-  if(cores != 1) stopCluster(cl)
   names(results) <- tests
 
   # Split ALDEx2 results in t.test and wilcoxon

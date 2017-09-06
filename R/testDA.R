@@ -115,6 +115,7 @@ testDA <- function(data, outcome, paired = NULL, R = 10, tests = c("neb","rai","
   
   # Checks
   if(min(count_table) < 0 & spikeMethod == "mult") stop("Additive spike-in should be used when count_table contains negative values")
+  if(min(count_table) < 0 & relative == TRUE) stop("Count_table contains negative values and relative = TRUE. This is nonsensical")
   if(sum(colSums(count_table) == 0) > 0) stop("Some samples are empty!")
   if(ncol(count_table) != length(outcome)) stop("Number of samples in count_table does not match length of outcome")
   if(length(levels(as.factor(outcome))) < 2) stop("outcome should have at least two levels")
