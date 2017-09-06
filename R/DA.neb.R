@@ -13,10 +13,6 @@
 
 DA.neb <- function(data, outcome, paired = NULL, p.adj = "fdr", ...){
  
-  count_table <- otu.cdna.x
-  outcome <- sample_data(cDNA)$Time
-  paired <- substring(gsub(".*B","",rownames(sample_data(cDNA))),1,1)
-  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
     if(length(outcome) > 1 | length(paired) > 1) stop("When data is a phyloseq object outcome and paired should only contain the name of the variables in sample_data")
