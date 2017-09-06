@@ -85,7 +85,7 @@ the respective dataset.
 
 Therefore, we want a method with a FPR ~0.05 or lower and a high AUC.
 
-#### **Run the test:**
+### **Run the test:**
 
 (if you have a phyloseq object, scroll down)
 
@@ -103,9 +103,10 @@ the p-value associated with the second level is used.
 
 outcome can also be numeric.
 
-*The function automatically uses multiple CPUs for fast execution* The
-methods run in parallel, and by default the number of cores used is one
-less than available. This can be changed with the `cores` argument.
+**The function automatically uses multiple CPUs for fast execution**
+
+The methods run in parallel, and by default the number of cores used is
+one less than available. This can be changed with the `cores` argument.
 `cores = 1` will turn off parallel computing. If the function is
 terminated before ending you might get the following warning:
 
@@ -118,7 +119,7 @@ runs slow, you might wan't to call `closeAllConnections()`. **WARNING:**
 This might affect other R process you have running! Alternatively,
 restart R.
 
-#### *If you have a paired/blocked experimental design:*
+### *If you have a paired/blocked experimental design:*
 
 E.g. repeated samples from same patients, or control/treatments inside
 blocks.
@@ -134,11 +135,11 @@ levels of the *paired* factor.
 Paired analysis can be very slow. If you simply can't wait to see the
 results remove "neb" from the tests argument.
 
-#### *If you have non-relative abundances, e.g. for normalized protein abundance:*
+### *If you have non-relative abundances, e.g. for normalized protein abundance:*
 
     mytest <- testDA(data, outcome, relative = FALSE)
 
-##### *If you have negative values in your abundance table:*
+#### *If you have negative values in your abundance table:*
 
     mytest <- testDA(data, outcome, relative = FALSE, spikeMethod = "add")
 
