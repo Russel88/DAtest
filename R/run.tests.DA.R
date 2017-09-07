@@ -1,6 +1,6 @@
 #' @export
 
-run.tests.DA <- function(count_table, outcome, paired, tests, relative, p.adj, args, cores){
+run.tests.DA <- function(count_table, outcome, paired, tests, relative, args, cores){
 
   # Progress bar
   pb <- txtProgressBar(max = length(tests), style = 3)
@@ -30,35 +30,34 @@ run.tests.DA <- function(count_table, outcome, paired, tests, relative, p.adj, a
     }
   
     res.sub <- switch(i,
-                    wil = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired, relative, p.adj),wil.args)),
-                    ttt = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired, relative, p.adj),ttt.args)),
-                    ltt = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired,relative, p.adj),ltt.args)),
-                    ltt2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired, p.adj),ltt2.args)),
-                    neb = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired, p.adj),neb.args)),
-                    erq = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired, p.adj),erq.args)),
-                    ere = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome, p.adj),ere.args)),
-                    msf = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome, p.adj),msf.args)),
-                    zig = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome, p.adj),zig.args)),
-                    ds2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired, p.adj),ds2.args)),
-                    per = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired, relative, p.adj),per.args)),
-                    bay = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired, p.adj),bay.args)),
+                    wil = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired, relative),wil.args)),
+                    ttt = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired, relative),ttt.args)),
+                    ltt = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired,relative),ltt.args)),
+                    ltt2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired),ltt2.args)),
+                    neb = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired),neb.args)),
+                    erq = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired),erq.args)),
+                    ere = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome),ere.args)),
+                    msf = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome),msf.args)),
+                    zig = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome),zig.args)),
+                    ds2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired),ds2.args)),
+                    per = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired, relative),per.args)),
+                    bay = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired),bay.args)),
                     adx = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome),adx.args)),
-                    lim = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired,relative,p.adj),lim.args)),
-                    lli = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired,relative,p.adj),lli.args)),
-                    lli2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired,p.adj),lli2.args)),
-                    kru = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome, relative, p.adj),kru.args)),
-                    aov = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome, relative, p.adj),aov.args)),
-                    lao = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,relative, p.adj),lao.args)),
-                    lao2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome, p.adj),lao2.args)),
-                    lrm = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired, relative, p.adj),lrm.args)),
-                    llm = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired,relative, p.adj),llm.args)),
-                    llm2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired, p.adj),llm2.args)),
-                    rai = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,p.adj),rai.args)),
-                    spe = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,relative,p.adj),spe.args)))
+                    lim = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired,relative),lim.args)),
+                    lli = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired,relative),lli.args)),
+                    lli2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired),lli2.args)),
+                    kru = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome, relative),kru.args)),
+                    aov = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome, relative),aov.args)),
+                    lao = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,relative),lao.args)),
+                    lao2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome),lao2.args)),
+                    lrm = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired, relative),lrm.args)),
+                    llm = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired,relative),llm.args)),
+                    llm2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,paired),llm2.args)),
+                    rai = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome),rai.args)),
+                    spe = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,outcome,relative),spe.args)))
   
     res.sub[is.na(res.sub$pval),"pval"] <- 1
-    res.sub[is.na(res.sub$pval.adj),"pval.adj"] <- 1
-  
+
     return(res.sub)
   
   }
@@ -72,8 +71,6 @@ run.tests.DA <- function(count_table, outcome, paired, tests, relative, p.adj, a
     colnames(adx.w) <- colnames(adx.t)
     adx.t$pval <- as.numeric(as.data.frame(results["adx"])$adx.we.ep)
     adx.w$pval <- as.numeric(as.data.frame(results["adx"])$adx.wi.ep)
-    adx.t$pval.adj <- p.adjust(adx.t$pval, method = p.adj)
-    adx.w$pval.adj <- p.adjust(adx.w$pval, method = p.adj)
     adx.t$Method <- "ALDEx2 t-test"
     adx.w$Method <- "ALDEx2 wilcox"
     results["adx"] <- NULL

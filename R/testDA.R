@@ -7,12 +7,10 @@
 #' @param R Integer. Number of times to run the tests. Default 10
 #' @param tests Character. Which tests to include. Default all (See below for details)
 #' @param relative Logical. Should abundances be made relative? Only has effect for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm" and "spe". Default TRUE
-#' @param spikeMethod Character. Multiplicative ("mult") or additive ("add") spike-in. Default "mult". Use "add" if count_table contains negative counts.
 #' @param effectSize Integer. The effect size for the spike-ins. Default 2
 #' @param k Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). k=c(5,10,15): 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default c(5,5,5)
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.
 #' @param rng.seed Numeric. Seed for reproducibility. Default 123
-#' @param p.adj Character. Method for pvalue adjustment. Default "fdr" (Does not affect AUC, FPR or Spike.detect.rate, these use raw p-values)
 #' @param args List. A list with lists of arguments passed to the different methods. See details for more.
 #' @param verbose Logical. Print information during run
 #' @details Currently implemented methods:
@@ -92,7 +90,7 @@
 #' @importFrom pROC roc
 #' @export
 
-testDA <- function(data, outcome, paired = NULL, R = 10, tests = c("neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","ere","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, spikeMethod = "mult", effectSize = 2, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), verbose = FALSE){
+testDA <- function(data, outcome, paired = NULL, R = 10, tests = c("neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","ere","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 2, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, args = list(), verbose = FALSE){
 
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -114,8 +112,7 @@ testDA <- function(data, outcome, paired = NULL, R = 10, tests = c("neb","rai","
   count_table <- as.matrix(count_table)
   
   # Checks
-  if(min(count_table) < 0 & spikeMethod == "mult") stop("Additive spike-in should be used when count_table contains negative values")
-  if(min(count_table) < 0 & relative == TRUE) stop("Count_table contains negative values and relative = TRUE. This is nonsensical")
+  if(min(count_table) < 0) stop("Count_table contains negative values!")
   if(sum(colSums(count_table) == 0) > 0) stop("Some samples are empty!")
   if(ncol(count_table) != length(outcome)) stop("Number of samples in count_table does not match length of outcome")
   if(length(levels(as.factor(outcome))) < 2) stop("outcome should have at least two levels")
@@ -135,6 +132,14 @@ testDA <- function(data, outcome, paired = NULL, R = 10, tests = c("neb","rai","
   if(verbose) message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
   count_table <- count_table[rowSums(count_table) > 0,]
   
+  # Numeric outcome
+  if(is.numeric(outcome)){
+    num.pred <- TRUE
+    print("outcome is assumed to be numeric")
+  } else {
+    num.pred <- FALSE
+  }
+  
   final.results <- foreach::foreach(r = 1:R) %do% {
 
     message(paste0(r,". Run:"))
@@ -147,17 +152,11 @@ testDA <- function(data, outcome, paired = NULL, R = 10, tests = c("neb","rai","
     }
     
     # Spikein
-    if(is.numeric(outcome)){
-      num.pred <- TRUE
-      if(verbose) print("outcome is assumed to be numeric")
-    } else {
-      num.pred <- FALSE
-    }
-    spiked <- spikein(count_table, rand, spikeMethod, effectSize,  k, num.pred, relative)
+    spiked <- spikein(count_table, rand, effectSize,  k, num.pred, relative)
     count_table <- spiked[[1]]
     
     # Run tests
-    results <- run.tests.DA(count_table, rand, paired, tests, relative, p.adj, args, cores)
+    results <- run.tests.DA(count_table, rand, paired, tests, relative, args, cores)
     
     # Insert spiked column
     newnames <- names(results)
@@ -201,12 +200,14 @@ testDA <- function(data, outcome, paired = NULL, R = 10, tests = c("neb","rai","
           error = function(e) NULL)
         if(!is.null(test_roc)){
           as.numeric(test_roc$auc) 
+        } else {
+          0.5
         }
       } else {
         0.5
       }
     })
-    
+
     # Combine and return
     df.combined <- data.frame(Method = sapply(results, function(x) x$Method[1]),
                               AUC = aucs,

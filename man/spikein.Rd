@@ -4,15 +4,13 @@
 \alias{spikein}
 \title{Spike-in}
 \usage{
-spikein(count_table, outcome, spikeMethod = "mult", effectSize = 2, k,
-  num.pred = FALSE, relative = TRUE)
+spikein(count_table, outcome, effectSize = 2, k, num.pred = FALSE,
+  relative = TRUE)
 }
 \arguments{
 \item{count_table}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
 
 \item{outcome}{Factor or Numeric. The outcome of interest. E.g. case and control. If the predictor has more than two levels, only the 2. level will be spiked. If the predictor is numeric it will be treated as such in the analyses}
-
-\item{spikeMethod}{Character. Multiplicative ("mult") or additive ("add") spike-in. Default "mult". Use "add" if there are negative values in count_table}
 
 \item{effectSize}{Integer. The effect size for the spike-ins. Default 2}
 

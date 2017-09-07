@@ -7,9 +7,9 @@
 testDA(data, outcome, paired = NULL, R = 10, tests = c("neb", "rai",
   "per", "bay", "adx", "wil", "ttt", "ltt", "ltt2", "erq", "ere", "msf", "zig",
   "ds2", "lim", "lli", "lli2", "aov", "lao", "lao2", "kru", "lrm", "llm",
-  "llm2", "spe"), relative = TRUE, spikeMethod = "mult", effectSize = 2,
-  k = c(5, 5, 5), cores = (detectCores() - 1), rng.seed = 123,
-  p.adj = "fdr", args = list(), verbose = FALSE)
+  "llm2", "spe"), relative = TRUE, effectSize = 2, k = c(5, 5, 5),
+  cores = (detectCores() - 1), rng.seed = 123, args = list(),
+  verbose = FALSE)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -24,8 +24,6 @@ testDA(data, outcome, paired = NULL, R = 10, tests = c("neb", "rai",
 
 \item{relative}{Logical. Should abundances be made relative? Only has effect for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm" and "spe". Default TRUE}
 
-\item{spikeMethod}{Character. Multiplicative ("mult") or additive ("add") spike-in. Default "mult". Use "add" if count_table contains negative counts.}
-
 \item{effectSize}{Integer. The effect size for the spike-ins. Default 2}
 
 \item{k}{Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). k=c(5,10,15): 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default c(5,5,5)}
@@ -33,8 +31,6 @@ testDA(data, outcome, paired = NULL, R = 10, tests = c("neb", "rai",
 \item{cores}{Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.}
 
 \item{rng.seed}{Numeric. Seed for reproducibility. Default 123}
-
-\item{p.adj}{Character. Method for pvalue adjustment. Default "fdr" (Does not affect AUC, FPR or Spike.detect.rate, these use raw p-values)}
 
 \item{args}{List. A list with lists of arguments passed to the different methods. See details for more.}
 

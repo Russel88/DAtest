@@ -27,7 +27,7 @@ DA.neb <- function(data, outcome, paired = NULL, p.adj = "fdr", ...){
   } else {
     count_table <- data
   }
-  
+
   libSize <- colSums(count_table)
   count_table <- as.data.frame.matrix(count_table)
   
@@ -35,7 +35,7 @@ DA.neb <- function(data, outcome, paired = NULL, p.adj = "fdr", ...){
     negbin <- function(x){
       fit <- NULL
       tryCatch(
-        fit <- glm.nb(x ~ outcome + offset(log(libSize)), ...), 
+        fit <- MASS::glm.nb(x ~ outcome + offset(log(libSize)),...), 
         error = function(x) fit <- NULL)
       if(!is.null(fit)) {
         if(nrow(coef(summary(fit))) > 1) {
@@ -58,19 +58,25 @@ DA.neb <- function(data, outcome, paired = NULL, p.adj = "fdr", ...){
   }
   
   res <- as.data.frame(t(as.data.frame(apply(count_table,1,negbin))))
+  if(nrow(res) == 1){
+    res <- data.frame(Estimate = rep(NA,nrow(count_table)), Std.Error = rep(NA,nrow(count_table)), z.value = rep(NA,nrow(count_table)), pval = rep(NA,nrow(count_table)))
+    rownames(res) <- rownames(count_table)                                                                                                           
+  } 
   colnames(res) <- c("Estimate","Std.Error","z value","pval")
   res$pval.adj <- p.adjust(res$pval, method = p.adj)
   res$Feature <- rownames(res)
   res$Method <- "Negbinom"
   
-  if(class(data) == "phyloseq"){
-    if(!is.null(tax_table(data, errorIfNULL = FALSE))){
-      tax <- tax_table(data)
-      res <- merge(res, tax, by.x = "Feature", by.y = "row.names")
-      rownames(res) <- NULL
-    } 
+  if(nrow(res) > 1){
+    if(class(data) == "phyloseq"){
+      if(!is.null(tax_table(data, errorIfNULL = FALSE))){
+        tax <- tax_table(data)
+        res <- merge(res, tax, by.x = "Feature", by.y = "row.names")
+        rownames(res) <- NULL
+      } 
+    }
   }
-  
+
   return(res)
   
 }

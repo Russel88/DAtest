@@ -139,33 +139,6 @@ results remove "neb" from the tests argument.
 
     mytest <- testDA(data, outcome, relative = FALSE)
 
-#### *If you have negative values in your abundance table:*
-
-    mytest <- testDA(data, outcome, relative = FALSE, spikeMethod = "add")
-
-It might be an advantage to change the test statistic of the permutation
-test for non-relative data, and this is highly recommended if the data
-contains negative values as the default log ratio then becomes
-nonsensical.
-
-Example (alternatively use medians, if data is highly non-normal):
-
-    testFun <- function(case,control){
-      mean(control) - mean(case)
-    }
-
-    testFun.pair <- function(case,control){
-      mean(control - case)
-    }
-
-    mytest <- testDA(data,outcome,relative=FALSE, 
-                     args = list(per = list(testStat=testFun, testStat.pair=testFun.pair)))
-
-Note that the output from ttt, ltt, ltt2 and wil also contains the log
-ratio fold change. This does not affect the results of the testDA
-function, but if any of these are used in the final analysis it should
-be changed if the data contains negative values.
-
 ### If you have a phyloseq object:
 
 data can also be a phyloseq object. In this case, the outcome and paired
