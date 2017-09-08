@@ -4,7 +4,7 @@
 \alias{DA.ltt2}
 \title{Welch t-test}
 \usage{
-DA.ltt2(data, outcome, paired = NULL, p.adj = "fdr", delta = 0.001,
+DA.ltt2(data, predictor, paired = NULL, p.adj = "fdr", delta = 0.001,
   testStat = function(case, control) {     log((mean(case) + 1)/(mean(control)
   + 1)) }, testStat.pair = function(case, control) {     mean(log((case +
   1)/(control + 1))) }, ...)
@@ -12,7 +12,7 @@ DA.ltt2(data, outcome, paired = NULL, p.adj = "fdr", delta = 0.001,
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
-\item{outcome}{The outcome of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+\item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
 
 \item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
 

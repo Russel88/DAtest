@@ -4,12 +4,12 @@
 \alias{DA.lao2}
 \title{ANOVA}
 \usage{
-DA.lao2(data, outcome, p.adj = "fdr", delta = 0.001, ...)
+DA.lao2(data, predictor, p.adj = "fdr", delta = 0.001, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
-\item{outcome}{The outcome of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+\item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
 
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
 

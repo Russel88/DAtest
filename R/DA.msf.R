@@ -3,22 +3,22 @@
 #' Implemented as in:
 #' https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
-#' @param outcome The outcome of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
+#' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
 #' @param ... Additional arguments for the fitFeatureModel function
 #' @export
 
-DA.msf <- function(data, outcome, p.adj = "fdr", ...){
+DA.msf <- function(data, predictor, p.adj = "fdr", ...){
 
   library(metagenomeSeq)
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
-    if(length(outcome) > 1) stop("When data is a phyloseq object outcome should only contain the name of the variables in sample_data")
-    if(!outcome %in% sample_variables(data)) stop(paste(outcome,"is not present in sample_data(data)"))
+    if(length(predictor) > 1) stop("When data is a phyloseq object predictor should only contain the name of the variables in sample_data")
+    if(!predictor %in% sample_variables(data)) stop(paste(predictor,"is not present in sample_data(data)"))
     count_table <- otu_table(data)
     if(!taxa_are_rows(data)) count_table <- t(count_table)
-    outcome <- suppressWarnings(as.matrix(sample_data(data)[,outcome]))
+    predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
   } else {
     count_table <- data
   }
@@ -27,7 +27,7 @@ DA.msf <- function(data, outcome, p.adj = "fdr", ...){
   mgsdata <- newMRexperiment(counts = count_table)
   mgsp <- cumNormStat(mgsdata)
   mgsdata <- cumNorm(mgsdata, mgsp)
-  mod <- model.matrix(~outcome)
+  mod <- model.matrix(~predictor)
   mgsfit <- fitFeatureModel(obj=mgsdata,mod=mod,...)
   temp_table <- MRtable(mgsfit, number=nrow(count_table))
   temp_table <- temp_table[!is.na(row.names(temp_table)),]

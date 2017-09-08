@@ -1,6 +1,6 @@
 #' @export
 
-prune.tests.DA <- function(tests, outcome, paired, relative){
+prune.tests.DA <- function(tests, predictor, paired, relative){
 
   # Prune test argument if packages are not installed
   if(!"baySeq" %in% rownames(installed.packages())) tests <- tests[tests != "bay"]
@@ -18,16 +18,16 @@ prune.tests.DA <- function(tests, outcome, paired, relative){
     tests <- tests[!tests %in% c("bay","adx","ere","msf","zig","aov","lao","lao2","kru","rai","spe")]
   } 
   
-  # Only include some tests if there are more than two levels in outcome
-  if(length(levels(as.factor(outcome))) > 2){
+  # Only include some tests if there are more than two levels in predictor
+  if(length(levels(as.factor(predictor))) > 2){
     tests <- tests[tests %in% c("neb","erq","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe")]
   } else {
-    # Excluded tests if levels in outcome is exactly 2
+    # Excluded tests if levels in predictor is exactly 2
     tests <- tests[!tests %in% c("aov","lao","lao2","kru","lrm","llm","llm2","spe")]
   }
   
-  # Only include specific tests if outcome is numeric
-  if(is.numeric(outcome)){
+  # Only include specific tests if predictor is numeric
+  if(is.numeric(predictor)){
     tests <- tests[tests %in% c("neb","erq","ds2","lim","lli","lli2","lrm","llm","llm2","spe")]
   } else {
     # Exclude if not numeric

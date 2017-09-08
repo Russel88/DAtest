@@ -3,7 +3,7 @@
 #' With log(librarySize) as offset.
 #' Mixed-effect model is used when a paired argument is included, with the paired variable as a random intercept.
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
-#' @param outcome The outcome of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
+#' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
 #' @param ... Additional arguments for the glm.nb/glmer.nb functions
@@ -11,18 +11,18 @@
 #' @importFrom lme4 glmer.nb glmer
 #' @export
 
-DA.neb <- function(data, outcome, paired = NULL, p.adj = "fdr", ...){
+DA.neb <- function(data, predictor, paired = NULL, p.adj = "fdr", ...){
  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
-    if(length(outcome) > 1 | length(paired) > 1) stop("When data is a phyloseq object outcome and paired should only contain the name of the variables in sample_data")
-    if(!outcome %in% sample_variables(data)) stop(paste(outcome,"is not present in sample_data(data)"))
+    if(length(predictor) > 1 | length(paired) > 1) stop("When data is a phyloseq object predictor and paired should only contain the name of the variables in sample_data")
+    if(!predictor %in% sample_variables(data)) stop(paste(predictor,"is not present in sample_data(data)"))
     if(!is.null(paired)){
       if(!paired %in% sample_variables(data)) stop(paste(paired,"is not present in sample_data(data)"))
     }
     count_table <- otu_table(data)
     if(!taxa_are_rows(data)) count_table <- t(count_table)
-    outcome <- suppressWarnings(as.matrix(sample_data(data)[,outcome]))
+    predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
     if(!is.null(paired)) paired <- suppressWarnings(as.matrix(sample_data(data)[,paired]))
   } else {
     count_table <- data
@@ -35,7 +35,7 @@ DA.neb <- function(data, outcome, paired = NULL, p.adj = "fdr", ...){
     negbin <- function(x){
       fit <- NULL
       tryCatch(
-        fit <- MASS::glm.nb(x ~ outcome + offset(log(libSize)),...), 
+        fit <- MASS::glm.nb(x ~ predictor + offset(log(libSize)),...), 
         error = function(x) fit <- NULL)
       if(!is.null(fit)) {
         if(nrow(coef(summary(fit))) > 1) {
@@ -47,7 +47,7 @@ DA.neb <- function(data, outcome, paired = NULL, p.adj = "fdr", ...){
     negbin <- function(x){
       fit <- NULL
       tryCatch(
-        fit <- lme4::glmer.nb(x ~ outcome + offset(log(libSize)) + (1|paired), ...), 
+        fit <- lme4::glmer.nb(x ~ predictor + offset(log(libSize)) + (1|paired), ...), 
         error = function(x) fit <- NULL)
       if(!is.null(fit)) {
         if(nrow(coef(summary(fit))) > 1) {

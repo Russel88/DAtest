@@ -4,12 +4,12 @@
 \alias{DA.ds2}
 \title{DESeq2}
 \usage{
-DA.ds2(data, outcome, paired = NULL, p.adj = "fdr", ...)
+DA.ds2(data, predictor, paired = NULL, p.adj = "fdr", ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
-\item{outcome}{The outcome of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+\item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
 
 \item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
 

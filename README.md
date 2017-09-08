@@ -13,9 +13,9 @@ in choosing a method based on empirical testing.
 
 #### The method goes as follows:
 
--   Shuffle outcome variable (E.g. case vs. control)
+-   Shuffle predictor variable (E.g. case vs. control)
 -   Spike in data for some randomly chosen features (OTU/gene/protein),
-    such that they are associated with the shuffled outcome
+    such that they are associated with the shuffled predictor
 -   Apply methods, and check:
     -   whether they can find the spike-ins
     -   whether the false positive rate is controlled
@@ -89,19 +89,19 @@ Therefore, we want a method with a FPR ~0.05 or lower and a high AUC.
 
 (if you have a phyloseq object, see details further down)
 
-    mytest <- testDA(data, outcome)
+    mytest <- testDA(data, predictor)
 
-data is either a matrix or data.frame with taxa/genes/proteins as rows
+`data` is either a matrix or data.frame with taxa/genes/proteins as rows
 and samples as columns.
 
-outcome is the outcome of interest, e.g. a factor denoting whether
+`predictor` is the predictor of interest, e.g. a factor denoting whether
 samples are cases or controls (in the same order as columns in data).
 
-outcome can be a factor with more than two levels, in which case only
-the second level is spiked, and if methods output several p-values, only
-the p-value associated with the second level is used.
+`predictor` can be a factor with more than two levels, in which case
+only the second level is spiked, and if methods output several p-values,
+only the p-value associated with the second level is used.
 
-outcome can also be numeric.
+`predictor` can also be continuous/quantitative
 
 *We recommend starting out with `R = 1` (only 1 run) to check if all
 methods run smoothly. If it fails, see the bottom of this tutorial*
@@ -125,27 +125,28 @@ runs slow, you might want to restart R to close the connections.
 E.g. repeated samples from same patients, or control/treatments inside
 blocks.
 
-The paired argument should be a factor with the ID of the
-patient/subject/block (in the same order as columns in data):
+The `paired` argument should be a factor with the ID of the
+patient/subject/block (in the same order as columns in `data`):
 
-    mytest <- testDA(data, outcome, paired = SubjectID)
+    mytest <- testDA(data, predictor, paired = SubjectID)
 
-When a *paired* argument is provided, the outcome is shuffled within the
-levels of the *paired* factor.
+When a `paired` argument is provided, the `predictor` is shuffled within
+the levels of the `paired` factor.
 
 Paired analysis can be very slow. If you simply can't wait to see the
 results remove "neb" from the tests argument.
 
 ### *If you have non-relative abundances, e.g. for normalized protein abundance:*
 
-    mytest <- testDA(data, outcome, relative = FALSE)
+    mytest <- testDA(data, predictor, relative = FALSE)
 
 ### If you have a phyloseq object:
 
-data can also be a phyloseq object. In this case, the outcome and paired
-arguments are the names of the variables in sample\_data(data):
+`data` can also be a phyloseq object. In this case, the `predictor` and
+`paired` arguments are the names of the variables in
+`sample_data(data)`:
 
-    mytest <- testDA(data, outcome = "Time", paired = "Patient")
+    mytest <- testDA(data, predictor = "Time", paired = "Patient")
 
 **Plot the output:**
 --------------------
@@ -165,15 +166,15 @@ How to run real (unshuffled) data
 All tests can easily be run with the original data. E.g. edgeR exact
 test:
 
-    res.ere <- DA.ere(data, outcome)
+    res.ere <- DA.ere(data, predictor)
 
 All methods can be accessed in the same way; DA."test" where "test" is
-the abbreviation given in the details of the testDA function.
+the abbreviation given in the details of the `testDA` function.
 
 Alternatively, run all (or several) methods and check which features are
 found by several methods
 
-    res.all <- allDA(data, outcome)
+    res.all <- allDA(data, predictor)
 
     head(res.all$table)
 
@@ -243,9 +244,9 @@ Implemented methods
 A paired permutation test is implemented specifically for this package.
 The test is similar to the original, but with a different test statistic
 and permutation scheme. The permutations are constrained in the paired
-version such that the outcome is only permuted within each level of the
-paired argument (e.g. subjects). The test statistic first finds the
-log-ratio between the two outcome levels (e.g. case and control) for
+version such that the predictor is only permuted within each level of
+the paired argument (e.g. subjects). The test statistic first finds the
+log-ratio between the two predictor levels (e.g. case and control) for
 each level of the paired argument and the final statistic is the mean of
 these log-ratios.
 
@@ -267,7 +268,7 @@ Extra features
 ### Passing arguments to the different tests
 
 Additional arguments can be passed to the internal functions with the
-"args" argument. It should be structured as a list with elements named
+`args` argument. It should be structured as a list with elements named
 by the tests:
 
 E.g. passing to the DA.per function that it should only run 1000

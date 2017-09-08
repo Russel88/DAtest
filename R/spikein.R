@@ -6,20 +6,20 @@
 #' https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8.
 #' 
 #' @param count_table Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns
-#' @param outcome Factor or Numeric. The outcome of interest. E.g. case and control. If the predictor has more than two levels, only the 2. level will be spiked. If the predictor is numeric it will be treated as such in the analyses
+#' @param predictor Factor or Numeric. The predictor of interest. E.g. case and control. If the predictor has more than two levels, only the 2. level will be spiked. If the predictor is numeric it will be treated as such in the analyses
 #' @param effectSize Integer. The effect size for the spike-ins. Default 2
 #' @param k Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). k=c(5,10,15): 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default c(5,5,5)
-#' @param num.pred Logical. Is the outcome numeric? Default FALSE
+#' @param num.pred Logical. Is the predictor numeric? Default FALSE
 #' @param relative Logical. Are abundances relative? Default TRUE
 #' @export
 
-spikein <- function(count_table, outcome, effectSize = 2, k, num.pred = FALSE, relative = TRUE){
+spikein <- function(count_table, predictor, effectSize = 2, k, num.pred = FALSE, relative = TRUE){
   
   if(effectSize < 0) stop("Effect size should be positive")
   if(effectSize == 1) spikeMethod <- "none" else spikeMethod <- "mult"
 
   count_table <- as.data.frame(count_table)
-  if(!num.pred) outcome <- as.numeric(as.factor(outcome))-1
+  if(!num.pred) predictor <- as.numeric(as.factor(predictor))-1
   
   # Choose Features to spike
   propcount <- apply(count_table,2,function(x) x/sum(x))
@@ -30,7 +30,7 @@ spikein <- function(count_table, outcome, effectSize = 2, k, num.pred = FALSE, r
     approved_count_abundances <- count_abundances
   } else {
     approved_count_abundances <- count_abundances[ 
-      names(count_abundances) %in% row.names( count_table[ rowSums(count_table[,outcome == 1]) > 0, outcome == 1] ) ]
+      names(count_abundances) %in% row.names( count_table[ rowSums(count_table[,predictor == 1]) > 0, predictor == 1] ) ]
   }
     
   lower_tert <- names(approved_count_abundances[approved_count_abundances < quantile(approved_count_abundances,1/3)])
@@ -46,18 +46,18 @@ spikein <- function(count_table, outcome, effectSize = 2, k, num.pred = FALSE, r
   if(spikeMethod == "mult"){
     
     if(num.pred){
-      outcome <- as.numeric(outcome)
+      predictor <- as.numeric(predictor)
       
       oldmat <- as.matrix(as.data.frame(count_table))
 
-      count_table[spike_feature_index,] <- t(log(t(count_table[spike_feature_index, ]) * (as.numeric((effectSize) ^ scale(outcome)))+1))
+      count_table[spike_feature_index,] <- t(log(t(count_table[spike_feature_index, ]) * (as.numeric((effectSize) ^ scale(predictor)))+1))
       
       for(i in spike_feature_index){
         count_table[i,] <- (count_table[i,] - min(count_table[i,]))/(max(count_table[i,])-min(count_table[i,])) * (max(oldmat[i,]) - min(oldmat[i,])) + min(oldmat[i,])
       }
       
     } else {
-      count_table[spike_feature_index,outcome==1] <- count_table[spike_feature_index, outcome==1] * effectSize
+      count_table[spike_feature_index,predictor==1] <- count_table[spike_feature_index, predictor==1] * effectSize
     }
   }
 

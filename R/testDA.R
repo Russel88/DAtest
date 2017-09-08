@@ -2,7 +2,7 @@
 #'
 #' Calculating false positive rates and AUC (Area Under the receiver operator Curve) for various differential abundance methods
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
-#' @param outcome The outcome of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the outcome is numeric it will be treated as such in the analyses
+#' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the predictor is numeric it will be treated as such in the analyses
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli" and "lli2"
 #' @param R Integer. Number of times to run the tests. Default 10
 #' @param tests Character. Which tests to include. Default all (See below for details)
@@ -90,20 +90,23 @@
 #' @importFrom pROC roc
 #' @export
 
-testDA <- function(data, outcome, paired = NULL, R = 10, tests = c("neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","ere","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 2, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, args = list(), verbose = FALSE){
+testDA <- function(data, predictor, paired = NULL, R = 10, tests = c("neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","ere","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 2, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, args = list(), verbose = FALSE){
 
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
-    if(length(outcome) > 1 | length(paired) > 1) stop("When data is a phyloseq object outcome and paired should only contain the name of the variables in sample_data")
-    if(!outcome %in% sample_variables(data)) stop(paste(outcome,"is not present in sample_data(data)"))
+    if(length(predictor) > 1 | length(paired) > 1) stop("When data is a phyloseq object predictor and paired should only contain the name of the variables in sample_data")
+    if(!predictor %in% sample_variables(data)) stop(paste(predictor,"is not present in sample_data(data)"))
     if(!is.null(paired)){
       if(!paired %in% sample_variables(data)) stop(paste(paired,"is not present in sample_data(data)"))
     }
     count_table <- otu_table(data)
     if(!taxa_are_rows(data)) count_table <- t(count_table)
-    outcome <- suppressWarnings(as.matrix(sample_data(data)[,outcome]))
+    predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
     if(!is.null(paired)) paired <- suppressWarnings(as.matrix(sample_data(data)[,paired]))
   } else {
+    if(!is.null(paired)){
+      if(length(paired) == 1) stop("paired argument should be a vector with length equal to columns in data")
+    }
     count_table <- data
   }
   
@@ -114,11 +117,11 @@ testDA <- function(data, outcome, paired = NULL, R = 10, tests = c("neb","rai","
   # Checks
   if(min(count_table) < 0) stop("Count_table contains negative values!")
   if(sum(colSums(count_table) == 0) > 0) stop("Some samples are empty!")
-  if(ncol(count_table) != length(outcome)) stop("Number of samples in count_table does not match length of outcome")
-  if(length(levels(as.factor(outcome))) < 2) stop("outcome should have at least two levels")
+  if(ncol(count_table) != length(predictor)) stop("Number of samples in count_table does not match length of predictor")
+  if(length(levels(as.factor(predictor))) < 2) stop("predictor should have at least two levels")
   
   # Prune tests argument
-  tests <- prune.tests.DA(tests, outcome, paired, relative)
+  tests <- prune.tests.DA(tests, predictor, paired, relative)
   tests.par <- paste0(unlist(lapply(1:R, function(x) rep(x,length(tests)))),"_",rep(tests,R))
   
   if(verbose){
@@ -133,19 +136,19 @@ testDA <- function(data, outcome, paired = NULL, R = 10, tests = c("neb","rai","
   if(verbose) message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
   count_table <- count_table[rowSums(count_table) > 0,]
   
-  # Numeric outcome
-  if(is.numeric(outcome)){
+  # Numeric predictor
+  if(is.numeric(predictor)){
     num.pred <- TRUE
-    message("outcome is assumed to be numeric")
+    message("predictor is assumed to be a continuous/quantitative variable")
   } else {
     num.pred <- FALSE
   }
   
-  # Shuffle outcome
+  # Shuffle predictor
   if(is.null(paired)){
-    rands <- lapply(1:R,function(x) sample(outcome))
+    rands <- lapply(1:R,function(x) sample(predictor))
   } else {
-    rands <- lapply(1:R,function(x) unsplit(lapply(split(outcome,paired), sample), paired))
+    rands <- lapply(1:R,function(x) unsplit(lapply(split(predictor,paired), sample), paired))
   }
   
   # Spikeins

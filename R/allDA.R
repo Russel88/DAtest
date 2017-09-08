@@ -2,7 +2,7 @@
 #'
 #' Run many differential abundance tests at a time
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
-#' @param outcome The outcome of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the outcome is numeric it will be treated as such in the analyses
+#' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the predictor is numeric it will be treated as such in the analyses
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli" and "lli2"
 #' @param tests Character. Which tests to include. Default all (See below for details)
 #' @param relative Logical. Should abundances be made relative? Only has effect for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm" and "spe". Default TRUE
@@ -80,31 +80,31 @@
 #' 
 #' @export
 
-allDA <- function(data, outcome, paired = NULL, tests = c("spe","per","bay","adx","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2","lim","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), verbose = FALSE){
+allDA <- function(data, predictor, paired = NULL, tests = c("spe","per","bay","adx","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2","lim","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), verbose = FALSE){
 
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
-    if(length(outcome) > 1 | length(paired) > 1) stop("When data is a phyloseq object outcome and paired should only contain the name of the variables in sample_data")
-    if(!outcome %in% sample_variables(data)) stop(paste(outcome,"is not present in sample_data(data)"))
+    if(length(predictor) > 1 | length(paired) > 1) stop("When data is a phyloseq object predictor and paired should only contain the name of the variables in sample_data")
+    if(!predictor %in% sample_variables(data)) stop(paste(predictor,"is not present in sample_data(data)"))
     if(!is.null(paired)){
       if(!paired %in% sample_variables(data)) stop(paste(paired,"is not present in sample_data(data)"))
     }
     count_table <- otu_table(data)
     if(!taxa_are_rows(data)) count_table <- t(count_table)
-    outcome <- suppressWarnings(as.matrix(sample_data(data)[,outcome]))
+    predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
     if(!is.null(paired)) paired <- suppressWarnings(as.matrix(sample_data(data)[,paired]))
   } else {
     count_table <- data
   }
   
   # Checks
-  if(min(count_table) < 0 & is.numeric(outcome)) stop("Numeric outcome and negative values in count_table is currently not supported")
+  if(min(count_table) < 0 & is.numeric(predictor)) stop("Numeric predictor and negative values in count_table is currently not supported")
   if(sum(colSums(count_table) == 0) > 0) stop("Some samples are empty!")
-  if(ncol(count_table) != length(outcome)) stop("Number of samples in count_table does not match length of outcome")
-  if(length(levels(as.factor(outcome))) < 2) stop("outcome should have at least two levels")
+  if(ncol(count_table) != length(predictor)) stop("Number of samples in count_table does not match length of predictor")
+  if(length(levels(as.factor(predictor))) < 2) stop("predictor should have at least two levels")
   
   # Prune tests argument
-  tests <- prune.tests.DA(tests, outcome, paired, relative)
+  tests <- prune.tests.DA(tests, predictor, paired, relative)
   
   if(verbose){
     message(paste("Tests are run in the following order:"))
@@ -119,7 +119,7 @@ allDA <- function(data, outcome, paired = NULL, tests = c("spe","per","bay","adx
   count_table <- count_table[rowSums(count_table) > 0,]
   
   # Run tests
-  results <- run.tests.DA(count_table, outcome, paired, tests, relative, p.adj, args, cores)
+  results <- run.tests.DA(count_table, predictor, paired, tests, relative, args, cores, p.adj)
   
   # Positives
   Pos.raw <- sapply(results,function(x) x[x$pval < 0.05,"Feature"])

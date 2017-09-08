@@ -4,10 +4,10 @@
 #' https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8.
 #' P-values are now two-sided, and test statistic is a simple log fold change
 #' 
-#' A paired permutation test is implemented specifically for this package. The test is similar to the original, but with a different test statistic and permutation scheme. The permutations are constrained in the paired version such that the outcome is only permuted within each level of the paired argument (e.g. subjects). The test statistic first finds the log-ratio between the two outcome levels (e.g. case and control) for each level of the paired argument and the final statistic is the mean of these log-ratios.
+#' A paired permutation test is implemented specifically for this package. The test is similar to the original, but with a different test statistic and permutation scheme. The permutations are constrained in the paired version such that the predictor is only permuted within each level of the paired argument (e.g. subjects). The test statistic first finds the log-ratio between the two predictor levels (e.g. case and control) for each level of the paired argument and the final statistic is the mean of these log-ratios.
 #' 
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
-#' @param outcome The outcome of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
+#' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param relative Logical. Should count_table be normalized to relative abundances. Default TRUE
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
@@ -17,18 +17,18 @@
 #' @param margin Numeric. Margin for when to stop iterations if p-value is high and unlikely to become low
 #' @export
 
-DA.per <- function(data, outcome, paired = NULL, relative = TRUE, p.adj = "fdr", testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))}, noOfIterations = 10000, margin = 50){
+DA.per <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr", testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))}, noOfIterations = 10000, margin = 50){
 
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
-    if(length(outcome) > 1 | length(paired) > 1) stop("When data is a phyloseq object outcome and paired should only contain the name of the variables in sample_data")
-    if(!outcome %in% sample_variables(data)) stop(paste(outcome,"is not present in sample_data(data)"))
+    if(length(predictor) > 1 | length(paired) > 1) stop("When data is a phyloseq object predictor and paired should only contain the name of the variables in sample_data")
+    if(!predictor %in% sample_variables(data)) stop(paste(predictor,"is not present in sample_data(data)"))
     if(!is.null(paired)){
       if(!paired %in% sample_variables(data)) stop(paste(paired,"is not present in sample_data(data)"))
     }
     count_table <- otu_table(data)
     if(!taxa_are_rows(data)) count_table <- t(count_table)
-    outcome <- suppressWarnings(as.matrix(sample_data(data)[,outcome]))
+    predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
     if(!is.null(paired)) paired <- suppressWarnings(as.matrix(sample_data(data)[,paired]))
   } else {
     count_table <- data
@@ -36,11 +36,11 @@ DA.per <- function(data, outcome, paired = NULL, relative = TRUE, p.adj = "fdr",
   
   if(!is.null(paired)){
     count_table <- count_table[,order(paired)]
-    outcome <- outcome[order(paired)]
+    predictor <- predictor[order(paired)]
     testStat <- testStat.pair
   }
   
-  outcome <- as.numeric(as.factor(outcome))-1
+  predictor <- as.numeric(as.factor(predictor))-1
   if(relative){
     count.rel <- apply(count_table,2,function(x) x/sum(x))
   } else {
@@ -49,15 +49,15 @@ DA.per <- function(data, outcome, paired = NULL, relative = TRUE, p.adj = "fdr",
   
   nullStatList <- list()
   
-  # Create shuffled outcomes
-  shuffledOutcomesList <- list()
+  # Create shuffled predictors
+  shuffledpredictorsList <- list()
   if(is.null(paired)){
     for (k in 1:noOfIterations){
-      shuffledOutcomesList[[k]] <- sample(outcome)
+      shuffledpredictorsList[[k]] <- sample(predictor)
     }
   } else {
     for (k in 1:noOfIterations){
-      shuffledOutcomesList[[k]] <- unlist(lapply(1:(length(outcome)/2),function(x) sample(c(0,1))))
+      shuffledpredictorsList[[k]] <- unlist(lapply(1:(length(predictor)/2),function(x) sample(c(0,1))))
     }
   }
   
@@ -70,15 +70,15 @@ DA.per <- function(data, outcome, paired = NULL, relative = TRUE, p.adj = "fdr",
     
     count_row      <- as.numeric(count_table[i,])
     
-    real_case    <- count_row[outcome==1]
-    real_control <- count_row[outcome==0]
+    real_case    <- count_row[predictor==1]
+    real_control <- count_row[predictor==0]
     realStat     <- testStat(real_case,real_control) 
     
     Wnull <- numeric(noOfIterations)
     
     for(j in 1:noOfIterations){
-      case     <- count_row[shuffledOutcomesList[[j]]==1]
-      control  <- count_row[shuffledOutcomesList[[j]]==0]
+      case     <- count_row[shuffledpredictorsList[[j]]==1]
+      control  <- count_row[shuffledpredictorsList[[j]]==0]
       Wnull[j] <- testStat(case,control)
       
       if(j %in% 10^(1:100)){

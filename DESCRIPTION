@@ -1,6 +1,6 @@
 Package: DAtest
 Title: Comparing Differential Abundance methods
-Version: 2.1.0
+Version: 2.2.0
 Authors@R: person("Jakob", "Russel", email = "russel2620@gmail.com", role = c("aut", "cre"))
 Description: What the title says.
 Depends: R (>= 3.2.5)

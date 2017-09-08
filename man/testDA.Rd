@@ -4,7 +4,7 @@
 \alias{testDA}
 \title{Comparing differential abundance methods by FPR and AUC}
 \usage{
-testDA(data, outcome, paired = NULL, R = 10, tests = c("neb", "rai",
+testDA(data, predictor, paired = NULL, R = 10, tests = c("neb", "rai",
   "per", "bay", "adx", "wil", "ttt", "ltt", "ltt2", "erq", "ere", "msf", "zig",
   "ds2", "lim", "lli", "lli2", "aov", "lao", "lao2", "kru", "lrm", "llm",
   "llm2", "spe"), relative = TRUE, effectSize = 2, k = c(5, 5, 5),
@@ -14,7 +14,7 @@ testDA(data, outcome, paired = NULL, R = 10, tests = c("neb", "rai",
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
-\item{outcome}{The outcome of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the outcome is numeric it will be treated as such in the analyses}
+\item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the predictor is numeric it will be treated as such in the analyses}
 
 \item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli" and "lli2"}
 

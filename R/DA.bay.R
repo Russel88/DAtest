@@ -3,7 +3,7 @@
 #' Implemented as in:
 #' https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
-#' @param outcome The outcome of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
+#' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
 #' @param samplesize How large a sample should be taken in estimating the priors? Default 1e5
 #' @param samplingSubset If given, the priors will be sampled only from the subset specified. Default NULL
@@ -14,23 +14,23 @@
 #' @param ... Additional arguments to the getLikelihoods function
 #' @export
 
-DA.bay <- function(data, outcome, p.adj = "fdr", samplesize = 1e5, samplingSubset = NULL, equalDispersions = TRUE, estimation = "QL", zeroML = FALSE, consensus = FALSE, ...){
+DA.bay <- function(data, predictor, p.adj = "fdr", samplesize = 1e5, samplingSubset = NULL, equalDispersions = TRUE, estimation = "QL", zeroML = FALSE, consensus = FALSE, ...){
   
   library(baySeq)
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
-    if(length(outcome) > 1) stop("When data is a phyloseq object outcome should only contain the name of the variables in sample_data")
-    if(!outcome %in% sample_variables(data)) stop(paste(outcome,"is not present in sample_data(data)"))
+    if(length(predictor) > 1) stop("When data is a phyloseq object predictor should only contain the name of the variables in sample_data")
+    if(!predictor %in% sample_variables(data)) stop(paste(predictor,"is not present in sample_data(data)"))
     count_table <- otu_table(data)
     if(!taxa_are_rows(data)) count_table <- t(count_table)
-    outcome <- suppressWarnings(as.matrix(sample_data(data)[,outcome]))
+    predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
   } else {
     count_table <- data
   }
   
-  outcome <- as.numeric(as.factor(outcome))-1
-  CD <- new("countData", data=as.matrix(count_table), replicates = ifelse(as.logical(outcome), "simA", "simB"), groups = list(NDE = rep(1,length(outcome)),DE=ifelse(as.logical(outcome),1,2))) # simA = cases
+  predictor <- as.numeric(as.factor(predictor))-1
+  CD <- new("countData", data=as.matrix(count_table), replicates = ifelse(as.logical(predictor), "simA", "simB"), groups = list(NDE = rep(1,length(predictor)),DE=ifelse(as.logical(predictor),1,2))) # simA = cases
   libsizes(CD) <- getLibsizes(CD)
   CD@annotation <- data.frame(name=rownames(count_table))
   

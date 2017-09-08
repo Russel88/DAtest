@@ -4,7 +4,7 @@
 \alias{allDA}
 \title{Run many differential abundance methods}
 \usage{
-allDA(data, outcome, paired = NULL, tests = c("spe", "per", "bay", "adx",
+allDA(data, predictor, paired = NULL, tests = c("spe", "per", "bay", "adx",
   "wil", "ttt", "ltt", "ltt2", "neb", "erq", "ere", "msf", "zig", "ds2", "lim",
   "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "rai"), relative = TRUE,
   cores = (detectCores() - 1), rng.seed = 123, p.adj = "fdr",
@@ -13,7 +13,7 @@ allDA(data, outcome, paired = NULL, tests = c("spe", "per", "bay", "adx",
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
-\item{outcome}{The outcome of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the outcome is numeric it will be treated as such in the analyses}
+\item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the predictor is numeric it will be treated as such in the analyses}
 
 \item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli" and "lli2"}
 
