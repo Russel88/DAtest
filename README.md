@@ -46,7 +46,6 @@ Overview of this tutorial
     data](#how-to-run-real-(unshuffled)-data)
 -   [Implemented methods](#implemented-methods)
 -   [Extra features](#extra-features)
--   [Errors and issues](#errors-and-issues)
 
 Installation of packages
 ========================
@@ -102,9 +101,6 @@ only the second level is spiked, and if methods output several p-values,
 only the p-value associated with the second level is used.
 
 `predictor` can also be continuous/quantitative
-
-*We recommend starting out with `R = 1` (only 1 run) to check if all
-methods run smoothly. If it fails, see the bottom of this tutorial*
 
 **The function automatically uses multiple CPUs for fast execution**
 
@@ -310,12 +306,3 @@ passed to a specific test:
 -   llm2 - Passed to lm and lme
 -   rai - Passed to raida
 -   spe - Passed to cor.test
-
-Errors and issues
-=================
-
-If a method fails the following is usually printed:
-`Error in { : task X failed`. To find the method corresponding to X, run
-the function again with `verbose = TRUE`. This will print the order of
-the tests, and test number X can then be excluded from the `tests`
-argument.

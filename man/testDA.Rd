@@ -8,8 +8,7 @@ testDA(data, predictor, paired = NULL, R = 10, tests = c("neb", "rai",
   "per", "bay", "adx", "wil", "ttt", "ltt", "ltt2", "erq", "ere", "msf", "zig",
   "ds2", "lim", "lli", "lli2", "aov", "lao", "lao2", "kru", "lrm", "llm",
   "llm2", "spe"), relative = TRUE, effectSize = 2, k = c(5, 5, 5),
-  cores = (detectCores() - 1), rng.seed = 123, args = list(),
-  verbose = FALSE)
+  cores = (detectCores() - 1), rng.seed = 123, args = list())
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -33,8 +32,6 @@ testDA(data, predictor, paired = NULL, R = 10, tests = c("neb", "rai",
 \item{rng.seed}{Numeric. Seed for reproducibility. Default 123}
 
 \item{args}{List. A list with lists of arguments passed to the different methods. See details for more.}
-
-\item{verbose}{Logical. Print information during run}
 }
 \value{
 An object of class DA, which contains a list of results:

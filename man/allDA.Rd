@@ -8,7 +8,7 @@ allDA(data, predictor, paired = NULL, tests = c("spe", "per", "bay", "adx",
   "wil", "ttt", "ltt", "ltt2", "neb", "erq", "ere", "msf", "zig", "ds2", "lim",
   "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "rai"), relative = TRUE,
   cores = (detectCores() - 1), rng.seed = 123, p.adj = "fdr",
-  args = list(), verbose = FALSE)
+  args = list())
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -28,8 +28,6 @@ allDA(data, predictor, paired = NULL, tests = c("spe", "per", "bay", "adx",
 \item{p.adj}{Character. Method for pvalue adjustment. Default "fdr"}
 
 \item{args}{List. A list with lists of arguments passed to the different methods. See details for more.}
-
-\item{verbose}{Logical. Print information during run}
 }
 \value{
 A list of results:

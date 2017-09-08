@@ -10,7 +10,6 @@
 #' @param rng.seed Numeric. Seed for reproducibility. Default 123
 #' @param p.adj Character. Method for pvalue adjustment. Default "fdr"
 #' @param args List. A list with lists of arguments passed to the different methods. See details for more.
-#' @param verbose Logical. Print information during run
 #' @details Currently implemented methods:
 #' \itemize{
 #'  \item per - Permutation test with user defined test statistic
@@ -80,7 +79,7 @@
 #' 
 #' @export
 
-allDA <- function(data, predictor, paired = NULL, tests = c("spe","per","bay","adx","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2","lim","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), verbose = FALSE){
+allDA <- function(data, predictor, paired = NULL, tests = c("spe","per","bay","adx","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2","lim","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list()){
 
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -104,18 +103,14 @@ allDA <- function(data, predictor, paired = NULL, tests = c("spe","per","bay","a
   if(length(levels(as.factor(predictor))) < 2) stop("predictor should have at least two levels")
   
   # Prune tests argument
+  tests <- unique(tests)
   tests <- prune.tests.DA(tests, predictor, paired, relative)
   
-  if(verbose){
-    message(paste("Tests are run in the following order:"))
-    print(as.data.frame(tests))
-  } 
-  
   set.seed(rng.seed)
-  if(verbose) message(paste("Seed is set to",rng.seed))
+  message(paste("Seed is set to",rng.seed))
   
   # Remove Features not present in any samples
-  if(verbose) message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
+  message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
   count_table <- count_table[rowSums(count_table) > 0,]
   
   # Run tests
