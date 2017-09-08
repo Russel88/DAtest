@@ -87,7 +87,7 @@ Therefore, we want a method with a FPR ~0.05 or lower and a high AUC.
 
 ### **Run the test:**
 
-(if you have a phyloseq object, scroll down)
+(if you have a phyloseq object, see details further down)
 
     mytest <- testDA(data, outcome)
 
@@ -103,6 +103,9 @@ the p-value associated with the second level is used.
 
 outcome can also be numeric.
 
+*We recommend starting out with `R = 1` (only 1 run) to check if all
+methods run smoothly. If it fails, see the bottom of this tutorial*
+
 **The function automatically uses multiple CPUs for fast execution**
 
 The methods run in parallel, and by default the number of cores used is
@@ -115,9 +118,7 @@ terminated before ending you might get the following warning:
 This can safely be ignored.
 
 If you have terminated the function before it ended and your computer
-runs slow, you might wan't to call `closeAllConnections()`. **WARNING:**
-This might affect other R process you have running! Alternatively,
-restart R.
+runs slow, you might want to restart R to close the connections.
 
 ### *If you have a paired/blocked experimental design:*
 
@@ -312,8 +313,8 @@ passed to a specific test:
 Errors and issues
 =================
 
-If a method fails the following is usually printed: *Error in { : task 1
-failed - "task X failed"*. To find the method corresponding to X, run
-the function again with *verbose = TRUE*. This will print the order of
-the tests, and test number X can then be excluded from the *tests*
+If a method fails the following is usually printed:
+`Error in { : task X failed`. To find the method corresponding to X, run
+the function again with `verbose = TRUE`. This will print the order of
+the tests, and test number X can then be excluded from the `tests`
 argument.

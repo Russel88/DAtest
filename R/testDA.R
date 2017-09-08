@@ -119,6 +119,7 @@ testDA <- function(data, outcome, paired = NULL, R = 10, tests = c("neb","rai","
   
   # Prune tests argument
   tests <- prune.tests.DA(tests, outcome, paired, relative)
+  tests.par <- paste0(unlist(lapply(1:R, function(x) rep(x,length(tests)))),"_",rep(tests,R))
   
   if(verbose){
     message(paste("Tests are run in the following order:"))
@@ -135,68 +136,146 @@ testDA <- function(data, outcome, paired = NULL, R = 10, tests = c("neb","rai","
   # Numeric outcome
   if(is.numeric(outcome)){
     num.pred <- TRUE
-    print("outcome is assumed to be numeric")
+    message("outcome is assumed to be numeric")
   } else {
     num.pred <- FALSE
   }
   
-  final.results <- foreach::foreach(r = 1:R) %do% {
+  # Shuffle outcome
+  if(is.null(paired)){
+    rands <- lapply(1:R,function(x) sample(outcome))
+  } else {
+    rands <- lapply(1:R,function(x) unsplit(lapply(split(outcome,paired), sample), paired))
+  }
+  
+  # Spikeins
+  spikeds <- lapply(1:R,function(x) spikein(count_table, rands[[x]], effectSize,  k, num.pred, relative))
+  count_tables <- lapply(1:R,function(x) spikeds[[x]][[1]])
+  
+  ### Run tests
+  # Progress bar
+  pb <- txtProgressBar(max = length(tests.par), style = 3)
+  progress <- function(n) setTxtProgressBar(pb, n)
+  opts <- list(progress = progress)
+  
+  # Start parallel
+  if(cores == 1) {
+    registerDoSEQ() 
+  } else {
+    cl <- makeCluster(cores)
+    registerDoSNOW(cl)
+    on.exit(stopCluster(cl))
+  }
+  
+  results <- foreach(i = tests.par , .options.snow = opts) %dopar% {
 
-    message(paste0(r,". Run:"))
+    run.no <- as.numeric(gsub("_.*","",i))
+    i <- gsub(".*_","",i)
     
-    # Shuffle outcome
-    if(is.null(paired)){
-      rand <- sample(outcome)
-    } else {
-      rand <- unsplit(lapply(split(outcome,paired), sample), paired)
+    # Extract test arguments
+    if(!all(names(args) %in% tests)) stop("One or more names in list with additional arguments does not match names of tests")
+    for(j in seq_along(args)){
+      assign(paste0(names(args)[j],".args"),args[[j]],pos=1)
+    }
+    test.args <- paste0(tests,".args")
+    test.boo <- lapply(test.args,exists)
+    for(l in seq_along(test.args)){
+      if(test.boo[l] == FALSE) assign(test.args[l], list(),pos=1)
     }
     
-    # Spikein
-    spiked <- spikein(count_table, rand, effectSize,  k, num.pred, relative)
-    count_table <- spiked[[1]]
+    res.sub <- switch(i,
+                      wil = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, relative),wil.args)),
+                      ttt = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, relative),ttt.args)),
+                      ltt = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative),ltt.args)),
+                      ltt2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),ltt2.args)),
+                      neb = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),neb.args)),
+                      erq = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),erq.args)),
+                      ere = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),ere.args)),
+                      msf = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),msf.args)),
+                      zig = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),zig.args)),
+                      ds2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),ds2.args)),
+                      per = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, relative),per.args)),
+                      bay = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),bay.args)),
+                      adx = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),adx.args)),
+                      lim = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative),lim.args)),
+                      lli = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative),lli.args)),
+                      lli2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),lli2.args)),
+                      kru = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]], relative),kru.args)),
+                      aov = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]], relative),aov.args)),
+                      lao = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],relative),lao.args)),
+                      lao2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),lao2.args)),
+                      lrm = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, relative),lrm.args)),
+                      llm = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative),llm.args)),
+                      llm2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),llm2.args)),
+                      rai = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),rai.args)),
+                      spe = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],relative),spe.args)))
     
-    # Run tests
-    results <- run.tests.DA(count_table, rand, paired, tests, relative, args, cores)
+    res.sub[is.na(res.sub$pval),"pval"] <- 1
     
+    return(res.sub)
+    
+  }
+  names(results) <- tests.par
+  
+  final.results <- foreach(r = 1:R) %do% {
+
+    res.sub <- results[names(results)[gsub("_.*","",names(results)) == r]]
+    
+    # Split ALDEx2 results in t.test and wilcoxon
+    if("adx" %in% tests){
+      adx.t <- as.data.frame(res.sub[paste0(r,"_","adx")])[,c(1:7,12)]
+      adx.w <- as.data.frame(res.sub[paste0(r,"_","adx")])[,c(1:7,12)]
+      colnames(adx.t) <- gsub(".*_adx.","",colnames(adx.t))
+      colnames(adx.w) <- colnames(adx.t)
+      adx.t$pval <- as.numeric(as.data.frame(res.sub[paste0(r,"_","adx")])[,8])
+      adx.w$pval <- as.numeric(as.data.frame(res.sub[paste0(r,"_","adx")])[,10])
+      adx.t$Method <- "ALDEx2 t-test"
+      adx.w$Method <- "ALDEx2 wilcox"
+      res.sub[paste0(r,"_","adx")] <- NULL
+      res.names <- names(res.sub)
+      res.sub <- c(res.sub,list(adx.t),list(adx.w))
+      names(res.sub) <- c(res.names,paste0(r,"_","adx.t"),paste0(r,"_","adx.w"))
+    }
+
     # Insert spiked column
-    newnames <- names(results)
-    results <- foreach(rsp = 1:length(results)) %do% {
-      temp <- results[[rsp]]
+    newnames <- gsub(".*_","",names(res.sub))
+    res.sub <- foreach(rsp = 1:length(res.sub)) %do% {
+      temp <- res.sub[[rsp]]
       temp$Spiked <- "No"
-      temp[temp$Feature %in% spiked[[2]],"Spiked"] <- "Yes"
+      temp[temp$Feature %in% spikeds[[r]][[2]],"Spiked"] <- "Yes"
       return(temp)
     }
-    names(results) <- newnames
+    names(res.sub) <- newnames
     
     # Confusion matrix
-    totalPos <- sapply(results,function(x) nrow(x[x$pval < 0.05,]))
-    totalNeg <- sapply(results,function(x) nrow(x[x$pval >= 0.05,])) 
+    totalPos <- sapply(res.sub,function(x) nrow(x[x$pval < 0.05,]))
+    totalNeg <- sapply(res.sub,function(x) nrow(x[x$pval >= 0.05,])) 
     trueNeg <- totalNeg  #if effectSize == 1
     truePos <- 0  #if effectSize == 1
     falseNeg <- 0 #if effectSize == 1
     if(effectSize != 1){
-      truePos <- sapply(results, function(x) sum(x[x$pval < 0.05,"Feature"] %in% spiked[[2]]))
-      falseNeg <- sapply(results, function(x) sum(x[x$pval >= 0.05,"Feature"] %in% spiked[[2]]))
+      truePos <- sapply(res.sub, function(x) sum(x[x$pval < 0.05,"Feature"] %in% spikeds[[r]][[2]]))
+      falseNeg <- sapply(res.sub, function(x) sum(x[x$pval >= 0.05,"Feature"] %in% spikeds[[r]][[2]]))
     }
     falsePos <- totalPos - truePos
     trueNeg <- totalNeg - falseNeg
     
     # FPR 
-    fprs <- sapply(1:length(results), function(x) {
+    fprs <- sapply(1:length(res.sub), function(x) {
       if(totalPos[x] != 0){
         falsePos[x] / (totalPos[x] + totalNeg[x])
       } else {0}})
     
     
     # Spike detection rate
-    sdrs <- sapply(1:length(results), function(x) truePos[x] / sum(k))
+    sdrs <- sapply(1:length(res.sub), function(x) truePos[x] / sum(k))
     
     # AUC
-    aucs <- sapply(1:length(results), function(x) {
+    aucs <- sapply(1:length(res.sub), function(x) {
       if(effectSize != 1){
         test_roc <- NULL
         tryCatch(
-          test_roc <- pROC::roc(as.numeric(results[[x]]$Feature %in% spiked[[2]]) ~ results[[x]]$pval, auc=TRUE, direction = ">"),
+          test_roc <- pROC::roc(as.numeric(res.sub[[x]]$Feature %in% spikeds[[r]][[2]]) ~ res.sub[[x]]$pval, auc=TRUE, direction = ">"),
           error = function(e) NULL)
         if(!is.null(test_roc)){
           as.numeric(test_roc$auc) 
@@ -207,16 +286,16 @@ testDA <- function(data, outcome, paired = NULL, R = 10, tests = c("neb","rai","
         0.5
       }
     })
-
+    
     # Combine and return
-    df.combined <- data.frame(Method = sapply(results, function(x) x$Method[1]),
+    df.combined <- data.frame(Method = sapply(res.sub, function(x) x$Method[1]),
                               AUC = aucs,
                               FPR = fprs,
                               Spike.detect.rate = sdrs,
                               Run = r)
     rownames(df.combined) <- NULL
-    
-    return(list(df.combined,results))
+
+    return(list(df.combined,res.sub))
     
   }
   
