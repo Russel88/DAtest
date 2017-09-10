@@ -237,6 +237,7 @@ Implemented methods
 -   rai -
     [RAIDA](https://academic.oup.com/bioinformatics/article/31/14/2269/256302/A-robust-approach-for-identifying-differentially?searchresult=1)
 -   spe - Spearman Rank Correlation
+-   pea - Pearson Correlation
 
 ### Paired permutation test
 
@@ -309,3 +310,4 @@ passed to a specific test:
 -   llm2 - Passed to lm, lme and DA.llm2
 -   rai - Passed to raida
 -   spe - Passed to cor.test
+-   pea - Passed to cor.test
