@@ -67,17 +67,17 @@
 #'  \item zig - Passed to fitZig
 #'  \item ds2 - Passed to DESeq
 #'  \item lim - Passed to eBayes
-#'  \item lli - Passed to eBayes
-#'  \item lli2 - Passed to eBayes
+#'  \item lli - Passed to eBayes and DA.lli
+#'  \item lli2 - Passed to eBayes and DA.lli2
 #'  \item kru - Passed to kruskal.test
 #'  \item aov - Passed to aov
-#'  \item lao - Passed to aov
-#'  \item lao2 - Passed to aov
+#'  \item lao - Passed to aov and DA.lao
+#'  \item lao2 - Passed to aov and DA.lao2
 #'  \item lrm - Passed to lm and lme
 #'  \item llm - Passed to lm, lme and DA.llm
 #'  \item llm2 - Passed to lm, lme and DA.llm2
 #'  \item rai - Passed to raida
-#'  \item spe - Passed to cor.test 
+#'  \item spe - Passed to cor.test
 #'  \item pea - Passed to cor.test
 #' }
 #' @return An object of class DA, which contains a list of results:
