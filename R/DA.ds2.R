@@ -37,7 +37,7 @@ DA.ds2 <- function(data, predictor, paired = NULL, p.adj = "fdr", ...){
     predictordf <- data.frame(predictor = factor(predictor),
                             paired = factor(paired))
     row.names(predictordf) <- colnames(count_table)
-    x <- DESeqDataSetFromMatrix(countData = as.data.frame(count_table), colData = predictordf , design = ~ paired + predictor)
+    x <- DESeqDataSetFromMatrix(countData = as.data.frame(count_table), colData = predictordf , design = ~ predictor + paired)
   }
   
   gm_mean = function(x, na.rm=TRUE){

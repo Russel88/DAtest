@@ -19,7 +19,7 @@ allDA(data, predictor, paired = NULL, tests = c("pea", "spe", "per", "bay",
 
 \item{tests}{Character. Which tests to include. Default all (See below for details)}
 
-\item{relative}{Logical. Should abundances be made relative? Only has effect for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea". Default TRUE}
+\item{relative}{Logical. Should abundances be made relative? Only for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea". Default TRUE}
 
 \item{cores}{Integer. Number of cores to use for parallel computing. Default one less than available}
 
@@ -56,6 +56,8 @@ Currently implemented methods:
  \item zig - MetagenomeSeq zero-inflated gaussian
  \item ds2 - DESeq2
  \item lim - LIMMA. Moderated linear models based on emperical bayes
+ \item lli - LIMMA, but reads are first transformed with log(abundance + delta1) then turned into relative abundances
+ \item lli2 - LIMMA, but with relative abundances transformed with log(relative abundance + delta2)
  \item kru - Kruskal-Wallis on relative abundances
  \item aov - ANOVA on relative abundances
  \item lao - ANOVA, but reads are first transformed with log(abundance + delta1) then turned into relative abundances

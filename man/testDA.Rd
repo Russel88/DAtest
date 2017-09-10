@@ -21,7 +21,7 @@ testDA(data, predictor, paired = NULL, R = 10, tests = c("pea", "neb",
 
 \item{tests}{Character. Which tests to include. Default all (See below for details)}
 
-\item{relative}{Logical. Should abundances be made relative? Only has effect for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea". Default TRUE}
+\item{relative}{Logical. Should abundances be made relative? Only for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea". Default TRUE}
 
 \item{effectSize}{Integer. The effect size for the spike-ins. Default 2}
 
@@ -99,17 +99,17 @@ Below is an overview of which functions get the arguments that are passed to a s
  \item zig - Passed to fitZig
  \item ds2 - Passed to DESeq
  \item lim - Passed to eBayes
- \item lli - Passed to eBayes and DA.lli
- \item lli2 - Passed to eBayes and DA.lli
+ \item lli - Passed to eBayes
+ \item lli2 - Passed to eBayes
  \item kru - Passed to kruskal.test
  \item aov - Passed to aov
- \item lao - Passed to aov and DA.lao
- \item lao2 - Passed to aov and DA.lao2
+ \item lao - Passed to aov
+ \item lao2 - Passed to aov
  \item lrm - Passed to lm and lme
  \item llm - Passed to lm, lme and DA.llm
  \item llm2 - Passed to lm, lme and DA.llm2
  \item rai - Passed to raida
- \item spe - Passed to cor.test
+ \item spe - Passed to cor.test 
  \item pea - Passed to cor.test
 }
 }

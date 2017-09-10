@@ -206,14 +206,15 @@ Implemented methods
     model](https://bioconductor.org/packages/release/bioc/html/metagenomeSeq.html)
 -   zig - [MetagenomeSeq zero-inflated
     gaussian](https://www.nature.com/nmeth/journal/v10/n12/full/nmeth.2658.html)
+    (The paired version is a model with the paired variable
+    as covariate)
 -   ds2 -
     [DESeq2](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0550-8)
     (The paired version is a model with the paired variable
     as covariate)
 -   lim -
     [LIMMA](https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true)
-    (The paired version is a model with the paired variable
-    as covariate)
+    (The paired version is using the block argument in lmFit)
 -   lli -
     [LIMMA](https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true),
     but reads are first transformed with log(abundance + delta) then

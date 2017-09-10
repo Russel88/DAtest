@@ -5,7 +5,7 @@
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the predictor is numeric it will be treated as such in the analyses
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"
 #' @param tests Character. Which tests to include. Default all (See below for details)
-#' @param relative Logical. Should abundances be made relative? Only has effect for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea". Default TRUE
+#' @param relative Logical. Should abundances be made relative? Only for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea". Default TRUE
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available
 #' @param rng.seed Numeric. Seed for reproducibility. Default 123
 #' @param p.adj Character. Method for pvalue adjustment. Default "fdr"
@@ -26,6 +26,8 @@
 #'  \item zig - MetagenomeSeq zero-inflated gaussian
 #'  \item ds2 - DESeq2
 #'  \item lim - LIMMA. Moderated linear models based on emperical bayes
+#'  \item lli - LIMMA, but reads are first transformed with log(abundance + delta1) then turned into relative abundances
+#'  \item lli2 - LIMMA, but with relative abundances transformed with log(relative abundance + delta2)
 #'  \item kru - Kruskal-Wallis on relative abundances
 #'  \item aov - ANOVA on relative abundances
 #'  \item lao - ANOVA, but reads are first transformed with log(abundance + delta1) then turned into relative abundances
@@ -113,7 +115,7 @@ allDA <- function(data, predictor, paired = NULL, tests = c("pea","spe","per","b
   message(paste("Seed is set to",rng.seed))
   
   # Remove Features not present in any samples
-  message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
+  if(sum(rowSums(count_table) == 0) != 0) message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
   count_table <- count_table[rowSums(count_table) > 0,]
   
   # Run tests
