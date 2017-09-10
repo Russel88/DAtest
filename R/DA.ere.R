@@ -5,7 +5,7 @@
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
-#' @param ... Additional arguments for the exactTest function
+#' @param ... Additional arguments for the calcNormFactors, estimateCommonDisp, estimateTagwiseDisp and exactTest functions
 #' @export
 
 DA.ere <- function(data, predictor, p.adj = "fdr", ...){
@@ -25,9 +25,17 @@ DA.ere <- function(data, predictor, p.adj = "fdr", ...){
   
   otu_table <- as.data.frame(count_table)
   x <- DGEList(counts = count_table, group = predictor, genes = data.frame(Feature = row.names(count_table)))
-  x <- edgeR::calcNormFactors(x)
-  x <- estimateTagwiseDisp(estimateCommonDisp(x))
-  ta <- exactTest(x, ...)[[1]]
+  
+  DA.ere.args <- list(...)
+  calcNormFactors.args <- DA.ere.args[names(DA.ere.args) %in% names(formals(calcNormFactors))]
+  estimateCommonDisp.args <- DA.ere.args[names(DA.ere.args) %in% names(formals(estimateCommonDisp))]
+  estimateTagwiseDisp.args <- DA.ere.args[names(DA.ere.args) %in% names(formals(estimateTagwiseDisp))]
+  exactTest.args <- DA.ere.args[names(DA.ere.args) %in% names(formals(exactTest))]
+  
+  x <- do.call(edgeR::calcNormFactors,c(list(x),calcNormFactors.args))
+  x <- do.call(estimateCommonDisp,c(list(x),estimateCommonDisp.args))
+  x <- do.call(estimateTagwiseDisp,c(list(x),estimateTagwiseDisp.args))
+  ta <- do.call(exactTest,c(list(x),exactTest.args))[[1]]
   colnames(ta)[3] <- "pval"
   ta$pval.adj <- p.adjust(ta$pval, method = p.adj)
   ta$Feature <- rownames(ta)

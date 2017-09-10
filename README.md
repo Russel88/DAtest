@@ -22,7 +22,7 @@ in choosing a method based on empirical testing.
 
 #### The workflow (details can be found below):
 
--   Compare methods with testDA function
+-   Compare methods with `testDA` function
     -   Check the results with `plot` or `summary`
     -   Choose method that has high AUC, and FPR not higher than ~0.05
 -   Run data with the chosen test with DA."test" function, where "test"
@@ -294,14 +294,16 @@ passed to a specific test:
 -   ltt - Passed to t.test and DA.ltt
 -   ltt2 - Passed to t.test and DA.ltt2
 -   neb - Passed to glm.nb and glmer.nb
--   erq - Passed to exactTest
--   ere - Passed to glmQLFit
+-   ere - Passed to calcNormFactors, estimateCommonDisp,
+    estimateTagwiseDisp and exactTest
+-   erq - Passed to calcNormFactors, estimateDisp, glmQLFit and
+    glmQLFTest
 -   msf - Passed to fitFeatureModel
 -   zig - Passed to fitZig
 -   ds2 - Passed to DESeq
--   lim - Passed to eBayes and DA.lim
--   lli - Passed to eBayes and DA.lli
--   lli2 - Passed to eBayes and DA.lli2
+-   lim - Passed to eBayes and lmFit
+-   lli - Passed to eBayes, lmFit and DA.lli
+-   lli2 - Passed to eBayes, lmFit and DA.lli2
 -   kru - Passed to kruskal.test
 -   aov - Passed to aov
 -   lao - Passed to aov and DA.lao

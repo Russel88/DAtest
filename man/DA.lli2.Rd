@@ -18,9 +18,7 @@ DA.lli2(data, predictor, paired = NULL, p.adj = "fdr", delta = 0.001,
 
 \item{delta}{Numeric. Pseudocount for log transformation. Default 0.001}
 
-\item{correlation}{Numeric. Correlation to be used in lmFit for non-paired data}
-
-\item{...}{Additional arguments for the eBayes function}
+\item{...}{Additional arguments for the eBayes and lmFit functions}
 }
 \description{
 With log transformation of relative abundances.

@@ -4,8 +4,7 @@
 \alias{plot.DA}
 \title{Plotting results from testDA}
 \usage{
-\method{plot}{DA}(x, sort = "AUC", p = FALSE, bins = 20, adj = FALSE,
-  ...)
+plot.DA(x, sort = "AUC", p = FALSE, bins = 20, adj = FALSE, ...)
 }
 \arguments{
 \item{x}{The output from the testDA function}

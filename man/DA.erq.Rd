@@ -15,7 +15,7 @@ DA.erq(data, predictor, paired = NULL, p.adj = "fdr", ...)
 
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
 
-\item{...}{Additional arguments for the glmQLFit function}
+\item{...}{Additional arguments for the calcNormFactors, estimateDisp, glmQLFit and glmQLFTest functions}
 }
 \description{
 EdgeR quasi-likelihood

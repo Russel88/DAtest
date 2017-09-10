@@ -13,7 +13,7 @@ DA.ere(data, predictor, p.adj = "fdr", ...)
 
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
 
-\item{...}{Additional arguments for the exactTest function}
+\item{...}{Additional arguments for the calcNormFactors, estimateCommonDisp, estimateTagwiseDisp and exactTest functions}
 }
 \description{
 Implemented as in:

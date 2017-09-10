@@ -4,7 +4,7 @@
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
-#' @param ... Additional arguments for the glmQLFit function
+#' @param ... Additional arguments for the calcNormFactors, estimateDisp, glmQLFit and glmQLFTest functions
 #' @export
 
 DA.erq <- function(data, predictor, paired = NULL, p.adj = "fdr", ...){
@@ -26,17 +26,24 @@ DA.erq <- function(data, predictor, paired = NULL, p.adj = "fdr", ...){
     count_table <- data
   }
   
+  DA.erq.args <- list(...)
+  calcNormFactors.args <- DA.erq.args[names(DA.erq.args) %in% names(formals(calcNormFactors))]
+  estimateDisp.args <- DA.erq.args[names(DA.erq.args) %in% names(formals(estimateDisp))]
+  glmQLFit.args <- DA.erq.args[names(DA.erq.args) %in% names(formals(glmQLFit))]
+  glmQLFTest.args <- DA.erq.args[names(DA.erq.args) %in% names(formals(glmQLFTest))]
+  
+  
   count_table <- as.data.frame(count_table)
   y <- DGEList(counts=count_table,genes = data.frame(Feature = row.names(count_table)))
-  y <- calcNormFactors(y)
+  y <- do.call(calcNormFactors, c(list(y),calcNormFactors.args))
   if(is.null(paired)){
     design <- model.matrix(~predictor)
   } else {
     design <- model.matrix(~predictor + paired)
   }
-  y <- estimateDisp(y,design)
-  fit <- glmQLFit(y,design, ...)
-  qlf <- glmQLFTest(fit,coef=2)
+  y <- do.call(estimateDisp,c(list(y,design),estimateDisp.args))
+  fit <- do.call(glmQLFit,c(list(y,design),glmQLFit.args))
+  qlf <- do.call(glmQLFTest,c(list(fit,coef=2),glmQLFTest.args))
   ta <- qlf$table
   colnames(ta)[4] <- "pval"
   ta$pval.adj <- p.adjust(ta$pval, method = p.adj)

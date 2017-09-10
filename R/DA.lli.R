@@ -9,8 +9,7 @@
 #' @param relative Logical. Should count_table be normalized to relative abundances. Default TRUE
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
 #' @param delta Numeric. Pseudocount for log transformation. Default 1
-#' @param correlation Numeric. Correlation to be used in lmFit for non-paired data
-#' @param ... Additional arguments for the eBayes function
+#' @param ... Additional arguments for the eBayes and lmFit functions
 #' @export
 
 DA.lli <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr", delta = 1, correlation = 0.75,  ...){
@@ -37,15 +36,19 @@ DA.lli <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
   
   if(relative) count_table <- apply(count_table,2,function(x) x/sum(x))
   
+  limma.args <- list(...)
+  lmFit.args <- limma.args[names(limma.args) %in% names(formals(lmFit))]
+  eBayes.args <- limma.args[names(limma.args) %in% names(formals(eBayes))]
+  
   design <- model.matrix(~predictor)
   n <- dim(count_table)[1]
   if(is.null(paired)){
-    fit <- lmFit(count_table, design, correlation = correlation)
+    fit <- do.call(lmFit,c(list(count_table, design),lmFit.args))
   } else {
     dupcor <-  duplicateCorrelation(count_table, design, block = paired)
-    fit <- lmFit(count_table, design, block = paired, correlation = dupcor$cor)
+    fit <- do.call(lmFit,c(list(count_table, design, block = paired, correlation = dupcor$cor),lmFit.args))
   }
-  fit.eb <- eBayes(fit, ...)
+  fit.eb <- do.call(eBayes, c(list(fit),eBayes.args))
   Estimate <- fit.eb$coefficients
   df.residual <- fit.eb$df.residual
   df.prior <- rep(fit.eb$df.prior, n)

@@ -8,8 +8,7 @@
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
 #' @param delta Numeric. Pseudocount for log transformation. Default 0.001
-#' @param correlation Numeric. Correlation to be used in lmFit for non-paired data
-#' @param ... Additional arguments for the eBayes function
+#' @param ... Additional arguments for the eBayes and lmFit functions
 #' @export
 
 DA.lli2 <- function(data, predictor, paired = NULL, p.adj = "fdr", delta = 0.001, correlation = 0.75, ...){
@@ -36,15 +35,19 @@ DA.lli2 <- function(data, predictor, paired = NULL, p.adj = "fdr", delta = 0.001
   
   count.rel <- log(count.rel + delta)
     
+  limma.args <- list(...)
+  lmFit.args <- limma.args[names(limma.args) %in% names(formals(lmFit))]
+  eBayes.args <- limma.args[names(limma.args) %in% names(formals(eBayes))]
+  
   design <- model.matrix(~predictor)
   n <- dim(count.rel)[1]
   if(is.null(paired)){
-    fit <- lmFit(count.rel, design, correlation = correlation)
+    fit <- do.call(lmFit,c(list(count.rel, design),lmFit.args))
   } else {
     dupcor <-  duplicateCorrelation(count.rel, design, block = paired)
-    fit <- lmFit(count.rel, design, block = paired, correlation = dupcor$cor)
+    fit <- do.call(lmFit,c(list(count.rel, design, block = paired, correlation = dupcor$cor),lmFit.args))
   }
-  fit.eb <- eBayes(fit, ...)
+  fit.eb <- do.call(eBayes, c(list(fit),eBayes.args))
   Estimate <- fit.eb$coefficients
   df.residual <- fit.eb$df.residual
   df.prior <- rep(fit.eb$df.prior, n)

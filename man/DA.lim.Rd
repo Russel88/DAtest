@@ -18,9 +18,7 @@ DA.lim(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr",
 
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
 
-\item{correlation}{Numeric. Correlation to be used in lmFit for non-paired data}
-
-\item{...}{Additional arguments for the eBayes function}
+\item{...}{Additional arguments for the eBayes and lmFit functions}
 }
 \description{
 Some implementation is borrowed from:

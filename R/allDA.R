@@ -56,14 +56,14 @@
 #'  \item ltt - Passed to t.test and DA.ltt
 #'  \item ltt2 - Passed to t.test and DA.ltt2
 #'  \item neb - Passed to glm.nb and glmer.nb
-#'  \item erq - Passed to exactTest
-#'  \item ere - Passed to glmQLFit
+#'  \item erq - Passed to calcNormFactors, estimateDisp, glmQLFit and glmQLFTest
+#'  \item ere - Passed to calcNormFactors, estimateCommonDisp, estimateTagwiseDisp and exactTest
 #'  \item msf - Passed to fitFeatureModel
 #'  \item zig - Passed to fitZig
 #'  \item ds2 - Passed to DESeq
-#'  \item lim - Passed to eBayes
-#'  \item lli - Passed to eBayes and DA.lli
-#'  \item lli2 - Passed to eBayes and DA.lli
+#'  \item lim - Passed to eBayes and lmFit
+#'  \item lli - Passed to eBayes, lmFit and DA.lli
+#'  \item lli2 - Passed to eBayes, lmFit and DA.lli2
 #'  \item kru - Passed to kruskal.test
 #'  \item aov - Passed to aov
 #'  \item lao - Passed to aov and DA.lao
