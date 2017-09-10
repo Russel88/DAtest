@@ -4,37 +4,49 @@
 #' https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
+#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
 #' @param ... Additional arguments for the fitZig function
 #' @export
 
-DA.zig <- function(data, predictor, p.adj = "fdr", ...){
+DA.zig <- function(data, predictor, paired = NULL, p.adj = "fdr", ...){
   
   library(metagenomeSeq)
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
-    if(length(predictor) > 1) stop("When data is a phyloseq object predictor should only contain the name of the variables in sample_data")
+    if(length(predictor) > 1 | length(paired) > 1) stop("When data is a phyloseq object predictor and paired should only contain the name of the variables in sample_data")
     if(!predictor %in% sample_variables(data)) stop(paste(predictor,"is not present in sample_data(data)"))
+    if(!is.null(paired)){
+      if(!paired %in% sample_variables(data)) stop(paste(paired,"is not present in sample_data(data)"))
+    }
     count_table <- otu_table(data)
     if(!taxa_are_rows(data)) count_table <- t(count_table)
     predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
+    if(!is.null(paired)) paired <- suppressWarnings(as.factor(as.matrix(sample_data(data)[,paired])))
   } else {
     count_table <- data
   }
-  
+
   count_table <- as.data.frame.matrix(count_table)
   mgsdata <- newMRexperiment(counts = count_table)
   mgsp <- cumNormStat(mgsdata)
   mgsdata <- cumNorm(mgsdata, mgsp)
-  mod <- model.matrix(~predictor)
-  mgsfit <- fitZig(obj=mgsdata,mod=mod, ...)
-  temp_table <- MRtable(mgsfit, number=nrow(count_table))
+  if(!is.null(paired)){
+    mod <- model.matrix(~predictor+paired)
+  } else {
+    mod <- model.matrix(~predictor)
+  }
+  mgsfit <- fitZig(obj=mgsdata,mod=mod)
+  temp_table <- MRtable(mgsfit, number=nrow(count_table), by = 2, coef = c(1:length(levels(as.factor(predictor)))))
   temp_table <- temp_table[!is.na(row.names(temp_table)),]
   # Pvalue have different naming depending on package version
-  #if("pvalues" %in% names(temp_table)) res.zig <- data.frame(pval = temp_table$pvalues)
-  #if("pValue" %in% names(temp_table)) res.zig <- data.frame(pval = temp_table$pValue)
-  colnames(temp_table)[8] <- "pval"
+  if("pvalues" %in% names(temp_table)){
+    colnames(temp_table)[which(names(temp_table) == "pvalues")] <- "pval"
+  } 
+  if("pValue" %in% names(temp_table)){
+    colnames(temp_table)[which(names(temp_table) == "pValue")] <- "pval"
+  }
   temp_table$pval.adj <- p.adjust(temp_table$pval, method = p.adj)
   temp_table$Feature <- rownames(temp_table)
   temp_table$Method <- "MetagenomeSeq ZIG"

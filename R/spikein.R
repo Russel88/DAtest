@@ -41,26 +41,31 @@ spikein <- function(count_table, predictor, effectSize = 2, k, num.pred = FALSE,
   spike_feature_index <- which(row.names(count_table) %in% spike_features)
   
   # Spike Features by multiplication
-    oldSums <- colSums(count_table)
+  oldSums <- colSums(count_table)
   
   if(spikeMethod == "mult"){
     
     if(num.pred){
+      # For numeric predictor
       predictor <- as.numeric(predictor)
       
       oldmat <- as.matrix(as.data.frame(count_table))
-
+      
+      # Multiply according to predictor and effectSize
       count_table[spike_feature_index,] <- t(log(t(count_table[spike_feature_index, ]) * (as.numeric((effectSize) ^ scale(predictor)))+1))
       
+      # Rescale to original level
       for(i in spike_feature_index){
         count_table[i,] <- (count_table[i,] - min(count_table[i,]))/(max(count_table[i,])-min(count_table[i,])) * (max(oldmat[i,]) - min(oldmat[i,])) + min(oldmat[i,])
       }
       
     } else {
+      # For categorical data
       count_table[spike_feature_index,predictor==1] <- count_table[spike_feature_index, predictor==1] * effectSize
     }
   }
 
+  # Rescale to original sample sums
   newSums <- colSums(count_table)
   if(relative) count_table <- round(t(t(count_table) * oldSums/newSums))
 

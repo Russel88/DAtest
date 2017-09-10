@@ -5,7 +5,7 @@
 \title{LIMMA}
 \usage{
 DA.lim(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr",
-  ...)
+  correlation = 0.75, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -17,6 +17,8 @@ DA.lim(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr",
 \item{relative}{Logical. Should count_table be normalized to relative abundances. Default TRUE}
 
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+
+\item{correlation}{Numeric. Correlation to be used in lmFit for non-paired data}
 
 \item{...}{Additional arguments for the eBayes function}
 }

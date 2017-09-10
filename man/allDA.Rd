@@ -4,22 +4,22 @@
 \alias{allDA}
 \title{Run many differential abundance methods}
 \usage{
-allDA(data, predictor, paired = NULL, tests = c("spe", "per", "bay", "adx",
-  "wil", "ttt", "ltt", "ltt2", "neb", "erq", "ere", "msf", "zig", "ds2", "lim",
-  "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "rai"), relative = TRUE,
-  cores = (detectCores() - 1), rng.seed = 123, p.adj = "fdr",
-  args = list())
+allDA(data, predictor, paired = NULL, tests = c("pea", "spe", "per", "bay",
+  "adx", "wil", "ttt", "ltt", "ltt2", "neb", "erq", "ere", "msf", "zig", "ds2",
+  "lim", "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "rai"),
+  relative = TRUE, cores = (detectCores() - 1), rng.seed = 123,
+  p.adj = "fdr", args = list())
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
 \item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the predictor is numeric it will be treated as such in the analyses}
 
-\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli" and "lli2"}
+\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"}
 
 \item{tests}{Character. Which tests to include. Default all (See below for details)}
 
-\item{relative}{Logical. Should abundances be made relative? Only has effect for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm" and "spe". Default TRUE}
+\item{relative}{Logical. Should abundances be made relative? Only has effect for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea". Default TRUE}
 
 \item{cores}{Integer. Number of cores to use for parallel computing. Default one less than available}
 
@@ -65,6 +65,7 @@ Currently implemented methods:
  \item llm2 - Linear regression, but with relative abundances transformed with log(relative abundance + delta2)
  \item rai - RAIDA
  \item spe - Spearman correlation
+ \item pea - Pearson correlation
 }
 
 Additional arguments can be passed to the internal functions with the "args" argument. 
@@ -89,16 +90,17 @@ Below is an overview of which functions get the arguments that are passed to a s
  \item zig - Passed to fitZig
  \item ds2 - Passed to DESeq
  \item lim - Passed to eBayes
- \item lli - Passed to eBayes
- \item lli2 - Passed to eBayes
+ \item lli - Passed to eBayes and DA.lli
+ \item lli2 - Passed to eBayes and DA.lli
  \item kru - Passed to kruskal.test
  \item aov - Passed to aov
- \item lao - Passed to aov
- \item lao2 - Passed to aov
+ \item lao - Passed to aov and DA.lao
+ \item lao2 - Passed to aov and DA.lao2
  \item lrm - Passed to lm and lme
- \item llm - Passed to lm and lme
- \item llm2 - Passed to lm and lme
+ \item llm - Passed to lm, lme and DA.llm
+ \item llm2 - Passed to lm, lme and DA.llm2
  \item rai - Passed to raida
  \item spe - Passed to cor.test
+ \item pea - Passed to cor.test
 }
 }

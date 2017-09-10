@@ -3,12 +3,12 @@
 #' Calculating false positive rates and AUC (Area Under the receiver operator Curve) for various differential abundance methods
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the predictor is numeric it will be treated as such in the analyses
-#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli" and "lli2"
+#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"
 #' @param R Integer. Number of times to run the tests. Default 10
 #' @param tests Character. Which tests to include. Default all (See below for details)
-#' @param relative Logical. Should abundances be made relative? Only has effect for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm" and "spe". Default TRUE
+#' @param relative Logical. Should abundances be made relative? Only has effect for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea". Default TRUE
 #' @param effectSize Integer. The effect size for the spike-ins. Default 2
-#' @param k Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). k=c(5,10,15): 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default c(5,5,5)
+#' @param k Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. k=c(5,10,15): 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default c(5,5,5)
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.
 #' @param rng.seed Numeric. Seed for reproducibility. Default 123
 #' @param args List. A list with lists of arguments passed to the different methods. See details for more.
@@ -39,6 +39,7 @@
 #'  \item llm2 - Linear regression, but with relative abundances transformed with log(relative abundance + delta2)
 #'  \item rai - RAIDA
 #'  \item spe - Spearman correlation
+#'  \item pea - Pearson correlation
 #' }
 #' "neb" can be slow if there is a paired argument.
 #' 
@@ -66,17 +67,18 @@
 #'  \item zig - Passed to fitZig
 #'  \item ds2 - Passed to DESeq
 #'  \item lim - Passed to eBayes
-#'  \item lli - Passed to eBayes
-#'  \item lli2 - Passed to eBayes
+#'  \item lli - Passed to eBayes and DA.lli
+#'  \item lli2 - Passed to eBayes and DA.lli
 #'  \item kru - Passed to kruskal.test
 #'  \item aov - Passed to aov
-#'  \item lao - Passed to aov
-#'  \item lao2 - Passed to aov
+#'  \item lao - Passed to aov and DA.lao
+#'  \item lao2 - Passed to aov and DA.lao2
 #'  \item lrm - Passed to lm and lme
-#'  \item llm - Passed to lm and lme
-#'  \item llm2 - Passed to lm and lme
+#'  \item llm - Passed to lm, lme and DA.llm
+#'  \item llm2 - Passed to lm, lme and DA.llm2
 #'  \item rai - Passed to raida
 #'  \item spe - Passed to cor.test
+#'  \item pea - Passed to cor.test
 #' }
 #' @return An object of class DA, which contains a list of results:
 #' \itemize{
@@ -89,7 +91,7 @@
 #' @importFrom pROC roc
 #' @export
 
-testDA <- function(data, predictor, paired = NULL, R = 10, tests = c("neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","ere","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 2, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, args = list()){
+testDA <- function(data, predictor, paired = NULL, R = 10, tests = c("pea","neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","ere","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 2, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, args = list()){
 
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -124,10 +126,12 @@ testDA <- function(data, predictor, paired = NULL, R = 10, tests = c("neb","rai"
   tests <- prune.tests.DA(tests, predictor, paired, relative)
   tests.par <- paste0(unlist(lapply(1:R, function(x) rep(x,length(tests)))),"_",rep(tests,R))
   
+  # neb warning
   if("neb" %in% tests & !is.null(paired)){
     message("As 'neb' is included and a 'paired' variable is supplied this might take a long time")
   }
   
+  # Set seed
   set.seed(rng.seed)
   message(paste("Seed is set to",rng.seed))
   
@@ -169,8 +173,10 @@ testDA <- function(data, predictor, paired = NULL, R = 10, tests = c("neb","rai"
     on.exit(stopCluster(cl))
   }
 
+  # Run the tests in parallel
   results <- foreach(i = tests.par , .options.snow = opts) %dopar% {
 
+    # Extract run info
     run.no <- as.numeric(gsub("_.*","",i))
     i <- gsub(".*_","",i)
     
@@ -185,6 +191,7 @@ testDA <- function(data, predictor, paired = NULL, R = 10, tests = c("neb","rai"
       if(test.boo[l] == FALSE) assign(test.args[l], list(),pos=1)
     }
     
+    # Run tests
     res.sub <- tryCatch(switch(i,
                                wil = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, relative),wil.args)),
                                ttt = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, relative),ttt.args)),
@@ -194,7 +201,7 @@ testDA <- function(data, predictor, paired = NULL, R = 10, tests = c("neb","rai"
                                erq = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),erq.args)),
                                ere = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),ere.args)),
                                msf = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),msf.args)),
-                               zig = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),zig.args)),
+                               zig = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),zig.args)),
                                ds2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),ds2.args)),
                                per = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, relative),per.args)),
                                bay = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),bay.args)),
@@ -210,7 +217,8 @@ testDA <- function(data, predictor, paired = NULL, R = 10, tests = c("neb","rai"
                                llm = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative),llm.args)),
                                llm2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),llm2.args)),
                                rai = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),rai.args)),
-                               spe = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],relative),spe.args))),
+                               spe = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],relative),spe.args)),
+                               pea = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],relative),pea.args))),
                         
                         error = function(e) NULL)
     
@@ -222,6 +230,8 @@ testDA <- function(data, predictor, paired = NULL, R = 10, tests = c("neb","rai"
     
   }
   names(results) <- tests.par
+  
+  # Handle failed tests
   results <- results[!sapply(results,is.null)]
   
   if(length(unique(gsub(".*_","",names(results)))) != length(tests)){

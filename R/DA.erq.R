@@ -21,12 +21,12 @@ DA.erq <- function(data, predictor, paired = NULL, p.adj = "fdr", ...){
     count_table <- otu_table(data)
     if(!taxa_are_rows(data)) count_table <- t(count_table)
     predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
-    if(!is.null(paired)) paired <- suppressWarnings(as.matrix(sample_data(data)[,paired]))
-  } else {
+    if(!is.null(paired)) paired <- suppressWarnings(as.factor(as.matrix(sample_data(data)[,paired])))
+    } else {
     count_table <- data
   }
   
-  otu_table <- as.data.frame(count_table)
+  count_table <- as.data.frame(count_table)
   y <- DGEList(counts=count_table,genes = data.frame(Feature = row.names(count_table)))
   y <- calcNormFactors(y)
   if(is.null(paired)){
@@ -36,16 +36,9 @@ DA.erq <- function(data, predictor, paired = NULL, p.adj = "fdr", ...){
   }
   y <- estimateDisp(y,design)
   fit <- glmQLFit(y,design, ...)
-  if(is.numeric(predictor)){
-    qlf <- glmQLFTest(fit,coef=2)
-    ta <- qlf$table
-    colnames(ta)[4] <- "pval"
-  } else {
-    qlf <- glmQLFTest(fit,coef=seq(2,length(levels(as.factor(predictor)))))
-    ta <- qlf$table
-    colnames(ta)[(length(levels(as.factor(predictor)))+2)] <- "pval"
-  }
-
+  qlf <- glmQLFTest(fit,coef=2)
+  ta <- qlf$table
+  colnames(ta)[4] <- "pval"
   ta$pval.adj <- p.adjust(ta$pval, method = p.adj)
   ta$Feature <- rownames(ta)
   ta$Method <- "EdgeR qll"

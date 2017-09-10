@@ -7,12 +7,15 @@
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param relative Logical. Should count_table be normalized to relative abundances. Default TRUE
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
+#' @param correlation Numeric. Correlation to be used in lmFit for non-paired data
 #' @param ... Additional arguments for the eBayes function
+#' @import statmod
 #' @export
 
-DA.lim <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr", ...){
+DA.lim <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr", correlation = 0.75, ...){
   
   library(limma)
+  library(statmod)
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -24,8 +27,8 @@ DA.lim <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
     count_table <- otu_table(data)
     if(!taxa_are_rows(data)) count_table <- t(count_table)
     predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
-    if(!is.null(paired)) paired <- suppressWarnings(as.matrix(sample_data(data)[,paired]))
-  } else {
+    if(!is.null(paired)) paired <- suppressWarnings(as.factor(as.matrix(sample_data(data)[,paired])))
+    } else {
     count_table <- data
   }
   
@@ -35,11 +38,16 @@ DA.lim <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
     count.rel <- count_table
   }
   
-  if(is.null(paired)) design <- model.matrix(~predictor) else design <- model.matrix(~as.factor(paired)+predictor)
+  design <- model.matrix(~predictor)
   n <- dim(count.rel)[1]
-  fit <- lmFit(count.rel, design)
+  if(is.null(paired)){
+    fit <- lmFit(count.rel, design, correlation = correlation)
+  } else {
+    dupcor <-  duplicateCorrelation(count.rel, design, block = paired)
+    fit <- lmFit(count.rel, design, block = paired, correlation = dupcor$cor)
+  }
   fit.eb <- eBayes(fit, ...)
-  if(is.null(paired)) Estimate <- fit.eb$coefficients else Estimate <- fit.eb$coefficients[,c(1,(length(levels(as.factor(paired)))+1):ncol(fit.eb$coefficients))]
+  Estimate <- fit.eb$coefficients
   df.residual <- fit.eb$df.residual
   df.prior <- rep(fit.eb$df.prior, n)
   s2.prior <- rep(fit.eb$s2.prior, n)

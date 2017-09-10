@@ -16,6 +16,7 @@ run.tests.DA <- function(count_table, predictor, paired, tests, relative, args, 
     on.exit(stopCluster(cl))
   }
 
+  # Run tests in parallel
   results <- foreach(i = tests , .options.snow = opts) %dopar% {
 
     # Extract test arguments
@@ -38,7 +39,7 @@ run.tests.DA <- function(count_table, predictor, paired, tests, relative, args, 
                                erq = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired, p.adj),erq.args)),
                                ere = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor, p.adj),ere.args)),
                                msf = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor, p.adj),msf.args)),
-                               zig = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor, p.adj),zig.args)),
+                               zig = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired, p.adj),zig.args)),
                                ds2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired, p.adj),ds2.args)),
                                per = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired, relative, p.adj),per.args)),
                                bay = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired, p.adj),bay.args)),
@@ -54,7 +55,8 @@ run.tests.DA <- function(count_table, predictor, paired, tests, relative, args, 
                                llm = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,relative, p.adj),llm.args)),
                                llm2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired, p.adj),llm2.args)),
                                rai = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor, p.adj),rai.args)),
-                               spe = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,relative, p.adj),spe.args))),
+                               spe = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,relative, p.adj),spe.args)),
+                               pea = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,relative, p.adj),pea.args))),
                         
                         error = function(e) NULL)
 
@@ -67,8 +69,9 @@ run.tests.DA <- function(count_table, predictor, paired, tests, relative, args, 
   
   }
   names(results) <- tests
-  results <- results[!sapply(results,is.null)]
   
+  # Handle failed tests
+  results <- results[!sapply(results,is.null)]
   if(length(names(results)) != length(tests)){
     if(length(tests) - length(names(results)) == 1){
       message(paste(paste(tests[!tests %in% names(results)],collapse = ", "),"was excluded due to failure"))

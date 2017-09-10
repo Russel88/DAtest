@@ -168,11 +168,14 @@ All methods can be accessed in the same way; DA."test" where "test" is
 the abbreviation given in the details of the `testDA` function.
 
 Alternatively, run all (or several) methods and check which features are
-found by several methods
+found by several methods.
 
     res.all <- allDA(data, predictor)
 
     head(res.all$table)
+
+A subset of methods can be run by setting the `tests` argument. E.g.
+only those performing well based on results from `testDA`.
 
 Implemented methods
 ===================
@@ -294,15 +297,15 @@ passed to a specific test:
 -   msf - Passed to fitFeatureModel
 -   zig - Passed to fitZig
 -   ds2 - Passed to DESeq
--   lim - Passed to eBayes
--   lli - Passed to eBayes
--   lli2 - Passed to eBayes
+-   lim - Passed to eBayes and DA.lim
+-   lli - Passed to eBayes and DA.lli
+-   lli2 - Passed to eBayes and DA.lli2
 -   kru - Passed to kruskal.test
 -   aov - Passed to aov
--   lao - Passed to aov
--   lao2 - Passed to aov
+-   lao - Passed to aov and DA.lao
+-   lao2 - Passed to aov and DA.lao2
 -   lrm - Passed to lm and lme
--   llm - Passed to lm and lme
--   llm2 - Passed to lm and lme
+-   llm - Passed to lm, lme and DA.llm
+-   llm2 - Passed to lm, lme and DA.llm2
 -   rai - Passed to raida
 -   spe - Passed to cor.test

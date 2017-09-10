@@ -4,7 +4,8 @@
 \alias{DA.lli2}
 \title{LIMMA}
 \usage{
-DA.lli2(data, predictor, paired = NULL, p.adj = "fdr", delta = 0.001, ...)
+DA.lli2(data, predictor, paired = NULL, p.adj = "fdr", delta = 0.001,
+  correlation = 0.75, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -16,6 +17,8 @@ DA.lli2(data, predictor, paired = NULL, p.adj = "fdr", delta = 0.001, ...)
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
 
 \item{delta}{Numeric. Pseudocount for log transformation. Default 0.001}
+
+\item{correlation}{Numeric. Correlation to be used in lmFit for non-paired data}
 
 \item{...}{Additional arguments for the eBayes function}
 }
