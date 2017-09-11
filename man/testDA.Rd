@@ -5,9 +5,9 @@
 \title{Comparing differential abundance methods by FPR and AUC}
 \usage{
 testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
-  tests = c("pea", "neb", "rai", "per", "bay", "adx", "wil", "ttt", "ltt",
-  "ltt2", "erq", "ere", "msf", "zig", "ds2", "lim", "lli", "lli2", "aov", "lao",
-  "lao2", "kru", "lrm", "llm", "llm2", "spe"), relative = TRUE,
+  tests = c("qpo", "poi", "pea", "neb", "rai", "per", "bay", "adx", "wil",
+  "ttt", "ltt", "ltt2", "erq", "ere", "msf", "zig", "ds2", "lim", "lli", "lli2",
+  "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe"), relative = TRUE,
   effectSize = 2, k = c(5, 5, 5), cores = (detectCores() - 1),
   rng.seed = 123, args = list())
 }
@@ -16,7 +16,7 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
 
 \item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the predictor is numeric it will be treated as such in the analyses}
 
-\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"}
+\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "poi", "qpo", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"}
 
 \item{covars}{Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)}
 
@@ -75,6 +75,8 @@ Currently implemented methods:
  \item rai - RAIDA
  \item spe - Spearman correlation
  \item pea - Pearson correlation
+ \item poi - Poisson GLM with log of library size as offset
+ \item qpo - Quasi-Poisson GLM with log of library size as offset
 }
 "neb" can be slow if there is a paired argument.
 
@@ -114,5 +116,7 @@ Below is an overview of which functions get the arguments that are passed to a s
  \item rai - Passed to raida
  \item spe - Passed to cor.test
  \item pea - Passed to cor.test
+ \item poi - Passed to glm/glmer
+ \item qpo - Passed to glm/glmer
 }
 }

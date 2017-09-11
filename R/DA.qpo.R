@@ -1,18 +1,17 @@
-#' Negative binomial glm
+#' Quasi-poisson glm
 #'
-#' With log(librarySize) as offset.
+#' With librarySize as offset.
 #' Mixed-effect model is used when a paired argument is included, with the paired variable as a random intercept.
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
-#' @param ... Additional arguments for the glm.nb/glmer.nb functions
-#' @import MASS
-#' @importFrom lme4 glmer.nb glmer
+#' @param ... Additional arguments for the glm/glmer functions
+#' @importFrom lme4 glmer
 #' @export
 
-DA.neb <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", ...){
+DA.qpo <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", ...){
  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -41,13 +40,14 @@ DA.neb <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
   
   libSize <- colSums(count_table)
   count_table <- as.data.frame.matrix(count_table)
+  obs.effect <- 1:nrow(count_table)
   
   if(is.null(paired)){
     if(is.null(covars)){
-      negbin <- function(x){
+      pois <- function(x){
         fit <- NULL
         tryCatch(
-          fit <- MASS::glm.nb(x ~ predictor + offset(log(libSize)),...), 
+          fit <- glm(x ~ predictor + offset(log(libSize)),family="quasipoisson",...), 
           error = function(x) fit <- NULL)
         if(!is.null(fit)) {
           if(nrow(coef(summary(fit))) > 1) {
@@ -57,10 +57,10 @@ DA.neb <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
       }
     } else {
       if(class(data) == "phyloseq"){
-        negbin <- function(x){
+        pois <- function(x){
           fit <- NULL
           tryCatch(
-            fit <- MASS::glm.nb(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(covars, collapse="+"),sep = "")),...), 
+            fit <- glm(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(covars, collapse="+"),sep = "")),family="quasipoisson",...), 
             error = function(x) fit <- NULL)
           if(!is.null(fit)) {
             if(nrow(coef(summary(fit))) > 1) {
@@ -69,10 +69,10 @@ DA.neb <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
           } else NA 
         }
       } else {
-        negbin <- function(x){
+        pois <- function(x){
           fit <- NULL
           tryCatch(
-            fit <- MASS::glm.nb(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(names(covars), collapse="+"),sep = "")),...), 
+            fit <- glm(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(names(covars), collapse="+"),sep = "")),family="quasipoisson",...), 
             error = function(x) fit <- NULL)
           if(!is.null(fit)) {
             if(nrow(coef(summary(fit))) > 1) {
@@ -84,10 +84,10 @@ DA.neb <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
     }
   } else {
     if(is.null(covars)){
-      negbin <- function(x){
+      pois <- function(x){
         fit <- NULL
         tryCatch(
-          fit <- lme4::glmer.nb(x ~ predictor + offset(log(libSize)) + (1|paired), ...), 
+          fit <- lme4::glmer(x ~ predictor + obs.effect + offset(log(libSize)) + (1|paired) + (1|obs.effect),family="poisson", ...), 
           error = function(x) fit <- NULL)
         if(!is.null(fit)) {
           if(nrow(coef(summary(fit))) > 1) {
@@ -97,10 +97,10 @@ DA.neb <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
       } 
     } else {
       if(class(data) == "phyloseq"){
-        negbin <- function(x){
+        pois <- function(x){
           fit <- NULL
           tryCatch(
-            fit <- lme4::glmer.nb(as.formula(paste("x ~ predictor+offset(log(libSize)) + (1|paired)+",paste(covars, collapse="+"),sep = "")), ...), 
+            fit <- lme4::glmer(as.formula(paste("x ~ predictor+obs.effect+offset(log(libSize)) + (1|paired) + (1|obs.effect)+",paste(covars, collapse="+"),sep = "")),family="poisson", ...), 
             error = function(x) fit <- NULL)
           if(!is.null(fit)) {
             if(nrow(coef(summary(fit))) > 1) {
@@ -109,10 +109,10 @@ DA.neb <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
           } else NA 
         } 
       } else {
-        negbin <- function(x){
+        pois <- function(x){
           fit <- NULL
           tryCatch(
-            fit <- lme4::glmer.nb(as.formula(paste("x ~ predictor+offset(log(libSize)) + (1|paired)+",paste(names(covars), collapse="+"),sep = "")), ...), 
+            fit <- lme4::glmer(as.formula(paste("x ~ predictor+obs.effect+offset(log(libSize)) + (1|paired) + (1|obs.effect)+",paste(names(covars), collapse="+"),sep = "")),family="poisson", ...), 
             error = function(x) fit <- NULL)
           if(!is.null(fit)) {
             if(nrow(coef(summary(fit))) > 1) {
@@ -124,7 +124,7 @@ DA.neb <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
     }
   }
   
-  res <- as.data.frame(t(as.data.frame(apply(count_table,1,negbin))))
+  res <- as.data.frame(t(as.data.frame(apply(count_table,1,pois))))
   if(nrow(res) == 1){
     res <- data.frame(Estimate = rep(NA,nrow(count_table)), Std.Error = rep(NA,nrow(count_table)), z.value = rep(NA,nrow(count_table)), pval = rep(NA,nrow(count_table)))
     rownames(res) <- rownames(count_table)                                                                                                           
@@ -132,7 +132,7 @@ DA.neb <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
   colnames(res) <- c("Estimate","Std.Error","z value","pval")
   res$pval.adj <- p.adjust(res$pval, method = p.adj)
   res$Feature <- rownames(res)
-  res$Method <- "Negbinom GLM"
+  res$Method <- "Quasi-Poisson GLM"
   
   if(nrow(res) > 1){
     if(class(data) == "phyloseq"){

@@ -46,18 +46,18 @@ DA.ds2 <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
     } else {
       predictordf <- as.data.frame(c(list(predictor = factor(predictor)),covars))
       row.names(predictordf) <- colnames(count_table)
-      x <- DESeqDataSetFromMatrix(countData = as.data.frame(count_table), colData = predictordf , design = as.formula(paste("~ ",paste(names(covars), collapse="+"),"+predictor",sep = "")))
+      x <- DESeqDataSetFromMatrix(countData = as.data.frame(count_table), colData = predictordf , design = as.formula(paste("~ predictor+",paste(names(covars), collapse="+"),sep = "")))
     }
   } else {
     if(is.null(covars)){
       predictordf <- data.frame(predictor = factor(predictor),
                                 paired = factor(paired))
       row.names(predictordf) <- colnames(count_table)
-      x <- DESeqDataSetFromMatrix(countData = as.data.frame(count_table), colData = predictordf , design = ~ paired + predictor)
+      x <- DESeqDataSetFromMatrix(countData = as.data.frame(count_table), colData = predictordf , design = ~ predictor + paired)
     } else {
       predictordf <- as.data.frame(c(list(predictor = factor(predictor),paired = factor(paired)),covars))
       row.names(predictordf) <- colnames(count_table)
-      x <- DESeqDataSetFromMatrix(countData = as.data.frame(count_table), colData = predictordf , design = as.formula(paste("~ ",paste(names(covars), collapse="+"),"+paired+predictor",sep = "")))
+      x <- DESeqDataSetFromMatrix(countData = as.data.frame(count_table), colData = predictordf , design = as.formula(paste("~ paired+predictor+",paste(names(covars), collapse="+"),sep = "")))
     }
   }
   

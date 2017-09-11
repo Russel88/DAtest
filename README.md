@@ -138,10 +138,10 @@ t-test, wilcox test and permutation test expect a balanced design with
 two values for each unique name in the `paired` argument; one for each
 of the two levels of the `predictor`.
 
-Neg binom glm, linear regression and limma models use the `paired`
-variable as a random intercept (i.e. they become mixed-effect models)
-and are very flexible regarding design and work well for unbalanced
-designs.
+Negbinom/poisson/quasipoisson glm, linear regression and limma models
+use the `paired` variable as a random intercept (i.e. they become
+mixed-effect models) and are very flexible regarding design and work
+well for unbalanced designs.
 
 EdgeR, DESeq2 and metagenomeSeq ZIG include the `paired` variable as a
 covariable in the model and are also generally flexible in the design,
@@ -262,6 +262,8 @@ Implemented methods
     [RAIDA](https://academic.oup.com/bioinformatics/article/31/14/2269/256302/A-robust-approach-for-identifying-differentially?searchresult=1)
 -   spe - Spearman Rank Correlation
 -   pea - Pearson Correlation
+-   poi - Poisson GLM
+-   qpo - Quasi-poisson GLM
 
 ### Paired permutation test
 
@@ -337,3 +339,5 @@ passed to a specific test:
 -   rai - Passed to raida
 -   spe - Passed to cor.test
 -   pea - Passed to cor.test
+-   poi - Passed to glm and glmer
+-   qpo - Passed to glm and glmer
