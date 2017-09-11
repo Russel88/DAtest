@@ -14,10 +14,14 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative){
   if(!"statmod" %in% rownames(installed.packages())) tests <- tests[tests != c("lim","lli","lli2")]
   if(!"RAIDA" %in% rownames(installed.packages())) tests <- tests[tests != "rai"]
   
-  # Excluded tests that do not work with a paired argument
+  # Exclude tests that do not work with a paired argument
   if(!is.null(paired)){
     tests <- tests[!tests %in% c("bay","adx","ere","msf","aov","lao","lao2","kru","rai","spe","pea")]
-  } 
+    # Exclude tests that only work with two values for each level of the paired argument
+    if(!all(table(paired,predictor) == 1)){
+      tests <- tests[!tests %in% c("ttt","ltt","ltt2","wil","per")]
+    }
+  }
   
   # Only include some tests if there are more than two levels in predictor
   if(length(levels(as.factor(predictor))) > 2){

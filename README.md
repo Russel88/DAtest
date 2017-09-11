@@ -132,6 +132,22 @@ the levels of the `paired` factor.
 Paired analysis can be very slow. If you simply can't wait to see the
 results remove "neb" from the tests argument.
 
+**Some details on how methods use the paired argument:**
+
+t-test, wilcox test and permutation test expect a balanced design with
+two values for each unique name in the `paired` argument; one for each
+of the two levels of the `predictor`.
+
+Neg binom glm, linear regression and limma models use the `paired`
+variable as a random intercept (i.e. they become mixed-effect models)
+and are very flexible regarding design and work well for unbalanced
+designs.
+
+EdgeR, DESeq2 and metagenomeSeq ZIG include the `paired` variable as a
+covariable in the model and are also generally flexible in the design,
+but they might fail if the design matrix is not full rank (i.e.
+balanced).
+
 ### *If you have non-relative abundances, e.g. for normalized protein abundance:*
 
     mytest <- testDA(data, predictor, relative = FALSE)
