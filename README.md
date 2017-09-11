@@ -124,7 +124,7 @@ blocks.
 The `paired` argument should be a factor with the ID of the
 patient/subject/block (in the same order as columns in `data`):
 
-    mytest <- testDA(data, predictor, paired = SubjectID)
+    mytest <- testDA(data, predictor, paired = subjectID)
 
 When a `paired` argument is provided, the `predictor` is shuffled within
 the levels of the `paired` factor.
@@ -136,13 +136,20 @@ results remove "neb" from the tests argument.
 
     mytest <- testDA(data, predictor, relative = FALSE)
 
+### *If you have covariables (confounders):*
+
+The `covars` argument should be a named list with the covariables (in
+the same order as columns in `data`):
+
+    mytest <- testDA(data, predictor, covars = list(Age = subject.age))
+
 ### If you have a phyloseq object:
 
-`data` can also be a phyloseq object. In this case, the `predictor` and
-`paired` arguments are the names of the variables in
+`data` can also be a phyloseq object. In this case, the `predictor`,
+`paired` and `covars` arguments are the names of the variables in
 `sample_data(data)`:
 
-    mytest <- testDA(data, predictor = "Time", paired = "Patient")
+    mytest <- testDA(data, predictor = "Time", paired = "Patient", covars = c("Age","ExpDate"))
 
 **Plot the output:**
 --------------------

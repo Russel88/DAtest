@@ -3,11 +3,12 @@
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
+#' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
 #' @param ... Additional arguments for the calcNormFactors, estimateDisp, glmQLFit and glmQLFTest functions
 #' @export
 
-DA.erq <- function(data, predictor, paired = NULL, p.adj = "fdr", ...){
+DA.erq <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", ...){
   
   library(edgeR)
   
@@ -22,8 +23,18 @@ DA.erq <- function(data, predictor, paired = NULL, p.adj = "fdr", ...){
     if(!taxa_are_rows(data)) count_table <- t(count_table)
     predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
     if(!is.null(paired)) paired <- suppressWarnings(as.factor(as.matrix(sample_data(data)[,paired])))
-    } else {
+    if(!is.null(covars)){
+      for(i in 1:length(covars)){
+        assign(covars[i], suppressWarnings(as.matrix(sample_data(data)[,covars[i]])))
+      }
+    } 
+  } else {
     count_table <- data
+    if(!is.null(covars)){
+      for(i in 1:length(covars)){
+        assign(names(covars)[i], covars[[i]])
+      }
+    }
   }
   
   DA.erq.args <- list(...)
@@ -36,10 +47,26 @@ DA.erq <- function(data, predictor, paired = NULL, p.adj = "fdr", ...){
   count_table <- as.data.frame(count_table)
   y <- DGEList(counts=count_table,genes = data.frame(Feature = row.names(count_table)))
   y <- do.call(calcNormFactors, c(list(y),calcNormFactors.args))
-  if(is.null(paired)){
-    design <- model.matrix(~predictor)
+  if(!is.null(paired)){
+    if(is.null(covars)){
+      design <- model.matrix(~ predictor+paired)
+    } else {
+      if(class(data) == "phyloseq"){
+        design <- model.matrix(as.formula(paste("~ predictor+paired+",paste(covars, collapse="+"),sep = "")))
+      } else {
+        design <- model.matrix(as.formula(paste("~ predictor+paired+",paste(names(covars), collapse="+"),sep = "")))
+      }
+    }
   } else {
-    design <- model.matrix(~predictor + paired)
+    if(is.null(covars)){
+      design <- model.matrix(~ predictor)
+    } else {
+      if(class(data) == "phyloseq"){
+        design <- model.matrix(as.formula(paste("~ predictor+",paste(covars, collapse="+"),sep = "")))
+      } else {
+        design <- model.matrix(as.formula(paste("~ predictor+",paste(names(covars), collapse="+"),sep = "")))
+      }
+    }
   }
   y <- do.call(estimateDisp,c(list(y,design),estimateDisp.args))
   fit <- do.call(glmQLFit,c(list(y,design),glmQLFit.args))

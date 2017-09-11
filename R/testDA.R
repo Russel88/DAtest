@@ -4,6 +4,7 @@
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the predictor is numeric it will be treated as such in the analyses
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"
+#' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
 #' @param R Integer. Number of times to run the tests. Default 10
 #' @param tests Character. Which tests to include. Default all (See below for details)
 #' @param relative Logical. Should abundances be made relative? Only for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea". Default TRUE
@@ -91,7 +92,7 @@
 #' @importFrom pROC roc
 #' @export
 
-testDA <- function(data, predictor, paired = NULL, R = 10, tests = c("pea","neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","ere","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 2, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, args = list()){
+testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests = c("pea","neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","ere","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 2, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, args = list()){
 
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -103,11 +104,16 @@ testDA <- function(data, predictor, paired = NULL, R = 10, tests = c("pea","neb"
     count_table <- otu_table(data)
     if(!taxa_are_rows(data)) count_table <- t(count_table)
     predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
-    if(!is.null(paired)) paired <- suppressWarnings(as.matrix(sample_data(data)[,paired]))
+    if(!is.null(paired)) paired <- suppressWarnings(as.factor(as.matrix(sample_data(data)[,paired])))
+    if(!is.null(covars)){
+      covars.n <- covars
+      covars <- list()
+      for(i in 1:length(covars.n)){
+        covars[[i]] <- suppressWarnings(as.matrix(sample_data(data)[,covars.n[i]]))
+      }
+      names(covars) <- covars.n
+    } 
   } else {
-    if(!is.null(paired)){
-      if(length(paired) == 1) stop("paired argument should be a vector with length equal to columns in data")
-    }
     count_table <- data
   }
   
@@ -123,7 +129,7 @@ testDA <- function(data, predictor, paired = NULL, R = 10, tests = c("pea","neb"
   
   # Prune tests argument
   tests <- unique(tests)
-  tests <- prune.tests.DA(tests, predictor, paired, relative)
+  tests <- prune.tests.DA(tests, predictor, paired, covars, relative)
   tests.par <- paste0(unlist(lapply(1:R, function(x) rep(x,length(tests)))),"_",rep(tests,R))
   
   # neb warning
@@ -197,25 +203,25 @@ testDA <- function(data, predictor, paired = NULL, R = 10, tests = c("pea","neb"
                                ttt = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, relative),ttt.args)),
                                ltt = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative),ltt.args)),
                                ltt2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),ltt2.args)),
-                               neb = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),neb.args)),
-                               erq = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),erq.args)),
+                               neb = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars),neb.args)),
+                               erq = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars),erq.args)),
                                ere = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),ere.args)),
                                msf = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),msf.args)),
-                               zig = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),zig.args)),
-                               ds2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),ds2.args)),
+                               zig = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars),zig.args)),
+                               ds2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars),ds2.args)),
                                per = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, relative),per.args)),
                                bay = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),bay.args)),
                                adx = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),adx.args)),
-                               lim = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative),lim.args)),
-                               lli = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative),lli.args)),
-                               lli2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),lli2.args)),
+                               lim = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,relative),lim.args)),
+                               lli = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,relative),lli.args)),
+                               lli2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars),lli2.args)),
                                kru = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]], relative),kru.args)),
-                               aov = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]], relative),aov.args)),
-                               lao = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],relative),lao.args)),
-                               lao2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),lao2.args)),
-                               lrm = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, relative),lrm.args)),
-                               llm = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative),llm.args)),
-                               llm2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),llm2.args)),
+                               aov = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],covars, relative),aov.args)),
+                               lao = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],covars,relative),lao.args)),
+                               lao2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],covars),lao2.args)),
+                               lrm = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars, relative),lrm.args)),
+                               llm = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,relative),llm.args)),
+                               llm2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars),llm2.args)),
                                rai = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),rai.args)),
                                spe = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],relative),spe.args)),
                                pea = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],relative),pea.args))),

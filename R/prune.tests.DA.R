@@ -1,6 +1,6 @@
 #' @export
 
-prune.tests.DA <- function(tests, predictor, paired, relative){
+prune.tests.DA <- function(tests, predictor, paired, covars, relative){
 
   # Prune test argument if packages are not installed
   if(!"baySeq" %in% rownames(installed.packages())) tests <- tests[tests != "bay"]
@@ -38,6 +38,11 @@ prune.tests.DA <- function(tests, predictor, paired, relative){
   # Exclude if relative is false
   if(relative == FALSE){
     tests <- tests[!tests %in% c("ltt2","neb","erq","ere","msf","zig","bay","ds2","adx","lli2","lao2","llm2","rai")]
+  }
+  
+  # Only include if covars are present
+  if(!is.null(covars)){
+    tests <- tests[tests %in% c("ds2","neb","erq","zig","lrm","llm","llm2","lim","lli","lli2","aov","lao","lao2")]
   }
   
   return(tests)

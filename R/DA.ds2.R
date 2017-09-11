@@ -6,11 +6,12 @@
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
+#' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
 #' @param ... Additional arguments for the DESeq function
 #' @export
 
-DA.ds2 <- function(data, predictor, paired = NULL, p.adj = "fdr", ...){
+DA.ds2 <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", ...){
   
   library(DESeq2)
   
@@ -25,19 +26,39 @@ DA.ds2 <- function(data, predictor, paired = NULL, p.adj = "fdr", ...){
     if(!taxa_are_rows(data)) count_table <- t(count_table)
     predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
     if(!is.null(paired)) paired <- suppressWarnings(as.factor(as.matrix(sample_data(data)[,paired])))
-    } else {
+    if(!is.null(covars)){
+      covars.n <- covars
+      covars <- list()
+      for(i in 1:length(covars.n)){
+        covars[[i]] <- suppressWarnings(as.matrix(sample_data(data)[,covars.n[i]]))
+      }
+      names(covars) <- covars.n
+    } 
+  } else {
     count_table <- data
   }
   
   if(is.null(paired)){
-    predictordf <- data.frame(predictor = factor(predictor))
-    row.names(predictordf) <- colnames(count_table)
-    x <- DESeqDataSetFromMatrix(countData = as.data.frame(count_table), colData = predictordf , design = ~ predictor)
+    if(is.null(covars)){
+      predictordf <- data.frame(predictor = factor(predictor))
+      row.names(predictordf) <- colnames(count_table)
+      x <- DESeqDataSetFromMatrix(countData = as.data.frame(count_table), colData = predictordf , design = ~ predictor)
+    } else {
+      predictordf <- as.data.frame(c(list(predictor = factor(predictor)),covars))
+      row.names(predictordf) <- colnames(count_table)
+      x <- DESeqDataSetFromMatrix(countData = as.data.frame(count_table), colData = predictordf , design = as.formula(paste("~ ",paste(names(covars), collapse="+"),"+predictor",sep = "")))
+    }
   } else {
-    predictordf <- data.frame(predictor = factor(predictor),
-                            paired = factor(paired))
-    row.names(predictordf) <- colnames(count_table)
-    x <- DESeqDataSetFromMatrix(countData = as.data.frame(count_table), colData = predictordf , design = ~ predictor + paired)
+    if(is.null(covars)){
+      predictordf <- data.frame(predictor = factor(predictor),
+                                paired = factor(paired))
+      row.names(predictordf) <- colnames(count_table)
+      x <- DESeqDataSetFromMatrix(countData = as.data.frame(count_table), colData = predictordf , design = ~ paired + predictor)
+    } else {
+      predictordf <- as.data.frame(c(list(predictor = factor(predictor),paired = factor(paired)),covars))
+      row.names(predictordf) <- colnames(count_table)
+      x <- DESeqDataSetFromMatrix(countData = as.data.frame(count_table), colData = predictordf , design = as.formula(paste("~ ",paste(names(covars), collapse="+"),"+paired+predictor",sep = "")))
+    }
   }
   
   gm_mean = function(x, na.rm=TRUE){

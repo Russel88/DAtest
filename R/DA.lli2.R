@@ -6,12 +6,13 @@
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
+#' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
 #' @param delta Numeric. Pseudocount for log transformation. Default 0.001
 #' @param ... Additional arguments for the eBayes and lmFit functions
 #' @export
 
-DA.lli2 <- function(data, predictor, paired = NULL, p.adj = "fdr", delta = 0.001, correlation = 0.75, ...){
+DA.lli2 <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", delta = 0.001, ...){
   
   library(limma)
   library(statmod)
@@ -27,19 +28,38 @@ DA.lli2 <- function(data, predictor, paired = NULL, p.adj = "fdr", delta = 0.001
     if(!taxa_are_rows(data)) count_table <- t(count_table)
     predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
     if(!is.null(paired)) paired <- suppressWarnings(as.factor(as.matrix(sample_data(data)[,paired])))
-    } else {
+    if(!is.null(covars)){
+      for(i in 1:length(covars)){
+        assign(covars[i], suppressWarnings(as.matrix(sample_data(data)[,covars[i]])))
+      }
+    } 
+  } else {
     count_table <- data
+    if(!is.null(covars)){
+      for(i in 1:length(covars)){
+        assign(names(covars)[i], covars[[i]])
+      }
+    }
   }
   
   count.rel <- apply(count_table,2,function(x) x/sum(x))
-  
   count.rel <- log(count.rel + delta)
     
   limma.args <- list(...)
   lmFit.args <- limma.args[names(limma.args) %in% names(formals(lmFit))]
   eBayes.args <- limma.args[names(limma.args) %in% names(formals(eBayes))]
   
-  design <- model.matrix(~predictor)
+  if(is.null(covars)){
+    form <- paste("~ predictor")
+  } else {
+    if(class(data) == "phyloseq"){
+      form <- paste("~ predictor+",paste(covars, collapse="+"),sep = "")
+    } else {
+      form <- paste("~ predictor+",paste(names(covars), collapse="+"),sep = "")
+    }
+  }
+  
+  design <- model.matrix(as.formula(form))
   n <- dim(count.rel)[1]
   if(is.null(paired)){
     fit <- do.call(lmFit,c(list(count.rel, design),lmFit.args))

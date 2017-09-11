@@ -4,6 +4,7 @@
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the predictor is numeric it will be treated as such in the analyses
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"
+#' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
 #' @param tests Character. Which tests to include. Default all (See below for details)
 #' @param relative Logical. Should abundances be made relative? Only for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea". Default TRUE
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available
@@ -83,7 +84,7 @@
 #' 
 #' @export
 
-allDA <- function(data, predictor, paired = NULL, tests = c("pea","spe","per","bay","adx","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2","lim","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list()){
+allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("pea","spe","per","bay","adx","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2","lim","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list()){
 
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -96,9 +97,18 @@ allDA <- function(data, predictor, paired = NULL, tests = c("pea","spe","per","b
     if(!taxa_are_rows(data)) count_table <- t(count_table)
     predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
     if(!is.null(paired)) paired <- suppressWarnings(as.factor(as.matrix(sample_data(data)[,paired])))
+    if(!is.null(covars)){
+      covars.n <- covars
+      covars <- list()
+      for(i in 1:length(covars.n)){
+        covars[[i]] <- suppressWarnings(as.matrix(sample_data(data)[,covars.n[i]]))
+      }
+      names(covars) <- covars.n
+    } 
   } else {
     count_table <- data
   }
+
   
   # Checks
   if(min(count_table) < 0 & is.numeric(predictor)) stop("Numeric predictor and negative values in count_table is currently not supported")
@@ -108,7 +118,7 @@ allDA <- function(data, predictor, paired = NULL, tests = c("pea","spe","per","b
   
   # Prune tests argument
   tests <- unique(tests)
-  tests <- prune.tests.DA(tests, predictor, paired, relative)
+  tests <- prune.tests.DA(tests, predictor, paired, covars, relative)
   
   # Set seed
   set.seed(rng.seed)
@@ -119,7 +129,7 @@ allDA <- function(data, predictor, paired = NULL, tests = c("pea","spe","per","b
   count_table <- count_table[rowSums(count_table) > 0,]
   
   # Run tests
-  results <- run.tests.DA(count_table, predictor, paired, tests, relative, args, cores, p.adj)
+  results <- run.tests.DA(count_table, predictor, paired, covars, tests, relative, args, cores, p.adj)
   
   # Positives
   Pos.raw <- sapply(results,function(x) x[x$pval < 0.05,"Feature"])

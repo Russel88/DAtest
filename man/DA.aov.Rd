@@ -4,12 +4,15 @@
 \alias{DA.aov}
 \title{ANOVA}
 \usage{
-DA.aov(data, predictor, relative = TRUE, p.adj = "fdr", ...)
+DA.aov(data, predictor, covars = NULL, relative = TRUE, p.adj = "fdr",
+  ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
 \item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+
+\item{covars}{Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)}
 
 \item{relative}{Logical. Should count_table be normalized to relative abundances. Default TRUE}
 

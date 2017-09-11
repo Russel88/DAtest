@@ -4,7 +4,7 @@
 \alias{DA.erq}
 \title{EdgeR quasi-likelihood}
 \usage{
-DA.erq(data, predictor, paired = NULL, p.adj = "fdr", ...)
+DA.erq(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -12,6 +12,8 @@ DA.erq(data, predictor, paired = NULL, p.adj = "fdr", ...)
 \item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
 
 \item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+
+\item{covars}{Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)}
 
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
 
