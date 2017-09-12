@@ -5,7 +5,7 @@ This is a package for comparing different differential abundance methods
 used in microbial marker-gene (e.g. 16S rRNA), RNA-seq and protein
 abundance analysis.
 
-There are many methods for testing differential abundance and no golden
+There are many methods for testing differential abundance and no gold
 standard, but results can vary a lot between the different statistical
 methods. The false positive rate and the power of the different methods
 highly depends on the dataset. This package aims at aiding the analyst
@@ -152,7 +152,7 @@ balanced).
 
     mytest <- testDA(data, predictor, relative = FALSE)
 
-### *If you have covariables (confounders):*
+### *If you have covariates:*
 
 The `covars` argument should be a named list with the covariables (in
 the same order as columns in `data`):
@@ -246,6 +246,9 @@ Implemented methods
     [LIMMA](https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true),
     but with relative abundances transformed with log(relative
     abundance + delta)
+-   vli - [LIMMA with
+    voom](https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true)
+    (The paired version is using the block argument in lmFit)
 -   kru - Kruskal-Wallis test on relative abundances
 -   aov - ANOVA on relative abundances
 -   lao - ANOVA, but reads are first transformed with log(abundance +
@@ -341,3 +344,4 @@ passed to a specific test:
 -   pea - Passed to cor.test
 -   poi - Passed to glm and glmer
 -   qpo - Passed to glm and glmer
+-   vli - Passed to voom, eBayes and lmFit

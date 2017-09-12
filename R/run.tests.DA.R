@@ -58,7 +58,8 @@ run.tests.DA <- function(count_table, predictor, paired, covars, tests, relative
                                spe = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,relative, p.adj),spe.args)),
                                pea = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,relative, p.adj),pea.args)),
                                poi = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars, p.adj),poi.args)),
-                               qpo = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars, p.adj),qpo.args))),
+                               qpo = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars, p.adj),qpo.args)),
+                               vli = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars, p.adj),vli.args))),
                         
                         error = function(e) NULL)
 

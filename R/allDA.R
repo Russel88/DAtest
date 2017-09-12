@@ -4,7 +4,7 @@
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the predictor is numeric it will be treated as such in the analyses
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "poi", "qpo", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"
-#' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
+#' @param covars Either a named list with covariates, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
 #' @param tests Character. Which tests to include. Default all (See below for details)
 #' @param relative Logical. Should abundances be made relative? Only for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea". Default TRUE
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available
@@ -41,6 +41,7 @@
 #'  \item pea - Pearson correlation
 #'  \item poi - Poisson GLM with log of library size as offset
 #'  \item qpo - Quasi-Poisson GLM with log of library size as offset
+#'  \item vli - Limma with voom
 #' }
 #' 
 #' Additional arguments can be passed to the internal functions with the "args" argument. 
@@ -79,6 +80,7 @@
 #'  \item pea - Passed to cor.test
 #'  \item poi - Passed to glm/glmer
 #'  \item qpo - Passed to glm/glmer
+#'  \item vli - Passed to voom, eBayes and lmFit
 #' }
 #' @return A list of results:
 #' \itemize{
@@ -88,7 +90,7 @@
 #' 
 #' @export
 
-allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("qpo","poi","pea","spe","per","bay","adx","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2","lim","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list()){
+allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("vli","qpo","poi","pea","spe","per","bay","adx","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2","lim","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list()){
 
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
