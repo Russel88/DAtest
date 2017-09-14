@@ -2,7 +2,7 @@
 % Please edit documentation in R/DA.ere.R
 \name{DA.ere}
 \alias{DA.ere}
-\title{EdgeR exact test}
+\title{EdgeR exact test - TMM normalization}
 \usage{
 DA.ere(data, predictor, p.adj = "fdr", ...)
 }

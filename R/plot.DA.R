@@ -1,8 +1,8 @@
 #' Plotting results from testDA
 #'
 #' @param x The output from the testDA function
-#' @param sort Sort methods by c("AUC","FPR","Spike.detect.rate")
-#' @param p Logical. Should the p-value distribution be plotted
+#' @param sort Sort methods by c("AUC","FPR")
+#' @param p Logical. Should the p-value distribution be plotted (only p-values from non-spiked features)
 #' @param bins Integer. Number of bins in p-value histograms
 #' @param adj Logical. Whether the histograms should show adjusted p-values 
 #' @param ... Additional plotting arguments
@@ -14,8 +14,9 @@
 plot.DA <- function(x, sort = "AUC", p = FALSE, bins = 20, adj = FALSE, ...){
   
   if(p){
-    pval.all <- lapply(x$results, function(x) lapply(x, function(y) y[,c("pval","pval.adj","Method")]))
+    pval.all <- lapply(x$results, function(x) lapply(x, function(y) y[,c("pval","pval.adj","Method","Spiked")]))
     df.all <- do.call(rbind, do.call(rbind,pval.all))
+    df.all <- df.all[df.all$Spiked == "No",]
     
     if(adj){
       ggplot(df.all, aes(pval.adj)) +
@@ -44,10 +45,6 @@ plot.DA <- function(x, sort = "AUC", p = FALSE, bins = 20, adj = FALSE, ...){
       fpr.median <- aggregate(FPR ~ Method, data = x$table, FUN = median)
       x$table$Method <- factor(x$table$Method, levels = fpr.median[order(fpr.median$FPR, decreasing = FALSE),"Method"])
     }
-    if(sort == "Spike.detect.rate") {
-      spr.median <- aggregate(Spike.detect.rate ~ Method, data = x$table, FUN = median)
-      x$table$Method <- factor(x$table$Method, levels = fpr.median[order(fpr.median$Spike.detect.rate, decreasing = TRUE),"Method"])
-    }
     
     p1 <- ggplot(x$table, aes(Method, FPR)) +
       theme_bw() +
@@ -58,8 +55,7 @@ plot.DA <- function(x, sort = "AUC", p = FALSE, bins = 20, adj = FALSE, ...){
       ylab("False Positive Rate") +
       theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
       xlab(NULL) +
-      theme(axis.text.x = element_blank(),
-            panel.grid.minor = element_blank())
+      theme(panel.grid.minor = element_blank())
     
     p2 <- ggplot(x$table, aes(Method, AUC)) +
       theme_bw() +
@@ -73,20 +69,9 @@ plot.DA <- function(x, sort = "AUC", p = FALSE, bins = 20, adj = FALSE, ...){
       xlab(NULL) +
       scale_y_continuous(labels=function(x) sprintf("%.2f", x))
     
-    p3 <- ggplot(x$table, aes(Method, Spike.detect.rate)) +
-      theme_bw() +
-      coord_cartesian(ylim = c(0,1)) +
-      geom_point() +
-      stat_summary(fun.y = median, fun.ymin = median, fun.ymax = median,geom = "crossbar",colour="red",width=0.75) +
-      ylab("Spike-In Detection Rate") +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
-            panel.grid.minor = element_blank()) +
-      xlab(NULL)
-    
     pp <- cowplot::ggdraw(...) +
-      cowplot::draw_plot(p1, 0, .7, 1, .3) +
-      cowplot::draw_plot(p2, 0, .4, 1, .3) +
-      cowplot::draw_plot(p3, 0, 0, 1, .4)
+      cowplot::draw_plot(p2, 0, .5, 1, .5) +
+      cowplot::draw_plot(p1, 0, 0, 1, .5)
     
     suppressWarnings(pp)
     

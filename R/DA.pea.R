@@ -41,7 +41,7 @@ DA.pea <- function(data, predictor, relative = TRUE, p.adj = "fdr", ...){
   res$pval.adj <- p.adjust(res$pval, method = p.adj)
   res$cor <- apply(count.rel,1,pea.cor)
   res$Feature <- rownames(res)
-  res$Method <- "Pearson"
+  res$Method <- "Pearson (pea)"
   
   # Add tax table if available
   if(class(data) == "phyloseq"){

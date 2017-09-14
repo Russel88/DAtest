@@ -7,12 +7,15 @@
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
 #' @param relative Logical. Should count_table be normalized to relative abundances. Default TRUE
+#' @param out.anova If TRUE will output results and p-values from anova. If false will output results for 2. level of the predictor.
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
 #' @param delta Numeric. Pseudocount for the log transformation. Default 1
+#' @param allResults If TRUE will return raw results from the lm/lme function
 #' @param ... Additional arguments for the lm/lme functions
+#' @import nlme
 #' @export
 
-DA.llm <- function(data, predictor, paired = NULL, covars = NULL, relative = TRUE, p.adj = "fdr", delta = 1, ...){
+DA.llm <- function(data, predictor, paired = NULL, covars = NULL, relative = TRUE, out.anova = TRUE, p.adj = "fdr", delta = 1, allResults = FALSE, ...){
  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -79,11 +82,40 @@ DA.llm <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
     }
   }
   
-  res <- as.data.frame(t(as.data.frame(apply(count_table,1,lmr))))
-  colnames(res) <- c("Estimate","Std.Error","t-value","pval")
+  if(out.anova){
+    if(is.null(paired)){
+      lmr <- function(x){
+        fit <- NULL
+        tryCatch(
+          fit <- anova(lm(as.formula(form),...))[1,], 
+          error = function(e) fit <- NULL)
+      }
+    } else {
+      lmr <- function(x){
+        fit <- NULL
+        tryCatch(
+          fit <- anova(lme(as.formula(form), random = ~1|paired,...))[2,], 
+          error = function(e) fit <- NULL)
+      }
+    }
+  }
+  
+  if(out.anova){
+    if(is.null(paired)){
+      res <- as.data.frame(do.call(rbind,apply(count_table,1,lmr)))
+      colnames(res) <- c("Df","Sum Sq","Mean Sq","F value","pval")
+    } else {
+      res <- as.data.frame(do.call(rbind,apply(count_table,1,lmr)))
+      colnames(res) <- c("numDF","denDF","F-value","pval")
+    }
+  } else {
+    res <- as.data.frame(t(as.data.frame(apply(count_table,1,lmr))))
+    colnames(res) <- c("Estimate","Std.Error","t-value","pval")
+  }
+    
   res$pval.adj <- p.adjust(res$pval, method = p.adj)
   res$Feature <- rownames(res)
-  res$Method <- "Log Linear regression"
+  res$Method <- "Log Linear reg. (llm)"
   
   if(class(data) == "phyloseq"){
     if(!is.null(tax_table(data, errorIfNULL = FALSE))){
@@ -93,6 +125,22 @@ DA.llm <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
     } 
   }
   
-  return(res)
+  if(allResults){
+    if(is.null(paired)){
+      lmr <- function(x){
+        fit <- NULL
+        tryCatch(fit <- lm(as.formula(form), ...), error = function(e) fit <- NULL)  
+      }
+    } else {
+      lmr <- function(x){
+        fit <- NULL
+        tryCatch(
+          fit <- lme(as.formula(form), random = ~1|paired, ...), error = function(e) fit <- NULL)
+      }
+    }
+    return(apply(count_table,1,lmr))
+  } else {
+    return(res)
+  } 
   
 }

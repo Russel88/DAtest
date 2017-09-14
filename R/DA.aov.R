@@ -5,10 +5,11 @@
 #' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
 #' @param relative Logical. Should count_table be normalized to relative abundances. Default TRUE
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
+#' @param allResults If TRUE will return raw results from the aov function
 #' @param ... Additional arguments for the aov function
 #' @export
 
-DA.aov <- function(data, predictor, covars = NULL, relative = TRUE, p.adj = "fdr", ...){
+DA.aov <- function(data, predictor, covars = NULL, relative = TRUE, p.adj = "fdr", allResults = FALSE, ...){
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -54,7 +55,7 @@ DA.aov <- function(data, predictor, covars = NULL, relative = TRUE, p.adj = "fdr
   res <- data.frame(pval = apply(count.rel,1,ao))
   res$pval.adj <- p.adjust(res$pval, method = p.adj)
   res$Feature <- rownames(res)
-  res$Method <- "ANOVA"
+  res$Method <- "ANOVA (aov)"
   
   if(class(data) == "phyloseq"){
     if(!is.null(tax_table(data, errorIfNULL = FALSE))){
@@ -64,7 +65,14 @@ DA.aov <- function(data, predictor, covars = NULL, relative = TRUE, p.adj = "fdr
     } 
   }
   
-  return(res)
+  if(allResults){
+    ao <- function(x){
+      tryCatch(aov(as.formula(form), ...), error = function(e){NA}) 
+    }
+    return(apply(count.rel,1,ao))
+  } else {
+    return(res)
+  }
 }
 
 

@@ -5,10 +5,11 @@
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
+#' @param allResults If TRUE will return raw results from the fitFeatureModel function
 #' @param ... Additional arguments for the fitFeatureModel function
 #' @export
 
-DA.msf <- function(data, predictor, p.adj = "fdr", ...){
+DA.msf <- function(data, predictor, p.adj = "fdr", allResults = FALSE, ...){
 
   library(metagenomeSeq)
   
@@ -34,7 +35,7 @@ DA.msf <- function(data, predictor, p.adj = "fdr", ...){
   temp_table$Feature <- rownames(temp_table)
   colnames(temp_table)[7] <- "pval"
   temp_table$pval.adj <- p.adjust(temp_table$pval, method = p.adj)
-  temp_table$Method <- "MetagenomeSeq Feature"  
+  temp_table$Method <- "MgSeq Feature (msf)"  
 
   if(class(data) == "phyloseq"){
     if(!is.null(tax_table(data, errorIfNULL = FALSE))){
@@ -44,5 +45,5 @@ DA.msf <- function(data, predictor, p.adj = "fdr", ...){
     } 
   }
   
-  return(temp_table)
+  if(allResults) return(mgsfit) else return(temp_table)
 }

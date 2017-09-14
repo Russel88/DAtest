@@ -8,10 +8,11 @@
 #' @param delta Numeric. Pseudocount for log transformation. Default 0.001
 #' @param testStat Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))
 #' @param testStat.pair Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: mean(log((case abundances+1)/(control abundances+1)))
+#' @param allResults If TRUE will return raw results from the t.test function
 #' @param ... Additional arguments for the t.test function
 #' @export
 
-DA.ltt2 <- function(data, predictor, paired = NULL, p.adj = "fdr", delta = 0.001, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))}, ...){
+DA.ltt2 <- function(data, predictor, paired = NULL, p.adj = "fdr", delta = 0.001, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))},allResults = FALSE, ...){
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -32,7 +33,7 @@ DA.ltt2 <- function(data, predictor, paired = NULL, p.adj = "fdr", delta = 0.001
     tryCatch(t.test(x ~ predictor, ...)$p.value, error = function(e){NA}) 
   }
   if(!is.null(paired)){
-    otu_table <- count_table[,order(paired)]
+    count_table <- count_table[,order(paired)]
     predictor <- predictor[order(paired)]
     testStat <- testStat.pair
     tt <- function(x){
@@ -55,7 +56,7 @@ DA.ltt2 <- function(data, predictor, paired = NULL, p.adj = "fdr", delta = 0.001
   res$FC <- apply(count.rel,1,testfun)
   
   res$Feature <- rownames(res)
-  res$Method <- "Log t-test2"
+  res$Method <- "Log t-test2 (ltt2)"
   
   if(class(data) == "phyloseq"){
     if(!is.null(tax_table(data, errorIfNULL = FALSE))){
@@ -65,5 +66,18 @@ DA.ltt2 <- function(data, predictor, paired = NULL, p.adj = "fdr", delta = 0.001
     } 
   }
   
-  return(res)
+  if(allResults){
+    if(is.null(paired)){
+      tt <- function(x){
+        tryCatch(t.test(x ~ predictor, ...), error = function(e){NA}) 
+      }
+    } else {
+      tt <- function(x){
+        tryCatch(t.test(x ~ predictor, paired = TRUE, ...), error = function(e){NA}) 
+      }
+    }
+    return(apply(count.rel,1,tt))
+  } else {
+    return(res)
+  }
 }

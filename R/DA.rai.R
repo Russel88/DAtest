@@ -26,7 +26,7 @@ DA.rai <- function(data, predictor, p.adj = "fdr", ...){
   res$Feature <- rownames(res)
   colnames(res)[1] <- "pval"
   colnames(res)[2] <- "pval.adj"
-  res$Method <- "RAIDA" 
+  res$Method <- "RAIDA (rai)" 
   
   if(class(data) == "phyloseq"){
     if(!is.null(tax_table(data, errorIfNULL = FALSE))){

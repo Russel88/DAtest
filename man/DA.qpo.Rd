@@ -4,22 +4,25 @@
 \alias{DA.qpo}
 \title{Quasi-poisson glm}
 \usage{
-DA.qpo(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", ...)
+DA.qpo(data, predictor, covars = NULL, out.anova = TRUE, p.adj = "fdr",
+  allResults = FALSE, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
 \item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
 
-\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
-
 \item{covars}{Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)}
+
+\item{out.anova}{If TRUE will output results and p-values from anova. If false will output results for 2. level of the predictor.}
 
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
 
-\item{...}{Additional arguments for the glm/glmer functions}
+\item{allResults}{If TRUE will return raw results from the glm function}
+
+\item{...}{Additional arguments for the glm functions}
 }
 \description{
-With librarySize as offset.
+With log(librarySize) as offset.
 Mixed-effect model is used when a paired argument is included, with the paired variable as a random intercept.
 }

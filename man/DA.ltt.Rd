@@ -7,7 +7,7 @@
 DA.ltt(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr",
   delta = 1, testStat = function(case, control) {     log((mean(case) +
   1)/(mean(control) + 1)) }, testStat.pair = function(case, control) {    
-  mean(log((case + 1)/(control + 1))) }, ...)
+  mean(log((case + 1)/(control + 1))) }, allResults = FALSE, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -25,6 +25,8 @@ DA.ltt(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr",
 \item{testStat}{Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))}
 
 \item{testStat.pair}{Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: mean(log((case abundances+1)/(control abundances+1)))}
+
+\item{allResults}{If TRUE will return raw results from the t.test function}
 
 \item{...}{Additional arguments for the t.test function}
 }

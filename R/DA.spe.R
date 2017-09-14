@@ -38,7 +38,7 @@ DA.spe <- function(data, predictor, relative = TRUE, p.adj = "fdr", ...){
   res$pval.adj <- p.adjust(res$pval, method = p.adj)
   res$rho <- apply(count.rel,1,spe.cor)
   res$Feature <- rownames(res)
-  res$Method <- "Spearman"
+  res$Method <- "Spearman (spe)"
   
   if(class(data) == "phyloseq"){
     if(!is.null(tax_table(data, errorIfNULL = FALSE))){

@@ -4,7 +4,8 @@
 \alias{DA.vli}
 \title{LIMMA voom}
 \usage{
-DA.vli(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", ...)
+DA.vli(data, predictor, paired = NULL, covars = NULL, out.anova = TRUE,
+  p.adj = "fdr", allResults = FALSE, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -15,7 +16,11 @@ DA.vli(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", ...)
 
 \item{covars}{Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)}
 
+\item{out.anova}{If TRUE will output results from F-tests, if FALSE t-statistic results from 2. level of the predictor.}
+
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+
+\item{allResults}{If TRUE will return raw results from the eBayes function}
 
 \item{...}{Additional arguments for the voom, eBayes and lmFit functions}
 }

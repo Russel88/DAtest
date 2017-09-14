@@ -5,7 +5,7 @@
 \title{ANOVA}
 \usage{
 DA.lao(data, predictor, covars = NULL, relative = TRUE, p.adj = "fdr",
-  delta = 1, ...)
+  delta = 1, allResults = FALSE, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -19,6 +19,8 @@ DA.lao(data, predictor, covars = NULL, relative = TRUE, p.adj = "fdr",
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
 
 \item{delta}{Numeric. Pseudocount for the log transformation. Default 1}
+
+\item{allResults}{If TRUE will return raw results from the aov function}
 
 \item{...}{Additional arguments for the aov functions}
 }

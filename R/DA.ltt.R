@@ -9,10 +9,11 @@
 #' @param delta Numeric. Pseudocount for log transformation.
 #' @param testStat Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))
 #' @param testStat.pair Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: mean(log((case abundances+1)/(control abundances+1)))
+#' @param allResults If TRUE will return raw results from the t.test function
 #' @param ... Additional arguments for the t.test function
 #' @export
 
-DA.ltt <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr", delta = 1, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))}, ...){
+DA.ltt <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr", delta = 1, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))},allResults = FALSE, ...){
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -57,7 +58,7 @@ DA.ltt <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
   res$FC <- apply(count_table,1,testfun)
   
   res$Feature <- rownames(res)
-  res$Method <- "Log t-test"
+  res$Method <- "Log t-test (ltt)"
   
   if(class(data) == "phyloseq"){
     if(!is.null(tax_table(data, errorIfNULL = FALSE))){
@@ -67,7 +68,20 @@ DA.ltt <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
     } 
   }
   
-  return(res)
+  if(allResults){
+    if(is.null(paired)){
+      tt <- function(x){
+        tryCatch(t.test(x ~ predictor, ...), error = function(e){NA}) 
+      }
+    } else {
+      tt <- function(x){
+        tryCatch(t.test(x ~ predictor, paired = TRUE, ...), error = function(e){NA}) 
+      }
+    }
+    return(apply(count.rel,1,tt))
+  } else {
+    return(res)
+  }
 }
 
 

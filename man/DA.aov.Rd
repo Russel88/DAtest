@@ -5,7 +5,7 @@
 \title{ANOVA}
 \usage{
 DA.aov(data, predictor, covars = NULL, relative = TRUE, p.adj = "fdr",
-  ...)
+  allResults = FALSE, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -17,6 +17,8 @@ DA.aov(data, predictor, covars = NULL, relative = TRUE, p.adj = "fdr",
 \item{relative}{Logical. Should count_table be normalized to relative abundances. Default TRUE}
 
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+
+\item{allResults}{If TRUE will return raw results from the aov function}
 
 \item{...}{Additional arguments for the aov function}
 }

@@ -2,14 +2,14 @@ DAtest
 ======
 
 This is a package for comparing different differential abundance methods
-used in microbial marker-gene (e.g. 16S rRNA), RNA-seq and protein
-abundance analysis.
+used in microbial marker-gene (e.g. 16S rRNA), RNA-seq and
+protein/metabolite abundance analysis.
 
 There are many methods for testing differential abundance and no gold
 standard, but results can vary a lot between the different statistical
 methods. The false positive rate and the power of the different methods
 highly depends on the dataset. This package aims at aiding the analyst
-in choosing a method based on empirical testing.
+in choosing a method for a specific dataset based on empirical testing.
 
 #### The method goes as follows:
 
@@ -97,8 +97,7 @@ and samples as columns.
 samples are cases or controls (in the same order as columns in data).
 
 `predictor` can be a factor with more than two levels, in which case
-only the second level is spiked, and if methods output several p-values,
-only the p-value associated with the second level is used.
+only the second level is spiked.
 
 `predictor` can also be continuous/quantitative
 
@@ -111,10 +110,22 @@ terminated before ending you might get the following warning:
 
     closing unused connection X (...)
 
-This can safely be ignored.
+This can safely be ignored, but if you have terminated the function
+before it ended and your computer runs slow, you might want to restart R
+to close all connections.
 
-If you have terminated the function before it ended and your computer
-runs slow, you might want to restart R to close the connections.
+### *If your predictor is categorical with more than two levels:*
+
+All linear models (also GLMs) output results (including p-values) from
+`anova`/`drop1` functions and are thus testing the `predictor` variable
+in one go. If you are interested in testing treatments against a common
+baseline/control, you can set `out.anova = FALSE`. This will output
+results from the 2. level of the `predictor` compared to the intercept,
+but be sure that the `predictor` is coded correctly such that the
+baseline level is the first factor level (e.g. with factor(predictor,
+levels = c("Control","Treat1","Treat2"))). This will ensure that
+p-values from `testDA` are comparable to the ones for the final
+analysis.
 
 ### *If you have a paired/blocked experimental design:*
 
@@ -134,19 +145,19 @@ results remove "neb" from the tests argument.
 
 **Some details on how methods use the paired argument:**
 
-t-test, wilcox test and permutation test expect a balanced design with
-two values for each unique name in the `paired` argument; one for each
-of the two levels of the `predictor`.
+t-test, wilcox test, friedman test, quade test and permutation test
+expect a balanced "unreplicated" design with one value for each
+combination of levels in the `paired` and `predictor` variables.
 
-Negbinom/poisson/quasipoisson glm, linear regression and limma models
-use the `paired` variable as a random intercept (i.e. they become
-mixed-effect models) and are very flexible regarding design and work
-well for unbalanced designs.
+Negbinom/poisson glm, linear regression and limma models use the
+`paired` variable as a random intercept (i.e. they become mixed-effect
+models) and are very flexible regarding design and work well for
+unbalanced designs.
 
 EdgeR, DESeq2 and metagenomeSeq ZIG include the `paired` variable as a
 covariable in the model and are also generally flexible in the design,
-but they might fail if the design matrix is not full rank (i.e.
-balanced).
+but they might fail if the design matrix is not full rank and if data is
+missing.
 
 ### *If you have non-relative abundances, e.g. for normalized protein abundance:*
 
@@ -157,7 +168,7 @@ balanced).
 The `covars` argument should be a named list with the covariables (in
 the same order as columns in `data`):
 
-    mytest <- testDA(data, predictor, covars = list(Age = subject.age))
+    mytest <- testDA(data, predictor, covars = list(Age = subject.age, Date = exp.date))
 
 ### If you have a phyloseq object:
 
@@ -170,14 +181,14 @@ the same order as columns in `data`):
 **Plot the output:**
 --------------------
 
-    plot(mytest, sort = "AUC")
+    plot(mytest)
 
 **Print the output:**
 ---------------------
 
 Medians for each method:
 
-    summary(mytest, sort = "AUC")
+    summary(mytest)
 
 How to run real (unshuffled) data
 =================================
@@ -190,8 +201,42 @@ test:
 All methods can be accessed in the same way; DA."test" where "test" is
 the abbreviation given in the details of the `testDA` function.
 
-Alternatively, run all (or several) methods and check which features are
-found by several methods.
+*IMPORTANT:* If your `predictor` has more than two levels you have to
+set the `by` argument for "zig" (this is by default = 2).
+
+By default all linear models (including all GLMs) output the p-value
+from an `anova`/`drop1` function. It is advised to set
+`allResults = TRUE` for checking final results. For all methods where
+relevant, this will output the raw results, often in a list with each
+element corresponding to a feature (OTU/gene/protein).
+
+For linear models the `drop1`/`anova` functions can be used to test
+significance of the `predictor` and `covars` variables:
+
+    ### Apply drop1 for each feature and output the adjusted p-values:
+    # For lm/glm functions (lrm, llm, llm2, poi, neb, qpo):
+    results <- DA.lrm(data, predictor, allResults = TRUE)
+    test <- apply(sapply(results, function(x) drop1(x, test = "Chisq")[,5]),1,function(y) p.adjust(y,method="fdr"))
+    colnames(test) <- rownames(drop1(results[[1]]))
+
+    # For glmer/zeroinfl functions (poi, neb with paired variable + znb and zpo): 
+    results <- DA.poi(data, predictor, paired, allResults = TRUE)
+    test <- sapply(results, function(x) tryCatch(drop1(x, test = "Chisq")[,4],error = function(e) NA))
+    test <- do.call(rbind,test[lapply(test, length) > 1])
+    test <- apply(test, 2, function(x) p.adjust(x, method="fdr"))
+    colnames(test) <- rownames(drop1(results[[1]]))
+
+    ### Compare likelihoods for each feature and output the adjusted p-values (also possible for lm/glm):
+    # For lme functions (lrm, llm, llm2 with paired variable):
+    results <- DA.lrm(data, predictor, paired, method = "ML", allResults = TRUE)
+    test <- apply(sapply(results, function(x) anova(x)[,4]),1,function(y) p.adjust(y,method="fdr"))
+    colnames(test) <- rownames(anova(results[[1]]))
+
+The `anova` function can also be used to compare different models, e.g.
+test significance of a random component (paired variable).
+
+*Alternatively, run all (or several) methods and check which features
+are found by several methods.*
 
     res.all <- allDA(data, predictor)
 
@@ -202,6 +247,9 @@ only those performing well based on results from `testDA`.
 
 Implemented methods
 ===================
+
+Is your favorite method missing? Just write me, preferably with a code
+snippet of the implementation (see email in Description).
 
 -   per - [Permutation test with user defined test
     statistic](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8)
@@ -265,8 +313,12 @@ Implemented methods
     [RAIDA](https://academic.oup.com/bioinformatics/article/31/14/2269/256302/A-robust-approach-for-identifying-differentially?searchresult=1)
 -   spe - Spearman Rank Correlation
 -   pea - Pearson Correlation
--   poi - Poisson GLM
+-   poi - Poisson GLM (The paired version is a mixed-effect model)
 -   qpo - Quasi-poisson GLM
+-   zpo - Zero-inflated Poisson GLM
+-   znb - Zero-inflated Negative Binomial GLM
+-   fri - Friedman Rank Sum test
+-   qua - Quade test
 
 ### Paired permutation test
 
@@ -343,5 +395,9 @@ passed to a specific test:
 -   spe - Passed to cor.test
 -   pea - Passed to cor.test
 -   poi - Passed to glm and glmer
--   qpo - Passed to glm and glmer
+-   qpo - Passed to glm
 -   vli - Passed to voom, eBayes and lmFit
+-   zpo - Passed to zeroinfl
+-   znb - Passed to zeroinfl
+-   fri - Passed to friedman.test
+-   qua - Passed to quade.test

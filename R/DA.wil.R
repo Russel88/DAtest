@@ -7,10 +7,11 @@
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
 #' @param testStat Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))
 #' @param testStat.pair Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: mean(log((case abundances+1)/(control abundances+1)))
+#' @param allResults If TRUE will return raw results from the wilcox.test function
 #' @param ... Additional arguments for the wilcox.test function
 #' @export
 
-DA.wil <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr", testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))}, ...){
+DA.wil <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr", testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))}, allResults = FALSE, ...){
  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -57,7 +58,7 @@ DA.wil <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
   res$FC <- apply(count.rel,1,testfun)
   
   res$Feature <- rownames(res)
-  res$Method <- "Wilcox" 
+  res$Method <- "Wilcox (wil)" 
   
   if(class(data) == "phyloseq"){
     if(!is.null(tax_table(data, errorIfNULL = FALSE))){
@@ -67,6 +68,19 @@ DA.wil <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
     } 
   }
   
-  return(res)
+  if(allResults){
+    if(is.null(paired)){
+      wil <- function(x){
+        tryCatch(wilcox.test(x ~ predictor, ...), error = function(e){NA}) 
+      }
+    } else {
+      wil <- function(x){
+        tryCatch(wilcox.test(x ~ predictor, paired = TRUE, ...), error = function(e){NA}) 
+      }
+    }
+    return(apply(count.rel,1,wil))
+  } else {
+    return(res)
+  }
  
 }

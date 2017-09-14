@@ -3,7 +3,7 @@
 #' Run many differential abundance tests at a time
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the predictor is numeric it will be treated as such in the analyses
-#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "poi", "qpo", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"
+#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2", "zig" and "fri"
 #' @param covars Either a named list with covariates, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
 #' @param tests Character. Which tests to include. Default all (See below for details)
 #' @param relative Logical. Should abundances be made relative? Only for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea". Default TRUE
@@ -11,6 +11,7 @@
 #' @param rng.seed Numeric. Seed for reproducibility. Default 123
 #' @param p.adj Character. Method for pvalue adjustment. Default "fdr"
 #' @param args List. A list with lists of arguments passed to the different methods. See details for more.
+#' @param out.anova If TRUE (default) linear models will output results and p-values from anova/drop1. If FALSE will output results for 2. level of the predictor.
 #' @details Currently implemented methods:
 #' \itemize{
 #'  \item per - Permutation test with user defined test statistic
@@ -23,6 +24,8 @@
 #'  \item neb - Negative binomial GLM with log of library size as offset
 #'  \item erq - EdgeR - Quasi likelihood
 #'  \item ere - EdgeR - Exact test
+#'  \item erq2 - EdgeR - Quasi likelihood - RLE normalization
+#'  \item ere2 - EdgeR - Exact test - RLE normalization
 #'  \item msf - MetagenomeSeq feature model
 #'  \item zig - MetagenomeSeq zero-inflated gaussian
 #'  \item ds2 - DESeq2
@@ -42,6 +45,10 @@
 #'  \item poi - Poisson GLM with log of library size as offset
 #'  \item qpo - Quasi-Poisson GLM with log of library size as offset
 #'  \item vli - Limma with voom
+#'  \item zpo - Zero-inflated Poisson GLM
+#'  \item znb - Zero-inflated Negative Binomial GLM
+#'  \item fri - Friedman Rank Sum test
+#'  \item qua - Quade test
 #' }
 #' 
 #' Additional arguments can be passed to the internal functions with the "args" argument. 
@@ -79,8 +86,12 @@
 #'  \item spe - Passed to cor.test
 #'  \item pea - Passed to cor.test
 #'  \item poi - Passed to glm/glmer
-#'  \item qpo - Passed to glm/glmer
+#'  \item qpo - Passed to glm
 #'  \item vli - Passed to voom, eBayes and lmFit
+#'  \item zpo - Passed to zeroinfl
+#'  \item znb - Passed to zeroinfl
+#'  \item fri - Passed to friedman.test
+#'  \item qua - Passed to quade.test
 #' }
 #' @return A list of results:
 #' \itemize{
@@ -90,8 +101,10 @@
 #' 
 #' @export
 
-allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("vli","qpo","poi","pea","spe","per","bay","adx","wil","ttt","ltt","ltt2","neb","erq","ere","msf","zig","ds2","lim","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list()){
+allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("qua","fri","znb","zpo","vli","qpo","poi","pea","spe","per","bay","adx","wil","ttt","ltt","ltt2","neb","erq","ere","erq2","ere2","msf","zig","ds2","lim","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), out.anova = TRUE){
 
+  stopifnot(exists("data"))
+  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
     if(length(predictor) > 1 | length(paired) > 1) stop("When data is a phyloseq object predictor and paired should only contain the name of the variables in sample_data")
@@ -134,8 +147,24 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("vli"
   if(sum(rowSums(count_table) == 0) != 0) message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
   count_table <- count_table[rowSums(count_table) > 0,]
   
+  # Numeric predictor
+  if(is.numeric(predictor[1])){
+    message("predictor is assumed to be a continuous/quantitative variable")
+  }
+  
+  # Covars
+  if(!is.null(covars)){
+    for(i in 1:length(covars)){
+      if(is.numeric(covars[[i]][1])){
+        message(paste(names(covars)[i],"is assumed to be a continuous/quantitative variable"))
+      } else {
+        message(paste(names(covars)[i],"is assumed to be a categorical variable"))
+      }
+    }
+  }
+  
   # Run tests
-  results <- run.tests.DA(count_table, predictor, paired, covars, tests, relative, args, cores, p.adj)
+  results <- run.tests.DA(count_table, predictor, paired, covars, tests, relative, args, cores, p.adj, out.anova)
   
   # Positives
   Pos.raw <- sapply(results,function(x) x[x$pval < 0.05,"Feature"])

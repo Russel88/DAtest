@@ -4,7 +4,8 @@
 \alias{DA.kru}
 \title{Kruskal-Wallis test}
 \usage{
-DA.kru(data, predictor, relative = TRUE, p.adj = "fdr", ...)
+DA.kru(data, predictor, relative = TRUE, p.adj = "fdr",
+  allResults = FALSE, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -14,6 +15,8 @@ DA.kru(data, predictor, relative = TRUE, p.adj = "fdr", ...)
 \item{relative}{Logical. Should count_table be normalized to relative abundances. Default TRUE}
 
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+
+\item{allResults}{If TRUE will return raw results from the kruskal.test function}
 
 \item{...}{Additional arguments for the kruskal.test function}
 }

@@ -1,4 +1,4 @@
-#' EdgeR exact test - TMM normalization
+#' EdgeR exact test - RLE normalization
 #'
 #' Implemented as in:
 #' https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8
@@ -8,7 +8,7 @@
 #' @param ... Additional arguments for the calcNormFactors, estimateCommonDisp, estimateTagwiseDisp and exactTest functions
 #' @export
 
-DA.ere <- function(data, predictor, p.adj = "fdr", ...){
+DA.ere2 <- function(data, predictor, p.adj = "fdr", ...){
   
  library(edgeR)
   
@@ -32,14 +32,14 @@ DA.ere <- function(data, predictor, p.adj = "fdr", ...){
   estimateTagwiseDisp.args <- DA.ere.args[names(DA.ere.args) %in% names(formals(estimateTagwiseDisp))]
   exactTest.args <- DA.ere.args[names(DA.ere.args) %in% names(formals(exactTest))]
   
-  x <- do.call(edgeR::calcNormFactors,c(list(x, method = "TMM"),calcNormFactors.args))
+  x <- do.call(edgeR::calcNormFactors,c(list(x, method = "RLE"),calcNormFactors.args))
   x <- do.call(estimateCommonDisp,c(list(x),estimateCommonDisp.args))
   x <- do.call(estimateTagwiseDisp,c(list(x),estimateTagwiseDisp.args))
   ta <- do.call(exactTest,c(list(x),exactTest.args))[[1]]
   colnames(ta)[3] <- "pval"
   ta$pval.adj <- p.adjust(ta$pval, method = p.adj)
   ta$Feature <- rownames(ta)
-  ta$Method <- "EdgeR exact - TMM (ere)"
+  ta$Method <- "EdgeR exact - RLE (ere2)"
  
   if(class(data) == "phyloseq"){
     if(!is.null(tax_table(data, errorIfNULL = FALSE))){

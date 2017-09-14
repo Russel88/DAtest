@@ -7,10 +7,11 @@
 #' @param relative Logical. Should count_table be normalized to relative abundances. Default TRUE
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
 #' @param delta Numeric. Pseudocount for the log transformation. Default 1
+#' @param allResults If TRUE will return raw results from the aov function
 #' @param ... Additional arguments for the aov functions
 #' @export
 
-DA.lao <- function(data, predictor, covars = NULL, relative = TRUE, p.adj = "fdr", delta = 1, ...){
+DA.lao <- function(data, predictor, covars = NULL, relative = TRUE, p.adj = "fdr", delta = 1, allResults = FALSE, ...){
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -53,7 +54,7 @@ DA.lao <- function(data, predictor, covars = NULL, relative = TRUE, p.adj = "fdr
   res <- data.frame(pval = apply(count_table,1,ao))
   res$pval.adj <- p.adjust(res$pval, method = p.adj)
     res$Feature <- rownames(res)
-  res$Method <- "Log ANOVA"
+  res$Method <- "Log ANOVA (lao)"
   
   if(class(data) == "phyloseq"){
     if(!is.null(tax_table(data, errorIfNULL = FALSE))){
@@ -63,7 +64,14 @@ DA.lao <- function(data, predictor, covars = NULL, relative = TRUE, p.adj = "fdr
     } 
   }
   
-  return(res)
+  if(allResults){
+    ao <- function(x){
+      tryCatch(aov(as.formula(form), ...), error = function(e){NA}) 
+    }
+    return(apply(count_table,1,ao))
+  } else {
+    return(res)
+  }
 }
 
 

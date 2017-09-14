@@ -1,17 +1,18 @@
-#' Quasi-poisson glm
+#' Zero inflated Negative Binomial glm
 #'
 #' With log(librarySize) as offset.
 #' Mixed-effect model is used when a paired argument is included, with the paired variable as a random intercept.
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
-#' @param out.anova If TRUE will output results and p-values from anova. If false will output results for 2. level of the predictor.
+#' @param out.anova If TRUE will output results and p-values from drop1. If false will output results for 2. level of the predictor.
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
-#' @param allResults If TRUE will return raw results from the glm function
-#' @param ... Additional arguments for the glm functions
+#' @param allResults If TRUE will return raw results from the zeroinfl function
+#' @param ... Additional arguments for the zeroinfl function
+#' @import pscl
 #' @export
 
-DA.qpo <- function(data, predictor, covars = NULL, out.anova = TRUE, p.adj = "fdr", allResults = FALSE, ...){
+DA.znb <- function(data, predictor, covars = NULL, out.anova = TRUE, p.adj = "fdr", allResults = FALSE, ...){
  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -36,16 +37,16 @@ DA.qpo <- function(data, predictor, covars = NULL, out.anova = TRUE, p.adj = "fd
   
   libSize <- colSums(count_table)
   count_table <- as.data.frame.matrix(count_table)
-
-    if(is.null(covars)){
+  
+  if(is.null(covars)){
       pois <- function(x){
         fit <- NULL
         tryCatch(
-          fit <- glm(x ~ predictor + offset(log(libSize)),family="quasipoisson",...), 
+          fit <- pscl::zeroinfl(x ~ predictor + offset(log(libSize)),dist="negbin",...), 
           error = function(x) fit <- NULL)
         if(!is.null(fit)) {
-          if(nrow(coef(summary(fit))) > 1) {
-            coef(summary(fit))[2,]
+          if(nrow(summary(fit)$coefficients$count) > 1) {
+            summary(fit)$coefficients$count[2,]
           } else NA
         } else NA 
       }
@@ -54,11 +55,11 @@ DA.qpo <- function(data, predictor, covars = NULL, out.anova = TRUE, p.adj = "fd
         pois <- function(x){
           fit <- NULL
           tryCatch(
-            fit <- glm(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(covars, collapse="+"),sep = "")),family="quasipoisson",...), 
+            fit <- pscl::zeroinfl(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(covars, collapse="+"),sep = "")),dist="negbin",...), 
             error = function(x) fit <- NULL)
           if(!is.null(fit)) {
-            if(nrow(coef(summary(fit))) > 1) {
-              coef(summary(fit))[2,]
+            if(nrow(summary(fit)$coefficients$count) > 1) {
+              summary(fit)$coefficients$count[2,]
             } else NA
           } else NA 
         }
@@ -66,59 +67,59 @@ DA.qpo <- function(data, predictor, covars = NULL, out.anova = TRUE, p.adj = "fd
         pois <- function(x){
           fit <- NULL
           tryCatch(
-            fit <- glm(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(names(covars), collapse="+"),sep = "")),family="quasipoisson",...), 
+            fit <- pscl::zeroinfl(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(names(covars), collapse="+"),sep = "")),dist="negbin",...), 
             error = function(x) fit <- NULL)
           if(!is.null(fit)) {
-            if(nrow(coef(summary(fit))) > 1) {
-              coef(summary(fit))[2,]
+            if(nrow(summary(fit)$coefficients$count) > 1) {
+              summary(fit)$coefficients$count[2,]
             } else NA
           } else NA 
         }
       }
     }
-  
+
   if(out.anova){
-      if(is.null(covars)){
+    if(is.null(covars)){
+      pois <- function(x){
+        fit <- NULL
+        tryCatch(
+          fit <- drop1(pscl::zeroinfl(x ~ predictor + offset(log(libSize)),dist="negbin",...),test="Chisq")[2,], 
+          error = function(x) fit <- NULL)
+      }
+    } else {
+      if(class(data) == "phyloseq"){
         pois <- function(x){
           fit <- NULL
           tryCatch(
-            fit <- anova(glm(x ~ predictor + offset(log(libSize)),family = "quasipoisson",...),test="Chisq")[2,], 
+            fit <- drop1(pscl::zeroinfl(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(covars, collapse="+"),sep = "")),dist="negbin",...),test="Chisq")[2,], 
             error = function(x) fit <- NULL)
         }
       } else {
-        if(class(data) == "phyloseq"){
-          pois <- function(x){
-            fit <- NULL
-            tryCatch(
-              fit <- anova(glm(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(covars, collapse="+"),sep = "")),family = "quasipoisson",...),test="Chisq")[2,], 
-              error = function(x) fit <- NULL)
-          }
-        } else {
-          pois <- function(x){
-            fit <- NULL
-            tryCatch(
-              fit <- anova(glm(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(names(covars), collapse="+"),sep = "")),family = "quasipoisson",...),test="Chisq")[2,], 
-              error = function(x) fit <- NULL)
-          }
+        pois <- function(x){
+          fit <- NULL
+          tryCatch(
+            fit <- drop1(pscl::zeroinfl(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(names(covars), collapse="+"),sep = "")),dist="negbin",...),test="Chisq")[2,], 
+            error = function(x) fit <- NULL)
         }
       }
-  }
-  
-  if(out.anova){
+    }
     res <- as.data.frame(do.call(rbind,apply(count_table,1,pois)))
-    colnames(res) <- c("Df","Deviance","Resid. Df","Resid. Dev","pval")
+    colnames(res) <- c("Df","AIC","LRT","pval")
   } else {
     res <- as.data.frame(t(as.data.frame(apply(count_table,1,pois))))
-    colnames(res) <- c("Estimate","Std.Error","t-value","pval")
+    colnames(res) <- c("Estimate","Std.Error","z value","pval")
   }
   
+
   if(nrow(res) == 1){
     res <- data.frame(Estimate = rep(NA,nrow(count_table)), Std.Error = rep(NA,nrow(count_table)), z.value = rep(NA,nrow(count_table)), pval = rep(NA,nrow(count_table)))
-    rownames(res) <- rownames(count_table)                                                                                                           
+    rownames(res) <- rownames(count_table) 
+    colnames(res) <- c("Estimate","Std.Error","z value","pval")
   } 
+
   res$pval.adj <- p.adjust(res$pval, method = p.adj)
   res$Feature <- rownames(res)
-  res$Method <- "Quasi-Poisson GLM (qpo)"
+  res$Method <- "ZI-NegBin GLM (znb)"
   
   if(nrow(res) > 1){
     if(class(data) == "phyloseq"){
@@ -131,30 +132,31 @@ DA.qpo <- function(data, predictor, covars = NULL, out.anova = TRUE, p.adj = "fd
   }
 
   if(allResults){
-      if(is.null(covars)){
+    if(is.null(covars)){
+      pois <- function(x){
+        fit <- NULL
+        tryCatch(
+          fit <- pscl::zeroinfl(x ~ predictor + offset(log(libSize)),dist="negbin",...), 
+          error = function(x) fit <- NULL)
+      }
+    } else {
+      if(class(data) == "phyloseq"){
         pois <- function(x){
           fit <- NULL
           tryCatch(
-            fit <- glm(x ~ predictor + offset(log(libSize)),family="quasipoisson",...), 
+            fit <- pscl::zeroinfl(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(covars, collapse="+"),sep = "")),dist="negbin",...), 
             error = function(x) fit <- NULL)
         }
       } else {
-        if(class(data) == "phyloseq"){
-          pois <- function(x){
-            fit <- NULL
-            tryCatch(
-              fit <- glm(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(covars, collapse="+"),sep = "")),family="quasipoisson",...), 
-              error = function(x) fit <- NULL)
-          }
-        } else {
-          pois <- function(x){
-            fit <- NULL
-            tryCatch(
-              fit <- glm(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(names(covars), collapse="+"),sep = "")),family="quasipoisson",...), 
-              error = function(x) fit <- NULL)
-          }
+        pois <- function(x){
+          fit <- NULL
+          tryCatch(
+            fit <- pscl::zeroinfl(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(names(covars), collapse="+"),sep = "")),dist="negbin",...), 
+            error = function(x) fit <- NULL)
         }
       }
+    }
+    
     return(apply(count_table,1,pois))
   } else {
     return(res)

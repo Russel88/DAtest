@@ -10,9 +10,9 @@
 \arguments{
 \item{x}{The output from the testDA function}
 
-\item{sort}{Sort methods by c("AUC","FPR","Spike.detect.rate")}
+\item{sort}{Sort methods by c("AUC","FPR")}
 
-\item{p}{Logical. Should the p-value distribution be plotted}
+\item{p}{Logical. Should the p-value distribution be plotted (only p-values from non-spiked features)}
 
 \item{bins}{Integer. Number of bins in p-value histograms}
 

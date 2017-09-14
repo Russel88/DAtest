@@ -4,7 +4,8 @@
 \alias{DA.poi}
 \title{Poisson glm}
 \usage{
-DA.poi(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", ...)
+DA.poi(data, predictor, paired = NULL, covars = NULL, out.anova = TRUE,
+  p.adj = "fdr", allResults = FALSE, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -15,11 +16,15 @@ DA.poi(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", ...)
 
 \item{covars}{Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)}
 
+\item{out.anova}{If TRUE will output results and p-values from anova (drop1 if paired != NULL). If false will output results for 2. level of the predictor.}
+
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+
+\item{allResults}{If TRUE will return raw results from the glm/glmer function}
 
 \item{...}{Additional arguments for the glm/glmer functions}
 }
 \description{
-With librarySize as offset.
+With log(librarySize) as offset.
 Mixed-effect model is used when a paired argument is included, with the paired variable as a random intercept.
 }

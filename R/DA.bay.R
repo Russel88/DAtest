@@ -5,10 +5,11 @@
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
+#' @param allResults If TRUE will return raw results from the getLikelihoods function
 #' @param ... Additional arguments to the getPriors.NB and getLikelihoods functions
 #' @export
 
-DA.bay <- function(data, predictor, p.adj = "fdr", ...){
+DA.bay <- function(data, predictor, p.adj = "fdr", allResults = FALSE, ...){
   
   library(baySeq)
   
@@ -44,7 +45,7 @@ DA.bay <- function(data, predictor, p.adj = "fdr", ...){
     output_df <- data.frame(Feature = as.character(tc$annotation), pval = 1 - tc$Likelihood, pval.adj = p.adjust(1 - tc$Likelihood, method = p.adj), ordering = tc$ordering)
   
   
-  output_df$Method <- "baySeq"
+  output_df$Method <- "baySeq (bay)"
 
   if(class(data) == "phyloseq"){
     if(!is.null(tax_table(data, errorIfNULL = FALSE))){
@@ -54,6 +55,6 @@ DA.bay <- function(data, predictor, p.adj = "fdr", ...){
     } 
   }
   
-  return(output_df)
+  if(allResults) return(CD) else return(output_df)
 }
 

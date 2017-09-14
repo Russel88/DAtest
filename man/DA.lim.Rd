@@ -5,7 +5,7 @@
 \title{LIMMA}
 \usage{
 DA.lim(data, predictor, paired = NULL, covars = NULL, relative = TRUE,
-  p.adj = "fdr", ...)
+  out.anova = TRUE, p.adj = "fdr", allResults = FALSE, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -18,7 +18,11 @@ DA.lim(data, predictor, paired = NULL, covars = NULL, relative = TRUE,
 
 \item{relative}{Logical. Should count_table be normalized to relative abundances. Default TRUE}
 
+\item{out.anova}{If TRUE will output results from F-tests, if FALSE t-statistic results from 2. level of the predictor.}
+
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+
+\item{allResults}{If TRUE will return raw results from the eBayes function}
 
 \item{...}{Additional arguments for the eBayes and lmFit functions}
 }

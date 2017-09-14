@@ -8,10 +8,11 @@
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
+#' @param allResults If TRUE will return raw results from the DESeq function
 #' @param ... Additional arguments for the DESeq function
 #' @export
 
-DA.ds2 <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", ...){
+DA.ds2 <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", allResults = FALSE, ...){
   
   library(DESeq2)
   
@@ -66,12 +67,25 @@ DA.ds2 <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
   }
   geoMeans = apply(counts(x), 1, gm_mean)
   x = estimateSizeFactors(x, geoMeans = geoMeans)
-  x <- DESeq(x, ...)
+  if(is.null(paired)){
+    if(is.null(covars)){
+      x <- DESeq(x,test="LRT",reduced = ~1, ...)
+    } else {
+      x <- DESeq(x,test="LRT",reduced = as.formula(paste("~ ",paste(names(covars), collapse="+"),sep = "")), ...)
+    } 
+  } else {
+    if(is.null(covars)){
+      x <- DESeq(x,test="LRT",reduced = ~ paired, ...)
+    } else {
+      x <- DESeq(x,test="LRT",reduced = as.formula(paste("~ paired +",paste(names(covars), collapse="+"),sep = "")), ...)
+    }
+  }
+  
   res <- as.data.frame(results(x)@listData)
   colnames(res)[5] <- "pval"
   res$pval.adj <- p.adjust(res$pval, method = p.adj)
   res$Feature <- results(x)@rownames
-  res$Method <- "DESeq2"
+  res$Method <- "DESeq2 (ds2)"
 
   if(class(data) == "phyloseq"){
     if(!is.null(tax_table(data, errorIfNULL = FALSE))){
@@ -81,6 +95,6 @@ DA.ds2 <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
     } 
   }
   
-  return(res)  
+  if(allResults) return(x) else return(res)  
 }
 

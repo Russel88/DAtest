@@ -5,7 +5,7 @@
 \title{Linear regression}
 \usage{
 DA.lrm(data, predictor, paired = NULL, covars = NULL, relative = TRUE,
-  p.adj = "fdr", ...)
+  out.anova = TRUE, p.adj = "fdr", allResults = FALSE, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -18,7 +18,11 @@ DA.lrm(data, predictor, paired = NULL, covars = NULL, relative = TRUE,
 
 \item{relative}{Logical. Should count_table be normalized to relative abundances. Default TRUE}
 
+\item{out.anova}{If TRUE will output results and p-values from anova. If false will output results for 2. level of the predictor.}
+
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+
+\item{allResults}{If TRUE will return raw results from the lm/lme function}
 
 \item{...}{Additional arguments for the lm/lme functions}
 }

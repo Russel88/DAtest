@@ -3,16 +3,17 @@
 #' Calculating false positive rates and AUC (Area Under the receiver operator Curve) for various differential abundance methods
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the predictor is numeric it will be treated as such in the analyses
-#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "poi", "qpo", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"
+#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"
 #' @param covars Either a named list with covariates, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
 #' @param R Integer. Number of times to run the tests. Default 10
 #' @param tests Character. Which tests to include. Default all (See below for details)
 #' @param relative Logical. Should abundances be made relative? Only for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea". Default TRUE
-#' @param effectSize Integer. The effect size for the spike-ins. Default 2
+#' @param effectSize Integer. The effect size for the spike-ins. Default 5
 #' @param k Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. k=c(5,10,15): 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default c(5,5,5)
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.
 #' @param rng.seed Numeric. Seed for reproducibility. Default 123
 #' @param args List. A list with lists of arguments passed to the different methods. See details for more.
+#' @param out.anova If TRUE (default) linear models will output results and p-values from anova/drop1. If FALSE will output results for 2. level of the predictor.
 #' @details Currently implemented methods:
 #' \itemize{
 #'  \item per - Permutation test with user defined test statistic
@@ -23,8 +24,10 @@
 #'  \item ltt - Welch t.test, but reads are first transformed with log(abundance + delta1) then turned into relative abundances
 #'  \item ltt2 - Welch t.test, but with relative abundances transformed with log(relative abundance + delta2)
 #'  \item neb - Negative binomial GLM with log of library size as offset
-#'  \item erq - EdgeR - Quasi likelihood
-#'  \item ere - EdgeR - Exact test
+#'  \item erq - EdgeR - Quasi likelihood - TMM normalization
+#'  \item ere - EdgeR - Exact test - TMM normalization
+#'  \item erq2 - EdgeR - Quasi likelihood - RLE normalization
+#'  \item ere2 - EdgeR - Exact test - RLE normalization
 #'  \item msf - MetagenomeSeq feature model
 #'  \item zig - MetagenomeSeq zero-inflated gaussian
 #'  \item ds2 - DESeq2
@@ -44,6 +47,10 @@
 #'  \item poi - Poisson GLM with log of library size as offset
 #'  \item qpo - Quasi-Poisson GLM with log of library size as offset
 #'  \item vli - Limma with voom
+#'  \item zpo - Zero-inflated Poisson GLM
+#'  \item znb - Zero-inflated Negative Binomial GLM
+#'  \item fri - Friedman Rank Sum test
+#'  \item qua - Quade test
 #' }
 #' "neb" can be slow if there is a paired argument.
 #' 
@@ -84,8 +91,12 @@
 #'  \item spe - Passed to cor.test
 #'  \item pea - Passed to cor.test
 #'  \item poi - Passed to glm/glmer
-#'  \item qpo - Passed to glm/glmer
+#'  \item qpo - Passed to glm
 #'  \item vli - Passed to voom, eBayes and lmFit
+#'  \item zpo - Passed to zeroinfl
+#'  \item znb - Passed to zeroinfl
+#'  \item fri - Passed to friedman.test
+#'  \item qua - Passed to quade.test
 #' }
 #' @return An object of class DA, which contains a list of results:
 #' \itemize{
@@ -98,8 +109,10 @@
 #' @importFrom pROC roc
 #' @export
 
-testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests = c("vli","qpo","poi","pea","neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","ere","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 5, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, args = list()){
+testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests = c("qua","fri","zpo","znb","vli","qpo","poi","pea","neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","erq2","ere","ere2","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 5, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, args = list(), out.anova = TRUE){
 
+  stopifnot(exists("data"))
+  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
     if(length(predictor) > 1 | length(paired) > 1) stop("When data is a phyloseq object predictor and paired should only contain the name of the variables in sample_data")
@@ -152,11 +165,22 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   count_table <- count_table[rowSums(count_table) > 0,]
   
   # Numeric predictor
-  if(is.numeric(predictor)){
+  if(is.numeric(predictor[1])){
     num.pred <- TRUE
     message("predictor is assumed to be a continuous/quantitative variable")
   } else {
     num.pred <- FALSE
+  }
+  
+  # Covars
+  if(!is.null(covars)){
+    for(i in 1:length(covars)){
+      if(is.numeric(covars[[i]][1])){
+        message(paste(names(covars)[i],"is assumed to be a continuous/quantitative variable"))
+      } else {
+        message(paste(names(covars)[i],"is assumed to be a categorical variable"))
+      }
+    }
   }
   
   # Shuffle predictor
@@ -209,31 +233,37 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
                                ttt = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, relative),ttt.args)),
                                ltt = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative),ltt.args)),
                                ltt2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),ltt2.args)),
-                               neb = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars),neb.args)),
+                               neb = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,out.anova),neb.args)),
                                erq = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars),erq.args)),
                                ere = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),ere.args)),
+                               erq2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars),erq2.args)),
+                               ere2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),ere2.args)),
                                msf = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),msf.args)),
                                zig = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars),zig.args)),
                                ds2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars),ds2.args)),
                                per = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, relative),per.args)),
                                bay = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),bay.args)),
                                adx = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),adx.args)),
-                               lim = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,relative),lim.args)),
-                               lli = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,relative),lli.args)),
-                               lli2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars),lli2.args)),
+                               lim = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,relative,out.anova),lim.args)),
+                               lli = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,relative,out.anova),lli.args)),
+                               lli2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,out.anova),lli2.args)),
                                kru = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]], relative),kru.args)),
                                aov = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],covars, relative),aov.args)),
                                lao = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],covars,relative),lao.args)),
                                lao2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],covars),lao2.args)),
-                               lrm = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars, relative),lrm.args)),
-                               llm = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,relative),llm.args)),
-                               llm2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars),llm2.args)),
+                               lrm = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars, relative,out.anova),lrm.args)),
+                               llm = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,relative,out.anova),llm.args)),
+                               llm2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,out.anova),llm2.args)),
                                rai = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),rai.args)),
                                spe = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],relative),spe.args)),
                                pea = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],relative),pea.args)),
-                               poi = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars),poi.args)),
-                               qpo = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars),qpo.args)),
-                               vli = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars),vli.args))),
+                               poi = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,out.anova),poi.args)),
+                               qpo = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],covars,out.anova),qpo.args)),
+                               vli = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,out.anova),vli.args)),
+                               zpo = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],covars,out.anova),zpo.args)),
+                               znb = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],covars,out.anova),znb.args)),
+                               fri = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative),fri.args)),
+                               qua = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative),qua.args))),
                         
                         error = function(e) NULL)
     
@@ -270,8 +300,10 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
       colnames(adx.w) <- colnames(adx.t)
       adx.t$pval <- as.numeric(as.data.frame(res.sub[paste0(r,"_","adx")])[,8])
       adx.w$pval <- as.numeric(as.data.frame(res.sub[paste0(r,"_","adx")])[,10])
-      adx.t$Method <- "ALDEx2 t-test"
-      adx.w$Method <- "ALDEx2 wilcox"
+      adx.t$pval.adj <- as.numeric(as.data.frame(res.sub[paste0(r,"_","adx")])[,12])
+      adx.w$pval.adj <- as.numeric(as.data.frame(res.sub[paste0(r,"_","adx")])[,13])
+      adx.t$Method <- "ALDEx2 t-test (adx)"
+      adx.w$Method <- "ALDEx2 wilcox (adx)"
       res.sub[paste0(r,"_","adx")] <- NULL
       res.names <- names(res.sub)
       res.sub <- c(res.sub,list(adx.t),list(adx.w))

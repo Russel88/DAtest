@@ -2,9 +2,10 @@
 % Please edit documentation in R/DA.erq.R
 \name{DA.erq}
 \alias{DA.erq}
-\title{EdgeR quasi-likelihood}
+\title{EdgeR quasi-likelihood - TMM normalization}
 \usage{
-DA.erq(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", ...)
+DA.erq(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
+  allResults = FALSE, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -17,8 +18,10 @@ DA.erq(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", ...)
 
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
 
+\item{allResults}{If TRUE will return raw results from the glmQLFTest function}
+
 \item{...}{Additional arguments for the calcNormFactors, estimateDisp, glmQLFit and glmQLFTest functions}
 }
 \description{
-EdgeR quasi-likelihood
+EdgeR quasi-likelihood - TMM normalization
 }

@@ -8,12 +8,14 @@
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
 #' @param relative Logical. Should count_table be normalized to relative abundances. Default TRUE
+#' @param out.anova If TRUE will output results from F-tests, if FALSE t-statistic results from 2. level of the predictor.
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
 #' @param delta Numeric. Pseudocount for log transformation. Default 1
+#' @param allResults If TRUE will return raw results from the eBayes function
 #' @param ... Additional arguments for the eBayes and lmFit functions
 #' @export
 
-DA.lli <- function(data, predictor, paired = NULL, covars = NULL, relative = TRUE, p.adj = "fdr", delta = 1,  ...){
+DA.lli <- function(data, predictor, paired = NULL, covars = NULL, relative = TRUE, out.anova = TRUE, p.adj = "fdr", delta = 1, allResults = FALSE,  ...){
   
   library(limma)
   library(statmod)
@@ -69,18 +71,30 @@ DA.lli <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
     fit <- do.call(lmFit,c(list(count_table, design, block = paired, correlation = dupcor$cor),lmFit.args))
   }
   fit.eb <- do.call(eBayes, c(list(fit),eBayes.args))
-  Estimate <- fit.eb$coefficients
-  df.residual <- fit.eb$df.residual
-  df.prior <- rep(fit.eb$df.prior, n)
-  s2.prior <- rep(fit.eb$s2.prior, n)
-  s2 <- (fit.eb$sigma)^2
-  s2.post <- fit.eb$s2.post
-  t.stat <- fit.eb$t[, 2]
-  pval <- fit.eb$p.value[, 2]
-  pval.adj <- p.adjust(pval, method = p.adj)
-  res <- data.frame(Estimate, t.stat, pval, pval.adj, df.residual, df.prior, s2.prior, s2, s2.post)
+  
+  if(out.anova){
+    if(is.numeric(predictor[1])){
+      res <- topTable(fit.eb, number = nrow(count_table), adjust.method = p.adj, coef = 2)
+      colnames(res)[4:5] <- c("pval","pval.adj")
+    } else {
+      res <- topTable(fit.eb, number = nrow(count_table), adjust.method = p.adj, coef = 2:length(levels(as.factor(predictor))))
+      colnames(res)[length(levels(as.factor(predictor)))+2:3] <- c("pval","pval.adj")
+    }
+  } else {
+    Estimate <- fit.eb$coefficients
+    df.residual <- fit.eb$df.residual
+    df.prior <- rep(fit.eb$df.prior, n)
+    s2.prior <- rep(fit.eb$s2.prior, n)
+    s2 <- (fit.eb$sigma)^2
+    s2.post <- fit.eb$s2.post
+    stat <- fit.eb$t[,2]
+    pval <- fit.eb$p.value[,2]
+    pval.adj <- p.adjust(pval, method = p.adj)
+    res <- data.frame(Estimate, stat, pval, pval.adj, df.residual, df.prior, s2.prior, s2, s2.post)  
+  }
+  
   res$Feature <- rownames(res)
-  res$Method <- "Log LIMMA"
+  res$Method <- "Log LIMMA (lli)"
   
   if(class(data) == "phyloseq"){
     if(!is.null(tax_table(data, errorIfNULL = FALSE))){
@@ -90,6 +104,6 @@ DA.lli <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
     } 
   }
 
-  return(res)  
+  if(allResults) return(fit.eb) else return(res) 
 }
 

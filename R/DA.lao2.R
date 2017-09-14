@@ -6,10 +6,11 @@
 #' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
 #' @param delta Numeric. Pseudocount for the log transformation. Default 0.001
+#' @param allResults If TRUE will return raw results from the aov function
 #' @param ... Additional arguments for the aov functions
 #' @export
 
-DA.lao2 <- function(data, predictor, covars = NULL, p.adj = "fdr", delta = 0.001, ...){
+DA.lao2 <- function(data, predictor, covars = NULL, p.adj = "fdr", delta = 0.001, allResults = FALSE, ...){
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -52,7 +53,7 @@ DA.lao2 <- function(data, predictor, covars = NULL, p.adj = "fdr", delta = 0.001
   res <- data.frame(pval = apply(count.rel,1,ao))
   res$pval.adj <- p.adjust(res$pval, method = p.adj)
     res$Feature <- rownames(res)
-  res$Method <- "Log ANOVA 2"
+  res$Method <- "Log ANOVA 2 (lao2)"
   
   if(class(data) == "phyloseq"){
     if(!is.null(tax_table(data, errorIfNULL = FALSE))){
@@ -62,7 +63,14 @@ DA.lao2 <- function(data, predictor, covars = NULL, p.adj = "fdr", delta = 0.001
     } 
   }
   
-  return(res)
+  if(allResults){
+    ao <- function(x){
+      tryCatch(aov(as.formula(form), ...), error = function(e){NA}) 
+    }
+    return(apply(count.rel,1,ao))
+  } else {
+    return(res)
+  }
 }
 
 

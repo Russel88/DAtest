@@ -5,18 +5,19 @@
 \title{Comparing differential abundance methods by FPR and AUC}
 \usage{
 testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
-  tests = c("vli", "qpo", "poi", "pea", "neb", "rai", "per", "bay", "adx",
-  "wil", "ttt", "ltt", "ltt2", "erq", "ere", "msf", "zig", "ds2", "lim", "lli",
-  "lli2", "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe"),
-  relative = TRUE, effectSize = 5, k = c(5, 5, 5),
-  cores = (detectCores() - 1), rng.seed = 123, args = list())
+  tests = c("qua", "fri", "zpo", "znb", "vli", "qpo", "poi", "pea", "neb",
+  "rai", "per", "bay", "adx", "wil", "ttt", "ltt", "ltt2", "erq", "erq2", "ere",
+  "ere2", "msf", "zig", "ds2", "lim", "lli", "lli2", "aov", "lao", "lao2",
+  "kru", "lrm", "llm", "llm2", "spe"), relative = TRUE, effectSize = 5,
+  k = c(5, 5, 5), cores = (detectCores() - 1), rng.seed = 123,
+  args = list(), out.anova = TRUE)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
 \item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the predictor is numeric it will be treated as such in the analyses}
 
-\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "poi", "qpo", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"}
+\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"}
 
 \item{covars}{Either a named list with covariates, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)}
 
@@ -26,7 +27,7 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
 
 \item{relative}{Logical. Should abundances be made relative? Only for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea". Default TRUE}
 
-\item{effectSize}{Integer. The effect size for the spike-ins. Default 2}
+\item{effectSize}{Integer. The effect size for the spike-ins. Default 5}
 
 \item{k}{Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. k=c(5,10,15): 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default c(5,5,5)}
 
@@ -35,6 +36,8 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
 \item{rng.seed}{Numeric. Seed for reproducibility. Default 123}
 
 \item{args}{List. A list with lists of arguments passed to the different methods. See details for more.}
+
+\item{out.anova}{If TRUE (default) linear models will output results and p-values from anova/drop1. If FALSE will output results for 2. level of the predictor.}
 }
 \value{
 An object of class DA, which contains a list of results:
@@ -57,8 +60,10 @@ Currently implemented methods:
  \item ltt - Welch t.test, but reads are first transformed with log(abundance + delta1) then turned into relative abundances
  \item ltt2 - Welch t.test, but with relative abundances transformed with log(relative abundance + delta2)
  \item neb - Negative binomial GLM with log of library size as offset
- \item erq - EdgeR - Quasi likelihood
- \item ere - EdgeR - Exact test
+ \item erq - EdgeR - Quasi likelihood - TMM normalization
+ \item ere - EdgeR - Exact test - TMM normalization
+ \item erq2 - EdgeR - Quasi likelihood - RLE normalization
+ \item ere2 - EdgeR - Exact test - RLE normalization
  \item msf - MetagenomeSeq feature model
  \item zig - MetagenomeSeq zero-inflated gaussian
  \item ds2 - DESeq2
@@ -78,6 +83,10 @@ Currently implemented methods:
  \item poi - Poisson GLM with log of library size as offset
  \item qpo - Quasi-Poisson GLM with log of library size as offset
  \item vli - Limma with voom
+ \item zpo - Zero-inflated Poisson GLM
+ \item znb - Zero-inflated Negative Binomial GLM
+ \item fri - Friedman Rank Sum test
+ \item qua - Quade test
 }
 "neb" can be slow if there is a paired argument.
 
@@ -118,7 +127,11 @@ Below is an overview of which functions get the arguments that are passed to a s
  \item spe - Passed to cor.test
  \item pea - Passed to cor.test
  \item poi - Passed to glm/glmer
- \item qpo - Passed to glm/glmer
+ \item qpo - Passed to glm
  \item vli - Passed to voom, eBayes and lmFit
+ \item zpo - Passed to zeroinfl
+ \item znb - Passed to zeroinfl
+ \item fri - Passed to friedman.test
+ \item qua - Passed to quade.test
 }
 }

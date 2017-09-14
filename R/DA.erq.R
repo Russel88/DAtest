@@ -1,14 +1,15 @@
-#' EdgeR quasi-likelihood
+#' EdgeR quasi-likelihood - TMM normalization
 #' 
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
+#' @param allResults If TRUE will return raw results from the glmQLFTest function
 #' @param ... Additional arguments for the calcNormFactors, estimateDisp, glmQLFit and glmQLFTest functions
 #' @export
 
-DA.erq <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", ...){
+DA.erq <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", allResults = FALSE, ...){
   
   library(edgeR)
   
@@ -46,7 +47,7 @@ DA.erq <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
   
   count_table <- as.data.frame(count_table)
   y <- DGEList(counts=count_table,genes = data.frame(Feature = row.names(count_table)))
-  y <- do.call(calcNormFactors, c(list(y),calcNormFactors.args))
+  y <- do.call(calcNormFactors, c(list(y, method = "TMM"),calcNormFactors.args))
   if(!is.null(paired)){
     if(is.null(covars)){
       design <- model.matrix(~ predictor+paired)
@@ -70,12 +71,20 @@ DA.erq <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
   }
   y <- do.call(estimateDisp,c(list(y,design),estimateDisp.args))
   fit <- do.call(glmQLFit,c(list(y,design),glmQLFit.args))
-  qlf <- do.call(glmQLFTest,c(list(fit,coef=2),glmQLFTest.args))
-  ta <- qlf$table
-  colnames(ta)[4] <- "pval"
+  
+  if(is.numeric(predictor[1])){
+    qlf <- do.call(glmQLFTest,c(list(fit,coef=2),glmQLFTest.args))
+    ta <- qlf$table
+    colnames(ta)[4] <- "pval"
+  } else {
+    qlf <- do.call(glmQLFTest,c(list(fit,coef=2:length(levels(as.factor(predictor)))),glmQLFTest.args))
+    ta <- qlf$table
+    colnames(ta)[(2+length(levels(as.factor(predictor))))] <- "pval"
+  }
+
   ta$pval.adj <- p.adjust(ta$pval, method = p.adj)
   ta$Feature <- rownames(ta)
-  ta$Method <- "EdgeR qll"
+  ta$Method <- "EdgeR qll - TMM (erq)"
   
   if(class(data) == "phyloseq"){
     if(!is.null(tax_table(data, errorIfNULL = FALSE))){
@@ -85,7 +94,7 @@ DA.erq <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
     } 
   }
   
-  return(ta)
+  if(allResults) return(qlf) else return(ta)
   
 }
 
