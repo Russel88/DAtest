@@ -122,8 +122,8 @@ in one go. If you are interested in testing treatments against a common
 baseline/control, you can set `out.anova = FALSE`. This will output
 results from the 2. level of the `predictor` compared to the intercept.
 This will ensure that p-values from `testDA` are comparable to the ones
-for the final analysis (See more in [How to run real (unshuffled)
-data](#how-to-run-real-(unshuffled)-data)).
+for the final analysis (See more
+[here](#how-to-run-real-(unshuffled)-data)).
 
 ### *If you have a paired/blocked experimental design:*
 
