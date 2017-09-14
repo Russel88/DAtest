@@ -42,8 +42,7 @@ Overview of this tutorial
 
 -   [Installation of packages](#installation-of-packages)
 -   [How to compare methods](#how-to-compare-methods)
--   [How to run real (unshuffled)
-    data](#how-to-run-real-(unshuffled)-data)
+-   [How to run original data](#how-to-run-original-data)
 -   [Implemented methods](#implemented-methods)
 -   [Extra features](#extra-features)
 
@@ -122,8 +121,7 @@ in one go. If you are interested in testing treatments against a common
 baseline/control, you can set `out.anova = FALSE`. This will output
 results from the 2. level of the `predictor` compared to the intercept.
 This will ensure that p-values from `testDA` are comparable to the ones
-for the final analysis (See more
-[here](#how-to-run-real-(unshuffled)-data)).
+for the final analysis (See more [here](#how-to-run-original-data)).
 
 ### *If you have a paired/blocked experimental design:*
 
@@ -188,8 +186,8 @@ Medians for each method:
 
     summary(mytest)
 
-How to run real (unshuffled) data
-=================================
+How to run original data
+========================
 
 All tests can easily be run with the original data. E.g. edgeR exact
 test:
