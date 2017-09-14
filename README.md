@@ -120,12 +120,10 @@ All linear models (also GLMs) output results (including p-values) from
 `anova`/`drop1` functions and are thus testing the `predictor` variable
 in one go. If you are interested in testing treatments against a common
 baseline/control, you can set `out.anova = FALSE`. This will output
-results from the 2. level of the `predictor` compared to the intercept,
-but be sure that the `predictor` is coded correctly such that the
-baseline level is the first factor level (e.g. with factor(predictor,
-levels = c("Control","Treat1","Treat2"))). This will ensure that
-p-values from `testDA` are comparable to the ones for the final
-analysis.
+results from the 2. level of the `predictor` compared to the intercept.
+This will ensure that p-values from `testDA` are comparable to the ones
+for the final analysis (See more in [How to run real (unshuffled)
+data](#how-to-run-real-(unshuffled)-data)).
 
 ### *If you have a paired/blocked experimental design:*
 
@@ -201,14 +199,21 @@ test:
 All methods can be accessed in the same way; DA."test" where "test" is
 the abbreviation given in the details of the `testDA` function.
 
-*IMPORTANT:* If your `predictor` has more than two levels you have to
-set the `by` argument for "zig" (this is by default = 2).
+It is advised to set `allResults = TRUE` for checking final results. For
+all methods where relevant, this will output the raw results, often in a
+list with each element corresponding to a feature (OTU/gene/protein).
 
-By default all linear models (including all GLMs) output the p-value
-from an `anova`/`drop1` function. It is advised to set
-`allResults = TRUE` for checking final results. For all methods where
-relevant, this will output the raw results, often in a list with each
-element corresponding to a feature (OTU/gene/protein).
+-   ***IMPORTANT:***
+    -   If your `predictor` has more than two levels you have to set the
+        `by` argument for "zig" (this is by default = 2)
+    -   All linear models (including all GLMs) output the p-value from
+        an `anova`/`drop1` functions. This can be changed with the
+        `out.anova` argument
+    -   All limma models (lim,lli,lli2,vli) tests all levels of the
+        `predictor` against the intercept. This can be changed with the
+        `out.anova` argument
+    -   Set `out.anova` similar in `testDA` as in your final analysis
+        for reliable comparison
 
 For linear models the `drop1`/`anova` functions can be used to test
 significance of the `predictor` and `covars` variables:
