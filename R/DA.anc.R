@@ -1,6 +1,6 @@
 #' ANCOM
 #'
-#' @param data Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns
+#' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Factor, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param allResults If TRUE will return raw results from the ANCOM function

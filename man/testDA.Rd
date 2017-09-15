@@ -5,10 +5,10 @@
 \title{Comparing differential abundance methods by FPR and AUC}
 \usage{
 testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
-  tests = c("anc", "qua", "fri", "zpo", "znb", "vli", "qpo", "poi", "pea",
-  "neb", "rai", "per", "bay", "adx", "wil", "ttt", "ltt", "ltt2", "erq", "erq2",
-  "ere", "ere2", "msf", "zig", "ds2", "lim", "lli", "lli2", "aov", "lao",
-  "lao2", "kru", "lrm", "llm", "llm2", "spe"), relative = TRUE,
+  tests = c("sam", "anc", "qua", "fri", "zpo", "znb", "vli", "qpo", "poi",
+  "pea", "neb", "rai", "per", "bay", "adx", "wil", "ttt", "ltt", "ltt2", "erq",
+  "erq2", "ere", "ere2", "msf", "zig", "ds2", "lim", "lli", "lli2", "aov",
+  "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe"), relative = TRUE,
   effectSize = 5, k = c(5, 5, 5), cores = (detectCores() - 1),
   rng.seed = 123, args = list(), out.anova = TRUE)
 }
@@ -88,6 +88,7 @@ Currently implemented methods:
  \item fri - Friedman Rank Sum test
  \item qua - Quade test
  \item anc - ANCOM
+ \item sam - SAMSeq
 }
 "neb" can be slow if there is a paired argument.
 
@@ -135,5 +136,6 @@ Below is an overview of which functions get the arguments that are passed to a s
  \item fri - Passed to friedman.test
  \item qua - Passed to quade.test
  \item anc - Passed to ANCOM
+ \item sam - Passed to SAMseq
 }
 }

@@ -7,7 +7,7 @@
 DA.anc(data, predictor, paired = NULL, allResults = FALSE, ...)
 }
 \arguments{
-\item{data}{Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns}
+\item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
 \item{predictor}{The predictor of interest. Factor, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
 

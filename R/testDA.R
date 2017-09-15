@@ -52,6 +52,7 @@
 #'  \item fri - Friedman Rank Sum test
 #'  \item qua - Quade test
 #'  \item anc - ANCOM
+#'  \item sam - SAMSeq
 #' }
 #' "neb" can be slow if there is a paired argument.
 #' 
@@ -99,6 +100,7 @@
 #'  \item fri - Passed to friedman.test
 #'  \item qua - Passed to quade.test
 #'  \item anc - Passed to ANCOM
+#'  \item sam - Passed to SAMseq
 #' }
 #' @return An object of class DA, which contains a list of results:
 #' \itemize{
@@ -111,7 +113,7 @@
 #' @importFrom pROC roc
 #' @export
 
-testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests = c("anc","qua","fri","zpo","znb","vli","qpo","poi","pea","neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","erq2","ere","ere2","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 5, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, args = list(), out.anova = TRUE){
+testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests = c("sam","anc","qua","fri","zpo","znb","vli","qpo","poi","pea","neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","erq2","ere","ere2","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 5, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, args = list(), out.anova = TRUE){
 
   stopifnot(exists("data"))
   
@@ -156,12 +158,13 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   # neb warning
   if("neb" %in% tests & !is.null(paired)){
     message("As 'neb' is included and a 'paired' variable is supplied this might take a long time")
+  } else {
+    # anc warning
+    if("anc" %in% tests){
+      message("As 'anc' is included this might take some time")
+    }
   }
-  # anc warning
-  if("anc" %in% tests){
-    message("As 'anc' is included this might take a long time")
-  }
-  
+
   # Set seed
   set.seed(rng.seed)
   message(paste("Seed is set to",rng.seed))
@@ -270,11 +273,12 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
                                znb = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],covars,out.anova),znb.args)),
                                fri = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative),fri.args)),
                                qua = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative),qua.args)),
-                               anc = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),anc.args))),
+                               anc = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),anc.args)),
+                               sam = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),sam.args))),
                         
                         error = function(e) NULL)
     
-    if(!is.null(res.sub) & (!i %in% c("anc"))){
+    if(!is.null(res.sub) & (!i %in% c("anc","sam"))){
       res.sub[is.na(res.sub$pval),"pval"] <- 1
     }
 
@@ -327,6 +331,26 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
       res.names <- names(res.sub)
       res.sub <- c(res.sub,list(anc))
       names(res.sub) <- c(res.names,paste0(r,"_","anc"))
+    }
+    
+    # Make pseudo-pval for SAMseq
+    if("sam" %in% gsub(".*_","",names(res.sub))){
+      samdf <- as.data.frame(res.sub[paste0(r,"_","sam")])
+      colnames(samdf) <- gsub(".*_sam.","",colnames(samdf))
+      
+      if(length(levels(as.factor(predictor))) > 2 & num.pred == FALSE){
+        samdf$pval <- 1/samdf$Score * 0.05/(1/min(samdf[samdf$Sig == "Yes","Score"]))
+      } else {
+        sam.inv.up <- 1/samdf$Score * 0.05/(1/min(samdf[samdf$Sig.up == "Yes","Score"]))
+        sam.inv.lo <- 1/samdf$Score * 0.05/(1/max(samdf[samdf$Sig.lo == "Yes","Score"]))
+        samdf$pval <- apply(cbind(sam.inv.up,sam.inv.lo),1,max)
+      }
+      
+      samdf$pval.adj <- samdf$pval
+      res.sub[paste0(r,"_","sam")] <- NULL
+      res.names <- names(res.sub)
+      res.sub <- c(res.sub,list(samdf))
+      names(res.sub) <- c(res.names,paste0(r,"_","sam"))
     }
     
     # Insert spiked column

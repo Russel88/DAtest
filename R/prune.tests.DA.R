@@ -15,6 +15,7 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative){
   if(!"RAIDA" %in% rownames(installed.packages())) tests <- tests[tests != "rai"]
   if(!"pscl" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("zpo","znb")]
   if(!"ancom.R" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("anc")]
+  if(!"samr" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("sam")]
   
   # Exclude tests that do not work with a paired argument
   if(!is.null(paired)){
@@ -30,7 +31,11 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative){
   
   # Only include some tests if there are more than two levels in predictor
   if(length(levels(as.factor(predictor))) > 2){
-    tests <- tests[tests %in% c("anc","qua","fri","znb","zpo","vli","qpo","poi","neb","erq","erq2","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe","pea","zig")]
+    tests <- tests[tests %in% c("sam","anc","qua","fri","znb","zpo","vli","qpo","poi","neb","erq","erq2","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe","pea","zig")]
+    # Exclude if only works for two-class paired
+    if(!is.null(paired)){
+      tests <- tests[!tests %in% c("sam")]
+    } 
   } else {
     # Excluded tests if levels in predictor is exactly 2
     tests <- tests[!tests %in% c("aov","lao","lao2","kru","spe","pea","fri","qua")]
@@ -38,7 +43,7 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative){
   
   # Only include specific tests if predictor is numeric
   if(is.numeric(predictor)){
-    tests <- tests[tests %in% c("znb","zpo","vli","qpo","poi","neb","erq","erq2","ds2","lim","lli","lli2","lrm","llm","llm2","spe","pea")]
+    tests <- tests[tests %in% c("sam","znb","zpo","vli","qpo","poi","neb","erq","erq2","ds2","lim","lli","lli2","lrm","llm","llm2","spe","pea")]
   } else {
     # Exclude if not numeric
     tests <- tests[!tests %in% c("spe","pea")]
@@ -46,7 +51,7 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative){
   
   # Exclude if relative is false
   if(relative == FALSE){
-    tests <- tests[!tests %in% c("anc","znb","zpo","vli","poi","qpo","ltt2","neb","erq","ere","ere2","erq2","msf","zig","bay","ds2","adx","lli2","lao2","llm2","rai")]
+    tests <- tests[!tests %in% c("sam","anc","znb","zpo","vli","poi","qpo","ltt2","neb","erq","ere","ere2","erq2","msf","zig","bay","ds2","adx","lli2","lao2","llm2","rai")]
   }
   
   # Only include if covars are present

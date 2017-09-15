@@ -180,23 +180,28 @@ the same order as columns in `data`):
 
     mytest <- testDA(data, predictor = "Time", paired = "Patient", covars = c("Age","ExpDate"))
 
-**Plot the output:**
---------------------
-
-    plot(mytest)
-
-**Print the output:**
+**Check the output:**
 ---------------------
 
-Medians for each method:
-
+    plot(mytest)
     summary(mytest)
 
-**Note:** As ANCOM does not output p-values, AUC/FPR/Spike.detect.rate
-for "anc" is based on psuedo p-values: the inverse W statistic,
-normalized such that, of the detected ("significant") features, the
-feature with the lowest W statistic has a pseudo p-value = 0.05. Higher
-W gives lower pseudo p-value and vice versa.
+**Note:**
+
+As ANCOM and SAMseq does not output p-values, AUC and Spike.detect.rate
+for "anc" and "sam" are based on psuedo p-values. These are calculated
+from the statistics/scores as these are perfectly ranked according to
+detection/significance calling: Pseudo p-value = the inverse
+statistic/score, normalized such that, of the detected ("significant")
+features, the feature with the lowest statistic/score has a pseudo
+p-value = 0.05. Higher statistic/score gives lower pseudo p-value and
+vice versa.
+
+FPR is also based on pseudo p-values for "anc" and "sam", but as these
+cannot be adjusted as nominal p-values, FPR for these methods is the
+final false discovery rate and we should expect an FPR = 0 for these two
+methods, unless you are willing to accept some false positives. This can
+be tuned with the `sig` ("anc") and `fdr.output` ("sam") arguments.
 
 How to run original data
 ========================
@@ -338,6 +343,7 @@ snippet of the implementation (see email in Description).
 -   fri - Friedman Rank Sum test
 -   qua - Quade test
 -   anc - [ANCOM](https://www.ncbi.nlm.nih.gov/pubmed/26028277)
+-   sam - [SAMseq](http://statweb.stanford.edu/~tibs/SAM/)
 
 ### Paired permutation test
 
@@ -421,3 +427,4 @@ passed to a specific test:
 -   fri - Passed to friedman.test
 -   qua - Passed to quade.test
 -   anc - Passed to ANCOM
+-   sam - Passed to SAMseq
