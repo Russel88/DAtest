@@ -5,19 +5,19 @@
 \title{Comparing differential abundance methods by FPR and AUC}
 \usage{
 testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
-  tests = c("qua", "fri", "zpo", "znb", "vli", "qpo", "poi", "pea", "neb",
-  "rai", "per", "bay", "adx", "wil", "ttt", "ltt", "ltt2", "erq", "erq2", "ere",
-  "ere2", "msf", "zig", "ds2", "lim", "lli", "lli2", "aov", "lao", "lao2",
-  "kru", "lrm", "llm", "llm2", "spe"), relative = TRUE, effectSize = 5,
-  k = c(5, 5, 5), cores = (detectCores() - 1), rng.seed = 123,
-  args = list(), out.anova = TRUE)
+  tests = c("anc", "qua", "fri", "zpo", "znb", "vli", "qpo", "poi", "pea",
+  "neb", "rai", "per", "bay", "adx", "wil", "ttt", "ltt", "ltt2", "erq", "erq2",
+  "ere", "ere2", "msf", "zig", "ds2", "lim", "lli", "lli2", "aov", "lao",
+  "lao2", "kru", "lrm", "llm", "llm2", "spe"), relative = TRUE,
+  effectSize = 5, k = c(5, 5, 5), cores = (detectCores() - 1),
+  rng.seed = 123, args = list(), out.anova = TRUE)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
 \item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the predictor is numeric it will be treated as such in the analyses}
 
-\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"}
+\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "anc", "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"}
 
 \item{covars}{Either a named list with covariates, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)}
 
@@ -87,10 +87,11 @@ Currently implemented methods:
  \item znb - Zero-inflated Negative Binomial GLM
  \item fri - Friedman Rank Sum test
  \item qua - Quade test
+ \item anc - ANCOM
 }
 "neb" can be slow if there is a paired argument.
 
-"per" is also somewhat slow, but is usually one of the methods performing well with large sample sizes.
+"anc" is somewhat slow compared to the other methods.
 
 Additional arguments can be passed to the internal functions with the "args" argument. 
 It should be structured as a list with elements named by the tests: 
@@ -133,5 +134,6 @@ Below is an overview of which functions get the arguments that are passed to a s
  \item znb - Passed to zeroinfl
  \item fri - Passed to friedman.test
  \item qua - Passed to quade.test
+ \item anc - Passed to ANCOM
 }
 }

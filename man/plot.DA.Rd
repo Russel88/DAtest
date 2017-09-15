@@ -4,8 +4,7 @@
 \alias{plot.DA}
 \title{Plotting results from testDA}
 \usage{
-\method{plot}{DA}(x, sort = "AUC", p = FALSE, bins = 20, adj = FALSE,
-  ...)
+\method{plot}{DA}(x, sort = "AUC", p = FALSE, bins = 20, ...)
 }
 \arguments{
 \item{x}{The output from the testDA function}
@@ -15,8 +14,6 @@
 \item{p}{Logical. Should the p-value distribution be plotted (only p-values from non-spiked features)}
 
 \item{bins}{Integer. Number of bins in p-value histograms}
-
-\item{adj}{Logical. Whether the histograms should show adjusted p-values}
 
 \item{...}{Additional plotting arguments}
 }

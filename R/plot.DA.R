@@ -4,36 +4,25 @@
 #' @param sort Sort methods by c("AUC","FPR")
 #' @param p Logical. Should the p-value distribution be plotted (only p-values from non-spiked features)
 #' @param bins Integer. Number of bins in p-value histograms
-#' @param adj Logical. Whether the histograms should show adjusted p-values 
 #' @param ... Additional plotting arguments
 #' @import ggplot2
 #' @importFrom cowplot ggdraw
 #' @importFrom cowplot draw_plot
 #' @export
 
-plot.DA <- function(x, sort = "AUC", p = FALSE, bins = 20, adj = FALSE, ...){
+plot.DA <- function(x, sort = "AUC", p = FALSE, bins = 20, ...){
   
   if(p){
-    pval.all <- lapply(x$results, function(x) lapply(x, function(y) y[,c("pval","pval.adj","Method","Spiked")]))
+    pval.all <- lapply(x$results, function(x) lapply(x, function(y) y[,c("pval","Method","Spiked")]))
     df.all <- do.call(rbind, do.call(rbind,pval.all))
     df.all <- df.all[df.all$Spiked == "No",]
     
-    if(adj){
-      ggplot(df.all, aes(pval.adj)) +
-        theme_bw() +
-        geom_histogram(bins=bins) +
-        facet_wrap(~Method, scales = "free_y") +
-        ylab("Density") +
-        xlab("Adjusted P-value")
-      
-    } else {
-      ggplot(df.all, aes(pval)) +
-        theme_bw() +
-        geom_histogram(bins=bins) +
-        facet_wrap(~Method, scales = "free_y") +
-        ylab("Density") +
-        xlab("P-value")
-    }
+    ggplot(df.all, aes(pval)) +
+      theme_bw() +
+      geom_histogram(bins=bins) +
+      facet_wrap(~Method, scales = "free_y") +
+      ylab("Density") +
+      xlab("P-value")
     
   } else {
     

@@ -66,8 +66,12 @@ But the package will work without them
 
 -   RAIDA has to be installed from an
     [external source.](https://cals.arizona.edu/~anling/software/)
-    -   It depends on: MASS, protoclust, qvalue (biocLite("qvalue")) and
+    -   It depends on: protoclust, qvalue (biocLite("qvalue")) and
         limma (biocLite("limma"))
+-   ANCOM has to be installed from an
+    [external source.](https://www.niehs.nih.gov/research/resources/software/biostatistics/ancom/index.cfm)
+    -   It depends on: shiny, doParallel, stringr, exactRankTests and
+        openxlsx
 
 How to compare methods
 ======================
@@ -155,6 +159,8 @@ covariable in the model and are also generally flexible in the design,
 but they might fail if the design matrix is not full rank and if data is
 missing.
 
+ANCOM use the `paired` variable in a repeated measures manner
+
 ### *If you have non-relative abundances, e.g. for normalized protein abundance:*
 
     mytest <- testDA(data, predictor, relative = FALSE)
@@ -166,7 +172,7 @@ the same order as columns in `data`):
 
     mytest <- testDA(data, predictor, covars = list(Age = subject.age, Date = exp.date))
 
-### If you have a phyloseq object:
+### *If you have a phyloseq object:*
 
 `data` can also be a phyloseq object. In this case, the `predictor`,
 `paired` and `covars` arguments are the names of the variables in
@@ -202,16 +208,19 @@ all methods where relevant, this will output the raw results, often in a
 list with each element corresponding to a feature (OTU/gene/protein).
 
 -   ***IMPORTANT:***
-    -   If your `predictor` has more than two levels you have to set the
-        `by` argument for "zig" (this is by default = 2)
+    -   Set `out.anova` similar in `testDA` as in your final analysis
+        for reliable comparison
+    -   If your `predictor` has more than two levels you might have to
+        set the `by` argument for "zig" (this is by default = 2)
     -   All linear models (including all GLMs) output the p-value from
         an `anova`/`drop1` functions. This can be changed with the
         `out.anova` argument
     -   All limma models (lim,lli,lli2,vli) tests all levels of the
-        `predictor` against the intercept. This can be changed with the
-        `out.anova` argument
-    -   Set `out.anova` similar in `testDA` as in your final analysis
-        for reliable comparison
+        `predictor` against the intercept (with `topTable`). This can be
+        changed with the `out.anova` argument
+    -   For ANCOM: If the FPR = 0, you would not expect false positives
+        with the default settings. If "anc" has an FPR &gt; 0, set
+        `multcorr = 1`
 
 For linear models the `drop1`/`anova` functions can be used to test
 significance of the `predictor` and `covars` variables:
@@ -322,6 +331,7 @@ snippet of the implementation (see email in Description).
 -   znb - Zero-inflated Negative Binomial GLM
 -   fri - Friedman Rank Sum test
 -   qua - Quade test
+-   anc - ANCOM
 
 ### Paired permutation test
 
@@ -404,3 +414,4 @@ passed to a specific test:
 -   znb - Passed to zeroinfl
 -   fri - Passed to friedman.test
 -   qua - Passed to quade.test
+-   anc - Passed to ANCOM

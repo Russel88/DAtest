@@ -3,7 +3,7 @@
 #' Calculating false positive rates and AUC (Area Under the receiver operator Curve) for various differential abundance methods
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the predictor is numeric it will be treated as such in the analyses
-#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"
+#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "anc", "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"
 #' @param covars Either a named list with covariates, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
 #' @param R Integer. Number of times to run the tests. Default 10
 #' @param tests Character. Which tests to include. Default all (See below for details)
@@ -51,10 +51,11 @@
 #'  \item znb - Zero-inflated Negative Binomial GLM
 #'  \item fri - Friedman Rank Sum test
 #'  \item qua - Quade test
+#'  \item anc - ANCOM
 #' }
 #' "neb" can be slow if there is a paired argument.
 #' 
-#' "per" is also somewhat slow, but is usually one of the methods performing well with large sample sizes.
+#' "anc" is somewhat slow compared to the other methods.
 #' 
 #' Additional arguments can be passed to the internal functions with the "args" argument. 
 #' It should be structured as a list with elements named by the tests: 
@@ -97,6 +98,7 @@
 #'  \item znb - Passed to zeroinfl
 #'  \item fri - Passed to friedman.test
 #'  \item qua - Passed to quade.test
+#'  \item anc - Passed to ANCOM
 #' }
 #' @return An object of class DA, which contains a list of results:
 #' \itemize{
@@ -109,7 +111,7 @@
 #' @importFrom pROC roc
 #' @export
 
-testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests = c("qua","fri","zpo","znb","vli","qpo","poi","pea","neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","erq2","ere","ere2","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 5, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, args = list(), out.anova = TRUE){
+testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests = c("anc","qua","fri","zpo","znb","vli","qpo","poi","pea","neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","erq2","ere","ere2","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 5, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, args = list(), out.anova = TRUE){
 
   stopifnot(exists("data"))
   
@@ -154,6 +156,10 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   # neb warning
   if("neb" %in% tests & !is.null(paired)){
     message("As 'neb' is included and a 'paired' variable is supplied this might take a long time")
+  }
+  # anc warning
+  if("anc" %in% tests){
+    message("As 'anc' is included this might take a long time")
   }
   
   # Set seed
@@ -263,11 +269,12 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
                                zpo = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],covars,out.anova),zpo.args)),
                                znb = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],covars,out.anova),znb.args)),
                                fri = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative),fri.args)),
-                               qua = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative),qua.args))),
+                               qua = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative),qua.args)),
+                               anc = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),anc.args))),
                         
                         error = function(e) NULL)
     
-    if(!is.null(res.sub)){
+    if(!is.null(res.sub) & (!i %in% c("anc"))){
       res.sub[is.na(res.sub$pval),"pval"] <- 1
     }
 
@@ -293,7 +300,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
     res.sub <- results[names(results)[gsub("_.*","",names(results)) == r]]
     
     # Split ALDEx2 results in t.test and wilcoxon
-    if("adx" %in% tests){
+    if("adx" %in% gsub(".*_","",names(res.sub))){
       adx.t <- as.data.frame(res.sub[paste0(r,"_","adx")])[,c(1:7,12)]
       adx.w <- as.data.frame(res.sub[paste0(r,"_","adx")])[,c(1:7,12)]
       colnames(adx.t) <- gsub(".*_adx.","",colnames(adx.t))
@@ -310,6 +317,17 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
       names(res.sub) <- c(res.names,paste0(r,"_","adx.t"),paste0(r,"_","adx.w"))
     }
 
+    # Make pseudo-pval for ANCOM
+    if("anc" %in% gsub(".*_","",names(res.sub))){
+      anc <- as.data.frame(res.sub[paste0(r,"_","anc")])
+      colnames(anc) <- gsub(".*_anc.","",colnames(anc))
+      anc$pval <- 1/(anc$W+1) * 0.05/(1/(min(anc[anc$Detected == "Yes","W"])+1))
+      res.sub[paste0(r,"_","anc")] <- NULL
+      res.names <- names(res.sub)
+      res.sub <- c(res.sub,list(anc))
+      names(res.sub) <- c(res.names,paste0(r,"_","anc"))
+    }
+    
     # Insert spiked column
     newnames <- gsub(".*_","",names(res.sub))
     res.sub <- foreach(rsp = 1:length(res.sub)) %do% {
@@ -321,14 +339,14 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
     names(res.sub) <- newnames
     
     # Confusion matrix
-    totalPos <- sapply(res.sub,function(x) nrow(x[x$pval < 0.05,]))
-    totalNeg <- sapply(res.sub,function(x) nrow(x[x$pval >= 0.05,])) 
+    totalPos <- sapply(res.sub,function(x) nrow(x[x$pval <= 0.05,]))
+    totalNeg <- sapply(res.sub,function(x) nrow(x[x$pval > 0.05,])) 
     trueNeg <- totalNeg  #if effectSize == 1
     truePos <- 0  #if effectSize == 1
     falseNeg <- 0 #if effectSize == 1
     if(effectSize != 1){
-      truePos <- sapply(res.sub, function(x) sum(x[x$pval < 0.05,"Feature"] %in% spikeds[[r]][[2]]))
-      falseNeg <- sapply(res.sub, function(x) sum(x[x$pval >= 0.05,"Feature"] %in% spikeds[[r]][[2]]))
+      truePos <- sapply(res.sub, function(x) sum(x[x$pval <= 0.05,"Feature"] %in% spikeds[[r]][[2]]))
+      falseNeg <- sapply(res.sub, function(x) sum(x[x$pval > 0.05,"Feature"] %in% spikeds[[r]][[2]]))
     }
     falsePos <- totalPos - truePos
     trueNeg <- totalNeg - falseNeg

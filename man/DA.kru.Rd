@@ -10,7 +10,7 @@ DA.kru(data, predictor, relative = TRUE, p.adj = "fdr",
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
-\item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+\item{predictor}{The predictor of interest. Factor, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
 
 \item{relative}{Logical. Should count_table be normalized to relative abundances. Default TRUE}
 
