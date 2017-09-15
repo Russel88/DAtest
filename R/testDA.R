@@ -322,6 +322,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
       anc <- as.data.frame(res.sub[paste0(r,"_","anc")])
       colnames(anc) <- gsub(".*_anc.","",colnames(anc))
       anc$pval <- 1/(anc$W+1) * 0.05/(1/(min(anc[anc$Detected == "Yes","W"])+1))
+      anc$pval.adj <- anc$pval
       res.sub[paste0(r,"_","anc")] <- NULL
       res.names <- names(res.sub)
       res.sub <- c(res.sub,list(anc))
@@ -359,7 +360,12 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
     
     
     # Spike detection rate
-    sdrs <- sapply(1:length(res.sub), function(x) truePos[x] / sum(k))
+    # True positive for adjusted p-values
+    truePos.adj <- 0  #if effectSize == 1
+    if(effectSize != 1){
+      truePos.adj <- sapply(res.sub, function(x) sum(x[x$pval.adj <= 0.05,"Feature"] %in% spikeds[[r]][[2]]))
+    }
+    sdrs <- sapply(1:length(res.sub), function(x) truePos.adj[x] / sum(k))
     
     # AUC
     aucs <- sapply(1:length(res.sub), function(x) {

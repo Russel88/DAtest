@@ -192,6 +192,12 @@ Medians for each method:
 
     summary(mytest)
 
+**Note:** As ANCOM does not output p-values, AUC/FPR/Spike.detect.rate
+for "anc" is based on psuedo p-values: the inverse W statistic,
+normalized such that, of the detected ("significant") features, the
+feature with the lowest W statistic has a pseudo p-value = 0.05. Higher
+W gives lower pseudo p-value and vice versa.
+
 How to run original data
 ========================
 
@@ -331,7 +337,7 @@ snippet of the implementation (see email in Description).
 -   znb - Zero-inflated Negative Binomial GLM
 -   fri - Friedman Rank Sum test
 -   qua - Quade test
--   anc - ANCOM
+-   anc - [ANCOM](https://www.ncbi.nlm.nih.gov/pubmed/26028277)
 
 ### Paired permutation test
 
