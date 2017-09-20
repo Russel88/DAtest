@@ -103,7 +103,12 @@
 
 allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("qua","fri","znb","zpo","vli","qpo","poi","pea","spe","per","bay","adx","wil","ttt","ltt","ltt2","neb","erq","ere","erq2","ere2","msf","zig","ds2","lim","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), out.anova = TRUE){
 
-  stopifnot(exists("data"))
+  stopifnot(exists("data"),exists("predictor"))
+  # Check for servers
+  if(cores > 10){
+    ANSWER <- readline(paste("You are about to run allDA using",cores,"cores. Enter y to proceed "))
+    if(ANSWER != "y") stop("Process aborted")
+  }
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){

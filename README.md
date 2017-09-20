@@ -186,6 +186,9 @@ the same order as columns in `data`):
     plot(mytest)
     summary(mytest)
 
+    # Details from the run:
+    mytest$details
+
 **Note:**
 
 As ANCOM and SAMseq do not output p-values, AUC and Spike.detect.rate
@@ -195,7 +198,8 @@ detection/significance calling: Pseudo p-value = the inverse
 statistic/score, normalized such that, of the detected ("significant")
 features, the feature with the lowest statistic/score has a pseudo
 p-value = 0.05. Higher statistic/score gives lower pseudo p-value and
-vice versa.
+vice versa. For SAMseq it is done seperately on the positive and
+negative scores.
 
 FPR is also based on pseudo p-values for "anc" and "sam", but as these
 cannot be adjusted as nominal p-values, FPR for these methods is the

@@ -36,7 +36,7 @@ DA.sam <- function(data, predictor, paired = NULL, fdr.output = 0.05, allResults
     
     if(length(levels(as.factor(predictor))) == 2){
       if(is.null(paired)){
-        res <- SAMseq(count_table, predictor, resp.type = "Two class unpaired", genenames = rownames(count_table), fdr.output = fdr.output, ...)
+        res <- SAMseq(count_table, predictor, resp.type = "Two class unpaired", genenames = rownames(count_table), fdr.output = fdr.output)
       } else {
         predictor[predictor == 2] <- -1
         predictor <- as.numeric(as.factor(paired)) * predictor
@@ -51,7 +51,7 @@ DA.sam <- function(data, predictor, paired = NULL, fdr.output = 0.05, allResults
     df <- data.frame(Feature = rownames(count_table),
                      Score = res$samr.obj$tt,
                      Sig = factor("No",levels = c("No","Yes")))
-    df[df$Feature %in% as.matrix(res$siggenes.table$genes.up)[,1],"Sig"] <- "Yes"
+    tryCatch(df[df$Feature %in% as.matrix(res$siggenes.table$genes.up)[,1],"Sig"] <- "Yes",error = function(e) NULL)
     cont <- as.data.frame(res$samr.obj$stand.contrasts)
     colnames(cont) <- paste("Contrast",colnames(cont))
     df <- cbind(df,cont)
@@ -61,16 +61,16 @@ DA.sam <- function(data, predictor, paired = NULL, fdr.output = 0.05, allResults
                        Score = res$samr.obj$tt,
                        Sig.up = factor("No",levels = c("No","Yes")),
                        Sig.lo = factor("No",levels = c("No","Yes")))
-      df[df$Feature %in% as.matrix(res$siggenes.table$genes.up)[,1],"Sig.up"] <- "Yes"
-      df[df$Feature %in% as.matrix(res$siggenes.table$genes.lo)[,1],"Sig.lo"] <- "Yes"
+      tryCatch(df[df$Feature %in% as.matrix(res$siggenes.table$genes.up)[,1],"Sig.up"] <- "Yes",error = function(e) NULL)
+      tryCatch(df[df$Feature %in% as.matrix(res$siggenes.table$genes.lo)[,1],"Sig.lo"] <- "Yes",error = function(e) NULL)
     } else {
       df <- data.frame(Feature = rownames(count_table),
                        Score = res$samr.obj$tt,
                        Fold.change = res$samr.obj$foldchange,
                        Sig.up = factor("No",levels = c("No","Yes")),
                        Sig.lo = factor("No",levels = c("No","Yes")))
-      df[df$Feature %in% as.matrix(res$siggenes.table$genes.up)[,1],"Sig.up"] <- "Yes"
-      df[df$Feature %in% as.matrix(res$siggenes.table$genes.lo)[,1],"Sig.lo"] <- "Yes"
+      tryCatch(df[df$Feature %in% as.matrix(res$siggenes.table$genes.up)[,1],"Sig.up"] <- "Yes",error = function(e) NULL)
+      tryCatch(df[df$Feature %in% as.matrix(res$siggenes.table$genes.lo)[,1],"Sig.lo"] <- "Yes",error = function(e) NULL)
     }
   }
   

@@ -116,8 +116,13 @@
 
 testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests = c("sam","anc","qua","fri","zpo","znb","vli","qpo","poi","pea","neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","erq2","ere","ere2","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 5, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, args = list(), out.anova = TRUE){
 
-  stopifnot(exists("data"))
-  
+  stopifnot(exists("data"),exists("predictor"))
+  # Check for servers
+  if(cores > 10){
+    ANSWER <- readline(paste("You are about to run testDA using",cores,"cores. Enter y to proceed "))
+    if(ANSWER != "y") stop("Process aborted")
+  }
+
   # Time taking
   t1 <- proc.time()
   
@@ -329,7 +334,9 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
     if("anc" %in% gsub(".*_","",names(res.sub))){
       anc <- as.data.frame(res.sub[paste0(r,"_","anc")])
       colnames(anc) <- gsub(".*_anc.","",colnames(anc))
-      anc$pval <- 1/(anc$W+1) * 0.05/(1/(min(anc[anc$Detected == "Yes","W"])+1))
+      suppressWarnings(min.d <- min(anc[anc$Detected == "Yes","W"]))
+      if(min.d == Inf) min.d <- max(anc$W)+1
+      anc$pval <- 1/(anc$W+1) * 0.05/(1/(min.d+1))
       anc$pval.adj <- anc$pval
       res.sub[paste0(r,"_","anc")] <- NULL
       res.names <- names(res.sub)
@@ -343,10 +350,16 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
       colnames(samdf) <- gsub(".*_sam.","",colnames(samdf))
       
       if(length(levels(as.factor(predictor))) > 2 & num.pred == FALSE){
-        samdf$pval <- 1/samdf$Score * 0.05/(1/min(samdf[samdf$Sig == "Yes","Score"]))
+        suppressWarnings(min.sig <- min(samdf[samdf$Sig == "Yes","Score"]))
+        if(min.sig == Inf) min.sig <- max(samdf$Score)+1
+        samdf$pval <- 1/samdf$Score * 0.05/(1/min.sig)
       } else {
-        sam.inv.up <- 1/samdf$Score * 0.05/(1/min(samdf[samdf$Sig.up == "Yes","Score"]))
-        sam.inv.lo <- 1/samdf$Score * 0.05/(1/max(samdf[samdf$Sig.lo == "Yes","Score"]))
+        suppressWarnings(min.up <- min(samdf[samdf$Sig.up == "Yes","Score"]))
+        suppressWarnings(max.lo <- max(samdf[samdf$Sig.lo == "Yes","Score"]))
+        if(min.up == Inf) min.up <- max(samdf$Score)+1
+        if(max.lo == -Inf) max.lo <- min(samdf$Score)-1
+        sam.inv.up <- 1/samdf$Score * 0.05/(1/min.up)
+        sam.inv.lo <- 1/samdf$Score * 0.05/(1/max.lo)
         samdf$pval <- apply(cbind(sam.inv.up,sam.inv.lo),1,max)
       }
       
@@ -426,18 +439,38 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   
   output.results <- do.call(rbind,lapply(final.results, function(x) x[[1]]))
   output.all.results <- lapply(final.results, function(x) x[[2]])
-  output.details <- data.frame(RunTime.sec = ((proc.time()-t1)[3]),
-                         Relative = relative,
-                         EffectSize = effectSize,
-                         RandomSeed = rng.seed,
-                         OutAnova = out.anova,
-                         NumericPredictor = num.pred)
+  
+  if(num.pred){
+    pred.det <- "Quantitative"
+  } else {
+    if(length(levels(as.factor(predictor))) == 2) pred.det <- "Two-class" else  pred.det <- "Multi-class"
+  }
+  
+  if(is.null(paired)) pair.det <- "No" else pair.det <- "Yes"
 
+  run.secs <- (proc.time() - t1)[3]
+
+  if((run.secs)/60/60 > 1){
+    run.time <- paste(round((run.secs)/60/60,2),"Hours")
+   } else {
+    run.time <- paste(round((run.secs)/60,2),"Minutes")
+   }
+
+  output.details <- data.frame(Features = nrow(count_table),
+                               Samples = ncol(count_table),
+                               Predictor = pred.det,
+                               Paired = pair.det,
+                               Covars = length(covars),
+                               RunTime = run.time,
+                               Relative = relative,
+                               EffectSize = effectSize,
+                               RandomSeed = rng.seed,
+                               OutAnova = out.anova)
+  rownames(output.details) <- ""
+  output.details <- as.data.frame(t(output.details))
+  colnames(output.details) <- ""
+  
   out <- list(table = output.results, results = output.all.results, details = output.details)
   class(out) <- "DA"
   return(out)
 }
-
-
-
-
