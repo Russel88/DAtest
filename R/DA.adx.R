@@ -26,13 +26,7 @@ DA.adx <- function(data, predictor, p.adj = "fdr", ...){
   x$wi.ep.adj <- p.adjust(x$wi.ep, method = p.adj)
   x$Feature <- rownames(x)
   
-  if(class(data) == "phyloseq"){
-    if(!is.null(tax_table(data, errorIfNULL = FALSE))){
-      tax <- tax_table(data)
-      x <- merge(x, tax, by.x = "Feature", by.y = "row.names")
-      rownames(x) <- NULL
-    } 
-  }
+  if(class(data) == "phyloseq") x <- add.tax.DA(data, x)
   
   return(x)
   

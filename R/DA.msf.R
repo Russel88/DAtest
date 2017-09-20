@@ -37,13 +37,7 @@ DA.msf <- function(data, predictor, p.adj = "fdr", allResults = FALSE, ...){
   temp_table$pval.adj <- p.adjust(temp_table$pval, method = p.adj)
   temp_table$Method <- "MgSeq Feature (msf)"  
 
-  if(class(data) == "phyloseq"){
-    if(!is.null(tax_table(data, errorIfNULL = FALSE))){
-      tax <- tax_table(data)
-      temp_table <- merge(temp_table, tax, by.x = "Feature", by.y = "row.names")
-      rownames(temp_table) <- NULL
-    } 
-  }
+  if(class(data) == "phyloseq") temp_table <- add.tax.DA(data, temp_table)
   
   if(allResults) return(mgsfit) else return(temp_table)
 }

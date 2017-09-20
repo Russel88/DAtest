@@ -164,7 +164,111 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("qua"
   }
   
   # Run tests
-  results <- run.tests.DA(count_table, predictor, paired, covars, tests, relative, args, cores, p.adj, out.anova)
+  # Progress bar
+  pb <- txtProgressBar(max = length(tests), style = 3)
+  progress <- function(n) setTxtProgressBar(pb, n)
+  opts <- list(progress = progress)
+  
+  # Start parallel
+  if(cores == 1) {
+    registerDoSEQ() 
+  } else {
+    cl <- makeCluster(cores)
+    registerDoSNOW(cl)
+    on.exit(stopCluster(cl))
+  }
+  
+  # Run tests in parallel
+  results <- foreach(i = tests, .options.snow = opts) %dopar% {
+    
+    # Extract test arguments
+    if(!all(names(args) %in% tests)) stop("One or more names in list with additional arguments does not match names of tests")
+    for(j in seq_along(args)){
+      assign(paste0(names(args)[j],".args"),args[[j]],pos=1)
+    }
+    test.args <- paste0(tests,".args")
+    test.boo <- lapply(test.args,exists)
+    for(l in seq_along(test.args)){
+      if(test.boo[l] == FALSE) assign(test.args[l], list(),pos=1)
+    }
+    
+    res.sub <- tryCatch(switch(i,
+                               wil = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired, relative, p.adj),wil.args)),
+                               ttt = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired, relative, p.adj),ttt.args)),
+                               ltt = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,relative, p.adj),ltt.args)),
+                               ltt2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired, p.adj),ltt2.args)),
+                               neb = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars,out.anova, p.adj),neb.args)),
+                               erq = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars, p.adj),erq.args)),
+                               ere = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor, p.adj),ere.args)),
+                               erq2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars, p.adj),erq2.args)),
+                               ere2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor, p.adj),ere2.args)),
+                               msf = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor, p.adj),msf.args)),
+                               zig = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars, p.adj),zig.args)),
+                               ds2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars, p.adj),ds2.args)),
+                               per = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired, relative, p.adj),per.args)),
+                               bay = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired, p.adj),bay.args)),
+                               adx = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor, p.adj),adx.args)),
+                               lim = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars,relative,out.anova, p.adj),lim.args)),
+                               lli = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars,relative,out.anova, p.adj),lli.args)),
+                               lli2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars,out.anova, p.adj),lli2.args)),
+                               kru = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor, relative, p.adj),kru.args)),
+                               aov = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,covars, relative, p.adj),aov.args)),
+                               lao = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,covars,relative, p.adj),lao.args)),
+                               lao2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,covars, p.adj),lao2.args)),
+                               lrm = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars, relative,out.anova, p.adj),lrm.args)),
+                               llm = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars,relative,out.anova, p.adj),llm.args)),
+                               llm2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars,out.anova, p.adj),llm2.args)),
+                               rai = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor, p.adj),rai.args)),
+                               spe = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,relative, p.adj),spe.args)),
+                               pea = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,relative, p.adj),pea.args)),
+                               poi = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars,out.anova, p.adj),poi.args)),
+                               qpo = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,covars,out.anova, p.adj),qpo.args)),
+                               vli = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars,out.anova, p.adj),vli.args)),
+                               zpo = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,covars,out.anova, p.adj),zpo.args)),
+                               znb = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,covars,out.anova, p.adj),znb.args)),
+                               fri = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,relative,p.adj),fri.args)),
+                               qua = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,relative,p.adj),qua.args))),
+                        
+                        error = function(e) NULL)
+    
+    if(!is.null(res.sub)){
+      res.sub[is.na(res.sub$pval),"pval"] <- 1
+      res.sub[is.na(res.sub$pval.adj),"pval.adj"] <- 1
+    }
+    
+    return(res.sub)
+    
+  }
+  names(results) <- tests
+  
+  # Handle failed tests
+  results <- results[!sapply(results,is.null)]
+  if(length(names(results)) != length(tests)){
+    if(length(tests) - length(names(results)) == 1){
+      message(paste(paste(tests[!tests %in% names(results)],collapse = ", "),"was excluded due to failure"))
+    } else {
+      message(paste(paste(tests[!tests %in% names(results)],collapse = ", "),"were excluded due to failure"))
+    }
+    tests <- names(results)
+  }
+  
+  # Split ALDEx2 results in t.test and wilcoxon
+  if("adx" %in% tests){
+    adx.t <- as.data.frame(results["adx"])[,c(1:7,12)]
+    adx.w <- as.data.frame(results["adx"])[,c(1:7,12)]
+    colnames(adx.t) <- gsub("adx.","",colnames(adx.t))
+    colnames(adx.w) <- colnames(adx.t)
+    adx.t$pval <- as.numeric(as.data.frame(results["adx"])$adx.we.ep)
+    adx.w$pval <- as.numeric(as.data.frame(results["adx"])$adx.wi.ep)
+    adx.t$pval.adj <- as.numeric(as.data.frame(results["adx"])$adx.we.ep.adj)
+    adx.w$pval.adj <- as.numeric(as.data.frame(results["adx"])$adx.wi.ep.adj)
+    adx.t$Method <- "ALDEx2 t-test (adx)"
+    adx.w$Method <- "ALDEx2 wilcox (adx)"
+    results["adx"] <- NULL
+    res.names <- names(results)
+    results <- c(results,list(adx.t),list(adx.w))
+    names(results) <- c(res.names,"adx.t","adx.w")
+  }
   
   # Positives
   Pos.raw <- sapply(results,function(x) x[x$pval < 0.05,"Feature"])

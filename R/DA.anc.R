@@ -42,13 +42,7 @@ DA.anc <- function(data, predictor, paired = NULL, allResults = FALSE, ...){
   df[df$Feature %in% res[[2]],"Detected"] <- "Yes"
   df$Method <- "ANCOM (anc)"
   
-  if(class(data) == "phyloseq"){
-    if(!is.null(tax_table(data, errorIfNULL = FALSE))){
-      tax <- tax_table(data)
-      df <- merge(df, tax, by.x = "Feature", by.y = "row.names")
-      rownames(df) <- NULL
-    } 
-  }
+  if(class(data) == "phyloseq") df <- add.tax.DA(data, df)
   
   if(allResults){
     return(res)

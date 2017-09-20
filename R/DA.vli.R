@@ -93,13 +93,7 @@ DA.vli <- function(data, predictor, paired = NULL, covars = NULL, out.anova = TR
   res$Feature <- rownames(res)
   res$Method <- "LIMMA voom (vli)"
   
-  if(class(data) == "phyloseq"){
-    if(!is.null(tax_table(data, errorIfNULL = FALSE))){
-      tax <- tax_table(data)
-      res <- merge(res, tax, by.x = "Feature", by.y = "row.names")
-      rownames(res) <- NULL
-    } 
-  }
+  if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
 
   if(allResults) return(fit.eb) else return(res)  
 }

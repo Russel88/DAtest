@@ -53,16 +53,10 @@ DA.lao <- function(data, predictor, covars = NULL, relative = TRUE, p.adj = "fdr
   
   res <- data.frame(pval = apply(count_table,1,ao))
   res$pval.adj <- p.adjust(res$pval, method = p.adj)
-    res$Feature <- rownames(res)
+  res$Feature <- rownames(res)
   res$Method <- "Log ANOVA (lao)"
   
-  if(class(data) == "phyloseq"){
-    if(!is.null(tax_table(data, errorIfNULL = FALSE))){
-      tax <- tax_table(data)
-      res <- merge(res, tax, by.x = "Feature", by.y = "row.names")
-      rownames(res) <- NULL
-    } 
-  }
+  if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
   
   if(allResults){
     ao <- function(x){

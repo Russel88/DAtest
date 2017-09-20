@@ -188,8 +188,8 @@ the same order as columns in `data`):
 
 **Note:**
 
-As ANCOM and SAMseq does not output p-values, AUC and Spike.detect.rate
-for "anc" and "sam" are based on psuedo p-values. These are calculated
+As ANCOM and SAMseq do not output p-values, AUC and Spike.detect.rate
+for "anc" and "sam" are based on pseudo p-values. They are calculated
 from the statistics/scores as these are perfectly ranked according to
 detection/significance calling: Pseudo p-value = the inverse
 statistic/score, normalized such that, of the detected ("significant")
@@ -224,7 +224,7 @@ list with each element corresponding to a feature (OTU/gene/protein).
     -   If your `predictor` has more than two levels you might have to
         set the `by` argument for "zig" (this is by default = 2)
     -   All linear models (including all GLMs) output the p-value from
-        an `anova`/`drop1` functions. This can be changed with the
+        an `anova`/`drop1` function. This can be changed with the
         `out.anova` argument
     -   All limma models (lim,lli,lli2,vli) tests all levels of the
         `predictor` against the intercept (with `topTable`). This can be

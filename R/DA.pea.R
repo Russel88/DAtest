@@ -44,13 +44,7 @@ DA.pea <- function(data, predictor, relative = TRUE, p.adj = "fdr", ...){
   res$Method <- "Pearson (pea)"
   
   # Add tax table if available
-  if(class(data) == "phyloseq"){
-    if(!is.null(tax_table(data, errorIfNULL = FALSE))){
-      tax <- tax_table(data)
-      res <- merge(res, tax, by.x = "Feature", by.y = "row.names")
-      rownames(res) <- NULL
-    } 
-  }
+  if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
 
   return(res)  
 }

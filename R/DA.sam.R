@@ -76,6 +76,8 @@ DA.sam <- function(data, predictor, paired = NULL, fdr.output = 0.05, allResults
   
   df$Method <- "SAMseq (sam)"
   
+  if(class(data) == "phyloseq") df <- add.tax.DA(data, df)
+  
   if(allResults){
     return(res)
   } else {

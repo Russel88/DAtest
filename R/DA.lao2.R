@@ -55,13 +55,7 @@ DA.lao2 <- function(data, predictor, covars = NULL, p.adj = "fdr", delta = 0.001
     res$Feature <- rownames(res)
   res$Method <- "Log ANOVA 2 (lao2)"
   
-  if(class(data) == "phyloseq"){
-    if(!is.null(tax_table(data, errorIfNULL = FALSE))){
-      tax <- tax_table(data)
-      res <- merge(res, tax, by.x = "Feature", by.y = "row.names")
-      rownames(res) <- NULL
-    } 
-  }
+  if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
   
   if(allResults){
     ao <- function(x){

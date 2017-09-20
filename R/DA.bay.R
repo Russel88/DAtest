@@ -47,13 +47,7 @@ DA.bay <- function(data, predictor, p.adj = "fdr", allResults = FALSE, ...){
   
   output_df$Method <- "baySeq (bay)"
 
-  if(class(data) == "phyloseq"){
-    if(!is.null(tax_table(data, errorIfNULL = FALSE))){
-      tax <- tax_table(data)
-      output_df <- merge(output_df, tax, by.x = "Feature", by.y = "row.names")
-      rownames(output_df) <- NULL
-    } 
-  }
+  if(class(data) == "phyloseq") output_df <- add.tax.DA(data, output_df)
   
   if(allResults) return(CD) else return(output_df)
 }

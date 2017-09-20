@@ -44,6 +44,7 @@ An object of class DA, which contains a list of results:
 \itemize{
  \item table - FPR, AUC and spike detection rate for each run
  \item results - A complete list of output from all the methods. Example: Get wilcoxon results from 2. run as such: $results[[2]]["wil"]
+ \item details - A dataframe with details from the run
 }
 }
 \description{

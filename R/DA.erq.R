@@ -86,13 +86,7 @@ DA.erq <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
   ta$Feature <- rownames(ta)
   ta$Method <- "EdgeR qll - TMM (erq)"
   
-  if(class(data) == "phyloseq"){
-    if(!is.null(tax_table(data, errorIfNULL = FALSE))){
-      tax <- tax_table(data)
-      ta <- merge(ta, tax, by.x = "Feature", by.y = "row.names")
-      rownames(ta) <- NULL
-    } 
-  }
+  if(class(data) == "phyloseq") ta <- add.tax.DA(data, ta)
   
   if(allResults) return(qlf) else return(ta)
   

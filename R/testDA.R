@@ -106,6 +106,7 @@
 #' \itemize{
 #'  \item table - FPR, AUC and spike detection rate for each run
 #'  \item results - A complete list of output from all the methods. Example: Get wilcoxon results from 2. run as such: $results[[2]]["wil"]
+#'  \item details - A dataframe with details from the run
 #' }
 #' 
 #' @import snow doSNOW foreach
@@ -116,6 +117,9 @@
 testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests = c("sam","anc","qua","fri","zpo","znb","vli","qpo","poi","pea","neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","erq2","ere","ere2","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 5, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, args = list(), out.anova = TRUE){
 
   stopifnot(exists("data"))
+  
+  # Time taking
+  t1 <- proc.time()
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -422,8 +426,14 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   
   output.results <- do.call(rbind,lapply(final.results, function(x) x[[1]]))
   output.all.results <- lapply(final.results, function(x) x[[2]])
-  
-  out <- list(table = output.results, results = output.all.results)
+  output.details <- data.frame(RunTime.sec = ((proc.time()-t1)[3]),
+                         Relative = relative,
+                         EffectSize = effectSize,
+                         RandomSeed = rng.seed,
+                         OutAnova = out.anova,
+                         NumericPredictor = num.pred)
+
+  out <- list(table = output.results, results = output.all.results, details = output.details)
   class(out) <- "DA"
   return(out)
 }
