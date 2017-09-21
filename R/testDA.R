@@ -229,7 +229,9 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
 
   # Run the tests in parallel
   results <- foreach(i = tests.par , .options.snow = opts) %dopar% {
-
+    library(DAtest)
+    t1.sub <- proc.time()
+    
     # Extract run info
     run.no <- as.numeric(gsub("_.*","",i))
     i <- gsub(".*_","",i)
@@ -291,11 +293,16 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
       res.sub[is.na(res.sub$pval),"pval"] <- 1
     }
 
-    return(res.sub)
+    run.time.sub <- (proc.time()-t1.sub)[3]
+    return(list(res.sub,run.time.sub))
     
   }
-  names(results) <- tests.par
+  run.times <- lapply(results, function(x) x[[2]])
+  results <- lapply(results, function(x) x[[1]])
   
+  names(results) <- tests.par
+  names(run.times) <- tests.par
+
   # Handle failed tests
   results <- results[!sapply(results,is.null)]
   
@@ -470,7 +477,14 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   output.details <- as.data.frame(t(output.details))
   colnames(output.details) <- ""
   
-  out <- list(table = output.results, results = output.all.results, details = output.details)
+  # Run times
+  run.times.all <- foreach(i = unique(gsub(".*_","",names(results))),.combine = rbind) %do% {
+    round(mean(as.numeric(run.times[gsub(".*_","",names(run.times)) == i]))/60,2)
+  }
+  rownames(run.times.all) <- unique(gsub(".*_","",names(results)))
+  colnames(run.times.all) <- "Minutes"
+  
+  out <- list(table = output.results, results = output.all.results, details = output.details, run.times = run.times.all)
   class(out) <- "DA"
   return(out)
 }

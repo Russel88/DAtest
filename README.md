@@ -49,8 +49,16 @@ Overview of this tutorial
 Installation of packages
 ========================
 
+The DAtest package:
+
     library(devtools)
     install_github("Russel88/DAtest")
+
+Below are all CRAN dependencies if you run into problems with
+installation. They should install automatically, but if they don't, run
+the line below and try installing the DAtest package again:
+
+    install.packages(c("nloptr","minqa","doParallel","foreach","snow","doSNOW","MASS","pROC","ggplot2","cowplot","lme4","nlme","statmod","pscl","samr"))
 
 #### The following are needed for *full* functionality
 
@@ -63,15 +71,28 @@ But the package will work without them
     biocLite("baySeq")
     biocLite("ALDEx2")
     biocLite("limma")
+    biocLite("qvalue")
+    biocLite("impute")
 
--   RAIDA has to be installed from an
-    [external source.](https://cals.arizona.edu/~anling/software/)
-    -   It depends on: protoclust, qvalue (biocLite("qvalue")) and
-        limma (biocLite("limma"))
--   ANCOM has to be installed from an
-    [external source.](https://www.niehs.nih.gov/research/resources/software/biostatistics/ancom/index.cfm)
-    -   It depends on: shiny, doParallel, stringr, exactRankTests and
-        openxlsx
+-   RAIDA and ANCOM have to be installed from external sources:
+
+<!-- -->
+
+    # Dependencies (after the bioconductor packages are installed)
+    install.packages(c("shiny","exactRankTests","openxlsx","protoclust","DT","coin","stringr"))
+
+    # RAIDA:
+    install.packages("https://cals.arizona.edu/~anling/software/RAIDA_1.0.tar.gz",repos = NULL)
+
+    # ANCOM:
+    download.file("https://www.niehs.nih.gov/research/resources/software/biostatistics/ancom/ancom_software.zip",destfile = "ANCOM.zip")
+    unzip("ANCOM.zip",exdir=getwd())
+    install.packages("ancom.R_1.1-3.tar.gz", repos = NULL)
+
+\*\* Note: \*\* If installation fails for any of the biocLite or
+external packages (RAIDA, ANCOM) do not despair. `DAtest` will work
+seamlessly, but will simply exclude methods that depends on these
+packages.
 
 How to compare methods
 ======================
@@ -188,6 +209,9 @@ the same order as columns in `data`):
 
     # Details from the run:
     mytest$details
+
+    # Average run times of each method:
+    mytest$run.times
 
 **Note:**
 
