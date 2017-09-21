@@ -167,11 +167,6 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   # neb warning
   if("neb" %in% tests & !is.null(paired)){
     message("As 'neb' is included and a 'paired' variable is supplied this might take a long time")
-  } else {
-    # anc warning
-    if("anc" %in% tests){
-      message("As 'anc' is included this might take some time")
-    }
   }
 
   # Set seed
@@ -229,7 +224,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
 
   # Run the tests in parallel
   results <- foreach(i = tests.par , .options.snow = opts) %dopar% {
-    library(DAtest)
+
     t1.sub <- proc.time()
     
     # Extract run info

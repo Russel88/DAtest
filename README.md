@@ -54,23 +54,17 @@ The DAtest package:
     library(devtools)
     install_github("Russel88/DAtest")
 
-Below are all CRAN dependencies if you run into problems with
-installation. They should install automatically, but if they don't, run
-the line below and try installing the DAtest package again:
-
-    install.packages(c("nloptr","minqa","doParallel","foreach","snow","doSNOW","MASS","pROC","ggplot2","cowplot","lme4","nlme","statmod","pscl","samr"))
-
 #### The following are needed for *full* functionality
 
 But the package will work without them
 
     source("https://bioconductor.org/biocLite.R")
     biocLite("DESeq2")
+    biocLite("limma")
     biocLite("edgeR")
     biocLite("metagenomeSeq")
     biocLite("baySeq")
     biocLite("ALDEx2")
-    biocLite("limma")
     biocLite("qvalue")
     biocLite("impute")
 
@@ -89,10 +83,9 @@ But the package will work without them
     unzip("ANCOM.zip",exdir=getwd())
     install.packages("ancom.R_1.1-3.tar.gz", repos = NULL)
 
-\*\* Note: \*\* If installation fails for any of the biocLite or
-external packages (RAIDA, ANCOM) do not despair. `DAtest` will work
-seamlessly, but will simply exclude methods that depends on these
-packages.
+**Note:** If installation fails for any of the biocLite or external
+packages (RAIDA, ANCOM) do not despair. `DAtest` will work seamlessly,
+but will simply exclude methods that depends on these packages.
 
 How to compare methods
 ======================
