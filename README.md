@@ -49,8 +49,12 @@ Overview of this tutorial
 Installation of packages
 ========================
 
+Installation of DAtest and all dependencies has been tested to work on a
+clean R version 3.4.1 by installing in the following order:
+
 The DAtest package:
 
+    install.packages("devtools")
     library(devtools)
     install_github("Russel88/DAtest")
 

@@ -107,6 +107,7 @@
 #'  \item table - FPR, AUC and spike detection rate for each run
 #'  \item results - A complete list of output from all the methods. Example: Get wilcoxon results from 2. run as such: $results[[2]]["wil"]
 #'  \item details - A dataframe with details from the run
+#'  \item run.times - A dataframe with average run times of the different methods
 #' }
 #' 
 #' @import snow doSNOW foreach
@@ -154,6 +155,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   count_table <- as.matrix(count_table)
   
   # Checks
+  if(relative) if(!isTRUE(all(unlist(count_table) == floor(unlist(count_table))))) stop("Count_table must only contain integer values")
   if(min(count_table) < 0) stop("Count_table contains negative values!")
   if(sum(colSums(count_table) == 0) > 0) stop("Some samples are empty!")
   if(ncol(count_table) != length(predictor)) stop("Number of samples in count_table does not match length of predictor")

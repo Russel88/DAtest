@@ -135,7 +135,8 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("qua"
 
   
   # Checks
-  if(min(count_table) < 0 & is.numeric(predictor)) stop("Numeric predictor and negative values in count_table is currently not supported")
+  if(relative) if(!isTRUE(all(unlist(count_table) == floor(unlist(count_table))))) stop("Count_table must only contain integer values")
+  if(min(count_table) < 0) stop("Count_table contains negative values!")
   if(sum(colSums(count_table) == 0) > 0) stop("Some samples are empty!")
   if(ncol(count_table) != length(predictor)) stop("Number of samples in count_table does not match length of predictor")
   if(length(levels(as.factor(predictor))) < 2) stop("predictor should have at least two levels")
