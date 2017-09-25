@@ -110,7 +110,7 @@
 #'  \item run.times - A dataframe with average run times of the different methods
 #' }
 #' 
-#' @import snow doSNOW foreach
+#' @import snow doSNOW foreach utils
 #' @importFrom parallel detectCores
 #' @importFrom pROC roc
 #' @export

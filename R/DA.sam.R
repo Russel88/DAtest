@@ -10,8 +10,6 @@
 #' @export
 DA.sam <- function(data, predictor, paired = NULL, fdr.output = 0.05, allResults = FALSE, ...){
   
-  library(samr, quietly = TRUE)
-  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
     if(length(predictor) > 1 | length(paired) > 1) stop("When data is a phyloseq object predictor and paired should only contain the name of the variables in sample_data")
@@ -29,21 +27,21 @@ DA.sam <- function(data, predictor, paired = NULL, fdr.output = 0.05, allResults
 
   if(is.numeric(predictor)){
     # Quantitative
-    res <- SAMseq(count_table, predictor, resp.type = "Quantitative", genenames = rownames(count_table), fdr.output = fdr.output, ...)
+    res <- samr::SAMseq(count_table, predictor, resp.type = "Quantitative", genenames = rownames(count_table), fdr.output = fdr.output, ...)
   } else {
     # Categorical
     predictor <- as.numeric(as.factor(predictor))
     
     if(length(levels(as.factor(predictor))) == 2){
       if(is.null(paired)){
-        res <- SAMseq(count_table, predictor, resp.type = "Two class unpaired", genenames = rownames(count_table), fdr.output = fdr.output)
+        res <- samr::SAMseq(count_table, predictor, resp.type = "Two class unpaired", genenames = rownames(count_table), fdr.output = fdr.output)
       } else {
         predictor[predictor == 2] <- -1
         predictor <- as.numeric(as.factor(paired)) * predictor
-        res <- SAMseq(count_table, predictor, resp.type = "Two class paired", genenames = rownames(count_table), fdr.output = fdr.output, ...)
+        res <- samr::SAMseq(count_table, predictor, resp.type = "Two class paired", genenames = rownames(count_table), fdr.output = fdr.output, ...)
       }
     } else {
-      res <- SAMseq(count_table, predictor, resp.type = "Multiclass", genenames = rownames(count_table), fdr.output = fdr.output, ...)
+      res <- samr::SAMseq(count_table, predictor, resp.type = "Multiclass", genenames = rownames(count_table), fdr.output = fdr.output, ...)
     }
   }
   
