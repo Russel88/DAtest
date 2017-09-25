@@ -9,7 +9,7 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
   "pea", "neb", "rai", "per", "bay", "adx", "wil", "ttt", "ltt", "ltt2", "erq",
   "erq2", "ere", "ere2", "msf", "zig", "ds2", "lim", "lli", "lli2", "aov",
   "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe"), relative = TRUE,
-  effectSize = 5, k = c(5, 5, 5), cores = (detectCores() - 1),
+  effectSize = 2, k = c(5, 5, 5), cores = (detectCores() - 1),
   rng.seed = 123, args = list(), out.anova = TRUE)
 }
 \arguments{
@@ -27,7 +27,7 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
 
 \item{relative}{Logical. Should abundances be made relative? Only for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea". Default TRUE}
 
-\item{effectSize}{Integer. The effect size for the spike-ins. Default 5}
+\item{effectSize}{Integer. The effect size for the spike-ins. Default 2}
 
 \item{k}{Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. k=c(5,10,15): 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default c(5,5,5)}
 
