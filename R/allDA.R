@@ -52,6 +52,7 @@
 #'  \item qua - Quade test
 #'  \item anc - ANCOM
 #'  \item sam - SAMSeq
+#'  \item zzz - A user-defined method (See ?DA.zzz)
 #' }
 #' 
 #' Additional arguments can be passed to the internal functions with the "args" argument. 
@@ -204,6 +205,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("anc"
     }
     
     res.sub <- tryCatch(switch(i,
+                               zzz = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars, p.adj),zzz.args)),
                                wil = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired, relative, p.adj),wil.args)),
                                ttt = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired, relative, p.adj),ttt.args)),
                                ltt = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,relative, p.adj),ltt.args)),

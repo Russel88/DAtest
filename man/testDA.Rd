@@ -91,6 +91,7 @@ Currently implemented methods:
  \item qua - Quade test
  \item anc - ANCOM
  \item sam - SAMSeq
+ \item zzz - A user-defined method (See ?DA.zzz)
 }
 "neb" can be slow if there is a paired argument.
 

@@ -307,9 +307,10 @@ only those performing well based on results from `testDA`.
 Implemented methods
 ===================
 
-Is your favorite method missing? Just write me, preferably with a code
-snippet of the implementation (see email in Description).
-
+-   Is your favorite method missing? Either:
+    -   Add it yourself, [see under 'Extra features'](#extra-features)
+    -   Write me, preferably with a code snippet of the implementation
+        (see email in Description).
 -   per - [Permutation test with user defined test
     statistic](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8)
     (See below for description of the paired permutation test)
@@ -394,6 +395,46 @@ these log-ratios.
 
 Extra features
 ==============
+
+#### Adding your own method without changing the package
+
+"zzz" (`DA.zzz`) is a placeholder for user-defined methods. You have to
+supply it with a function whose input is: A count\_table (data.frame,
+samples are columns), a predictor (vector), a paired variable (factor),
+and a covars argument (named list with vectors). It is OK if your
+function doesn't use paired/covars, but they have to be there in the
+arguments. The output from the user-defined function should be a
+data.frame that includes: The names of the features ("Feature"),
+p-values ("pval"), and name of method ("Method"). See example below on
+how to include a simple t-test on relative abundances:
+
+    # Define our function
+    myfun <- function(count_table, predictor, paired, covars){ # These fours arguments should always be there
+      
+      # Relative abundance
+      rel <- apply(count_table, 2, function(x) x/sum(x))
+      
+      # t-test function
+      tfun <- function(x){
+        tryCatch(t.test(x ~ predictor)$p.value, error = function(e){NA}) 
+      }
+      
+      # P-values for each feature
+      pvals <- apply(rel, 1, tfun)
+      
+      # Collect and return data
+      df <- data.frame(Feature = rownames(count_table),
+                       pval = pvals)
+      df$Method <- "My own t-test"
+      return(df)
+      
+    }
+
+    # Test that it works on raw data
+    res <- DA.zzz(data, predictor, dafun = myfun)
+
+    # Use it in the testDA function
+    mytest <- testDA(data, predictor, tests = c("zzz","ttt","wil"), args = list(zzz = list(dafun = myfun)))
 
 #### Plot the p-value distributions. Raw p-values should in theory have a uniform (flat) distribution between 0 and 1.
 

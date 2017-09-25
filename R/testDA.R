@@ -53,6 +53,7 @@
 #'  \item qua - Quade test
 #'  \item anc - ANCOM
 #'  \item sam - SAMSeq
+#'  \item zzz - A user-defined method (See ?DA.zzz)
 #' }
 #' "neb" can be slow if there is a paired argument.
 #' 
@@ -254,6 +255,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
     
     # Run tests
     res.sub <- tryCatch(switch(i,
+                               zzz = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars),zzz.args)),
                                wil = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, relative),wil.args)),
                                ttt = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, relative),ttt.args)),
                                ltt = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative),ltt.args)),
