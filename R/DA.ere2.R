@@ -23,7 +23,7 @@ DA.ere2 <- function(data, predictor, p.adj = "fdr", ...){
     count_table <- data
   }
   
-  otu_table <- as.data.frame(count_table)
+  count_table <- as.data.frame(count_table)
   x <- DGEList(counts = count_table, group = predictor, genes = data.frame(Feature = row.names(count_table)))
   
   DA.ere.args <- list(...)

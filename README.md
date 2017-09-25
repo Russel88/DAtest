@@ -122,7 +122,7 @@ only the second level is spiked.
 
 `predictor` can also be continuous/quantitative
 
-**The function automatically uses multiple CPUs for fast execution**
+#### **The function automatically uses multiple CPUs for fast execution**
 
 The methods run in parallel, and by default the number of cores used is
 one less than available. This can be changed with the `cores` argument.
@@ -134,6 +134,9 @@ terminated before ending you might get the following warning:
 This can safely be ignored, but if you have terminated the function
 before it ended and your computer runs slow, you might want to restart R
 to close all connections.
+
+If you run out of memory/RAM, reduce the number of cores used for
+computing.
 
 ### *If your predictor is categorical with more than two levels:*
 
@@ -286,9 +289,17 @@ test significance of a random component (paired variable).
 *Alternatively, run all (or several) methods and check which features
 are found by several methods.*
 
+    # Run many methods:
     res.all <- allDA(data, predictor)
 
-    head(res.all$table)
+    # Which features are detected by several methods:
+    View(res.all$table)
+
+    # Venn diagram of detected features from selected methods:
+    vennDA(res.all, tests = c("wil","ttt","ltt"))
+
+    # See results from a method (e.g. t.test "ttt"):
+    View(res.all$results$ttt)
 
 A subset of methods can be run by setting the `tests` argument. E.g.
 only those performing well based on results from `testDA`.

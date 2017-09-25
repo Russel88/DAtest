@@ -4,12 +4,13 @@
 \alias{allDA}
 \title{Run many differential abundance methods}
 \usage{
-allDA(data, predictor, paired = NULL, covars = NULL, tests = c("qua",
-  "fri", "znb", "zpo", "vli", "qpo", "poi", "pea", "spe", "per", "bay", "adx",
-  "wil", "ttt", "ltt", "ltt2", "neb", "erq", "ere", "erq2", "ere2", "msf",
-  "zig", "ds2", "lim", "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2",
-  "rai"), relative = TRUE, cores = (detectCores() - 1), rng.seed = 123,
-  p.adj = "fdr", args = list(), out.anova = TRUE)
+allDA(data, predictor, paired = NULL, covars = NULL, tests = c("anc",
+  "sam", "qua", "fri", "znb", "zpo", "vli", "qpo", "poi", "pea", "spe", "per",
+  "bay", "adx", "wil", "ttt", "ltt", "ltt2", "neb", "erq", "ere", "erq2",
+  "ere2", "msf", "zig", "ds2", "lim", "aov", "lao", "lao2", "kru", "lrm", "llm",
+  "llm2", "rai"), relative = TRUE, cores = (detectCores() - 1),
+  rng.seed = 123, p.adj = "fdr", args = list(), out.anova = TRUE,
+  alpha = 0.05)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -33,6 +34,8 @@ allDA(data, predictor, paired = NULL, covars = NULL, tests = c("qua",
 \item{args}{List. A list with lists of arguments passed to the different methods. See details for more.}
 
 \item{out.anova}{If TRUE (default) linear models will output results and p-values from anova/drop1. If FALSE will output results for 2. level of the predictor.}
+
+\item{alpha}{P-value threshold for calling significance. Default 0.05}
 }
 \value{
 A list of results:
@@ -82,6 +85,8 @@ Currently implemented methods:
  \item znb - Zero-inflated Negative Binomial GLM
  \item fri - Friedman Rank Sum test
  \item qua - Quade test
+ \item anc - ANCOM
+ \item sam - SAMSeq
 }
 
 Additional arguments can be passed to the internal functions with the "args" argument. 
@@ -125,5 +130,7 @@ Below is an overview of which functions get the arguments that are passed to a s
  \item znb - Passed to zeroinfl
  \item fri - Passed to friedman.test
  \item qua - Passed to quade.test
+ \item anc - Passed to ANCOM
+ \item sam - Passed to SAMseq
 }
 }

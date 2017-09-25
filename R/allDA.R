@@ -12,6 +12,7 @@
 #' @param p.adj Character. Method for pvalue adjustment. Default "fdr"
 #' @param args List. A list with lists of arguments passed to the different methods. See details for more.
 #' @param out.anova If TRUE (default) linear models will output results and p-values from anova/drop1. If FALSE will output results for 2. level of the predictor.
+#' @param alpha P-value threshold for calling significance. Default 0.05
 #' @details Currently implemented methods:
 #' \itemize{
 #'  \item per - Permutation test with user defined test statistic
@@ -49,6 +50,8 @@
 #'  \item znb - Zero-inflated Negative Binomial GLM
 #'  \item fri - Friedman Rank Sum test
 #'  \item qua - Quade test
+#'  \item anc - ANCOM
+#'  \item sam - SAMSeq
 #' }
 #' 
 #' Additional arguments can be passed to the internal functions with the "args" argument. 
@@ -92,6 +95,8 @@
 #'  \item znb - Passed to zeroinfl
 #'  \item fri - Passed to friedman.test
 #'  \item qua - Passed to quade.test
+#'  \item anc - Passed to ANCOM
+#'  \item sam - Passed to SAMseq
 #' }
 #' @return A list of results:
 #' \itemize{
@@ -101,7 +106,7 @@
 #' 
 #' @export
 
-allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("qua","fri","znb","zpo","vli","qpo","poi","pea","spe","per","bay","adx","wil","ttt","ltt","ltt2","neb","erq","ere","erq2","ere2","msf","zig","ds2","lim","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), out.anova = TRUE){
+allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("anc","sam","qua","fri","znb","zpo","vli","qpo","poi","pea","spe","per","bay","adx","wil","ttt","ltt","ltt2","neb","erq","ere","erq2","ere2","msf","zig","ds2","lim","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), out.anova = TRUE, alpha = 0.05){
 
   stopifnot(exists("data"),exists("predictor"))
   # Check for servers
@@ -212,7 +217,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("qua"
                                zig = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars, p.adj),zig.args)),
                                ds2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars, p.adj),ds2.args)),
                                per = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired, relative, p.adj),per.args)),
-                               bay = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired, p.adj),bay.args)),
+                               bay = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor, p.adj),bay.args)),
                                adx = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor, p.adj),adx.args)),
                                lim = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars,relative,out.anova, p.adj),lim.args)),
                                lli = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars,relative,out.anova, p.adj),lli.args)),
@@ -233,11 +238,13 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("qua"
                                zpo = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,covars,out.anova, p.adj),zpo.args)),
                                znb = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,covars,out.anova, p.adj),znb.args)),
                                fri = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,relative,p.adj),fri.args)),
-                               qua = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,relative,p.adj),qua.args))),
+                               qua = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,relative,p.adj),qua.args)),
+                               anc = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired),anc.args)),
+                               sam = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired),sam.args))),
                         
                         error = function(e) NULL)
     
-    if(!is.null(res.sub)){
+    if(!is.null(res.sub) & !i %in% c("sam","anc")){
       res.sub[is.na(res.sub$pval),"pval"] <- 1
       res.sub[is.na(res.sub$pval.adj),"pval.adj"] <- 1
     }
@@ -259,9 +266,9 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("qua"
   }
   
   # Split ALDEx2 results in t.test and wilcoxon
-  if("adx" %in% tests){
-    adx.t <- as.data.frame(results["adx"])[,c(1:7,12)]
-    adx.w <- as.data.frame(results["adx"])[,c(1:7,12)]
+  if("adx" %in% names(results)){
+    adx.t <- as.data.frame(results["adx"])[,c(1:7,14)]
+    adx.w <- as.data.frame(results["adx"])[,c(1:7,14)]
     colnames(adx.t) <- gsub("adx.","",colnames(adx.t))
     colnames(adx.w) <- colnames(adx.t)
     adx.t$pval <- as.numeric(as.data.frame(results["adx"])$adx.we.ep)
@@ -275,10 +282,40 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("qua"
     results <- c(results,list(adx.t),list(adx.w))
     names(results) <- c(res.names,"adx.t","adx.w")
   }
+
+  # P-values for ANCOM and SAMseq
+  if("anc" %in% names(results)){
+    ancdf <- as.data.frame(results[["anc"]])
+    ancdf$pval.adj <- 1
+    ancdf[ancdf$Detected == "Yes","pval.adj"] <- 0
+    ancdf$pval <- NA
+    results["anc"] <- NULL
+    res.names <- names(results)
+    results <- c(results,list(ancdf))
+    names(results) <- c(res.names,"anc")
+  }
+  if("sam" %in% names(results)){
+    samdf <- as.data.frame(results[["sam"]])
+    samdf$pval.adj <- 1
+    if("Sig" %in% colnames(samdf)){
+      samdf[samdf$Sig == "Yes","pval.adj"] <- 0
+    }
+    if("Sig.up" %in% colnames(samdf)){
+      samdf[samdf$Sig.up == "Yes","pval.adj"] <- 0
+    }
+    if("Sig.lo" %in% colnames(samdf)){
+      samdf[samdf$Sig.lo == "Yes","pval.adj"] <- 0
+    }
+    samdf$pval <- NA
+    results["sam"] <- NULL
+    res.names <- names(results)
+    results <- c(results,list(samdf))
+    names(results) <- c(res.names,"sam")
+  }
   
   # Positives
-  Pos.raw <- sapply(results,function(x) x[x$pval < 0.05,"Feature"])
-  Pos.adj <- sapply(results,function(x) x[x$pval.adj < 0.05,"Feature"])
+  Pos.raw <- sapply(results,function(x) x[x$pval < alpha,"Feature"])
+  Pos.adj <- sapply(results,function(x) x[x$pval.adj < alpha,"Feature"])
 
   features <- row.names(count_table)
   counts <- sapply(features, function(y) sum(unlist(sapply(Pos.raw, function(x) x %in% y)))) / length(results)

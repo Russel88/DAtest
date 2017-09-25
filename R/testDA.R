@@ -155,9 +155,9 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   count_table <- as.matrix(count_table)
   
   # Checks
-  if(relative) if(!isTRUE(all(unlist(count_table) == floor(unlist(count_table))))) stop("Count_table must only contain integer values")
-  if(min(count_table) < 0) stop("Count_table contains negative values!")
-  if(sum(colSums(count_table) == 0) > 0) stop("Some samples are empty!")
+  if(relative) if(!isTRUE(all(unlist(count_table) == floor(unlist(count_table))))) stop("count_table must only contain integer values")
+  if(min(count_table) < 0) stop("count_table contains negative values")
+  if(sum(colSums(count_table) == 0) > 0) stop("Some samples are empty")
   if(ncol(count_table) != length(predictor)) stop("Number of samples in count_table does not match length of predictor")
   if(length(levels(as.factor(predictor))) < 2) stop("predictor should have at least two levels")
   
@@ -166,11 +166,15 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   tests <- prune.tests.DA(tests, predictor, paired, covars, relative)
   tests.par <- paste0(unlist(lapply(1:R, function(x) rep(x,length(tests)))),"_",rep(tests,R))
   
-  # neb warning
+  # Run time warnings
   if("neb" %in% tests & !is.null(paired)){
-    message("As 'neb' is included and a 'paired' variable is supplied this might take a long time")
+    message("As 'neb' is included and a 'paired' variable is supplied, this might take a long time")
+  } else {
+    if("anc" %in% tests){
+      message("As 'anc' is included, this might take some time")
+    }
   }
-
+  
   # Set seed
   set.seed(rng.seed)
   message(paste("Seed is set to",rng.seed))
@@ -178,6 +182,10 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   # Remove Features not present in any samples
   if(sum(rowSums(count_table) == 0) != 0) message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
   count_table <- count_table[rowSums(count_table) > 0,]
+  
+  # Spike vs no features
+  if(sum(k) == nrow(count_table)) stop("Set to spike all features. Can't calculate FPR or AUC. Change k argument")
+  if(sum(k) > nrow(count_table)) stop("Set to spike more features than are present in the data. Change k argument")
   
   # Numeric predictor
   if(is.numeric(predictor[1])){
@@ -318,8 +326,8 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
     
     # Split ALDEx2 results in t.test and wilcoxon
     if("adx" %in% gsub(".*_","",names(res.sub))){
-      adx.t <- as.data.frame(res.sub[paste0(r,"_","adx")])[,c(1:7,12)]
-      adx.w <- as.data.frame(res.sub[paste0(r,"_","adx")])[,c(1:7,12)]
+      adx.t <- as.data.frame(res.sub[paste0(r,"_","adx")])[,c(1:7,14)]
+      adx.w <- as.data.frame(res.sub[paste0(r,"_","adx")])[,c(1:7,14)]
       colnames(adx.t) <- gsub(".*_adx.","",colnames(adx.t))
       colnames(adx.w) <- colnames(adx.t)
       adx.t$pval <- as.numeric(as.data.frame(res.sub[paste0(r,"_","adx")])[,8])
