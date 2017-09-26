@@ -5,11 +5,11 @@
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
-#' @param dafun Function to apply to data. Should take input in the following order: count_table (data.frame, samples are columns), predictor (vector), paired (factor), covars (named list with vector).
+#' @param FUN Function to apply to data. Should take input in the following order: count_table (data.frame, samples are columns), predictor (vector), paired (factor), covars (named list with vector). Output should be a dataframe with at least the following columns: Feature, pval and Method.
 #' @export
-DA.zzz <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", dafun = NULL){
+DA.zzz <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", FUN = NULL){
   
-  if(is.null(dafun)) stop("dafun has to be defined")
+  if(is.null(FUN)) stop("FUN has to be defined")
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){

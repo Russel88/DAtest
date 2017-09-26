@@ -5,10 +5,10 @@
 \title{Comparing differential abundance methods by FPR and AUC}
 \usage{
 testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
-  tests = c("sam", "anc", "qua", "fri", "zpo", "znb", "vli", "qpo", "poi",
-  "pea", "neb", "rai", "per", "bay", "adx", "wil", "ttt", "ltt", "ltt2", "erq",
-  "erq2", "ere", "ere2", "msf", "zig", "ds2", "lim", "lli", "lli2", "aov",
-  "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe"), relative = TRUE,
+  tests = c("sam", "qua", "fri", "zpo", "znb", "vli", "qpo", "poi", "pea",
+  "neb", "rai", "per", "bay", "adx", "wil", "ttt", "ltt", "ltt2", "erq", "erq2",
+  "ere", "ere2", "msf", "zig", "ds2", "lim", "lli", "lli2", "aov", "lao",
+  "lao2", "kru", "lrm", "llm", "llm2", "spe"), relative = TRUE,
   effectSize = 2, k = c(5, 5, 5), cores = (detectCores() - 1),
   rng.seed = 123, args = list(), out.anova = TRUE)
 }
@@ -23,7 +23,7 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
 
 \item{R}{Integer. Number of times to run the tests. Default 10}
 
-\item{tests}{Character. Which tests to include. Default all (See below for details)}
+\item{tests}{Character. Which tests to include. Default all (Except ANCOM, see below for details)}
 
 \item{relative}{Logical. Should abundances be made relative? Only for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea". Default TRUE}
 
@@ -89,7 +89,7 @@ Currently implemented methods:
  \item znb - Zero-inflated Negative Binomial GLM
  \item fri - Friedman Rank Sum test
  \item qua - Quade test
- \item anc - ANCOM
+ \item anc - ANCOM (by default not included, as it is very slow)
  \item sam - SAMSeq
  \item zzz - A user-defined method (See ?DA.zzz)
 }

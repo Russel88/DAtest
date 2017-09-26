@@ -5,7 +5,7 @@
 \title{User-defined function}
 \usage{
 DA.zzz(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
-  dafun = NULL)
+  FUN = NULL)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -18,7 +18,7 @@ DA.zzz(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
 
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
 
-\item{dafun}{Function to apply to data. Should take input in the following order: count_table (data.frame, samples are columns), predictor (vector), paired (factor), covars (named list with vector).}
+\item{FUN}{Function to apply to data. Should take input in the following order: count_table (data.frame, samples are columns), predictor (vector), paired (factor), covars (named list with vector). Output should be a dataframe with at least the following columns: Feature, pval and Method.}
 }
 \description{
 User-defined function

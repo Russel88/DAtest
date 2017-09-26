@@ -82,7 +82,7 @@ But the package will work without them
     # RAIDA:
     install.packages("https://cals.arizona.edu/~anling/software/RAIDA_1.0.tar.gz",repos = NULL)
 
-    # ANCOM:
+    # ANCOM (by default not included, as it is very slow):
     download.file("https://www.niehs.nih.gov/research/resources/software/biostatistics/ancom/ancom_software.zip",destfile = "ANCOM.zip")
     unzip("ANCOM.zip",exdir=getwd())
     install.packages("ancom.R_1.1-3.tar.gz", repos = NULL)
@@ -307,10 +307,12 @@ only those performing well based on results from `testDA`.
 Implemented methods
 ===================
 
--   Is your favorite method missing? Either:
-    -   Add it yourself, [see under 'Extra features'](#extra-features)
-    -   Write me, preferably with a code snippet of the implementation
-        (see email in Description).
+### Is your favorite method missing?
+
+Either add it yourself [(see under 'Extra features')](#extra-features),
+or write to me, preferably with a code snippet of the implementation
+(see email in Description).
+
 -   per - [Permutation test with user defined test
     statistic](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8)
     (See below for description of the paired permutation test)
@@ -318,15 +320,24 @@ Implemented methods
     [baySeq](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-11-422)
 -   adx - [ALDEx t-test and
     wilcoxon](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0067019)
--   wil - Wilcoxon Rank Sum on relative abundances (Paired is a Wilcoxon
-    Signed Rank test)
--   ttt - Welch t.test on relative abundances
--   ltt - Welch t.test, but reads are first transformed with
-    log(abundance + delta) then turned into relative abundances
--   ltt2 - Welch t.test, but with relative abundances transformed with
-    log(relative abundance + delta)
--   neb - Negative binomial GLM with log of library size as offset (The
-    paired version is a mixed-effect model)
+-   wil - [Wilcoxon Rank
+    Sum](https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test) on
+    relative abundances (Paired is a [Wilcoxon Signed Rank
+    test](https://en.wikipedia.org/wiki/Wilcoxon_signed-rank_test)
+-   ttt - [Welch t.test](https://en.wikipedia.org/wiki/Welch%27s_t-test)
+    on relative abundances (Paired is [paired
+    t-test](https://en.wikipedia.org/wiki/Student%27s_t-test#Dependent_t-test_for_paired_samples))
+-   ltt - [Welch
+    t.test](https://en.wikipedia.org/wiki/Welch%27s_t-test), but reads
+    are first transformed with log(abundance + delta) then turned into
+    relative abundances
+-   ltt2 - [Welch
+    t.test](https://en.wikipedia.org/wiki/Welch%27s_t-test), but with
+    relative abundances transformed with log(relative abundance + delta)
+-   neb - [Negative binomial
+    GLM](https://en.wikipedia.org/wiki/Negative_binomial_distribution)
+    with log of library size as offset (The paired version is a
+    [mixed-effect model](https://en.wikipedia.org/wiki/Mixed_model))
 -   erq - [EdgeR - Quasi
     likelihood](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2796818/)
     (The paired version is a model with the paired variable
@@ -357,29 +368,50 @@ Implemented methods
 -   vli - [LIMMA with
     voom](https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true)
     (The paired version is using the block argument in lmFit)
--   kru - Kruskal-Wallis test on relative abundances
--   aov - ANOVA on relative abundances
--   lao - ANOVA, but reads are first transformed with log(abundance +
-    delta) then turned into relative abundances
--   lao2 - ANOVA, but with relative abundances transformed with
-    log(relative abundance + delta)
--   lrm - Linear regression on relative abundances (The paired version
-    is a mixed-effect model)
--   llm - Linear regression, but reads are first transformed with
-    log(abundance + delta) then turned into relative abundances
--   llm2 - Linear regression, but with relative abundances transformed
-    with log(relative abundance + delta)
+-   kru - [Kruskal-Wallis
+    test](https://en.wikipedia.org/wiki/Kruskal%E2%80%93Wallis_one-way_analysis_of_variance)
+    on relative abundances
+-   aov - [ANOVA](https://en.wikipedia.org/wiki/Analysis_of_variance) on
+    relative abundances
+-   lao - [ANOVA](https://en.wikipedia.org/wiki/Analysis_of_variance),
+    but reads are first transformed with log(abundance + delta) then
+    turned into relative abundances
+-   lao2 - [ANOVA](https://en.wikipedia.org/wiki/Analysis_of_variance),
+    but with relative abundances transformed with log(relative
+    abundance + delta)
+-   lrm - [Linear
+    regression](https://en.wikipedia.org/wiki/Linear_regression) on
+    relative abundances (The paired version is a [mixed-effect
+    model](https://en.wikipedia.org/wiki/Mixed_model))
+-   llm - [Linear
+    regression](https://en.wikipedia.org/wiki/Linear_regression), but
+    reads are first transformed with log(abundance + delta) then turned
+    into relative abundances
+-   llm2 - [Linear
+    regression](https://en.wikipedia.org/wiki/Linear_regression), but
+    with relative abundances transformed with log(relative abundance +
+    delta)
 -   rai -
     [RAIDA](https://academic.oup.com/bioinformatics/article/31/14/2269/256302/A-robust-approach-for-identifying-differentially?searchresult=1)
--   spe - Spearman Rank Correlation
--   pea - Pearson Correlation
--   poi - Poisson GLM (The paired version is a mixed-effect model)
--   qpo - Quasi-poisson GLM
--   zpo - Zero-inflated Poisson GLM
--   znb - Zero-inflated Negative Binomial GLM
--   fri - Friedman Rank Sum test
--   qua - Quade test
--   anc - [ANCOM](https://www.ncbi.nlm.nih.gov/pubmed/26028277)
+-   spe - [Spearman Rank
+    Correlation](https://en.wikipedia.org/wiki/Spearman%27s_rank_correlation_coefficient)
+-   pea - [Pearson
+    Correlation](https://en.wikipedia.org/wiki/Pearson_correlation_coefficient)
+-   poi - [Poisson
+    GLM](https://en.wikipedia.org/wiki/Poisson_distribution) (The paired
+    version is a [mixed-effect
+    model](https://en.wikipedia.org/wiki/Mixed_model))
+-   qpo - [Quasi-poisson
+    GLM](https://en.wikipedia.org/wiki/Quasi-likelihood)
+-   zpo - [Zero-inflated Poisson
+    GLM](https://en.wikipedia.org/wiki/Zero-inflated_model)
+-   znb - [Zero-inflated Negative Binomial
+    GLM](https://en.wikipedia.org/wiki/Zero-inflated_model)
+-   fri - [Friedman Rank Sum
+    test](https://en.wikipedia.org/wiki/Friedman_test)
+-   qua - [Quade test](http://rcompanion.org/handbook/F_11.html)
+-   anc - [ANCOM](https://www.ncbi.nlm.nih.gov/pubmed/26028277) (by
+    default not included, as it is very slow)
 -   sam - [SAMseq](http://statweb.stanford.edu/~tibs/SAM/)
 
 ### Paired permutation test
@@ -399,17 +431,17 @@ Extra features
 #### Adding your own method without changing the package
 
 "zzz" (`DA.zzz`) is a placeholder for user-defined methods. You have to
-supply it with a function whose input is: A count\_table (data.frame,
-samples are columns), a predictor (vector), a paired variable (factor),
-and a covars argument (named list with vectors). It is OK if your
-function doesn't use paired/covars, but they have to be there in the
-arguments. The output from the user-defined function should be a
+supply it with a function whose input is: A `count_table` (data.frame,
+samples are columns), a `predictor` (vector), a `paired` variable
+(factor), and a `covars` argument (named list with vectors). It is OK if
+your function doesn't use `paired`/`covars`, but they have to be there
+in the arguments. The output from the user-defined function should be a
 data.frame that includes: The names of the features ("Feature"),
 p-values ("pval"), and name of method ("Method"). See example below on
 how to include a simple t-test on relative abundances:
 
     # Define our function
-    myfun <- function(count_table, predictor, paired, covars){ # These fours arguments should always be there
+    myfun <- function(count_table, predictor, paired, covars){ # These fours arguments should not be altered
       
       # Relative abundance
       rel <- apply(count_table, 2, function(x) x/sum(x))
@@ -430,11 +462,20 @@ how to include a simple t-test on relative abundances:
       
     }
 
-    # Test that it works on raw data
-    res <- DA.zzz(data, predictor, dafun = myfun)
+    # Test that it works on real data
+    res <- DA.zzz(data, predictor, FUN = myfun)
 
     # Use it in the testDA function
-    mytest <- testDA(data, predictor, tests = c("zzz","ttt","wil"), args = list(zzz = list(dafun = myfun)))
+    mytest <- testDA(data, predictor, tests = c("zzz","ttt","wil"), args = list(zzz = list(FUN = myfun)))
+
+    # Several user-defined methods can be included by simply putting numbers after "zzz" in both the "tests" and "args" arguments:
+    mytest <- testDA(data, predictor, tests = c("zzz","zzz2","ttt","wil"), args = list(zzz = list(FUN = myfun),
+                                                                                       zzz2 = list(FUN = myfun2)))
+
+**Caution:**If "zzz" is in the `tests` argument, there will be no checks
+of whether any of the supplied methods are suitable for the data. If
+e.g. your `predictor` is quantitative and "ttt" is in the `tests`
+argument, it will try to run a t-test and fail miserably.
 
 #### Plot the p-value distributions. Raw p-values should in theory have a uniform (flat) distribution between 0 and 1.
 

@@ -6,7 +6,7 @@
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "anc", "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"
 #' @param covars Either a named list with covariates, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
 #' @param R Integer. Number of times to run the tests. Default 10
-#' @param tests Character. Which tests to include. Default all (See below for details)
+#' @param tests Character. Which tests to include. Default all (Except ANCOM, see below for details)
 #' @param relative Logical. Should abundances be made relative? Only for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea". Default TRUE
 #' @param effectSize Integer. The effect size for the spike-ins. Default 2
 #' @param k Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. k=c(5,10,15): 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default c(5,5,5)
@@ -51,7 +51,7 @@
 #'  \item znb - Zero-inflated Negative Binomial GLM
 #'  \item fri - Friedman Rank Sum test
 #'  \item qua - Quade test
-#'  \item anc - ANCOM
+#'  \item anc - ANCOM (by default not included, as it is very slow)
 #'  \item sam - SAMSeq
 #'  \item zzz - A user-defined method (See ?DA.zzz)
 #' }
@@ -116,7 +116,7 @@
 #' @importFrom pROC roc
 #' @export
 
-testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests = c("sam","anc","qua","fri","zpo","znb","vli","qpo","poi","pea","neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","erq2","ere","ere2","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 2, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, args = list(), out.anova = TRUE){
+testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests = c("sam","qua","fri","zpo","znb","vli","qpo","poi","pea","neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","erq2","ere","ere2","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 2, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, args = list(), out.anova = TRUE){
 
   stopifnot(exists("data"),exists("predictor"))
   # Check for servers
@@ -164,7 +164,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   
   # Prune tests argument
   tests <- unique(tests)
-  tests <- prune.tests.DA(tests, predictor, paired, covars, relative)
+  if(!"zzz" %in% tests) tests <- prune.tests.DA(tests, predictor, paired, covars, relative)
   tests.par <- paste0(unlist(lapply(1:R, function(x) rep(x,length(tests)))),"_",rep(tests,R))
   
   # Run time warnings
@@ -241,7 +241,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
     # Extract run info
     run.no <- as.numeric(gsub("_.*","",i))
     i <- gsub(".*_","",i)
-    
+
     # Extract test arguments
     if(!all(names(args) %in% tests)) stop("One or more names in list with additional arguments does not match names of tests")
     for(j in seq_along(args)){
@@ -252,6 +252,11 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
     for(l in seq_along(test.args)){
       if(test.boo[l] == FALSE) assign(test.args[l], list(),pos=1)
     }
+    
+    if(!is.na(pmatch("zzz",i))){
+      zzz.args <- get(paste0(i,".args"))
+      i <- "zzz"
+    } 
     
     # Run tests
     res.sub <- tryCatch(switch(i,

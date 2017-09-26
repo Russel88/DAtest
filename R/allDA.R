@@ -5,7 +5,7 @@
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the predictor is numeric it will be treated as such in the analyses
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2", "zig" and "fri"
 #' @param covars Either a named list with covariates, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
-#' @param tests Character. Which tests to include. Default all (See below for details)
+#' @param tests Character. Which tests to include. Default all (Except ANCOM, see below for details)
 #' @param relative Logical. Should abundances be made relative? Only for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea". Default TRUE
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available
 #' @param rng.seed Numeric. Seed for reproducibility. Default 123
@@ -50,7 +50,7 @@
 #'  \item znb - Zero-inflated Negative Binomial GLM
 #'  \item fri - Friedman Rank Sum test
 #'  \item qua - Quade test
-#'  \item anc - ANCOM
+#'  \item anc - ANCOM (by default not included, as it is very slow)
 #'  \item sam - SAMSeq
 #'  \item zzz - A user-defined method (See ?DA.zzz)
 #' }
@@ -107,7 +107,7 @@
 #' 
 #' @export
 
-allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("anc","sam","qua","fri","znb","zpo","vli","qpo","poi","pea","spe","per","bay","adx","wil","ttt","ltt","ltt2","neb","erq","ere","erq2","ere2","msf","zig","ds2","lim","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), out.anova = TRUE, alpha = 0.05){
+allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("sam","qua","fri","znb","zpo","vli","qpo","poi","pea","spe","per","bay","adx","wil","ttt","ltt","ltt2","neb","erq","ere","erq2","ere2","msf","zig","ds2","lim","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), out.anova = TRUE, alpha = 0.05){
 
   stopifnot(exists("data"),exists("predictor"))
   # Check for servers
@@ -139,7 +139,6 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("anc"
     count_table <- data
   }
 
-  
   # Checks
   if(relative) if(!isTRUE(all(unlist(count_table) == floor(unlist(count_table))))) stop("Count_table must only contain integer values")
   if(min(count_table) < 0) stop("Count_table contains negative values!")
@@ -149,7 +148,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("anc"
   
   # Prune tests argument
   tests <- unique(tests)
-  tests <- prune.tests.DA(tests, predictor, paired, covars, relative)
+  if(!"zzz" %in% tests) tests <- prune.tests.DA(tests, predictor, paired, covars, relative)
   
   # Set seed
   set.seed(rng.seed)
@@ -203,6 +202,11 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("anc"
     for(l in seq_along(test.args)){
       if(test.boo[l] == FALSE) assign(test.args[l], list(),pos=1)
     }
+    
+    if(!is.na(pmatch("zzz",i))){
+      zzz.args <- get(paste0(i,".args"))
+      i <- "zzz"
+    } 
     
     res.sub <- tryCatch(switch(i,
                                zzz = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars, p.adj),zzz.args)),
