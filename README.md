@@ -254,7 +254,7 @@ list with each element corresponding to a feature (OTU/gene/protein).
     -   All linear models (including all GLMs) output the p-value from
         an `anova`/`drop1` function. This can be changed with the
         `out.anova` argument
-    -   All limma models (lim,lli,lli2,vli) tests all levels of the
+    -   All limma models (lim,lli,lli2,vli) test all levels of the
         `predictor` against the intercept (with `topTable`). This can be
         changed with the `out.anova` argument
     -   For ANCOM: If the FPR = 0, you would not expect false positives
@@ -436,9 +436,11 @@ samples are columns), a `predictor` (vector), a `paired` variable
 (factor), and a `covars` argument (named list with vectors). It is OK if
 your function doesn't use `paired`/`covars`, but they have to be there
 in the arguments. The output from the user-defined function should be a
-data.frame that includes: The names of the features ("Feature"),
-p-values ("pval"), and name of method ("Method"). See example below on
-how to include a simple t-test on relative abundances:
+data.frame that at least includes: The names of the features
+("Feature"), p-values ("pval"), and name of method ("Method").
+
+See example below on how to include a simple t-test on relative
+abundances:
 
     # Define our function
     myfun <- function(count_table, predictor, paired, covars){ # These fours arguments should not be altered
@@ -472,12 +474,15 @@ how to include a simple t-test on relative abundances:
     mytest <- testDA(data, predictor, tests = c("zzz","zzz2","ttt","wil"), args = list(zzz = list(FUN = myfun),
                                                                                        zzz2 = list(FUN = myfun2)))
 
-**Caution:**If "zzz" is in the `tests` argument, there will be no checks
-of whether any of the supplied methods are suitable for the data. If
-e.g. your `predictor` is quantitative and "ttt" is in the `tests`
+**Caution:** If "zzz" is in the `tests` argument, there will be no
+checks of whether any of the supplied methods are suitable for the data.
+If e.g. your `predictor` is quantitative and "ttt" is in the `tests`
 argument, it will try to run a t-test and fail miserably.
 
 #### Plot the p-value distributions. Raw p-values should in theory have a uniform (flat) distribution between 0 and 1.
+
+(Except for the permutation test due its time-saving algorithm, change
+the `margin` argument if you want theoretically correct p-values)
 
     plot(mytest, p = TRUE)
 
