@@ -45,6 +45,7 @@ Overview of this tutorial
 -   [How to run real data](#how-to-run-real-data)
 -   [Implemented methods](#implemented-methods)
 -   [Extra features](#extra-features)
+-   [Errors and Issues](#errors-and-issues)
 
 Installation of packages
 ========================
@@ -57,11 +58,6 @@ The DAtest package:
     install.packages("devtools")
     library(devtools)
     install_github("Russel88/DAtest")
-
-You might get an error with the "rJava" package. This should not be a
-problem for the workings of the package, but might interfere with the
-`vennDA` function. [See here for
-solutions](https://www.r-statistics.com/2012/08/how-to-load-the-rjava-package-after-the-error-java_home-cannot-be-determined-from-the-registry/)
 
 #### The following are needed for *full* functionality
 
@@ -569,3 +565,13 @@ passed to a specific test:
 -   qua - Passed to quade.test
 -   anc - Passed to ANCOM
 -   sam - Passed to SAMseq
+
+Errors and Issues
+=================
+
+### JAVA\_HOME error
+
+You might get an error with the "rJava" package. This will not be a
+problem for the workings of any of the main functionalities of this
+package, but might interfere with the `vennDA` function. [See here for
+solutions](https://www.r-statistics.com/2012/08/how-to-load-the-rjava-package-after-the-error-java_home-cannot-be-determined-from-the-registry/)
