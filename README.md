@@ -42,7 +42,7 @@ Overview of this tutorial
 
 -   [Installation of packages](#installation-of-packages)
 -   [How to compare methods](#how-to-compare-methods)
--   [How to run original data](#how-to-run-original-data)
+-   [How to run real data](#how-to-run-real-data)
 -   [Implemented methods](#implemented-methods)
 -   [Extra features](#extra-features)
 
@@ -57,6 +57,11 @@ The DAtest package:
     install.packages("devtools")
     library(devtools)
     install_github("Russel88/DAtest")
+
+You might get an error with the "rJava" package. This should not be a
+problem for the workings of the package, but might interfere with the
+`vennDA` function. [See here for
+solutions](https://www.r-statistics.com/2012/08/how-to-load-the-rjava-package-after-the-error-java_home-cannot-be-determined-from-the-registry/)
 
 #### The following are needed for *full* functionality
 
@@ -146,7 +151,7 @@ in one go. If you are interested in testing treatments against a common
 baseline/control, you can set `out.anova = FALSE`. This will output
 results from the 2. level of the `predictor` compared to the intercept.
 This will ensure that p-values from `testDA` are comparable to the ones
-for the final analysis (See more [here](#how-to-run-original-data)).
+for the final analysis (See more [here](#how-to-run-real-data)).
 
 ### *If you have a paired/blocked experimental design:*
 
@@ -231,8 +236,8 @@ final false discovery rate and we should expect an FPR = 0 for these two
 methods, unless you are willing to accept some false positives. This can
 be tuned with the `sig` ("anc") and `fdr.output` ("sam") arguments.
 
-How to run original data
-========================
+How to run real data
+====================
 
 All tests can easily be run with the original data. E.g. edgeR exact
 test:
@@ -286,8 +291,8 @@ significance of the `predictor` and `covars` variables:
 The `anova` function can also be used to compare different models, e.g.
 test significance of a random component (paired variable).
 
-*Alternatively, run all (or several) methods and check which features
-are found by several methods.*
+**Alternatively, run all (or several) methods and check which features
+are found by several methods.**
 
     # Run many methods:
     res.all <- allDA(data, predictor)
@@ -304,6 +309,16 @@ are found by several methods.*
 A subset of methods can be run by setting the `tests` argument. E.g.
 only those performing well based on results from `testDA`.
 
+### How **NOT** to choose a method
+
+Choosing a method based on the results run from the real data, e.g. the
+one with most significant features or with the most *interesting*
+results, will most likely give you an inflated false positive rate, even
+though the method has a low FPR based on the `testDA` function. This is
+because `testDA` estimates FPR indpendently for each method, but if a
+method is non-randomly chosen from a set of methods they are no longer
+independent.
+
 Implemented methods
 ===================
 
@@ -312,6 +327,9 @@ Implemented methods
 Either add it yourself [(see under 'Extra features')](#extra-features),
 or write to me, preferably with a code snippet of the implementation
 (see email in Description).
+
+All count models (Poisson and Negative Binomial) use log(LibrarySize) as
+offset if `relative` is TRUE, but use no offset if `relative` is FALSE.
 
 -   per - [Permutation test with user defined test
     statistic](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8)
@@ -336,8 +354,8 @@ or write to me, preferably with a code snippet of the implementation
     relative abundances transformed with log(relative abundance + delta)
 -   neb - [Negative binomial
     GLM](https://en.wikipedia.org/wiki/Negative_binomial_distribution)
-    with log of library size as offset (The paired version is a
-    [mixed-effect model](https://en.wikipedia.org/wiki/Mixed_model))
+    (The paired version is a [mixed-effect
+    model](https://en.wikipedia.org/wiki/Mixed_model))
 -   erq - [EdgeR - Quasi
     likelihood](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2796818/)
     (The paired version is a model with the paired variable
@@ -428,7 +446,7 @@ these log-ratios.
 Extra features
 ==============
 
-#### Adding your own method without changing the package
+#### Adding user-defined methods
 
 "zzz" (`DA.zzz`) is a placeholder for user-defined methods. You have to
 supply it with a function whose input is: A `count_table` (data.frame,

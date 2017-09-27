@@ -23,6 +23,8 @@ DA.neb(data, predictor, paired = NULL, covars = NULL, out.anova = TRUE,
 \item{allResults}{If TRUE will return raw results from the glm.nb/glmer.nb function}
 
 \item{...}{Additional arguments for the glm.nb/glmer.nb functions}
+
+\item{relative}{Logical. Should count_table be normalized to relative abundances. Default TRUE}
 }
 \description{
 With log(librarySize) as offset.

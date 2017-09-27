@@ -51,7 +51,7 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative){
   
   # Exclude if relative is false
   if(relative == FALSE){
-    tests <- tests[!tests %in% c("sam","anc","znb","zpo","vli","poi","qpo","ltt2","neb","erq","ere","ere2","erq2","msf","zig","bay","ds2","adx","lli2","lao2","llm2","rai")]
+    tests <- tests[!tests %in% c("sam","anc","vli","ltt2","erq","ere","ere2","erq2","msf","zig","bay","ds2","adx","lli2","lao2","llm2","rai")]
   }
   
   # Only include if covars are present
