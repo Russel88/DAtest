@@ -25,7 +25,7 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
 
 \item{tests}{Character. Which tests to include. Default all (Except ANCOM, see below for details)}
 
-\item{relative}{Logical. Should abundances be made relative? Only for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea". Default TRUE}
+\item{relative}{Logical. If TRUE (default) Abundances are made relative for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea", and there is an offset of log(LibrarySize) for "neb", "poi", "qpo", "zpo" and "znb"}
 
 \item{effectSize}{Integer. The effect size for the spike-ins. Default 2}
 
