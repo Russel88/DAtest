@@ -6,7 +6,7 @@
 #' @param alpha Numeric. q-value threshold for significant features. Default 0.05
 #' @param ... Additional arguments for plotting
 #' @return Nothing
-#' @import venneuler
+#' @importFrom  venneuler venneuler
 #' @export
 vennDA <- function(x, tests = NULL, alpha = 0.05, ...){
   
@@ -33,7 +33,7 @@ vennDA <- function(x, tests = NULL, alpha = 0.05, ...){
   vennname <- do.call(c, naming)
   
   venndf <- data.frame(vennfeat,vennname)
-  venndia <- venneuler(venndf)
+  venndia <- venneuler::venneuler(venndf)
   plot(venndia, ...)
   
 }
