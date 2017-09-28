@@ -59,7 +59,8 @@ DA.vli <- function(data, predictor, paired = NULL, covars = NULL, out.anova = TR
   }
   
   design <- model.matrix(as.formula(form))
-  voo <- do.call(voom,c(list(count_table, design),voom.args))
+  nf <- edgeR::calcNormFactors(count_table)
+  voo <- do.call(voom,c(list(count_table, design, lib.size=colSums(count_table)*nf),voom.args))
   n <- dim(count_table)[1]
   if(is.null(paired)){
     fit <- do.call(lmFit,c(list(voo, design),lmFit.args))

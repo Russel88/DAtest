@@ -12,7 +12,7 @@ allDA(data, predictor, paired = NULL, covars = NULL, tests = c("sam",
   p.adj = "fdr", args = list(), out.anova = TRUE, alpha = 0.05)
 }
 \arguments{
-\item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
+\item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
 
 \item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the predictor is numeric it will be treated as such in the analyses}
 
@@ -22,7 +22,7 @@ allDA(data, predictor, paired = NULL, covars = NULL, tests = c("sam",
 
 \item{tests}{Character. Which tests to include. Default all (Except ANCOM, see below for details)}
 
-\item{relative}{Logical. If TRUE (default) Abundances are made relative for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea", and there is an offset of log(LibrarySize) for "neb", "poi", "qpo", "zpo" and "znb"}
+\item{relative}{Logical. If TRUE (default) abundances are made relative for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea", and there is an offset of log(LibrarySize) for "neb", "poi", "qpo", "zpo" and "znb"}
 
 \item{cores}{Integer. Number of cores to use for parallel computing. Default one less than available}
 

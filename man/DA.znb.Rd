@@ -14,7 +14,7 @@ DA.znb(data, predictor, covars = NULL, relative = TRUE, out.anova = TRUE,
 
 \item{covars}{Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)}
 
-\item{relative}{Logical. Should count_table be normalized to relative abundances. Default TRUE}
+\item{relative}{Logical. Whether log(librarySize) should be used as offset. Default TRUE}
 
 \item{out.anova}{If TRUE will output results and p-values from drop1. If false will output results for 2. level of the predictor.}
 

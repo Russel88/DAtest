@@ -113,7 +113,7 @@ Therefore, we want a method with a FPR ~0.05 or lower and a high AUC.
     mytest <- testDA(data, predictor)
 
 `data` is either a matrix or data.frame with taxa/genes/proteins as rows
-and samples as columns.
+and samples as columns (with rownames).
 
 `predictor` is the predictor of interest, e.g. a factor denoting whether
 samples are cases or controls (in the same order as columns in data).
@@ -163,12 +163,12 @@ When a `paired` argument is provided, the `predictor` is shuffled within
 the levels of the `paired` factor.
 
 Paired analysis can be very slow. If you simply can't wait to see the
-results remove "neb" from the tests argument.
+results remove "neb" from the `tests` argument.
 
 **Some details on how methods use the paired argument:**
 
-t-test, wilcox test, friedman test, quade test and permutation test
-expect a balanced "unreplicated" design with one value for each
+t-test, wilcox test, friedman test, quade test, SAMseq and permutation
+test expect a balanced "unreplicated" design with one value for each
 combination of levels in the `paired` and `predictor` variables.
 
 Negbinom/poisson glm, linear regression and limma models use the
@@ -177,9 +177,7 @@ models) and are very flexible regarding design and work well for
 unbalanced designs.
 
 EdgeR, DESeq2 and metagenomeSeq ZIG include the `paired` variable as a
-covariable in the model and are also generally flexible in the design,
-but they might fail if the design matrix is not full rank and if data is
-missing.
+covariable in the model and are also generally flexible in the design.
 
 ANCOM use the `paired` variable in a repeated measures manner
 
@@ -224,13 +222,14 @@ statistic/score, normalized such that, of the detected ("significant")
 features, the feature with the lowest statistic/score has a pseudo
 p-value = 0.05. Higher statistic/score gives lower pseudo p-value and
 vice versa. For SAMseq it is done seperately on the positive and
-negative scores.
+negative scores. FPR is also based on pseudo p-values for "anc" and
+"sam", but as these cannot be adjusted as nominal p-values, FPR for
+these methods is the final false discovery rate and we should expect an
+FPR = 0 for these two methods, unless you are willing to accept some
+false positives. This can be tuned with the `sig` ("anc") and
+`fdr.output` ("sam") arguments.
 
-FPR is also based on pseudo p-values for "anc" and "sam", but as these
-cannot be adjusted as nominal p-values, FPR for these methods is the
-final false discovery rate and we should expect an FPR = 0 for these two
-methods, unless you are willing to accept some false positives. This can
-be tuned with the `sig` ("anc") and `fdr.output` ("sam") arguments.
+P-values for baySeq are defined as 1 - posterior likelihoods.
 
 How to run real data
 ====================
@@ -446,12 +445,13 @@ Extra features
 
 "zzz" (`DA.zzz`) is a placeholder for user-defined methods. You have to
 supply it with a function whose input is: A `count_table` (data.frame,
-samples are columns), a `predictor` (vector), a `paired` variable
-(factor), and a `covars` argument (named list with vectors). It is OK if
-your function doesn't use `paired`/`covars`, but they have to be there
-in the arguments. The output from the user-defined function should be a
-data.frame that at least includes: The names of the features
-("Feature"), p-values ("pval"), and name of method ("Method").
+samples are columns, rownames indicate features), a `predictor`
+(vector), a `paired` variable (factor), and a `covars` argument (named
+list with vectors). It is OK if your function doesn't use
+`paired`/`covars`, but they have to be there in the arguments. The
+output from the user-defined function should be a data.frame that at
+least includes: The names of the features ("Feature"), p-values
+("pval"), and name of method ("Method").
 
 See example below on how to include a simple t-test on relative
 abundances:

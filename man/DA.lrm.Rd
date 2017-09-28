@@ -27,5 +27,5 @@ DA.lrm(data, predictor, paired = NULL, covars = NULL, relative = TRUE,
 \item{...}{Additional arguments for the lm/lme functions}
 }
 \description{
-Mixed-effect model is a paired argument is present, with the paired variable as random intercept
+Mixed-effect model is used when a paired argument is present, with the paired variable as random intercept
 }

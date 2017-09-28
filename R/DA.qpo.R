@@ -5,7 +5,7 @@
 #' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
-#' @param relative Logical. Should count_table be normalized to relative abundances. Default TRUE
+#' @param relative Logical. Whether log(librarySize) should be used as offset. Default TRUE
 #' @param out.anova If TRUE will output results and p-values from anova. If false will output results for 2. level of the predictor.
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
 #' @param allResults If TRUE will return raw results from the glm function

@@ -13,7 +13,7 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
   rng.seed = 123, args = list(), out.anova = TRUE)
 }
 \arguments{
-\item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
+\item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
 
 \item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the predictor is numeric it will be treated as such in the analyses}
 
@@ -25,7 +25,7 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
 
 \item{tests}{Character. Which tests to include. Default all (Except ANCOM, see below for details)}
 
-\item{relative}{Logical. If TRUE (default) Abundances are made relative for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea", and there is an offset of log(LibrarySize) for "neb", "poi", "qpo", "zpo" and "znb"}
+\item{relative}{Logical. If TRUE (default) abundances are made relative for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea", and there is an offset of log(LibrarySize) for "neb", "poi", "qpo", "zpo" and "znb"}
 
 \item{effectSize}{Integer. The effect size for the spike-ins. Default 2}
 

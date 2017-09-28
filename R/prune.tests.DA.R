@@ -5,8 +5,6 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative){
   # Prune test argument if packages are not installed
   if(!"baySeq" %in% rownames(installed.packages())) tests <- tests[tests != "bay"]
   if(!"ALDEx2" %in% rownames(installed.packages())) tests <- tests[tests != "adx"] 
-  if(!"MASS" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("neb")]
-  if(!"lme4" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("neb","poi","qpo")]
   if(!"edgeR" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("ere","erq","ere2","erq2")]
   if(!"metagenomeSeq" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("msf","zig")]
   if(!"DESeq2" %in% rownames(installed.packages())) tests <- tests[tests != "ds2"]
@@ -22,7 +20,7 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative){
     tests <- tests[!tests %in% c("qpo","zpo","znb","bay","adx","ere","ere2","msf","aov","lao","lao2","kru","rai","spe","pea")]
     # Exclude tests that only work with one value for each combination of predictor and paired arguments
     if(!all(table(paired,predictor) == 1)){
-      tests <- tests[!tests %in% c("ttt","ltt","ltt2","wil","per","fri","qua")]
+      tests <- tests[!tests %in% c("ttt","ltt","ltt2","wil","per","fri","qua","sam")]
     }
   } else {
     # Exclude if there is no paired
