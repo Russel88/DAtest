@@ -150,10 +150,6 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("sam"
   tests <- unique(tests)
   if(!"zzz" %in% tests) tests <- prune.tests.DA(tests, predictor, paired, covars, relative)
   
-  # Set seed
-  set.seed(rng.seed)
-  message(paste("Seed is set to",rng.seed))
-  
   # Remove Features not present in any samples
   if(sum(rowSums(count_table) == 0) != 0) message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
   count_table <- count_table[rowSums(count_table) > 0,]
@@ -174,6 +170,10 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("sam"
     }
   }
   
+  # Set seed
+  message(paste("Seed is set to",rng.seed))
+  set.seed(rng.seed)
+  
   # Run tests
   # Progress bar
   pb <- txtProgressBar(max = length(tests), style = 3)
@@ -191,6 +191,9 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("sam"
   
   # Run tests in parallel
   results <- foreach(i = tests, .options.snow = opts) %dopar% {
+    
+    # Set seed
+    set.seed(rng.seed)
     
     # Extract test arguments
     if(!all(names(args) %in% tests)) stop("One or more names in list with additional arguments does not match names of tests")

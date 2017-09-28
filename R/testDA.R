@@ -179,6 +179,10 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   # Set seed
   set.seed(rng.seed)
   message(paste("Seed is set to",rng.seed))
+  set.seed(123)
+  
+  # Create some random seeds for each run
+  seeds <- MASS::rnegbin(R, mu = (1:R)*1e6, theta = 1)
   
   # Remove Features not present in any samples
   if(sum(rowSums(count_table) == 0) != 0) message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
@@ -242,6 +246,9 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
     run.no <- as.numeric(gsub("_.*","",i))
     i <- gsub(".*_","",i)
 
+    # Set subseed
+    set.seed(seeds[run.no])
+    
     # Extract test arguments
     if(!all(names(args) %in% tests)) stop("One or more names in list with additional arguments does not match names of tests")
     for(j in seq_along(args)){
