@@ -8,11 +8,12 @@
 #' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
 #' @param by Column number or column name specifying which coefficient or contrast of the linear model is of interest (only for categorical predictors). Default 2
+#' @param eff Filter features to have at least a "eff" quantile or number of effective samples.
 #' @param allResults If TRUE will return raw results from the fitZig function
 #' @param ... Additional arguments for the fitZig function
 #' @export
 
-DA.zig <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", by = 2, allResults = FALSE, ...){
+DA.zig <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", by = 2, eff = 0, allResults = FALSE, ...){
   
   library(metagenomeSeq)
   
@@ -69,9 +70,9 @@ DA.zig <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
   
   mgsfit <- fitZig(obj=mgsdata,mod=mod)
   if(is.numeric(predictor[1])){
-    temp_table <- MRtable(mgsfit, number=nrow(count_table), by = by, coef = 1:2)
+    temp_table <- MRtable(mgsfit, number=nrow(count_table), by = by, coef = 1:2, eff = eff)
   } else {
-    temp_table <- MRtable(mgsfit, number=nrow(count_table), by = by, coef = c(1:length(levels(as.factor(predictor)))))
+    temp_table <- MRtable(mgsfit, number=nrow(count_table), by = by, coef = c(1:length(levels(as.factor(predictor)))), eff = eff)
   }
   temp_table <- temp_table[!is.na(row.names(temp_table)),]
   # Pvalue have different naming depending on package version

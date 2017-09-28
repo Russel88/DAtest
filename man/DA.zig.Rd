@@ -5,7 +5,7 @@
 \title{MetageonomeSeq ZIG}
 \usage{
 DA.zig(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
-  by = 2, allResults = FALSE, ...)
+  by = 2, eff = 0, allResults = FALSE, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -19,6 +19,8 @@ DA.zig(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
 
 \item{by}{Column number or column name specifying which coefficient or contrast of the linear model is of interest (only for categorical predictors). Default 2}
+
+\item{eff}{Filter features to have at least a "eff" quantile or number of effective samples.}
 
 \item{allResults}{If TRUE will return raw results from the fitZig function}
 
