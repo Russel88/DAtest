@@ -15,7 +15,7 @@
 #' @importFrom lme4 glmer.nb glmer
 #' @export
 
-DA.neb <- function(data, predictor, paired = NULL, covars = NULL, out.anova = TRUE, p.adj = "fdr", allResults = FALSE, ...){
+DA.neb <- function(data, predictor, paired = NULL, covars = NULL, relative = TRUE, out.anova = TRUE, p.adj = "fdr", allResults = FALSE, ...){
  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){

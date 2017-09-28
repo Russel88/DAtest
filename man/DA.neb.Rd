@@ -4,8 +4,8 @@
 \alias{DA.neb}
 \title{Negative binomial glm}
 \usage{
-DA.neb(data, predictor, paired = NULL, covars = NULL, out.anova = TRUE,
-  p.adj = "fdr", allResults = FALSE, ...)
+DA.neb(data, predictor, paired = NULL, covars = NULL, relative = TRUE,
+  out.anova = TRUE, p.adj = "fdr", allResults = FALSE, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -16,6 +16,8 @@ DA.neb(data, predictor, paired = NULL, covars = NULL, out.anova = TRUE,
 
 \item{covars}{Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)}
 
+\item{relative}{Logical. Should count_table be normalized to relative abundances. Default TRUE}
+
 \item{out.anova}{If TRUE will output results and p-values from anova (drop1 if paired != NULL). If false will output results for 2. level of the predictor.}
 
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
@@ -23,8 +25,6 @@ DA.neb(data, predictor, paired = NULL, covars = NULL, out.anova = TRUE,
 \item{allResults}{If TRUE will return raw results from the glm.nb/glmer.nb function}
 
 \item{...}{Additional arguments for the glm.nb/glmer.nb functions}
-
-\item{relative}{Logical. Should count_table be normalized to relative abundances. Default TRUE}
 }
 \description{
 With log(librarySize) as offset.
