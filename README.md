@@ -242,9 +242,9 @@ The default effect size of 2 (equal to a log2 fold change of 1) might
 not fit for your data. If the best method has an AUC below 0.7 you might
 want to increase the effect size. In contrast, if several methods have
 an AUC close to 1, you might want to decrease the effect size (towards
-1) to better differentiate the methods. It is also possible to test for
-negative associations with effect sizes between 0 and 1, but this has
-not been tested extensively.
+one) to better differentiate the methods. It is also possible to test
+for negative associations with effect sizes between 0 and 1, but this
+has not been tested extensively.
 
 How to run real data
 ====================
