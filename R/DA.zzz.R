@@ -34,7 +34,7 @@ DA.zzz <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
     count_table <- data
   }
 
-  res <- dafun(count_table, predictor, paired, covars)
+  res <- FUN(count_table, predictor, paired, covars)
   
   # Check output
   if(!all(c("pval","Feature","Method") %in% colnames(res))) stop("The following columns has to be present in output: pval, Feature and Method")

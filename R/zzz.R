@@ -1,6 +1,12 @@
-# Fix samr options problem
 
 .onLoad <- function(libname, pkgname){
-  options(error=NULL)
+  message("DAtest version 2.6.1")
+  
+  # Fix samr problem
+  if(.Platform$OS.type == "windows"){
+    if("samr" %in% rownames(installed.packages())){
+      options(error = NULL)
+    }
+  }
 }
 

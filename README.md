@@ -31,11 +31,16 @@ in choosing a method for a specific dataset based on empirical testing.
 
 ### Citation
 
-Some scripts, including the spike-in for estimating AUC, is borrowed
-from: [Thorsen J, Brejnrod A et al. Large-scale benchmarking reveals
-false discoveries and count transformation sensitivity in 16S rRNA gene
-amplicon data analysis methods used in microbiome studies. *Microbiome*
-(2016)](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8)
+Please cite the following publication if you use the DAtest package:
+
+Russel *et al.* (2017) DAtest: A framework for comparing differential
+abundance and expression methods. *In Prep*
+
+Remember also to cite the method you end up using for your final
+analysis (See [implemented methods](#implemented-methods) for links). If
+there is no associated publication (e.g. for a t-test) you can cite as
+follows: ."we used t-test as implemented in DAtest version x.x.x (Russel
+*et al.* 2017)"
 
 Overview of this tutorial
 -------------------------
@@ -230,6 +235,16 @@ false positives. This can be tuned with the `sig` ("anc") and
 `fdr.output` ("sam") arguments.
 
 P-values for baySeq are defined as 1 - posterior likelihoods.
+
+### *How to choose the effect size:*
+
+The default effect size of 2 (equal to a log2 fold change of 1) might
+not fit for your data. If the best method has an AUC below 0.7 you might
+want to increase the effect size. In contrast, if several methods have
+an AUC close to 1, you might want to decrease the effect size (towards
+1) to better differentiate the methods. It is also possible to test for
+negative associations with effect sizes between 0 and 1, but this has
+not been tested extensively.
 
 How to run real data
 ====================
