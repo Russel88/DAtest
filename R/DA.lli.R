@@ -46,7 +46,7 @@ DA.lli <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
   }
   
   count_table <- log(count_table + delta)
-    if(relative) count_table <- apply(count_table,2,function(x) x/sum(x))
+  if(relative) count_table <- apply(count_table,2,function(x) x/sum(x))
   
   limma.args <- list(...)
   lmFit.args <- limma.args[names(limma.args) %in% names(formals(lmFit))]
@@ -61,7 +61,7 @@ DA.lli <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
       form <- paste("~ predictor+",paste(names(covars), collapse="+"),sep = "")
     }
   }
-  
+  count_table <- as.data.frame(count_table)
   design <- model.matrix(as.formula(form))
   n <- dim(count_table)[1]
   if(is.null(paired)){

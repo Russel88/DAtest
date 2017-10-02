@@ -60,7 +60,7 @@ DA.lli2 <- function(data, predictor, paired = NULL, covars = NULL, out.anova = T
       form <- paste("~ predictor+",paste(names(covars), collapse="+"),sep = "")
     }
   }
-  
+  count.rel <- as.data.frame(count.rel)
   design <- model.matrix(as.formula(form))
   n <- dim(count.rel)[1]
   if(is.null(paired)){

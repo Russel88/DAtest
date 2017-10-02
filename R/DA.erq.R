@@ -47,7 +47,7 @@ DA.erq <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
   
   count_table <- as.data.frame(count_table)
   y <- DGEList(counts=count_table,genes = data.frame(Feature = row.names(count_table)))
-  y <- do.call(calcNormFactors, c(list(y, method = "TMM"),calcNormFactors.args))
+  y <- do.call(edgeR::calcNormFactors, c(list(y, method = "TMM"),calcNormFactors.args))
   if(!is.null(paired)){
     if(is.null(covars)){
       design <- model.matrix(~ predictor+paired)

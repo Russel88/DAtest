@@ -63,7 +63,7 @@ DA.lim <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
       form <- paste("~ predictor+",paste(names(covars), collapse="+"),sep = "")
     }
   }
-  
+  count.rel <- as.data.frame(count.rel)
   design <- model.matrix(as.formula(form))
   n <- dim(count.rel)[1]
   if(is.null(paired)){
