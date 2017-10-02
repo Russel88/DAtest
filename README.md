@@ -219,6 +219,24 @@ the same order as columns in `data`):
     # Average run times of each method:
     mytest$run.times
 
+It is advised to also choose a method based on the p-value histograms of
+the methods. Many methods will likely have almost similar AUCs, and
+looking at the p-value histograms can help to differentiate the methods.
+This will plot p-value histograms for all the non-spiked features:
+
+    plot(mytest, p = TRUE)
+
+This distribution should theoretically be uniform (flat) (except for the
+permutation test due its time-saving algorithm). Multiple-correction
+methods for controlling the false discovery rate, e.g. "fdr" / "BH",
+assume a uniform distribution, and will not work properly if the p-value
+distribution deviates greatly from uniform. The calculations of AUC does
+not take this fact into account.
+
+Check out [this nice
+blog](http://varianceexplained.org/statistics/interpreting-pvalue-histogram/)
+if you want to know more on how to interpret these histograms.
+
 **Note:**
 
 As ANCOM and SAMseq do not output p-values, AUC and Spike.detect.rate
@@ -522,13 +540,6 @@ abundances:
 checks of whether any of the supplied methods are suitable for the data.
 If e.g. your `predictor` is quantitative and "ttt" is in the `tests`
 argument, it will try to run a t-test and fail miserably.
-
-#### Plot the p-value distributions. Raw p-values should in theory have a uniform (flat) distribution between 0 and 1.
-
-(Except for the permutation test due its time-saving algorithm, change
-the `margin` argument if you want theoretically correct p-values)
-
-    plot(mytest, p = TRUE)
 
 #### Results from all the runs:
 
