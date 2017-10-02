@@ -55,6 +55,7 @@ Overview of this tutorial
 Installation of packages
 ========================
 
+It is advised not to have any packages loaded when installing DAtest.
 Installation of DAtest and all dependencies has been tested to work on a
 clean R version 3.4.1 by installing in the following order:
 
@@ -131,9 +132,10 @@ only the second level is spiked.
 #### **The function automatically uses multiple CPUs for fast execution**
 
 The methods run in parallel, and by default the number of cores used is
-one less than available. This can be changed with the `cores` argument.
-`cores = 1` will turn off parallel computing. If the function is
-terminated before ending you might get the following warning:
+one less than available. It has been tested to work on Windows, OS X and
+Linux Debian. It can be changed with the `cores` argument. `cores = 1`
+will turn off parallel computing. If the function is terminated before
+ending you might get the following warning:
 
     closing unused connection X (...)
 
@@ -260,6 +262,8 @@ the abbreviation given in the details of the `testDA` function.
 It is advised to set `allResults = TRUE` for checking final results. For
 all methods where relevant, this will output the raw results, often in a
 list with each element corresponding to a feature (OTU/gene/protein).
+For published methods, it is advised to check their tutorials on how to
+read to output.
 
 -   ***IMPORTANT:***
     -   Set `out.anova` similar in `testDA` as in your final analysis
@@ -270,7 +274,7 @@ list with each element corresponding to a feature (OTU/gene/protein).
         an `anova`/`drop1` function. This can be changed with the
         `out.anova` argument
     -   All limma models (lim,lli,lli2,vli) test all levels of the
-        `predictor` against the intercept (with `topTable`). This can be
+        `predictor` against an intercept (with `topTable`). This can be
         changed with the `out.anova` argument
     -   For ANCOM: If the FPR = 0, you would not expect false positives
         with the default settings. If "anc" has an FPR &gt; 0, set
@@ -280,26 +284,36 @@ For linear models the `drop1`/`anova` functions can be used to test
 significance of the `predictor` and `covars` variables:
 
     ### Apply drop1 for each feature and output the adjusted p-values:
-    # For lm/glm functions (lrm, llm, llm2, poi, neb, qpo):
+    # Works on "zpo", "znb", "qpo", "neb", "poi". Non-paired "lrm", "llm", "llm2"
     results <- DA.lrm(data, predictor, allResults = TRUE)
-    test <- apply(sapply(results, function(x) drop1(x, test = "Chisq")[,5]),1,function(y) p.adjust(y,method="fdr"))
-    colnames(test) <- rownames(drop1(results[[1]]))
+    res.drop1 <- DA.drop1(results)
 
-    # For glmer/zeroinfl functions (poi, neb with paired variable + znb and zpo): 
-    results <- DA.poi(data, predictor, paired, allResults = TRUE)
-    test <- sapply(results, function(x) tryCatch(drop1(x, test = "Chisq")[,4],error = function(e) NA))
-    test <- do.call(rbind,test[lapply(test, length) > 1])
-    test <- apply(test, 2, function(x) p.adjust(x, method="fdr"))
-    colnames(test) <- rownames(drop1(results[[1]]))
+    ### Apply anova for each feature and output the adjusted p-values:
+    # Works on "lrm", "llm", "llm2". Non-paired "neb"
+    results <- DA.lrm(data, predictor, allResults = TRUE)
+    res.anova <- DA.anova(results)
 
-    ### Compare likelihoods for each feature and output the adjusted p-values (also possible for lm/glm):
-    # For lme functions (lrm, llm, llm2 with paired variable):
-    results <- DA.lrm(data, predictor, paired, method = "ML", allResults = TRUE)
-    test <- apply(sapply(results, function(x) anova(x)[,4]),1,function(y) p.adjust(y,method="fdr"))
-    colnames(test) <- rownames(anova(results[[1]]))
+For anova and linear models we can also run post-hoc tests for all
+pairwise comparisons of multi-class `predictor`/`covars`.
 
-The `anova` function can also be used to compare different models, e.g.
-test significance of a random component (paired variable).
+    ### Apply TukeyHSD for each feature for a selected variable and output the adjusted p-values:
+    # Works on "aov", "lao", "lao2"
+    results <- DA.aov(data, predictor, allResults = TRUE)
+    res.tukey <- DA.TukeyHSD(results, variable = "predictor") # variable can also be the name of a covar
+
+    ### Apply lsmeans for each feature for a selected variable and output the adjusted p-values:
+    # This requires the lsmeans package.
+    # Works on "poi", "neb", "lrm", "llm", "llm2", "qpo", "znb", "zpo"
+    results <- DA.lrm(data, predictor, allResults = TRUE)
+    res.lsm <- DA.lsmeans(results, variable = "predictor") # variable can also be the name of a covar
+
+    # For paired "lrm", "llm", "llm2" the original predictor variable has to be supplied. For example:
+    results <- DA.lrm(data, predictor = mypred, paired = SubjectID,  allResults = TRUE)
+    res.lsm <- DA.lsmeans(results, variable = "predictor", predictor = mypred)
+
+    # and if covars are used, they also need to be supplied for paired "lrm", "llm", "llm2". For example:
+    results <- DA.lrm(data, predictor = mypred, paired = SubjectID, covars = list(covar1 = mycovar),  allResults = TRUE)
+    res.lsm <- DA.lsmeans(results, variable = "predictor", predictor = mypred, covars = list(covar1 = mycovar))
 
 **Alternatively, run all (or several) methods and check which features
 are found by several methods.**
@@ -311,6 +325,7 @@ are found by several methods.**
     View(res.all$table)
 
     # Venn diagram of detected features from selected methods:
+    # This requires the venneuler package.
     vennDA(res.all, tests = c("wil","ttt","ltt"))
 
     # See results from a method (e.g. t.test "ttt"):

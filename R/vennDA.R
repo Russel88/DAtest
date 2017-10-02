@@ -1,14 +1,17 @@
 #' Plot Venn diagram from allDA object
 #'
-#' Plot a Venn (Euler) diagram of features found by different methods
+#' Plot a Venn (Euler) diagram of features found by different methods.
+#' 
+#' Require the venneuler package.
 #' @param x Output from the allDA function
 #' @param tests Character vector with tests to plot (E.g. c("ttt","adx.t","wil"), see names(x$results)). Default none
 #' @param alpha Numeric. q-value threshold for significant features. Default 0.05
 #' @param ... Additional arguments for plotting
 #' @return Nothing
-#' @importFrom  venneuler venneuler
 #' @export
 vennDA <- function(x, tests = NULL, alpha = 0.05, ...){
+  
+  library(venneuler)
   
   if(!all(names(x) == c("table","results"))) stop("x is not an allDA object")
   

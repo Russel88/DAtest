@@ -89,7 +89,7 @@ DA.poi <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
       pois <- function(x){
         fit <- NULL
         tryCatch(
-          fit <- lme4::glmer(x ~ predictor + offset(log(log(libSize))) + (1|paired),family="poisson", ...), 
+          fit <- lme4::glmer(x ~ predictor + offset(log(libSize)) + (1|paired),family="poisson", ...), 
           error = function(x) fit <- NULL)
         if(!is.null(fit)) {
           if(nrow(coef(summary(fit))) > 1) {

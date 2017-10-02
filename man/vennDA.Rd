@@ -19,5 +19,8 @@ vennDA(x, tests = NULL, alpha = 0.05, ...)
 Nothing
 }
 \description{
-Plot a Venn (Euler) diagram of features found by different methods
+Plot a Venn (Euler) diagram of features found by different methods.
+}
+\details{
+Require the venneuler package.
 }
