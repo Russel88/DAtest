@@ -79,6 +79,8 @@ But the package will work without them
     biocLite("qvalue")
     biocLite("impute")
 
+    install.packages("samr")
+
 -   RAIDA and ANCOM have to be installed from external sources:
 
 <!-- -->
@@ -94,7 +96,7 @@ But the package will work without them
     unzip("ANCOM.zip",exdir=getwd())
     install.packages("ancom.R_1.1-3.tar.gz", repos = NULL)
 
-**Note:** If installation fails for any of the biocLite or external
+**Note:** If installation fails for any of the bioconductor or external
 packages (RAIDA, ANCOM) do not despair. `DAtest` will work seamlessly,
 but will simply exclude methods that depends on these packages.
 
