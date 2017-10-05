@@ -77,9 +77,12 @@ But the package will work without them
     biocLite("baySeq")
     biocLite("ALDEx2")
     biocLite("qvalue")
-    biocLite("impute")
 
-    install.packages("samr")
+    biocLite("impute") # For SamSeq
+    install.packages("samr") # SamSeq
+
+    install.packages("pscl") # Zero-inflated Poisson and zero-inflated Negative Binomial
+    install.packages("statmod") # For limma with blocking
 
 -   RAIDA and ANCOM have to be installed from external sources:
 
@@ -99,6 +102,14 @@ But the package will work without them
 **Note:** If installation fails for any of the bioconductor or external
 packages (RAIDA, ANCOM) do not despair. `DAtest` will work seamlessly,
 but will simply exclude methods that depends on these packages.
+
+The following are suggested, but not needed:
+
+    # For drawing Venn diagrams
+    install.packages("venneuler")
+
+    # For post-hoc testing (generalized) linear models
+    install.packages("lsmeans")
 
 How to compare methods
 ======================
