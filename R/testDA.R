@@ -14,6 +14,7 @@
 #' @param rng.seed Numeric. Seed for reproducibility. Default 123
 #' @param args List. A list with lists of arguments passed to the different methods. See details for more.
 #' @param out.anova If TRUE (default) linear models will output results and p-values from anova/drop1. If FALSE will output results for 2. level of the predictor.
+#' @param core.check If TRUE will make an interactive check that the amount of cores specified are desired. Only if cores>10. This is to ensure that the function doesn't automatically overloads a server with workers.  
 #' @details Currently implemented methods:
 #' \itemize{
 #'  \item per - Permutation test with user defined test statistic
@@ -116,15 +117,16 @@
 #' @importFrom pROC roc
 #' @export
 
-testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests = c("sam","qua","fri","zpo","znb","vli","qpo","poi","pea","neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","erq2","ere","ere2","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 2, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, args = list(), out.anova = TRUE){
+testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests = c("sam","qua","fri","zpo","znb","vli","qpo","poi","pea","neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","erq2","ere","ere2","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 2, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, args = list(), out.anova = TRUE, core.check = TRUE){
 
   stopifnot(exists("data"),exists("predictor"))
   # Check for servers
-  if(cores > 10){
-    ANSWER <- readline(paste("You are about to run testDA using",cores,"cores. Enter y to proceed "))
-    if(ANSWER != "y") stop("Process aborted")
+  if(core.check){
+    if(cores > 10){
+      ANSWER <- readline(paste("You are about to run allDA using",cores,"cores. Enter y to proceed "))
+      if(ANSWER != "y") stop("Process aborted")
+    }
   }
-
   # Time taking
   t1 <- proc.time()
   
@@ -161,7 +163,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   if(sum(colSums(count_table) == 0) > 0) stop("Some samples are empty")
   if(ncol(count_table) != length(predictor)) stop("Number of samples in count_table does not match length of predictor")
   if(length(levels(as.factor(predictor))) < 2) stop("predictor should have at least two levels")
-  
+
   # Prune tests argument
   tests <- unique(tests)
   if(!"zzz" %in% tests) tests <- prune.tests.DA(tests, predictor, paired, covars, relative)
@@ -194,7 +196,11 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   # Numeric predictor
   if(is.numeric(predictor[1])){
     num.pred <- TRUE
-    message("predictor is assumed to be a continuous/quantitative variable")
+    message("predictor is assumed to be a quantitative variable")
+    if(levels(as.factor(predictor)) == 2){
+      ANSWER <- readline("The predictor is quantitative, but only contains 2 unique values. Are you sure this is correct? Enter y to proceed ")
+      if(ANSWER != "y") stop("Wrap the predictor with as.factor(predictor) to treat it is a categorical variable")
+    }
   } else {
     num.pred <- FALSE
   }
@@ -203,7 +209,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   if(!is.null(covars)){
     for(i in 1:length(covars)){
       if(is.numeric(covars[[i]][1])){
-        message(paste(names(covars)[i],"is assumed to be a continuous/quantitative variable"))
+        message(paste(names(covars)[i],"is assumed to be a quantitative variable"))
       } else {
         message(paste(names(covars)[i],"is assumed to be a categorical variable"))
       }
@@ -238,7 +244,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
 
   # Run the tests in parallel
   results <- foreach(i = tests.par , .options.snow = opts) %dopar% {
-
+    
     t1.sub <- proc.time()
     
     # Extract run info
@@ -485,7 +491,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
                                Samples = ncol(count_table),
                                Predictor = pred.det,
                                Paired = pair.det,
-                               Covars = length(covars),
+                               Covars = paste(names(covars), collapse = ", "),
                                RunTime = run.time,
                                Relative = relative,
                                EffectSize = effectSize,
@@ -497,8 +503,9 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   
   # Run times
   run.times.all <- foreach(i = unique(gsub(".*_","",names(results))),.combine = rbind) %do% {
-    round(mean(as.numeric(run.times[gsub(".*_","",names(run.times)) == i]))/60,2)
+    round(mean(as.numeric(run.times[gsub(".*_","",names(run.times)) == i]))/60,4)
   }
+  run.times.all <- as.data.frame(run.times.all)
   rownames(run.times.all) <- unique(gsub(".*_","",names(results)))
   colnames(run.times.all) <- "Minutes"
   

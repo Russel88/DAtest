@@ -9,7 +9,8 @@ allDA(data, predictor, paired = NULL, covars = NULL, tests = c("sam",
   "adx", "wil", "ttt", "ltt", "ltt2", "neb", "erq", "ere", "erq2", "ere2",
   "msf", "zig", "ds2", "lim", "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2",
   "rai"), relative = TRUE, cores = (detectCores() - 1), rng.seed = 123,
-  p.adj = "fdr", args = list(), out.anova = TRUE, alpha = 0.05)
+  p.adj = "fdr", args = list(), out.anova = TRUE, alpha = 0.05,
+  core.check = TRUE)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
@@ -35,6 +36,8 @@ allDA(data, predictor, paired = NULL, covars = NULL, tests = c("sam",
 \item{out.anova}{If TRUE (default) linear models will output results and p-values from anova/drop1. If FALSE will output results for 2. level of the predictor.}
 
 \item{alpha}{P-value threshold for calling significance. Default 0.05}
+
+\item{core.check}{If TRUE will make an interactive check that the amount of cores specified are desired. Only if cores>10. This is to ensure that the function doesn't automatically overloads a server with workers.}
 }
 \value{
 A list of results:

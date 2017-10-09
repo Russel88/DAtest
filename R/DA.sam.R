@@ -6,10 +6,11 @@
 #' @param fdr.output Passed to SAMseq. (Approximate) False Discovery Rate cutoff for output in significant genes table
 #' @param allResults If TRUE will return raw results from the SAMseq function
 #' @param ... Additional arguments for the SAMseq function
-#' @import samr
 #' @export
 DA.sam <- function(data, predictor, paired = NULL, fdr.output = 0.05, allResults = FALSE, ...){
 
+  library(samr)
+  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
     if(length(predictor) > 1 | length(paired) > 1) stop("When data is a phyloseq object predictor and paired should only contain the name of the variables in sample_data")
@@ -75,6 +76,8 @@ DA.sam <- function(data, predictor, paired = NULL, fdr.output = 0.05, allResults
   df$Method <- "SAMseq (sam)"
   
   if(class(data) == "phyloseq") df <- add.tax.DA(data, df)
+  
+  detach("package:samr", unload = TRUE)
   
   if(allResults){
     return(res)

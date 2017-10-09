@@ -129,7 +129,7 @@ Therefore, we want a method with a FPR ~0.05 or lower and a high AUC.
 
 (if you have a phyloseq object, see details further down)
 
-    mytest <- testDA(data, predictor)
+    mytest <- testDA(data, predictor, R = 10)
 
 `data` is either a matrix or data.frame with taxa/genes/proteins as rows
 and samples as columns (with rownames).
@@ -141,6 +141,10 @@ samples are cases or controls (in the same order as columns in data).
 only the second level is spiked.
 
 `predictor` can also be continuous/quantitative
+
+`R` denotes how many times the spike-in and FPR/AUC calculation should
+be replicated. It is advised to use at least 10, but it can be set to 1
+for a fast test of the function.
 
 #### **The function automatically uses multiple CPUs for fast execution**
 
@@ -158,6 +162,21 @@ to close all connections.
 
 If you run out of memory/RAM, reduce the number of cores used for
 computing.
+
+### *If you have a lot of features; i.e. more than 10k*
+
+Runtime of the different methods can vary quite a lot, and some methods
+are simply unfeasible for datasets with tenths of thousands of features.
+The `runtimeDA` function can estimate the runtime of the different
+methods on your dataset: It runs on small subsets of the data and then
+extrapolates the runtime from these subsets. It will not be super
+precise, but it should give a decent estimate. The function prints how
+many minutes it will take to run each method one time and `R` times. If
+you only use 1 core the actual runtime will be the sum of all the
+methods. With more cores the runtime will decrease and approach the
+runtime of the slowest method.
+
+    runtimeDA(data, predictor)
 
 ### *If your predictor is categorical with more than two levels:*
 
