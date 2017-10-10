@@ -18,6 +18,8 @@ spikein <- function(count_table, predictor, effectSize = 2, k, num.pred = FALSE,
   if(effectSize < 0) stop("Effect size should be positive")
   if(effectSize == 1) spikeMethod <- "none" else spikeMethod <- "mult"
 
+  if(is.null(rownames(count_table))) rownames(count_table) <- 1:nrow(count_table)
+  
   count_table <- as.data.frame(count_table)
   if(!num.pred) predictor <- as.numeric(as.factor(predictor))-1
   

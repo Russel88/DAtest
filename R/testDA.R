@@ -197,7 +197,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   if(is.numeric(predictor[1])){
     num.pred <- TRUE
     message("predictor is assumed to be a quantitative variable")
-    if(levels(as.factor(predictor)) == 2){
+    if(length(levels(as.factor(predictor))) == 2){
       ANSWER <- readline("The predictor is quantitative, but only contains 2 unique values. Are you sure this is correct? Enter y to proceed ")
       if(ANSWER != "y") stop("Wrap the predictor with as.factor(predictor) to treat it is a categorical variable")
     }
