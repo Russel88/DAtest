@@ -201,7 +201,7 @@ is spiked when `predictor` contains multiple levels. In your final
 analysis you can get an output with all p-values (See more
 [here](#how-to-run-real-data)).
 
-All limma models output reuslts (including p-values) from `topTable`
+All limma models output results (including p-values) from `topTable`
 testing all levels (minus 1) against the intercept. This can be changed
 with `out.anova`.
 
