@@ -34,7 +34,7 @@ in choosing a method for a specific dataset based on empirical testing.
 Please cite the following publication if you use the DAtest package:
 
 Russel *et al.* (2017) DAtest: A framework for comparing differential
-abundance and expression methods. *In Prep*
+abundance and expression methods. *Submitted*
 
 Remember also to cite the method you end up using for your final
 analysis (See [implemented methods](#implemented-methods) for links). If
@@ -180,13 +180,36 @@ runtime of the slowest method.
 
 ### *If your predictor is categorical with more than two levels:*
 
+There are generally two ways to output results with a categorical
+predictor with multiple levels; either there is one p-value indicating
+whether the categories are similar or different (e.g. in ANOVA), or
+there is one p-value for each level, often where the first level is set
+as intercept and the remaining levels are tested against the intercept.
+For some methods you can choose which option fits you, with other
+methods not, but it is crucial that this option is similar in the
+`testDA` function as in the final analysis (use the `out.anova`
+argument).
+
 All linear models (also GLMs) output results (including p-values) from
 `anova`/`drop1` functions and are thus testing the `predictor` variable
-in one go. If you are interested in testing treatments against a common
-baseline/control, you can set `out.anova = FALSE`. This will output
-results from the 2. level of the `predictor` compared to the intercept.
-This will ensure that p-values from `testDA` are comparable to the ones
-for the final analysis (See more [here](#how-to-run-real-data)).
+in one go. For your final analysis you can run post-hoc tests for all
+pairwise comparisons. If you are interested in testing treatments
+against a common baseline/control (i.e. intercept), you can set
+`out.anova = FALSE`. This will output results from the 2. level of the
+`predictor` compared to the intercept. This is because only the 2. level
+is spiked when `predictor` contains multiple levels. In your final
+analysis you can get an output with all p-values (See more
+[here](#how-to-run-real-data)).
+
+All limma models output reuslts (including p-values) from `topTable`
+testing all levels (minus 1) against the intercept. This can be changed
+with `out.anova`.
+
+DESeq2 is set to run Log Ratio Test (LRT) and is thus testing all levels
+of the `predictor` in one go.
+
+EdgeR is set to test if all levels of `predcitor` (minus intercept) are
+zero.
 
 ### *If you have a paired/blocked experimental design:*
 
@@ -223,6 +246,16 @@ ANCOM use the `paired` variable in a repeated measures manner
 ### *If you have non-relative abundances, e.g. for normalized protein abundance:*
 
     mytest <- testDA(data, predictor, relative = FALSE)
+
+If `relative=FALSE` the values in `data` will NOT be normalized by the
+sum of the samples for "ttt", "ltt", "ltt2", "wil", "per", "lrm", "llm",
+"llm2", "lim", "lli", "lli2", "pea", "spe", "aov", "lao", "lao2" and
+"kru", and there will NOT be an offset of log(librarySize) for "neb",
+"poi", "qpo", "zpo" and "znb". Furthermore, tests that are specifically
+designed to handle the problem of compositionality are turned off, e.g.
+DESeq2, EdgeR, MetagenomeSeq, ANCOM, RAIDA, ALDEx2 and baySeq.
+Therefore, the `data` is analysed as provided, except for the tests that
+log-transform the data: "ltt", "llm", "lli" and "lao".
 
 ### *If you have covariates:*
 
@@ -261,9 +294,9 @@ This will plot p-value histograms for all the non-spiked features:
 This distribution should theoretically be uniform (flat) (except for the
 permutation test due its time-saving algorithm). Multiple-correction
 methods for controlling the false discovery rate, e.g. "fdr" / "BH",
-assume a uniform distribution, and will not work properly if the p-value
-distribution deviates greatly from uniform. The calculations of AUC does
-not take this fact into account.
+assume a uniform distribution (given all null hypotheses are true), and
+will not work properly if the p-value distribution deviates greatly from
+uniform. The calculations of AUC does not take this fact into account.
 
 Check out [this nice
 blog](http://varianceexplained.org/statistics/interpreting-pvalue-histogram/)
@@ -402,9 +435,6 @@ Implemented methods
 Either add it yourself [(see under 'Extra features')](#extra-features),
 or write to me, preferably with a code snippet of the implementation
 (see email in Description).
-
-All count models (Poisson and Negative Binomial) use log(LibrarySize) as
-offset if `relative` is TRUE, but use no offset if `relative` is FALSE.
 
 -   per - [Permutation test with user defined test
     statistic](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8)
