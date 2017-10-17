@@ -244,7 +244,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
 
   # Run the tests in parallel
   results <- foreach(i = tests.par , .options.snow = opts) %dopar% {
-    
+
     t1.sub <- proc.time()
     
     # Extract run info
@@ -385,15 +385,18 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
         if(min.sig == Inf) min.sig <- max(samdf$Score)+1
         samdf$pval <- 1/samdf$Score * 0.05/(1/min.sig)
       } else {
-        suppressWarnings(min.up <- min(samdf[samdf$Sig.up == "Yes","Score"]))
-        suppressWarnings(max.lo <- max(samdf[samdf$Sig.lo == "Yes","Score"]))
-        if(min.up == Inf) min.up <- max(samdf$Score)+1
-        if(max.lo == -Inf) max.lo <- min(samdf$Score)-1
-        sam.inv.up <- 1/samdf$Score * 0.05/(1/min.up)
-        sam.inv.lo <- 1/samdf$Score * 0.05/(1/max.lo)
-        samdf$pval <- apply(cbind(sam.inv.up,sam.inv.lo),1,max)
+        samdf$ScoreRank <- rank(samdf$Score)
+        suppressWarnings(min.up <- min(samdf[samdf$Sig.up == "Yes","ScoreRank"]))
+        suppressWarnings(max.lo <- max(samdf[samdf$Sig.lo == "Yes","ScoreRank"]))
+        if(effectSize >= 1){
+          if(min.up == Inf) min.up <- max(samdf$ScoreRank)+1
+          samdf$pval <- 1/samdf$ScoreRank * 0.05/(1/min.up)
+        } 
+        if(effectSize < 1){
+          if(max.lo == -Inf) max.lo <- 0.5
+          samdf$pval <- samdf$ScoreRank * 0.05/max.lo
+        } 
       }
-      
       samdf$pval.adj <- samdf$pval
       res.sub[paste0(r,"_","sam")] <- NULL
       res.names <- names(res.sub)

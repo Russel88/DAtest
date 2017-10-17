@@ -252,10 +252,10 @@ sum of the samples for "ttt", "ltt", "ltt2", "wil", "per", "lrm", "llm",
 "llm2", "lim", "lli", "lli2", "pea", "spe", "aov", "lao", "lao2" and
 "kru", and there will NOT be an offset of log(librarySize) for "neb",
 "poi", "qpo", "zpo" and "znb". Furthermore, tests that are specifically
-designed to handle the problem of compositionality are turned off, e.g.
-DESeq2, EdgeR, MetagenomeSeq, ANCOM, RAIDA, ALDEx2 and baySeq.
-Therefore, the `data` is analysed as provided, except for the tests that
-log-transform the data: "ltt", "llm", "lli" and "lao".
+designed to handle sequence data are turned off: DESeq2, EdgeR,
+MetagenomeSeq, ANCOM, RAIDA, ALDEx2 and baySeq. Therefore, the `data` is
+analysed as provided, except for the tests that log-transform the data:
+"ltt", "llm", "lli" and "lao".
 
 ### *If you have covariates:*
 
@@ -284,24 +284,6 @@ the same order as columns in `data`):
     # Average run times of each method:
     mytest$run.times
 
-It is advised to also choose a method based on the p-value histograms of
-the methods. Many methods will likely have almost similar AUCs, and
-looking at the p-value histograms can help to differentiate the methods.
-This will plot p-value histograms for all the non-spiked features:
-
-    plot(mytest, p = TRUE)
-
-This distribution should theoretically be uniform (flat) (except for the
-permutation test due its time-saving algorithm). Multiple-correction
-methods for controlling the false discovery rate, e.g. "fdr" / "BH",
-assume a uniform distribution (given all null hypotheses are true), and
-will not work properly if the p-value distribution deviates greatly from
-uniform. The calculations of AUC does not take this fact into account.
-
-Check out [this nice
-blog](http://varianceexplained.org/statistics/interpreting-pvalue-histogram/)
-if you want to know more on how to interpret these histograms.
-
 **Note:**
 
 As ANCOM and SAMseq do not output p-values, AUC and Spike.detect.rate
@@ -311,13 +293,14 @@ detection/significance calling: Pseudo p-value = the inverse
 statistic/score, normalized such that, of the detected ("significant")
 features, the feature with the lowest statistic/score has a pseudo
 p-value = 0.05. Higher statistic/score gives lower pseudo p-value and
-vice versa. For SAMseq it is done seperately on the positive and
-negative scores. FPR is also based on pseudo p-values for "anc" and
-"sam", but as these cannot be adjusted as nominal p-values, FPR for
-these methods is the final false discovery rate and we should expect an
-FPR = 0 for these two methods, unless you are willing to accept some
-false positives. This can be tuned with the `sig` ("anc") and
-`fdr.output` ("sam") arguments.
+vice versa. For SAMseq, it is done on the ranked scores, and if
+effectSize is below 1 the scores are not inversed such that high
+negative scores gives low pseudo p-values. FPR is also based on pseudo
+p-values for "anc" and "sam", but as these cannot be adjusted as nominal
+p-values, FPR for these methods is the final false discovery rate and we
+should expect an FPR = 0 for these two methods, unless you are willing
+to accept some false positives. This can be tuned with the `sig` ("anc")
+and `fdr.output` ("sam") arguments.
 
 P-values for baySeq are defined as 1 - posterior likelihoods.
 
@@ -610,6 +593,10 @@ argument, it will try to run a t-test and fail miserably.
 #### See the output from the individual methods. E.g. "ere" first run:
 
     View(mytest$results[[1]]["ere"])
+
+#### Plot p-value histograms for all the non-spiked features:
+
+    plot(mytest, p = TRUE)
 
 ### Passing arguments to the different tests
 
