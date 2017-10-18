@@ -25,64 +25,58 @@ DA.sam <- function(data, predictor, paired = NULL, fdr.output = 0.05, allResults
   }
 
   library(samr)
-  res <- NULL
+  on.exit(detach("package:samr", unload = TRUE))
   if(is.numeric(predictor)){
     # Quantitative
-    res <- tryCatch(samr::SAMseq(count_table, predictor, resp.type = "Quantitative", genenames = rownames(count_table), fdr.output = fdr.output, ...),error = function(e) NULL)
+    res <- samr::SAMseq(count_table, predictor, resp.type = "Quantitative", genenames = rownames(count_table), fdr.output = fdr.output, ...)
   } else {
     # Categorical
     predictor <- as.numeric(as.factor(predictor))
     
     if(length(levels(as.factor(predictor))) == 2){
       if(is.null(paired)){
-        res <- tryCatch(samr::SAMseq(count_table, predictor, resp.type = "Two class unpaired", genenames = rownames(count_table), fdr.output = fdr.output, ...),error = function(e) NULL)
+        res <- samr::SAMseq(count_table, predictor, resp.type = "Two class unpaired", genenames = rownames(count_table), fdr.output = fdr.output, ...)
       } else {
         predictor[predictor == 2] <- -1
         predictor <- as.numeric(as.factor(paired)) * predictor
-        res <- tryCatch(samr::SAMseq(count_table, predictor, resp.type = "Two class paired", genenames = rownames(count_table), fdr.output = fdr.output, ...),error = function(e) NULL)
+        res <- samr::SAMseq(count_table, predictor, resp.type = "Two class paired", genenames = rownames(count_table), fdr.output = fdr.output, ...)
       }
     } else {
-      res <- tryCatch(samr::SAMseq(count_table, predictor, resp.type = "Multiclass", genenames = rownames(count_table), fdr.output = fdr.output, ...),error = function(e) NULL)
+      res <- samr::SAMseq(count_table, predictor, resp.type = "Multiclass", genenames = rownames(count_table), fdr.output = fdr.output, ...)
     }
   }
-  detach("package:samr", unload = TRUE)
   
-  if(!is.null(res)){
-    if(res$samr.obj$resp.type == "Multiclass"){
+  if(res$samr.obj$resp.type == "Multiclass"){
+    df <- data.frame(Feature = rownames(count_table),
+                     Score = res$samr.obj$tt,
+                     Sig = factor("No",levels = c("No","Yes")))
+    tryCatch(df[df$Feature %in% as.matrix(res$siggenes.table$genes.up)[,1],"Sig"] <- "Yes",error = function(e) NULL)
+    cont <- as.data.frame(res$samr.obj$stand.contrasts)
+    colnames(cont) <- paste("Contrast",colnames(cont))
+    df <- cbind(df,cont)
+  } else {
+    if(res$samr.obj$resp.type == "Quantitative"){
       df <- data.frame(Feature = rownames(count_table),
                        Score = res$samr.obj$tt,
-                       Sig = factor("No",levels = c("No","Yes")))
-      tryCatch(df[df$Feature %in% as.matrix(res$siggenes.table$genes.up)[,1],"Sig"] <- "Yes",error = function(e) NULL)
-      cont <- as.data.frame(res$samr.obj$stand.contrasts)
-      colnames(cont) <- paste("Contrast",colnames(cont))
-      df <- cbind(df,cont)
+                       Sig.up = factor("No",levels = c("No","Yes")),
+                       Sig.lo = factor("No",levels = c("No","Yes")))
+      tryCatch(df[df$Feature %in% as.matrix(res$siggenes.table$genes.up)[,1],"Sig.up"] <- "Yes",error = function(e) NULL)
+      tryCatch(df[df$Feature %in% as.matrix(res$siggenes.table$genes.lo)[,1],"Sig.lo"] <- "Yes",error = function(e) NULL)
     } else {
-      if(res$samr.obj$resp.type == "Quantitative"){
-        df <- data.frame(Feature = rownames(count_table),
-                         Score = res$samr.obj$tt,
-                         Sig.up = factor("No",levels = c("No","Yes")),
-                         Sig.lo = factor("No",levels = c("No","Yes")))
-        tryCatch(df[df$Feature %in% as.matrix(res$siggenes.table$genes.up)[,1],"Sig.up"] <- "Yes",error = function(e) NULL)
-        tryCatch(df[df$Feature %in% as.matrix(res$siggenes.table$genes.lo)[,1],"Sig.lo"] <- "Yes",error = function(e) NULL)
-      } else {
-        df <- data.frame(Feature = rownames(count_table),
-                         Score = res$samr.obj$tt,
-                         Fold.change = res$samr.obj$foldchange,
-                         Sig.up = factor("No",levels = c("No","Yes")),
-                         Sig.lo = factor("No",levels = c("No","Yes")))
-        tryCatch(df[df$Feature %in% as.matrix(res$siggenes.table$genes.up)[,1],"Sig.up"] <- "Yes",error = function(e) NULL)
-        tryCatch(df[df$Feature %in% as.matrix(res$siggenes.table$genes.lo)[,1],"Sig.lo"] <- "Yes",error = function(e) NULL)
-      }
+      df <- data.frame(Feature = rownames(count_table),
+                       Score = res$samr.obj$tt,
+                       Fold.change = res$samr.obj$foldchange,
+                       Sig.up = factor("No",levels = c("No","Yes")),
+                       Sig.lo = factor("No",levels = c("No","Yes")))
+      tryCatch(df[df$Feature %in% as.matrix(res$siggenes.table$genes.up)[,1],"Sig.up"] <- "Yes",error = function(e) NULL)
+      tryCatch(df[df$Feature %in% as.matrix(res$siggenes.table$genes.lo)[,1],"Sig.lo"] <- "Yes",error = function(e) NULL)
     }
-    
-    df$Method <- "SAMseq (sam)"
-    
-    if(class(data) == "phyloseq") df <- add.tax.DA(data, df)
-    
-  } else {
-    df <- NULL
   }
-
+  
+  df$Method <- "SAMseq (sam)"
+  
+  if(class(data) == "phyloseq") df <- add.tax.DA(data, df)
+  
   if(allResults){
     return(res)
   } else {
