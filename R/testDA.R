@@ -15,6 +15,7 @@
 #' @param args List. A list with lists of arguments passed to the different methods. See details for more.
 #' @param out.anova If TRUE (default) linear models will output results and p-values from anova/drop1. If FALSE will output results for 2. level of the predictor.
 #' @param core.check If TRUE will make an interactive check that the amount of cores specified are desired. Only if cores>10. This is to ensure that the function doesn't automatically overloads a server with workers.  
+#' @param verbose If TRUE will print informative messages
 #' @details Currently implemented methods:
 #' \itemize{
 #'  \item per - Permutation test with user defined test statistic
@@ -117,7 +118,7 @@
 #' @importFrom pROC roc
 #' @export
 
-testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests = c("sam","qua","fri","zpo","znb","vli","qpo","poi","pea","neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","erq2","ere","ere2","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 2, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, args = list(), out.anova = TRUE, core.check = TRUE){
+testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests = c("sam","qua","fri","zpo","znb","vli","qpo","poi","pea","neb","rai","per","bay","adx","wil","ttt","ltt","ltt2","erq","erq2","ere","ere2","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 2, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, args = list(), out.anova = TRUE, core.check = TRUE, verbose = TRUE){
 
   stopifnot(exists("data"),exists("predictor"))
   # Check for servers
@@ -170,17 +171,19 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   tests.par <- paste0(unlist(lapply(1:R, function(x) rep(x,length(tests)))),"_",rep(tests,R))
   
   # Run time warnings
-  if("neb" %in% tests & !is.null(paired)){
-    message("As 'neb' is included and a 'paired' variable is supplied, this might take a long time")
-  } else {
-    if("anc" %in% tests){
-      message("As 'anc' is included, this might take some time")
+  if(verbose){
+    if("neb" %in% tests & !is.null(paired)){
+      message("As 'neb' is included and a 'paired' variable is supplied, this might take a long time")
+    } else {
+      if("anc" %in% tests){
+        message("As 'anc' is included, this might take some time")
+      }
     }
   }
-  
+
   # Set seed
   set.seed(rng.seed)
-  message(paste("Seed is set to",rng.seed))
+  if(verbose) message(paste("Seed is set to",rng.seed))
 
   # Create some random seeds for each run
   seeds <- rpois(R, lambda = (1:R)*1e6)
@@ -193,25 +196,26 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   if(sum(k) == nrow(count_table)) stop("Set to spike all features. Can't calculate FPR or AUC. Change k argument")
   if(sum(k) > nrow(count_table)) stop("Set to spike more features than are present in the data. Change k argument")
   
-  # Numeric predictor
+  # predictor
   if(is.numeric(predictor[1])){
     num.pred <- TRUE
-    message("predictor is assumed to be a quantitative variable")
+    if(verbose) message("predictor is assumed to be a quantitative variable")
     if(length(levels(as.factor(predictor))) == 2){
       ANSWER <- readline("The predictor is quantitative, but only contains 2 unique values. Are you sure this is correct? Enter y to proceed ")
       if(ANSWER != "y") stop("Wrap the predictor with as.factor(predictor) to treat it is a categorical variable")
     }
   } else {
     num.pred <- FALSE
+    if(verbose) message(paste("predictor is assumed to be a categorical variable with",length(unique(predictor)),"levels:",paste(unique(predictor),collapse = ", ")))
   }
   
   # Covars
   if(!is.null(covars)){
     for(i in 1:length(covars)){
       if(is.numeric(covars[[i]][1])){
-        message(paste(names(covars)[i],"is assumed to be a quantitative variable"))
+        if(verbose) message(paste(names(covars)[i],"is assumed to be a quantitative variable"))
       } else {
-        message(paste(names(covars)[i],"is assumed to be a categorical variable"))
+        if(verbose) message(paste(names(covars)[i],"is assumed to be a categorical variable with",length(unique(covars[[i]])),"levels:",paste(unique(covars[[i]]),collapse = ", ")))
       }
     }
   }
@@ -268,7 +272,10 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
     if(!is.na(pmatch("zzz",i))){
       zzz.args <- get(paste0(i,".args"))
       i <- "zzz"
+      on.exit(suppressWarnings(rm(list=zzz.args, pos = 1)), add = TRUE)
     } 
+
+    on.exit(suppressWarnings(rm(list=test.args, pos = 1)), add = TRUE)
     
     # Run tests
     res.sub <- tryCatch(switch(i,

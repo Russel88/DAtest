@@ -8,7 +8,7 @@
 
 DA.adx <- function(data, predictor, p.adj = "fdr", ...){
   
-  library(ALDEx2)
+  suppressMessages(library(ALDEx2))
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){

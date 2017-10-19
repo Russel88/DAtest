@@ -11,7 +11,7 @@
 
 DA.msf <- function(data, predictor, p.adj = "fdr", allResults = FALSE, ...){
 
-  library(metagenomeSeq)
+  suppressMessages(library(metagenomeSeq))
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){

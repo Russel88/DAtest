@@ -11,7 +11,7 @@
 
 DA.bay <- function(data, predictor, p.adj = "fdr", allResults = FALSE, ...){
   
-  library(baySeq)
+  suppressMessages(library(baySeq))
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){

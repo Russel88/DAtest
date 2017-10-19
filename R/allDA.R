@@ -157,13 +157,15 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("sam"
   if(sum(rowSums(count_table) == 0) != 0) message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
   count_table <- count_table[rowSums(count_table) > 0,]
   
-  # Numeric predictor
+  # predictor
   if(is.numeric(predictor[1])){
     message("predictor is assumed to be a quantitative variable")
     if(levels(as.factor(predictor)) == 2){
       ANSWER <- readline("The predictor is quantitative, but only contains 2 unique values. Are you sure this is correct? Enter y to proceed ")
       if(ANSWER != "y") stop("Wrap the predictor with as.factor(predictor) to treat it is a categorical variable")
     }
+  } else {
+    message(paste("predictor is assumed to be a categorical variable with",length(unique(predictor)),"levels:",paste(unique(predictor),collapse = ", ")))
   }
 
   # Covars
@@ -172,7 +174,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("sam"
       if(is.numeric(covars[[i]][1])){
         message(paste(names(covars)[i],"is assumed to be a quantitative variable"))
       } else {
-        message(paste(names(covars)[i],"is assumed to be a categorical variable"))
+        message(paste(names(covars)[i],"is assumed to be a categorical variable with",length(unique(covars[[i]])),"levels:",paste(unique(covars[[i]]),collapse = ", ")))
       }
     }
   }

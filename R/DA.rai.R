@@ -7,7 +7,7 @@
 
 DA.rai <- function(data, predictor, p.adj = "fdr", ...){
   
-  library(RAIDA)
+  suppressMessages(library(RAIDA))
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){

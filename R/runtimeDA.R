@@ -18,9 +18,9 @@
 #' @return A data.frame if print.res is FALSE
 #' @importFrom parallel detectCores
 #' @export
-runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples = c(500,1000,1500,2000,2500), subsamples.slow = c(100,200,300,400,500), 
-                      tests =  c("ds2","sam", "qua", "fri", "vli", "qpo", "poi", "pea", "wil", "ttt", "ltt", "ltt2", "erq", "erq2","ere", "ere2", "msf", "zig", "lim", "lli", "lli2", "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe"), 
-                      tests.slow = c("neb", "bay", "per", "zpo", "znb", "rai", "adx"), R = 10, cores = (detectCores()-1), print.res = TRUE, ...){
+runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples = c(500,1000,1500,2000), subsamples.slow = c(50,100,150,200), 
+                      tests =  c("sam", "qua", "fri", "vli", "qpo", "pea", "wil", "ttt", "ltt", "ltt2","ere", "ere2", "msf", "zig", "lim", "lli", "lli2", "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe"), 
+                      tests.slow = c("neb", "bay", "per", "zpo", "znb", "rai", "adx", "ds2", "poi", "erq", "erq2"), R = 10, cores = (detectCores()-1), print.res = TRUE, ...){
   
   stopifnot(exists("data"),exists("predictor"))
 
@@ -56,11 +56,35 @@ runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples 
   if(sum(rowSums(count_table) == 0) != 0) message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
   count_table <- count_table[rowSums(count_table) > 0,]
   
+  # Trim for small datasets
+  subsamples <- subsamples[subsamples <= nrow(count_table)]
+  subsamples.slow <- subsamples.slow[subsamples.slow <= nrow(count_table)]
+  if(length(subsamples) < 2) stop("At least two subsamples are needed to estimate runtime")
+  if(length(subsamples.slow) < 2) stop("At least two subsamples are needed to estimate runtime")
+  
+  # predictor
+  if(is.numeric(predictor[1])){
+    message("predictor is assumed to be a quantitative variable")
+  } else {
+    message(paste("predictor is assumed to be a categorical variable with",length(unique(predictor)),"levels:",paste(unique(predictor),collapse = ", ")))
+  }
+  
+  # Covars
+  if(!is.null(covars)){
+    for(i in 1:length(covars)){
+      if(is.numeric(covars[[i]][1])){
+        message(paste(names(covars)[i],"is assumed to be a quantitative variable"))
+      } else {
+        message(paste(names(covars)[i],"is assumed to be a categorical variable with",length(unique(covars[[i]])),"levels:",paste(unique(covars[[i]]),collapse = ", ")))
+      }
+    }
+  }
+  
   # Run subsets fast
   message("Running fast methods")
   test.list <- list()
   for(i in 1:length(subsamples)){
-    
+    cat(paste("\n",subsamples[i],"features"),fill = TRUE)
     # Subset and ensure that no samples are empty
     j <- 0
     while(j == 0){
@@ -69,7 +93,7 @@ runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples 
     }
     
     # Run test
-    sub.test <- testDA(sub, predictor, paired, covars, R = 1, tests = tests, cores = cores, core.check = FALSE, ...)
+    sub.test <- testDA(sub, predictor, paired, covars, R = 1, tests = tests, cores = cores, core.check = FALSE, verbose = FALSE, ...)
     test.list[[i]] <- sub.test
   }
 
@@ -77,7 +101,7 @@ runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples 
   message("Running slow methods")
   test.slow.list <- list()
   for(i in 1:length(subsamples.slow)){
-    
+    cat(paste("\n",subsamples.slow[i],"features"),fill = TRUE)
     # Subset and ensure that no samples are empty
     j <- 0
     while(j == 0){
@@ -86,7 +110,7 @@ runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples 
     }
     
     # Run test
-    sub.test <- testDA(sub, predictor, paired, covars, R = 1, tests = tests.slow, cores = cores, core.check = FALSE, ...)
+    sub.test <- testDA(sub, predictor, paired, covars, R = 1, tests = tests.slow, cores = cores, core.check = FALSE, verbose = FALSE)
     test.slow.list[[i]] <- sub.test
   }
   
@@ -95,12 +119,12 @@ runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples 
   
   # Extrapolate
   runtimes <- lapply(tests.list, function(x) x$run.times)
-  runtimes <- lapply(1:length(runtimes), function(x) cbind(runtimes[[x]],subsamps[[x]]))
+  runtimes <- lapply(1:length(runtimes), function(x) cbind(runtimes[[x]],subsamps[[x]],rownames(runtimes[[x]])))
   runtimes <- do.call(rbind,runtimes)
+  colnames(runtimes) <- c("Minutes","SubSamp","Test")
   
   # Which tests have been run
-  all.tests <- unique(rownames(runtimes))
-  all.tests <- names(table(rownames(runtimes))[table(rownames(runtimes))>1])
+  all.tests <- names(table(runtimes$Test)[table(runtimes$Test)>1])
   
   # Collect data
   extra <- data.frame(Test = all.tests,
@@ -109,14 +133,14 @@ runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples 
   colnames(extra)[3] <- paste0(colnames(extra[3]),"R=",R)
   
   for(i in all.tests){
-    extra.sub <- runtimes[rownames(runtimes) == i,]
+    extra.sub <- runtimes[runtimes$Test == i,]
     if(i %in% c("anc","bay")){
-      fit <- lm(Minutes ~ poly(V2,2), data = as.data.frame(extra.sub))
+      fit <- lm(Minutes ~ poly(SubSamp,2), data = as.data.frame(extra.sub))
     } else {
-      fit <- lm(Minutes ~ V2, data = as.data.frame(extra.sub))
+      fit <- lm(Minutes ~ SubSamp, data = as.data.frame(extra.sub))
     }
-    extra[extra$Test == i,2] <- round(predict(fit, newdata = data.frame(V2 = nrow(count_table))),2)
-    extra[extra$Test == i,3] <- round(predict(fit, newdata = data.frame(V2 = nrow(count_table)))*R,2)
+    extra[extra$Test == i,2] <- round(predict(fit, newdata = data.frame(SubSamp = nrow(count_table))),2)
+    extra[extra$Test == i,3] <- round(predict(fit, newdata = data.frame(SubSamp = nrow(count_table)))*R,2)
   }
   
   extra[extra[,2] < 0,"Minutes"] <- 0

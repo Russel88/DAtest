@@ -16,8 +16,7 @@
 
 DA.lim <- function(data, predictor, paired = NULL, covars = NULL, relative = TRUE, out.anova = TRUE, p.adj = "fdr", allResults = FALSE, ...){
   
-  library(limma)
-  library(statmod)
+  suppressMessages(library(limma))
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){

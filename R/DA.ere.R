@@ -10,7 +10,7 @@
 
 DA.ere <- function(data, predictor, p.adj = "fdr", ...){
   
- library(edgeR)
+  suppressMessages(library(edgeR))
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){

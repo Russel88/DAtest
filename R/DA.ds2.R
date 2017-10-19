@@ -14,7 +14,7 @@
 
 DA.ds2 <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", allResults = FALSE, ...){
   
-  library(DESeq2)
+  suppressMessages(library(DESeq2))
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){

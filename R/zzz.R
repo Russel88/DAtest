@@ -1,5 +1,5 @@
 
 .onLoad <- function(libname, pkgname){
-  message("DAtest version 2.6.4")
+  message("DAtest version 2.6.5")
 }
 

@@ -15,9 +15,8 @@
 
 DA.vli <- function(data, predictor, paired = NULL, covars = NULL, out.anova = TRUE, p.adj = "fdr", allResults = FALSE, ...){
   
-  library(limma)
-  library(statmod)
-  
+  suppressMessages(library(limma))
+
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
     if(length(predictor) > 1 | length(paired) > 1) stop("When data is a phyloseq object predictor and paired should only contain the name of the variables in sample_data")

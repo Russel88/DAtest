@@ -9,7 +9,7 @@
 
 DA.anc <- function(data, predictor, paired = NULL, allResults = FALSE, ...){
   
-  library(ancom.R, quietly = TRUE)
+  suppressMessages(library(ancom.R, quietly = TRUE))
 
   # Extract from phyloseq
   if(class(data) == "phyloseq"){

@@ -24,7 +24,7 @@ DA.sam <- function(data, predictor, paired = NULL, fdr.output = 0.05, allResults
     count_table <- data
   }
 
-  library(samr)
+  suppressMessages(library(samr))
   on.exit(detach("package:samr", unload = TRUE))
   if(is.numeric(predictor)){
     # Quantitative

@@ -11,7 +11,7 @@
 
 DA.erq <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", allResults = FALSE, ...){
   
-  library(edgeR)
+  suppressMessages(library(edgeR))
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){

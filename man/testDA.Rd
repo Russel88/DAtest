@@ -10,7 +10,8 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
   "ere", "ere2", "msf", "zig", "ds2", "lim", "lli", "lli2", "aov", "lao",
   "lao2", "kru", "lrm", "llm", "llm2", "spe"), relative = TRUE,
   effectSize = 2, k = c(5, 5, 5), cores = (detectCores() - 1),
-  rng.seed = 123, args = list(), out.anova = TRUE, core.check = TRUE)
+  rng.seed = 123, args = list(), out.anova = TRUE, core.check = TRUE,
+  verbose = TRUE)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
@@ -40,6 +41,8 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
 \item{out.anova}{If TRUE (default) linear models will output results and p-values from anova/drop1. If FALSE will output results for 2. level of the predictor.}
 
 \item{core.check}{If TRUE will make an interactive check that the amount of cores specified are desired. Only if cores>10. This is to ensure that the function doesn't automatically overloads a server with workers.}
+
+\item{verbose}{If TRUE will print informative messages}
 }
 \value{
 An object of class DA, which contains a list of results:

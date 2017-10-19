@@ -15,7 +15,7 @@
 
 DA.zig <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", by = 2, eff = 0, allResults = FALSE, ...){
   
-  library(metagenomeSeq)
+  suppressMessages(library(metagenomeSeq))
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){

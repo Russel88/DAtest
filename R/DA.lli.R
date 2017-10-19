@@ -13,12 +13,12 @@
 #' @param delta Numeric. Pseudocount for log transformation. Default 1
 #' @param allResults If TRUE will return raw results from the eBayes function
 #' @param ... Additional arguments for the eBayes and lmFit functions
+#' @import statmod
 #' @export
 
 DA.lli <- function(data, predictor, paired = NULL, covars = NULL, relative = TRUE, out.anova = TRUE, p.adj = "fdr", delta = 1, allResults = FALSE,  ...){
   
-  library(limma)
-  library(statmod)
+  suppressMessages(library(limma))
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
