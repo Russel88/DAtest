@@ -218,7 +218,10 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("sam"
     if(!is.na(pmatch("zzz",i))){
       zzz.args <- get(paste0(i,".args"))
       i <- "zzz"
+      on.exit(suppressWarnings(rm(list=zzz.args, pos = 1)), add = TRUE)
     } 
+    
+    on.exit(suppressWarnings(rm(list=test.args, pos = 1)), add = TRUE)
     
     res.sub <- tryCatch(switch(i,
                                zzz = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars, p.adj),zzz.args)),
