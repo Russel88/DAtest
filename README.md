@@ -114,16 +114,40 @@ The following are suggested, but not needed:
 How to compare methods
 ======================
 
-First, all methods with a "False Positive Rate" (FPR) above ~0.05 has an
-inflated false positive rate, and the p-values can therefore not be
-trusted.
+Methods are compared with "False Positve Rate" (FPR), "Area Under the
+(Receiver Operator) Curve" (AUC), and potentially also "Spike Detection
+Rate" (Spike.detect.rate).
 
-Second, among methods with a low FPR, those with a high "Area Under the
-(Receiver Operator) Curve" (AUC) and "Spike Detection Rate"
-(Spike.detect.rate) are likely to have more power to detect signal in
-the respective dataset.
+By shuffling the predictor variable and spiking a subset of the
+features, we know a priori which features should be siginificant (the
+spiked features) and which features shouldn't (the non-spiked features).
 
-Therefore, we want a method with a FPR ~0.05 or lower and a high AUC.
+FPR indicates the proportion of non-spiked features that were found to
+be significant (raw p-value below 0.05). With randomly generated data
+the p-value distribution should be uniform (flat) and 5% of the raw
+p-values are expected to be below 0.05. We therefore want an FPR at 0.05
+or lower.
+
+AUC is estimated by ranking all features by their respective p-value,
+and finding the area under the ROC curve. For a good method p-values
+from the spiked features should be among the lowest. For a perfect
+method, with AUC = 1, all the lowest p-values are spiked features. An
+AUC of 0.5 means that p-values from the spiked features are randomly
+spread across the spectrum. An AUC below 0.5 means that p-values from
+spiked features in general are *higher* than for non-spiked features.
+Therefore, we want an AUC as high as possible; spiked features should
+have low p-values.
+
+Spike.detect.rate is the proportion of spiked features that are
+significant after multiple correction of the p-values. It is therefore
+the proportion of features you would expect to detect in a regular
+analysis. The higher Spike.detect.rate, the better.
+
+-   The intended workflow for choosing a method is:
+    -   Omit methods with FPR significantly higher than 0.05
+    -   Of remaining methods, choose the one with highest AUC
+    -   If several methods have very similar AUCs, the Spike.detect.rate
+        can be used to differentiate among the methods
 
 ### **Run the test:**
 
@@ -142,9 +166,20 @@ only the second level is spiked.
 
 `predictor` can also be continuous/quantitative
 
+**Important:** If `predictor` is numeric it will be treated as a
+quantitative variable in the analyses. Therefore, if you, for example,
+have two groups of samples and call the groups 0 and 1, it will be
+treated as a quantitative variable and it will not run t-test,
+wilcoxon-test, and others dedicated for two-class predictors. Write
+`predictor` as `as.factor(predictor)` to treat it as a categorical
+variable. The `testDA` function will produce a message telling you how
+the `predictor` is read - Make sure this fits your expectations!
+
 `R` denotes how many times the spike-in and FPR/AUC calculation should
 be replicated. It is advised to use at least 10, but it can be set to 1
 for a fast test of the function.
+
+A subset of methods can be run by setting the `tests` argument.
 
 #### **The function automatically uses multiple CPUs for fast execution**
 
@@ -152,29 +187,30 @@ The methods run in parallel, and by default the number of cores used is
 one less than available. It has been tested to work on Windows, OS X and
 Linux Debian. It can be changed with the `cores` argument. `cores = 1`
 will turn off parallel computing. If the function is terminated before
-ending you might get the following warning:
+ending you might get the following warning, which can safely be ignored:
 
     closing unused connection X (...)
 
-This can safely be ignored, but if you have terminated the function
-before it ended and your computer runs slow, you might want to restart R
-to close all connections.
+But if you have terminated the function before it ended and your
+computer runs slow, you might want to restart R to close all
+connections.
 
 If you run out of memory/RAM, reduce the number of cores used for
 computing.
 
-### *If you have a lot of features; i.e. more than 10k*
+### *If you have more than 10k features (or 2k for paired analysis):*
 
 Runtime of the different methods can vary quite a lot, and some methods
-are simply unfeasible for datasets with tenths of thousands of features.
+are simply unfeasible for datasets with several thousands of features.
 The `runtimeDA` function can estimate the runtime of the different
 methods on your dataset: It runs on small subsets of the data and then
 extrapolates the runtime from these subsets. It will not be super
-precise, but it should give a decent estimate. The function prints how
-many minutes it will take to run each method one time and `R` times. If
-you only use 1 core the actual runtime will be the sum of all the
-methods. With more cores the runtime will decrease and approach the
-runtime of the slowest method.
+precise if you have tenths of thousands of features or more, but it
+should give a decent estimate. The function prints how many minutes it
+will take to run each method one time and `R` times. If you only use 1
+core the actual runtime will be the sum of all the methods. With more
+cores the runtime will decrease and approach the runtime of the slowest
+method.
 
     runtimeDA(data, predictor)
 
@@ -184,11 +220,13 @@ There are generally two ways to output results with a categorical
 predictor with multiple levels; either there is one p-value indicating
 whether the categories are similar or different (e.g. in ANOVA), or
 there is one p-value for each level, often where the first level is set
-as intercept and the remaining levels are tested against the intercept.
-For some methods you can choose which option fits you, with other
-methods not, but it is crucial that this option is similar in the
-`testDA` function as in the final analysis (use the `out.anova`
-argument).
+as intercept and the remaining levels are tested against the intercept
+(e.g. in linear regression). For some methods you can choose which
+option fits you, with other methods not, but it is crucial that this
+option is similar in the `testDA` function as in the final analysis. Use
+the `out.anova` argument to set this.
+
+Below is a description of how the methods treat multi-class predictors:
 
 All linear models (also GLMs) output results (including p-values) from
 `anova`/`drop1` functions and are thus testing the `predictor` variable
@@ -203,12 +241,15 @@ analysis you can get an output with all p-values (See more
 
 All limma models output results (including p-values) from `topTable`
 testing all levels (minus 1) against the intercept. This can be changed
-with `out.anova`.
+with `out.anova`. `out.anova = FALSE` will output results from the 2.
+level of the predictor. In your final analysis you can set
+`allResults = TRUE` and use `topTable` on the output to get the desired
+results.
 
 DESeq2 is set to run Log Ratio Test (LRT) and is thus testing all levels
 of the `predictor` in one go.
 
-EdgeR is set to test if all levels of `predcitor` (minus intercept) are
+EdgeR is set to test if all levels of `predictor` (minus intercept) are
 zero.
 
 ### *If you have a paired/blocked experimental design:*
@@ -286,21 +327,15 @@ the same order as columns in `data`):
 
 **Note:**
 
-As ANCOM and SAMseq do not output p-values, AUC and Spike.detect.rate
-for "anc" and "sam" are based on pseudo p-values. They are calculated
-from the statistics/scores as these are perfectly ranked according to
-detection/significance calling: Pseudo p-value = the inverse
-statistic/score, normalized such that, of the detected ("significant")
-features, the feature with the lowest statistic/score has a pseudo
-p-value = 0.05. Higher statistic/score gives lower pseudo p-value and
-vice versa. For SAMseq, it is done on the ranked scores, and if
-effectSize is below 1 the scores are not inversed such that high
-negative scores gives low pseudo p-values. FPR is also based on pseudo
-p-values for "anc" and "sam", but as these cannot be adjusted as nominal
-p-values, FPR for these methods is the final false discovery rate and we
-should expect an FPR = 0 for these two methods, unless you are willing
-to accept some false positives. This can be tuned with the `sig` ("anc")
-and `fdr.output` ("sam") arguments.
+As ANCOM and SAMseq do not output p-values, AUC for "anc" and "sam" is
+based on pseudo p-values. They are calculated from the statistics/scores
+as these are perfectly ranked according to detection/significance
+calling. FPR is also based on pseudo p-values for "anc" and "sam", but
+as these cannot be adjusted as nominal p-values, FPR for these methods
+is the final false discovery rate and we should expect an FPR close to 0
+for these two methods, unless you are willing to accept some false
+positives. This can be tuned with the `sig`/`multcorr` ("anc") and
+`fdr.output` ("sam") arguments.
 
 P-values for baySeq are defined as 1 - posterior likelihoods.
 
@@ -399,16 +434,6 @@ are found by several methods.**
 
 A subset of methods can be run by setting the `tests` argument. E.g.
 only those performing well based on results from `testDA`.
-
-### How **NOT** to choose a method
-
-Choosing a method based on the results run from the real data, e.g. the
-one with most significant features or with the most *interesting*
-results, will most likely give you an inflated false positive rate, even
-though the method has a low FPR based on the `testDA` function. This is
-because `testDA` estimates FPR indpendently for each method, but if a
-method is non-randomly chosen from a set of methods they are no longer
-independent.
 
 Implemented methods
 ===================
