@@ -270,7 +270,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
     }
     
     if(!is.na(pmatch("zzz",i))){
-      zzz.args <- get(paste0(i,".DAargs"))
+      zzz.DAargs <- get(paste0(i,".DAargs"))
       i <- "zzz"
     } 
 
