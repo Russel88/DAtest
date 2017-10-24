@@ -7,10 +7,10 @@
 allDA(data, predictor, paired = NULL, covars = NULL, tests = c("sam",
   "qua", "fri", "znb", "zpo", "vli", "qpo", "poi", "pea", "spe", "per", "bay",
   "adx", "wil", "ttt", "ltt", "ltt2", "neb", "erq", "ere", "erq2", "ere2",
-  "msf", "zig", "ds2", "lim", "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2",
-  "rai"), relative = TRUE, cores = (detectCores() - 1), rng.seed = 123,
-  p.adj = "fdr", args = list(), out.anova = TRUE, alpha = 0.05,
-  core.check = TRUE)
+  "msf", "zig", "ds2", "lim", "lli", "lli2", "aov", "lao", "lao2", "kru", "lrm",
+  "llm", "llm2", "rai"), relative = TRUE, cores = (detectCores() - 1),
+  rng.seed = 123, p.adj = "fdr", args = list(), out.anova = TRUE,
+  alpha = 0.05, core.check = TRUE)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
