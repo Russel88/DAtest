@@ -20,13 +20,13 @@ DA.zzz <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
     }
     count_table <- otu_table(data)
     if(!taxa_are_rows(data)) count_table <- t(count_table)
-    predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
+    predictor <- unlist(sample_data(data)[,predictor])
     if(!is.null(paired)) paired <- suppressWarnings(as.factor(as.matrix(sample_data(data)[,paired])))
     if(!is.null(covars)){
       covars.n <- covars
       covars <- list()
       for(i in 1:length(covars.n)){
-        covars[[i]] <- suppressWarnings(as.matrix(sample_data(data)[,covars.n[i]]))
+        covars[[i]] <- unlist(sample_data(data)[,covars.n[i]])
       }
       names(covars) <- covars.n
     } 

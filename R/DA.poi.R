@@ -25,11 +25,11 @@ DA.poi <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
     }
     count_table <- otu_table(data)
     if(!taxa_are_rows(data)) count_table <- t(count_table)
-    predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
+    predictor <- unlist(sample_data(data)[,predictor])
     if(!is.null(paired)) paired <- suppressWarnings(as.factor(as.matrix(sample_data(data)[,paired])))
     if(!is.null(covars)){
       for(i in 1:length(covars)){
-        assign(covars[i], suppressWarnings(as.matrix(sample_data(data)[,covars[i]])))
+        assign(covars[i], unlist(sample_data(data)[,covars[i]]))
       }
     } 
   } else {

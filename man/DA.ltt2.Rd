@@ -5,9 +5,9 @@
 \title{Welch t-test}
 \usage{
 DA.ltt2(data, predictor, paired = NULL, p.adj = "fdr", delta = 0.001,
-  testStat = function(case, control) {     log((mean(case) + 1)/(mean(control)
-  + 1)) }, testStat.pair = function(case, control) {     mean(log((case +
-  1)/(control + 1))) }, allResults = FALSE, ...)
+  testStat = function(case, control) {     (mean(case)) - (mean(control)) },
+  testStat.pair = function(case, control) {     mean(case - control) },
+  allResults = FALSE, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -20,9 +20,9 @@ DA.ltt2(data, predictor, paired = NULL, p.adj = "fdr", delta = 0.001,
 
 \item{delta}{Numeric. Pseudocount for log transformation. Default 0.001}
 
-\item{testStat}{Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))}
+\item{testStat}{Function. Function for calculating fold change. Should take two vectors as arguments. Default is a mean(case abundances)-mean(control abundances)}
 
-\item{testStat.pair}{Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: mean(log((case abundances+1)/(control abundances+1)))}
+\item{testStat.pair}{Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: mean(case abundances - control abundances)}
 
 \item{allResults}{If TRUE will return raw results from the t.test function}
 

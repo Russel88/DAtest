@@ -6,13 +6,13 @@
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
 #' @param delta Numeric. Pseudocount for log transformation. Default 0.001
-#' @param testStat Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))
-#' @param testStat.pair Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: mean(log((case abundances+1)/(control abundances+1)))
+#' @param testStat Function. Function for calculating fold change. Should take two vectors as arguments. Default is a mean(case abundances)-mean(control abundances)
+#' @param testStat.pair Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: mean(case abundances - control abundances)
 #' @param allResults If TRUE will return raw results from the t.test function
 #' @param ... Additional arguments for the t.test function
 #' @export
 
-DA.ltt2 <- function(data, predictor, paired = NULL, p.adj = "fdr", delta = 0.001, testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))},allResults = FALSE, ...){
+DA.ltt2 <- function(data, predictor, paired = NULL, p.adj = "fdr", delta = 0.001, testStat = function(case, control){(mean(case))-(mean(control))}, testStat.pair = function(case, control){mean(case-control)},allResults = FALSE, ...){
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -23,7 +23,7 @@ DA.ltt2 <- function(data, predictor, paired = NULL, p.adj = "fdr", delta = 0.001
     }
     count_table <- otu_table(data)
     if(!taxa_are_rows(data)) count_table <- t(count_table)
-    predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
+    predictor <- unlist(sample_data(data)[,predictor])
     if(!is.null(paired)) paired <- suppressWarnings(as.factor(as.matrix(sample_data(data)[,paired])))
     } else {
     count_table <- data

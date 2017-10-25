@@ -422,11 +422,14 @@ are found by several methods.**
     # Run many methods:
     res.all <- allDA(data, predictor)
 
-    # Which features are detected by several methods:
-    View(res.all$table)
+    # Adjusted p-values from all methods (detection/no-detection from sam and anc)
+    res.all$adj
+
+    # Estimates/fold.changes from all methods which output anything relevant for this
+    res.all$est
 
     # Venn diagram of detected features from selected methods:
-    # This requires the venneuler package.
+    # This requires the venneuler package (See 'Errors and Issues' in this tutorial if you get an error with rJava package)
     vennDA(res.all, tests = c("wil","ttt","ltt"))
 
     # See results from a method (e.g. t.test "ttt"):

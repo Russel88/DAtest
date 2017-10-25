@@ -5,8 +5,8 @@
 \title{Estimate runtime of testDA on large datasets}
 \usage{
 runtimeDA(data, predictor, paired = NULL, covars = NULL,
-  subsamples = c(500, 1000, 1500, 2000), subsamples.slow = c(50, 100, 150,
-  200), tests = c("sam", "qua", "fri", "vli", "qpo", "pea", "wil", "ttt",
+  subsamples = c(500, 1000, 1500, 2000), subsamples.slow = c(100, 150, 200,
+  250), tests = c("sam", "qua", "fri", "vli", "qpo", "pea", "wil", "ttt",
   "ltt", "ltt2", "ere", "ere2", "msf", "zig", "lim", "lli", "lli2", "aov",
   "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe"), tests.slow = c("neb",
   "bay", "per", "zpo", "znb", "rai", "adx", "ds2", "poi", "erq", "erq2"),

@@ -21,10 +21,10 @@ DA.zpo <- function(data, predictor, covars = NULL, relative = TRUE, out.anova = 
     if(!predictor %in% sample_variables(data)) stop(paste(predictor,"is not present in sample_data(data)"))
     count_table <- otu_table(data)
     if(!taxa_are_rows(data)) count_table <- t(count_table)
-    predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
+    predictor <- unlist(sample_data(data)[,predictor])
     if(!is.null(covars)){
       for(i in 1:length(covars)){
-        assign(covars[i], suppressWarnings(as.matrix(sample_data(data)[,covars[i]])))
+        assign(covars[i], unlist(sample_data(data)[,covars[i]]))
       }
     } 
   } else {

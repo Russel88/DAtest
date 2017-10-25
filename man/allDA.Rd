@@ -42,7 +42,9 @@ allDA(data, predictor, paired = NULL, covars = NULL, tests = c("sam",
 \value{
 A list of results:
 \itemize{
- \item table - Summary of results
+ \item raw - A data.frame with raw p-values from all methods
+ \item adj - A data.frame with adjusted p-values from all methods (detection/no-detection from anc and sam)
+ \item est - A data.frame with estimates/fold.changes from all relevant methods
  \item results - A complete list of output from all the methods. Example: Get wilcoxon results from 2. run as such: $results[[2]]["wil"]
 }
 }

@@ -41,7 +41,7 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative){
   
   # Only include specific tests if predictor is numeric
   if(is.numeric(predictor)){
-    tests <- tests[tests %in% c("sam","znb","zpo","vli","qpo","poi","neb","erq","erq2","ds2","lim","lli","lli2","lrm","llm","llm2","spe","pea")]
+    tests <- tests[tests %in% c("sam","znb","zpo","vli","qpo","poi","neb","erq","erq2","lim","lli","lli2","lrm","llm","llm2","spe","pea")]
   } else {
     # Exclude if not numeric
     tests <- tests[!tests %in% c("spe","pea")]

@@ -20,7 +20,7 @@ DA.fri <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
     if(!paired %in% sample_variables(data)) stop(paste(paired,"is not present in sample_data(data)"))
     count_table <- otu_table(data)
     if(!taxa_are_rows(data)) count_table <- t(count_table)
-    predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
+    predictor <- unlist(sample_data(data)[,predictor])
     paired <- suppressWarnings(as.factor(as.matrix(sample_data(data)[,paired])))
   } else {
     count_table <- data

@@ -102,7 +102,9 @@
 #' }
 #' @return A list of results:
 #' \itemize{
-#'  \item table - Summary of results
+#'  \item raw - A data.frame with raw p-values from all methods
+#'  \item adj - A data.frame with adjusted p-values from all methods (detection/no-detection from anc and sam)
+#'  \item est - A data.frame with estimates/fold.changes from all relevant methods
 #'  \item results - A complete list of output from all the methods. Example: Get wilcoxon results from 2. run as such: $results[[2]]["wil"]
 #' }
 #' 
@@ -128,13 +130,13 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("sam"
     }
     count_table <- otu_table(data)
     if(!taxa_are_rows(data)) count_table <- t(count_table)
-    predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
+    predictor <- unlist(sample_data(data)[,predictor])
     if(!is.null(paired)) paired <- suppressWarnings(as.factor(as.matrix(sample_data(data)[,paired])))
     if(!is.null(covars)){
       covars.n <- covars
       covars <- list()
       for(i in 1:length(covars.n)){
-        covars[[i]] <- suppressWarnings(as.matrix(sample_data(data)[,covars.n[i]]))
+        covars[[i]] <- unlist(sample_data(data)[,covars.n[i]])
       }
       names(covars) <- covars.n
     } 
@@ -147,11 +149,12 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("sam"
   if(min(count_table) < 0) stop("Count_table contains negative values!")
   if(sum(colSums(count_table) == 0) > 0) stop("Some samples are empty!")
   if(ncol(count_table) != length(predictor)) stop("Number of samples in count_table does not match length of predictor")
-  if(length(levels(as.factor(predictor))) < 2) stop("predictor should have at least two levels")
+  if(length(unique(predictor)) < 2) stop("predictor should have at least two levels")
   
   # Prune tests argument
   tests <- unique(tests)
   if(!"zzz" %in% tests) tests <- prune.tests.DA(tests, predictor, paired, covars, relative)
+  if(length(tests) == 0) stop("No tests to run!")
   
   # Remove Features not present in any samples
   if(sum(rowSums(count_table) == 0) != 0) message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
@@ -160,12 +163,13 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("sam"
   # predictor
   if(is.numeric(predictor[1])){
     message("predictor is assumed to be a quantitative variable")
-    if(levels(as.factor(predictor)) == 2){
+    if(length(levels(as.factor(predictor))) == 2){
       ANSWER <- readline("The predictor is quantitative, but only contains 2 unique values. Are you sure this is correct? Enter y to proceed ")
       if(ANSWER != "y") stop("Wrap the predictor with as.factor(predictor) to treat it is a categorical variable")
     }
   } else {
-    message(paste("predictor is assumed to be a categorical variable with",length(unique(predictor)),"levels:",paste(unique(predictor),collapse = ", ")))
+    if(length(levels(as.factor(predictor))) > length(unique(predictor))) stop("predictor has more levels than unique values!")
+    message(paste("predictor is assumed to be a categorical variable with",length(unique(predictor)),"levels:",paste(levels(as.factor(predictor)),collapse = ", ")))
   }
 
   # Covars
@@ -174,7 +178,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("sam"
       if(is.numeric(covars[[i]][1])){
         message(paste(names(covars)[i],"is assumed to be a quantitative variable"))
       } else {
-        message(paste(names(covars)[i],"is assumed to be a categorical variable with",length(unique(covars[[i]])),"levels:",paste(unique(covars[[i]]),collapse = ", ")))
+        message(paste(names(covars)[i],"is assumed to be a categorical variable with",length(unique(covars[[i]])),"levels:",paste(levels(as.factor(covars[[i]])),collapse = ", ")))
       }
     }
   }
@@ -200,7 +204,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("sam"
   
   # Run tests in parallel
   results <- foreach(i = tests, .options.snow = opts) %dopar% {
-    
+
     # Set seed
     set.seed(rng.seed)
     
@@ -302,52 +306,100 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("sam"
     results <- c(results,list(adx.t),list(adx.w))
     names(results) <- c(res.names,"adx.t","adx.w")
   }
-
-  # P-values for ANCOM and SAMseq
-  if("anc" %in% names(results)){
-    ancdf <- as.data.frame(results[["anc"]])
-    ancdf$pval.adj <- 1
-    ancdf[ancdf$Detected == "Yes","pval.adj"] <- 0
-    ancdf$pval <- NA
-    results["anc"] <- NULL
-    res.names <- names(results)
-    results <- c(results,list(ancdf))
-    names(results) <- c(res.names,"anc")
+  
+  # Raw p-values
+  Pval.raw <- lapply(results,function(x) tryCatch(as.data.frame(x[,c("Feature","pval")]), error = function(e) NULL))
+  Pval.raw <- Pval.raw[!sapply(Pval.raw,is.null)]
+  if(length(Pval.raw) > 0){
+    df.raw <- suppressWarnings(Reduce(function(x,y) merge(x, y, by= "Feature", all.x = TRUE, all.y = TRUE), Pval.raw))
+    colnames(df.raw)[2:ncol(df.raw)] <- names(Pval.raw)
+    df.raw <- add.tax.DA(data, df.raw)
+  } else {
+    df.raw <- NULL
   }
-  if("sam" %in% names(results)){
-    samdf <- as.data.frame(results[["sam"]])
-    samdf$pval.adj <- 1
-    if("Sig" %in% colnames(samdf)){
-      samdf[samdf$Sig == "Yes","pval.adj"] <- 0
+
+  # Adjusted p-values
+  Pval.adj <- lapply(results,function(x) tryCatch(as.data.frame(x[,c("Feature","pval.adj")]), error = function(e) NULL))
+  Pval.adj <- Pval.adj[!sapply(Pval.adj,is.null)]
+  if(length(Pval.adj) > 0){
+    df.adj <- suppressWarnings(Reduce(function(x,y) merge(x, y, by= "Feature", all.x = TRUE, all.y = TRUE), Pval.adj))
+    colnames(df.adj)[2:ncol(df.adj)] <- names(Pval.adj)
+    if("sam" %in% names(results)) {
+      if("Sig" %in% colnames(results$sam)){
+        df.adj <- merge(df.adj, results$sam[,c("Feature","Sig")], by = "Feature")
+      } else {
+        sam.adj <- results$sam[,c("Feature","Sig.up","Sig.lo")]
+        sam.adj$Sig <- "No"
+        sam.adj[sam.adj$Sig.up == "Yes","Sig"] <- "Up"
+        sam.adj[sam.adj$Sig.lo == "Yes","Sig"] <- "Down"
+        df.adj <- merge(df.adj, sam.adj[,c("Feature","Sig")], by = "Feature")  
+      }
+      colnames(df.adj)[ncol(df.adj)] <- "sam"
     }
-    if("Sig.up" %in% colnames(samdf)){
-      samdf[samdf$Sig.up == "Yes","pval.adj"] <- 0
+    if("anc" %in% names(results)) {
+      df.adj <- merge(df.adj, results$anc[,c("Feature","Detected")], by = "Feature")
+      colnames(df.adj)[ncol(df.adj)] <- "anc"
     }
-    if("Sig.lo" %in% colnames(samdf)){
-      samdf[samdf$Sig.lo == "Yes","pval.adj"] <- 0
-    }
-    samdf$pval <- NA
-    results["sam"] <- NULL
-    res.names <- names(results)
-    results <- c(results,list(samdf))
-    names(results) <- c(res.names,"sam")
+    df.adj <- add.tax.DA(data, df.adj)
+  } else {
+    df.adj <- NULL
   }
   
-  # Positives
-  Pos.raw <- sapply(results,function(x) x[x$pval < alpha,"Feature"])
-  Pos.adj <- sapply(results,function(x) x[x$pval.adj < alpha,"Feature"])
+  ## Estimate
+  est.name <- list(sam = "Fold.change",
+                   znb = "Estimate",
+                   zpo = "Estimate",
+                   qpo = "Estimate",
+                   poi = "Estimate",
+                   neb = "Estimate",
+                   lrm = "Estimate",
+                   llm = "Estimate",
+                   llm2 = "Estimate",
+                   vli = c("logFC",paste0("predictor",levels(as.factor(predictor))[2])),
+                   lim = c("logFC",paste0("predictor",levels(as.factor(predictor))[2])),
+                   lli = c("logFC",paste0("predictor",levels(as.factor(predictor))[2])),
+                   lli2 = c("logFC",paste0("predictor",levels(as.factor(predictor))[2])),
+                   pea = "cor",
+                   spe = "rho",
+                   per = "FC",
+                   bay = "ordering",
+                   adx.t = "effect",
+                   adx.w = "effect",
+                   wil = "FC",
+                   ttt = "FC",
+                   ltt = "FC",
+                   ltt2 = "FC",
+                   erq = c("logFC",paste0("logFC.predictor",levels(as.factor(predictor))[2])),
+                   ere = "logFC",
+                   erq2 = c("logFC",paste0("logFC.predictor",levels(as.factor(predictor))[2])),
+                   ere2 = "logFC",
+                   msf = "logFC",
+                   zig = paste0("predictor",levels(as.factor(predictor))[2]),
+                   ds2 = "log2FoldChange")
 
-  features <- row.names(count_table)
-  counts <- sapply(features, function(y) sum(unlist(sapply(Pos.raw, function(x) x %in% y)))) / length(results)
-  counts.adj <- sapply(features, function(y) sum(unlist(sapply(Pos.adj, function(x) x %in% y)))) / length(results)
-  
-  # Combine and return
-  df.combined <- data.frame(Feature = features,
-                            Detect.rate.raw = counts,
-                            Detect.rate.adj = counts.adj)
-  rownames(df.combined) <- NULL
-  
-  # Add taxa data
+  if(!is.numeric(predictor) & length(unique(predictor)) > 2){
+    df.est <- NULL
+  } else {
+    list.est <- foreach(ll = names(results)) %do% {
+      if(ll %in% names(est.name)){
+        if(any(est.name[ll][[1]] %in% colnames(results[ll][[1]]))){
+          est.sub.name <- est.name[ll][[1]][est.name[ll][[1]] %in% colnames(results[ll][[1]])]
+          est.sub <- results[ll][[1]][,c("Feature",est.sub.name)]
+          colnames(est.sub) <- c("Feature",paste0(ll,"_",est.sub.name,""))
+          return(est.sub)
+        } else return(NULL)
+      } else return(NULL)
+    }
+    list.est <- list.est[!sapply(list.est, is.null)]
+    if(length(list.est) > 0){
+      df.est <- Reduce(function(x,y) merge(x, y, by= "Feature", all.x = TRUE, all.y = TRUE), list.est)
+      df.est <- add.tax.DA(data, df.est)
+    } else {
+      df.est <- NULL
+    } 
+  }
+
+  # Add tax table to results
   if(class(data) == "phyloseq"){
     if(!is.null(tax_table(data, errorIfNULL = FALSE))){
       newresults <- list()
@@ -358,10 +410,6 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("sam"
         newresults[[i]] <- subres
       }
       names(newresults) <- names(results)
-    
-      df.combined <- merge(df.combined, tax, by.x = "Feature", by.y = "row.names")
-      rownames(df.combined) <- NULL
-      
     } else {
       newresults <- results
     } 
@@ -369,8 +417,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("sam"
     newresults <- results
   }
   
-  
-  return(list(table = df.combined,results = newresults))
+  return(list(raw = df.raw, adj = df.adj, est = df.est,results = newresults))
 
 }
 

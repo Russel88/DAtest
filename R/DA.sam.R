@@ -18,7 +18,7 @@ DA.sam <- function(data, predictor, paired = NULL, fdr.output = 0.05, allResults
     }
     count_table <- otu_table(data)
     if(!taxa_are_rows(data)) count_table <- t(count_table)
-    predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
+    predictor <- unlist(sample_data(data)[,predictor])
     if(!is.null(paired)) paired <- suppressWarnings(as.factor(as.matrix(sample_data(data)[,paired])))
   } else {
     count_table <- data
@@ -37,7 +37,8 @@ DA.sam <- function(data, predictor, paired = NULL, fdr.output = 0.05, allResults
       if(is.null(paired)){
         res <- samr::SAMseq(count_table, predictor, resp.type = "Two class unpaired", genenames = rownames(count_table), fdr.output = fdr.output, ...)
       } else {
-        predictor[predictor == 2] <- -1
+        predictor[predictor == 1] <- -1
+        predictor[predictor == 2] <- 1
         predictor <- as.numeric(as.factor(paired)) * predictor
         res <- samr::SAMseq(count_table, predictor, resp.type = "Two class paired", genenames = rownames(count_table), fdr.output = fdr.output, ...)
       }

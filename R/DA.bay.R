@@ -19,13 +19,12 @@ DA.bay <- function(data, predictor, p.adj = "fdr", allResults = FALSE, ...){
     if(!predictor %in% sample_variables(data)) stop(paste(predictor,"is not present in sample_data(data)"))
     count_table <- otu_table(data)
     if(!taxa_are_rows(data)) count_table <- t(count_table)
-    predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
+    predictor <- unlist(sample_data(data)[,predictor])
   } else {
     count_table <- data
   }
   
-  predictor <- as.numeric(as.factor(predictor))-1
-  CD <- new("countData", data=as.matrix(count_table), replicates = ifelse(as.logical(predictor), "simA", "simB"), groups = list(NDE = rep(1,length(predictor)),DE=ifelse(as.logical(predictor),1,2))) # simA = cases
+  CD <- new("countData", data=as.matrix(count_table), replicates = ifelse(as.logical(as.numeric(as.factor(predictor))-1), "simA", "simB"), groups = list(NDE = rep(1,length(predictor)),DE=predictor)) # simA = cases
   libsizes(CD) <- getLibsizes(CD)
   CD@annotation <- data.frame(name=rownames(count_table))
   

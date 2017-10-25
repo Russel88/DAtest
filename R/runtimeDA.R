@@ -18,7 +18,7 @@
 #' @return A data.frame if print.res is FALSE
 #' @importFrom parallel detectCores
 #' @export
-runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples = c(500,1000,1500,2000), subsamples.slow = c(50,100,150,200), 
+runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples = c(500,1000,1500,2000), subsamples.slow = c(100,150,200,250), 
                       tests =  c("sam", "qua", "fri", "vli", "qpo", "pea", "wil", "ttt", "ltt", "ltt2","ere", "ere2", "msf", "zig", "lim", "lli", "lli2", "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe"), 
                       tests.slow = c("neb", "bay", "per", "zpo", "znb", "rai", "adx", "ds2", "poi", "erq", "erq2"), R = 10, cores = (detectCores()-1), print.res = TRUE, ...){
   
@@ -38,13 +38,13 @@ runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples 
     }
     count_table <- otu_table(data)
     if(!taxa_are_rows(data)) count_table <- t(count_table)
-    predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
+    predictor <- unlist(sample_data(data)[,predictor])
     if(!is.null(paired)) paired <- suppressWarnings(as.factor(as.matrix(sample_data(data)[,paired])))
     if(!is.null(covars)){
       covars.n <- covars
       covars <- list()
       for(i in 1:length(covars.n)){
-        covars[[i]] <- suppressWarnings(as.matrix(sample_data(data)[,covars.n[i]]))
+        covars[[i]] <- unlist(sample_data(data)[,covars.n[i]])
       }
       names(covars) <- covars.n
     } 
@@ -66,7 +66,7 @@ runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples 
   if(is.numeric(predictor[1])){
     message("predictor is assumed to be a quantitative variable")
   } else {
-    message(paste("predictor is assumed to be a categorical variable with",length(unique(predictor)),"levels:",paste(unique(predictor),collapse = ", ")))
+    message(paste("predictor is assumed to be a categorical variable with",length(unique(predictor)),"levels:",paste(levels(as.factor(predictor)),collapse = ", ")))
   }
   
   # Covars
@@ -75,7 +75,7 @@ runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples 
       if(is.numeric(covars[[i]][1])){
         message(paste(names(covars)[i],"is assumed to be a quantitative variable"))
       } else {
-        message(paste(names(covars)[i],"is assumed to be a categorical variable with",length(unique(covars[[i]])),"levels:",paste(unique(covars[[i]]),collapse = ", ")))
+        message(paste(names(covars)[i],"is assumed to be a categorical variable with",length(unique(covars[[i]])),"levels:",paste(levels(as.factor(covars[[i]])),collapse = ", ")))
       }
     }
   }

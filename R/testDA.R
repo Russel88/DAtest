@@ -140,13 +140,13 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
     }
     count_table <- otu_table(data)
     if(!taxa_are_rows(data)) count_table <- t(count_table)
-    predictor <- suppressWarnings(as.matrix(sample_data(data)[,predictor]))
+    predictor <- unlist(sample_data(data)[,predictor])
     if(!is.null(paired)) paired <- suppressWarnings(as.factor(as.matrix(sample_data(data)[,paired])))
     if(!is.null(covars)){
       covars.n <- covars
       covars <- list()
       for(i in 1:length(covars.n)){
-        covars[[i]] <- suppressWarnings(as.matrix(sample_data(data)[,covars.n[i]]))
+        covars[[i]] <- unlist(sample_data(data)[,covars.n[i]])
       }
       names(covars) <- covars.n
     } 
@@ -163,12 +163,13 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   if(min(count_table) < 0) stop("count_table contains negative values")
   if(sum(colSums(count_table) == 0) > 0) stop("Some samples are empty")
   if(ncol(count_table) != length(predictor)) stop("Number of samples in count_table does not match length of predictor")
-  if(length(levels(as.factor(predictor))) < 2) stop("predictor should have at least two levels")
+  if(length(unique(predictor)) < 2) stop("predictor should have at least two levels")
 
   # Prune tests argument
   tests <- unique(tests)
   if(!"zzz" %in% tests) tests <- prune.tests.DA(tests, predictor, paired, covars, relative)
   tests.par <- paste0(unlist(lapply(1:R, function(x) rep(x,length(tests)))),"_",rep(tests,R))
+  if(length(tests) == 0) stop("No tests to run!")
   
   # Run time warnings
   if(verbose){
@@ -206,7 +207,8 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
     }
   } else {
     num.pred <- FALSE
-    if(verbose) message(paste("predictor is assumed to be a categorical variable with",length(unique(predictor)),"levels:",paste(unique(predictor),collapse = ", ")))
+    if(length(levels(as.factor(predictor))) > length(unique(predictor))) stop("predictor has more levels than unique values!")
+    if(verbose) message(paste("predictor is assumed to be a categorical variable with",length(unique(predictor)),"levels:",paste(levels(as.factor(predictor)),collapse = ", ")))
   }
   
   # Covars
@@ -215,7 +217,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
       if(is.numeric(covars[[i]][1])){
         if(verbose) message(paste(names(covars)[i],"is assumed to be a quantitative variable"))
       } else {
-        if(verbose) message(paste(names(covars)[i],"is assumed to be a categorical variable with",length(unique(covars[[i]])),"levels:",paste(unique(covars[[i]]),collapse = ", ")))
+        if(verbose) message(paste(names(covars)[i],"is assumed to be a categorical variable with",length(unique(covars[[i]])),"levels:",paste(levels(as.factor(covars[[i]])),collapse = ", ")))
       }
     }
   }
