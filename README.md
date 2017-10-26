@@ -233,13 +233,13 @@ Below is a description of how the methods treat multi-class predictors:
 All linear models (also GLMs) output results (including p-values) from
 `anova`/`drop1` functions and are thus testing the `predictor` variable
 in one go. For your final analysis you can run post-hoc tests for all
-pairwise comparisons. If you are interested in testing treatments
-against a common baseline/control (i.e. intercept), you can set
-`out.anova = FALSE`. This will output results from the 2. level of the
-`predictor` compared to the intercept. This is because only the 2. level
-is spiked when `predictor` contains multiple levels. In your final
-analysis you can get an output with all p-values (See more
-[here](#how-to-run-real-data)).
+pairwise comparisons, see [extra features](#extra-features). If you are
+interested in testing treatments against a common baseline/control (i.e.
+intercept), you can set `out.anova = FALSE`. This will output results
+from the 2. level of the `predictor` compared to the intercept. This is
+because only the 2. level is spiked when `predictor` contains multiple
+levels. In your final analysis you can get an output with all p-values,
+see more in [how to run real data](#how-to-run-real-data)).
 
 All limma models output results (including p-values) from `topTable`
 testing all levels (minus 1) against the intercept. This can be changed
@@ -362,61 +362,12 @@ test:
 All methods can be accessed in the same way; DA."test" where "test" is
 the abbreviation given in the details of the `testDA` function.
 
-It is advised to set `allResults = TRUE` for checking final results. For
-all methods where relevant, this will output the raw results, often in a
+If you have a categorical variable with more than two levels it is
+advised to set `allResults = TRUE` for checking final results. For all
+methods where relevant, this will output the raw results, often in a
 list with each element corresponding to a feature (OTU/gene/protein).
 For published methods, it is advised to check their tutorials on how to
 read to output.
-
--   ***IMPORTANT:***
-    -   Set `out.anova` similar in `testDA` as in your final analysis
-        for reliable comparison
-    -   If your `predictor` has more than two levels you might have to
-        set the `by` argument for "zig" (this is by default = 2)
-    -   All linear models (including all GLMs) output the p-value from
-        an `anova`/`drop1` function. This can be changed with the
-        `out.anova` argument
-    -   All limma models (lim,lli,lli2,vli) test all levels of the
-        `predictor` against an intercept (with `topTable`). This can be
-        changed with the `out.anova` argument
-    -   For ANCOM: If the FPR = 0, you would not expect false positives
-        with the default settings. If "anc" has an FPR &gt; 0, set
-        `multcorr = 1`
-
-For linear models the `drop1`/`anova` functions can be used to test
-significance of the `predictor` and `covars` variables:
-
-    ### Apply drop1 for each feature and output the adjusted p-values:
-    # Works on "zpo", "znb", "qpo", "neb", "poi". Non-paired "lrm", "llm", "llm2"
-    results <- DA.lrm(data, predictor, allResults = TRUE)
-    res.drop1 <- DA.drop1(results)
-
-    ### Apply anova for each feature and output the adjusted p-values:
-    # Works on "lrm", "llm", "llm2". Non-paired "neb"
-    results <- DA.lrm(data, predictor, allResults = TRUE)
-    res.anova <- DA.anova(results)
-
-For anova and linear models we can also run post-hoc tests for all
-pairwise comparisons of multi-class `predictor`/`covars`.
-
-    ### Apply TukeyHSD for each feature for a selected variable and output the adjusted p-values:
-    # Works on "aov", "lao", "lao2"
-    results <- DA.aov(data, predictor, allResults = TRUE)
-    res.tukey <- DA.TukeyHSD(results, variable = "predictor") # variable can also be the name of a covar
-
-    ### Apply lsmeans for each feature for a selected variable and output the adjusted p-values:
-    # This requires the lsmeans package.
-    # Works on "poi", "neb", "lrm", "llm", "llm2", "qpo", "znb", "zpo"
-    results <- DA.lrm(data, predictor, allResults = TRUE)
-    res.lsm <- DA.lsmeans(results, variable = "predictor") # variable can also be the name of a covar
-
-    # For paired "lrm", "llm", "llm2" the original predictor variable has to be supplied. For example:
-    results <- DA.lrm(data, predictor = mypred, paired = SubjectID,  allResults = TRUE)
-    res.lsm <- DA.lsmeans(results, variable = "predictor", predictor = mypred)
-
-    # and if covars are used, they also need to be supplied for paired "lrm", "llm", "llm2". For example:
-    results <- DA.lrm(data, predictor = mypred, paired = SubjectID, covars = list(covar1 = mycovar),  allResults = TRUE)
-    res.lsm <- DA.lsmeans(results, variable = "predictor", predictor = mypred, covars = list(covar1 = mycovar))
 
 **Alternatively, run all (or several) methods and check which features
 are found by several methods.**
@@ -451,6 +402,8 @@ Implemented methods
 Either add it yourself [(see under 'Extra features')](#extra-features),
 or write to me, preferably with a code snippet of the implementation
 (see email in Description).
+
+### Methods:
 
 -   per - [Permutation test with user defined test
     statistic](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8)
@@ -553,7 +506,7 @@ or write to me, preferably with a code snippet of the implementation
     default not included, as it is very slow)
 -   sam - [SAMseq](http://statweb.stanford.edu/~tibs/SAM/)
 
-### Paired permutation test
+#### Paired permutation test
 
 A paired permutation test is implemented specifically for this package.
 The test is similar to the original, but with a different test statistic
@@ -567,7 +520,50 @@ these log-ratios.
 Extra features
 ==============
 
-#### Adding user-defined methods
+### Plot p-value histograms for all the non-spiked features
+
+    plot(mytest, p = TRUE)
+
+### Post-hoc tests for linear models and ANOVAs
+
+For anova and linear models we can run post-hoc tests for all pairwise
+comparisons of multi-class `predictor`/`covars`.
+
+    ### Apply TukeyHSD for each feature for a selected variable and output the adjusted p-values:
+    # Works on "aov", "lao", "lao2"
+    results <- DA.aov(data, predictor, allResults = TRUE)
+    res.tukey <- DA.TukeyHSD(results, variable = "predictor") # variable can also be the name of a covar
+
+    ### Apply lsmeans for each feature for a selected variable and output the adjusted p-values:
+    # This requires the lsmeans package.
+    # Works on "poi", "neb", "lrm", "llm", "llm2", "qpo", "znb", "zpo"
+    results <- DA.lrm(data, predictor, allResults = TRUE)
+    res.lsm <- DA.lsmeans(results, variable = "predictor") # variable can also be the name of a covar
+
+    # For paired "lrm", "llm", "llm2" the original predictor variable has to be supplied. For example:
+    results <- DA.lrm(data, predictor = mypred, paired = SubjectID,  allResults = TRUE)
+    res.lsm <- DA.lsmeans(results, variable = "predictor", predictor = mypred)
+
+    # and if covars are used, they also need to be supplied for paired "lrm", "llm", "llm2". For example:
+    results <- DA.lrm(data, predictor = mypred, paired = SubjectID, covars = list(covar1 = mycovar),  allResults = TRUE)
+    res.lsm <- DA.lsmeans(results, variable = "predictor", predictor = mypred, covars = list(covar1 = mycovar))
+
+### Test significance of covars (and predictor)
+
+For linear models the `drop1`/`anova` functions can be used to test
+significance of the `predictor` and `covars` variables:
+
+    ### Apply drop1 for each feature and output the adjusted p-values:
+    # Works on "zpo", "znb", "qpo", "neb", "poi". Non-paired "lrm", "llm", "llm2"
+    results <- DA.lrm(data, predictor, allResults = TRUE)
+    res.drop1 <- DA.drop1(results)
+
+    ### Apply anova for each feature and output the adjusted p-values:
+    # Works on "lrm", "llm", "llm2". Non-paired "neb"
+    results <- DA.lrm(data, predictor, allResults = TRUE)
+    res.anova <- DA.anova(results)
+
+### Adding user-defined methods
 
 "zzz" (`DA.zzz`) is a placeholder for user-defined methods. You have to
 supply it with a function whose input is: A `count_table` (data.frame,
@@ -618,18 +614,6 @@ abundances:
 checks of whether any of the supplied methods are suitable for the data.
 If e.g. your `predictor` is quantitative and "ttt" is in the `tests`
 argument, it will try to run a t-test and fail miserably.
-
-#### Results from all the runs:
-
-    print(mytest)
-
-#### See the output from the individual methods. E.g. "ere" first run:
-
-    View(mytest$results[[1]]["ere"])
-
-#### Plot p-value histograms for all the non-spiked features:
-
-    plot(mytest, p = TRUE)
 
 ### Passing arguments to the different tests
 
