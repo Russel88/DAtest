@@ -124,7 +124,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   # Check for servers
   if(core.check){
     if(cores > 10){
-      ANSWER <- readline(paste("You are about to run allDA using",cores,"cores. Enter y to proceed "))
+      ANSWER <- readline(paste("You are about to run testDA using",cores,"cores. Enter y to proceed "))
       if(ANSWER != "y") stop("Process aborted")
     }
   }

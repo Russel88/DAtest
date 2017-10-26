@@ -5,7 +5,7 @@ Authors@R: person("Jakob", "Russel", email = "russel2620@gmail.com", role = c("a
 Description: What the title says.
 Depends: R (>= 3.2.5)
 Imports: foreach, doParallel, doSNOW, snow, MASS, pROC, ggplot2, cowplot, lme4, nlme, stats, methods, utils, minqa, nloptr
-Suggests: lsmeans, venneuler, pscl, samr, statmod
+Suggests: lsmeans, eulerr, pscl, samr, statmod
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true

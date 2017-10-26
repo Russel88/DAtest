@@ -50,7 +50,6 @@ Overview of this tutorial
 -   [How to run real data](#how-to-run-real-data)
 -   [Implemented methods](#implemented-methods)
 -   [Extra features](#extra-features)
--   [Errors and Issues](#errors-and-issues)
 
 Installation of packages
 ========================
@@ -106,7 +105,7 @@ but will simply exclude methods that depends on these packages.
 The following are suggested, but not needed:
 
     # For drawing Venn diagrams
-    install.packages("venneuler")
+    install.packages("eulerr")
 
     # For post-hoc testing (generalized) linear models
     install.packages("lsmeans")
@@ -428,9 +427,12 @@ are found by several methods.**
     # Estimates/fold.changes from all methods which output anything relevant for this
     res.all$est
 
-    # Venn diagram of detected features from selected methods:
-    # This requires the venneuler package (See 'Errors and Issues' in this tutorial if you get an error with rJava package)
+    # Venn (Euler) diagram of detected features from selected methods:
+    # This requires the eulerr package
     vennDA(res.all, tests = c("wil","ttt","ltt"))
+
+    # Split Venn (Euler) diagram in significant features with either positive or negative fold changes (if possible)
+    vennDA(res.all, tests = c("wil","ttt","ltt"), split = TRUE)
 
     # See results from a method (e.g. t.test "ttt"):
     View(res.all$results$ttt)
@@ -683,13 +685,3 @@ passed to a specific test:
 -   qua - Passed to quade.test
 -   anc - Passed to ANCOM
 -   sam - Passed to SAMseq
-
-Errors and Issues
-=================
-
-### JAVA\_HOME error
-
-You might get an error with the "rJava" package. This will not be a
-problem for the workings of any of the main functionalities of this
-package, but might interfere with the `vennDA` function. [See here for
-solutions](https://www.r-statistics.com/2012/08/how-to-load-the-rjava-package-after-the-error-java_home-cannot-be-determined-from-the-registry/)

@@ -4,7 +4,8 @@
 \alias{vennDA}
 \title{Plot Venn diagram from allDA object}
 \usage{
-vennDA(x, tests = NULL, alpha = 0.05, ...)
+vennDA(x, tests = NULL, alpha = 0.05, split = FALSE, output = FALSE,
+  pkg = "eulerr", ...)
 }
 \arguments{
 \item{x}{Output from the allDA function}
@@ -13,14 +14,20 @@ vennDA(x, tests = NULL, alpha = 0.05, ...)
 
 \item{alpha}{Numeric. q-value threshold for significant features. Default 0.05}
 
+\item{split}{If TRUE will split diagrams in positive and negative estimates if possible}
+
+\item{output}{If TRUE will return a data.frame instead of a plot}
+
+\item{pkg}{Use either "eulerr" package (default) or "venneuler" for drawing diagrams.}
+
 \item{...}{Additional arguments for plotting}
 }
 \value{
-Nothing
+If output TRUE then a data.frame with Features detected by the different methods
 }
 \description{
 Plot a Venn (Euler) diagram of features found by different methods.
 }
 \details{
-Require the venneuler package.
+Require the eulerr package unless output is TRUE.
 }
