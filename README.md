@@ -52,7 +52,7 @@ Overview of this tutorial
 -   [Extra features](#extra-features)
 
 See example on a test dataset
-[here](https://github.com/Russel88/DAtest/blob/master/Suppl_script.html)
+[here](http://htmlpreview.github.com/?https://github.com/Russel88/DAtest/blob/master/Suppl_script.html)
 
 Installation of packages
 ========================
