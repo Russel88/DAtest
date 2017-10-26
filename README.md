@@ -52,7 +52,7 @@ Overview of this tutorial
 -   [Extra features](#extra-features)
 
 See example on a test dataset
-[here](https://github.com/Russel88/DAtest/blob/master/Suppl_script.pdf)
+[here](https://github.com/Russel88/DAtest/blob/master/Suppl_script.html)
 
 Installation of packages
 ========================
@@ -367,7 +367,7 @@ advised to set `allResults = TRUE` for checking final results. For all
 methods where relevant, this will output the raw results, often in a
 list with each element corresponding to a feature (OTU/gene/protein).
 For published methods, it is advised to check their tutorials on how to
-read to output.
+read the output.
 
 **Alternatively, run all (or several) methods and check which features
 are found by several methods.**
