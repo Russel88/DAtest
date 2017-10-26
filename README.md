@@ -51,6 +51,9 @@ Overview of this tutorial
 -   [Implemented methods](#implemented-methods)
 -   [Extra features](#extra-features)
 
+See example on a test dataset
+[here](https://github.com/github/Russel88/DAtest/Suppl_script.pdf)
+
 Installation of packages
 ========================
 
