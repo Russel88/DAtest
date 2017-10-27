@@ -1,13 +1,1 @@
-# Source files
-# ============
-*.Rdata     text
-*.rdb       binary
-*.rds       binary
-*.Rd        text
-*.Rdx       binary
-*.Rmd		text
-*.R 		text
-
-$ cat .gitattributes
-special-vendored-path/* linguist-vendored
-Suppl_script.html	    linguist-vendored=false
+*.html	    linguist-vendored=true
