@@ -7,4 +7,6 @@
 *.Rdx       binary
 *.Rmd		text
 *.R 		text
-*.html	    linguist-vendored=false
+
+special-vendored-path/* linguist-vendored
+Suppl_script.html	    linguist-vendored=false
