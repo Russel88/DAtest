@@ -4,12 +4,12 @@
 \alias{allDA}
 \title{Run many differential abundance methods}
 \usage{
-allDA(data, predictor, paired = NULL, covars = NULL, tests = c("sam",
-  "qua", "fri", "znb", "zpo", "vli", "qpo", "poi", "pea", "spe", "per", "bay",
-  "adx", "wil", "ttt", "ltt", "ltt2", "neb", "erq", "ere", "erq2", "ere2",
+allDA(data, predictor, paired = NULL, covars = NULL, tests = c("neb",
+  "per", "bay", "adx", "sam", "qua", "fri", "znb", "zpo", "vli", "qpo", "poi",
+  "pea", "spe", "wil", "ttt", "ltt", "ltt2", "erq", "ere", "erq2", "ere2",
   "msf", "zig", "ds2", "lim", "lli", "lli2", "aov", "lao", "lao2", "kru", "lrm",
   "llm", "llm2", "rai"), relative = TRUE, cores = (detectCores() - 1),
-  rng.seed = 123, p.adj = "fdr", args = list(), out.anova = TRUE,
+  rng.seed = 123, p.adj = "fdr", args = list(), out.anova = NULL,
   alpha = 0.05, core.check = TRUE)
 }
 \arguments{
@@ -33,7 +33,7 @@ allDA(data, predictor, paired = NULL, covars = NULL, tests = c("sam",
 
 \item{args}{List. A list with lists of arguments passed to the different methods. See details for more.}
 
-\item{out.anova}{If TRUE (default) linear models will output results and p-values from anova/drop1. If FALSE will output results for 2. level of the predictor.}
+\item{out.anova}{If TRUE linear models will output results and p-values from anova/drop1. If FALSE will output results for 2. level of the predictor. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise}
 
 \item{alpha}{P-value threshold for calling significance. Default 0.05}
 

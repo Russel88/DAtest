@@ -4,7 +4,7 @@
 \alias{DA.lli2}
 \title{LIMMA}
 \usage{
-DA.lli2(data, predictor, paired = NULL, covars = NULL, out.anova = TRUE,
+DA.lli2(data, predictor, paired = NULL, covars = NULL, out.anova = NULL,
   p.adj = "fdr", delta = 0.001, allResults = FALSE, ...)
 }
 \arguments{
@@ -16,7 +16,7 @@ DA.lli2(data, predictor, paired = NULL, covars = NULL, out.anova = TRUE,
 
 \item{covars}{Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)}
 
-\item{out.anova}{If TRUE will output results from F-tests, if FALSE t-statistic results from 2. level of the predictor.}
+\item{out.anova}{If TRUE will output results from F-tests, if FALSE t-statistic results from 2. level of the predictor. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise}
 
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
 

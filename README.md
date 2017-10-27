@@ -220,39 +220,54 @@ method.
 
 There are generally two ways to output results with a categorical
 predictor with multiple levels; either there is one p-value indicating
-whether the categories are similar or different (e.g. in ANOVA), or
+whether the categories are similar or different (e.g. as in ANOVA), or
 there is one p-value for each level, often where the first level is set
 as intercept and the remaining levels are tested against the intercept
 (e.g. in linear regression). For some methods you can choose which
 option fits you, with other methods not, but it is crucial that this
-option is similar in the `testDA` function as in the final analysis. Use
-the `out.anova` argument to set this.
+option is similar in the `testDA` function as in the final analysis.
 
-Below is a description of how the methods treat multi-class predictors:
+In general, the default settings for `testDA` should be fine for
+multi-class predictors. If you are interested in testing two or more
+levels against a baseline, you should set the levels of the `predictor`
+such that the baseline is the first level (e.g. factor(predictor, levels
+= c("baseline","treatment1","treatment2"))), and you should set
+`out.anova = FALSE` in both `testDA` and in your final analysis.
 
-All linear models (also GLMs) output results (including p-values) from
-`anova`/`drop1` functions and are thus testing the `predictor` variable
-in one go. For your final analysis you can run post-hoc tests for all
-pairwise comparisons, see [extra features](#extra-features). If you are
-interested in testing treatments against a common baseline/control (i.e.
-intercept), you can set `out.anova = FALSE`. This will output results
-from the 2. level of the `predictor` compared to the intercept. This is
-because only the 2. level is spiked when `predictor` contains multiple
-levels. In your final analysis you can get an output with all p-values,
-see more in [how to run real data](#how-to-run-real-data)).
+**Below is a description of how the methods treat multi-class
+predictors:**
 
-All limma models output results (including p-values) from `topTable`
-testing all levels (minus 1) against the intercept. This can be changed
-with `out.anova`. `out.anova = FALSE` will output results from the 2.
-level of the predictor. In your final analysis you can set
-`allResults = TRUE` and use `topTable` on the output to get the desired
-results.
+Methods not mentioned here are not tunable for multi-class predictors.
 
-DESeq2 is set to run Log Ratio Test (LRT) and is thus testing all levels
-of the `predictor` in one go.
+For multi-class predictors all linear models (also GLMs) output results
+(including p-values) from `anova`/`drop1` functions and are thus testing
+the `predictor` variable in one go. If you are interested in testing
+treatments against a common baseline/control (i.e. intercept), you can
+set `out.anova = FALSE`. This will output results from the 2. level of
+the `predictor` compared to the intercept. This is because only the 2.
+level is spiked when `predictor` contains multiple levels. In your final
+analysis you can get an output with all p-values, see more in [how to
+run real data](#how-to-run-real-data)). No matter what `out.anova` is
+set to, you can run post-hoc tests for all pairwise comparisons, see
+[extra features](#extra-features).
 
-EdgeR is set to test if all levels of `predictor` (minus intercept) are
-zero.
+For multi-class predictors all limma models output results (including
+p-values) from `topTable` testing all levels (minus 1) against the
+intercept. This can be changed with `out.anova`. `out.anova = FALSE`
+will output results from the 2. level of the predictor. In your final
+analysis you can set `allResults = TRUE` and use `topTable` on the
+output to get the desired results.
+
+DESeq2 is always set to run Log Ratio Test (LRT) and is thus testing all
+levels of the `predictor` in one go.
+
+EdgeR is always set to test if all levels of `predictor` (minus
+intercept) are zero.
+
+MetagenomeSeq Zig is set to always output p.values from the 2. level of
+the `predictor`. For your final analysis use the `by` argument to change
+this, or set `allResults = TRUE` and then use `MRtable` on the output to
+get the desired results.
 
 ### *If you have a paired/blocked experimental design:*
 

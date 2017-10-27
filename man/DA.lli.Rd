@@ -5,7 +5,7 @@
 \title{LIMMA}
 \usage{
 DA.lli(data, predictor, paired = NULL, covars = NULL, relative = TRUE,
-  out.anova = TRUE, p.adj = "fdr", delta = 1, allResults = FALSE, ...)
+  out.anova = NULL, p.adj = "fdr", delta = 1, allResults = FALSE, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -18,7 +18,7 @@ DA.lli(data, predictor, paired = NULL, covars = NULL, relative = TRUE,
 
 \item{relative}{Logical. Should count_table be normalized to relative abundances. Default TRUE}
 
-\item{out.anova}{If TRUE will output results from F-tests, if FALSE t-statistic results from 2. level of the predictor.}
+\item{out.anova}{If TRUE will output results from F-tests, if FALSE t-statistic results from 2. level of the predictor. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise}
 
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
 

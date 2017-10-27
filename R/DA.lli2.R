@@ -7,7 +7,7 @@
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
-#' @param out.anova If TRUE will output results from F-tests, if FALSE t-statistic results from 2. level of the predictor.
+#' @param out.anova If TRUE will output results from F-tests, if FALSE t-statistic results from 2. level of the predictor. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
 #' @param delta Numeric. Pseudocount for log transformation. Default 0.001
 #' @param allResults If TRUE will return raw results from the eBayes function
@@ -15,7 +15,7 @@
 #' @import statmod
 #' @export
 
-DA.lli2 <- function(data, predictor, paired = NULL, covars = NULL, out.anova = TRUE, p.adj = "fdr", delta = 0.001, allResults = FALSE, ...){
+DA.lli2 <- function(data, predictor, paired = NULL, covars = NULL, out.anova = NULL, p.adj = "fdr", delta = 0.001, allResults = FALSE, ...){
   
   suppressMessages(library(limma))
   
@@ -42,6 +42,13 @@ DA.lli2 <- function(data, predictor, paired = NULL, covars = NULL, out.anova = T
         assign(names(covars)[i], covars[[i]])
       }
     }
+  }
+  
+  # Out.anova
+  if(is.null(out.anova)){
+    if(is.numeric(predictor)) out.anova <- FALSE
+    if(length(unique(predictor)) == 2) out.anova <- FALSE
+    if(length(unique(predictor)) > 2) out.anova <- TRUE
   }
   
   count.rel <- apply(count_table,2,function(x) x/sum(x))

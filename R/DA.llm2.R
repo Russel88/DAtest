@@ -6,7 +6,7 @@
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
-#' @param out.anova If TRUE will output results and p-values from anova. If false will output results for 2. level of the predictor.
+#' @param out.anova If TRUE will output results and p-values from anova. If false will output results for 2. level of the predictor. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
 #' @param delta Numeric. Pseudocount for the log transformation. Default 0.001
 #' @param allResults If TRUE will return raw results from the lm/lme function
@@ -14,7 +14,7 @@
 #' @import nlme
 #' @export
 
-DA.llm2 <- function(data, predictor, paired = NULL, covars = NULL, out.anova = TRUE, p.adj = "fdr", delta = 0.001, allResults = FALSE, ...){
+DA.llm2 <- function(data, predictor, paired = NULL, covars = NULL, out.anova = NULL, p.adj = "fdr", delta = 0.001, allResults = FALSE, ...){
  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -39,6 +39,13 @@ DA.llm2 <- function(data, predictor, paired = NULL, covars = NULL, out.anova = T
         assign(names(covars)[i], covars[[i]])
       }
     }
+  }
+  
+  # Out.anova
+  if(is.null(out.anova)){
+    if(is.numeric(predictor)) out.anova <- FALSE
+    if(length(unique(predictor)) == 2) out.anova <- FALSE
+    if(length(unique(predictor)) > 2) out.anova <- TRUE
   }
   
   count_table <- as.data.frame.matrix(count_table)

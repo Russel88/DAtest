@@ -4,7 +4,7 @@
 \alias{DA.zpo}
 \title{Zero inflated Poisson glm}
 \usage{
-DA.zpo(data, predictor, covars = NULL, relative = TRUE, out.anova = TRUE,
+DA.zpo(data, predictor, covars = NULL, relative = TRUE, out.anova = NULL,
   p.adj = "fdr", allResults = FALSE, ...)
 }
 \arguments{
@@ -16,7 +16,7 @@ DA.zpo(data, predictor, covars = NULL, relative = TRUE, out.anova = TRUE,
 
 \item{relative}{Logical. Whether log(librarySize) should be used as offset. Default TRUE}
 
-\item{out.anova}{If TRUE will output results and p-values from drop1. If false will output results for 2. level of the predictor.}
+\item{out.anova}{If TRUE will output results and p-values from drop1. If false will output results for 2. level of the predictor. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise}
 
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
 

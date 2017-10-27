@@ -6,13 +6,13 @@
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
 #' @param relative Logical. Whether log(librarySize) should be used as offset. Default TRUE
-#' @param out.anova If TRUE will output results and p-values from anova. If false will output results for 2. level of the predictor.
+#' @param out.anova If TRUE will output results and p-values from anova. If false will output results for 2. level of the predictor. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
 #' @param allResults If TRUE will return raw results from the glm function
 #' @param ... Additional arguments for the glm functions
 #' @export
 
-DA.qpo <- function(data, predictor, covars = NULL, relative = TRUE, out.anova = TRUE, p.adj = "fdr", allResults = FALSE, ...){
+DA.qpo <- function(data, predictor, covars = NULL, relative = TRUE, out.anova = NULL, p.adj = "fdr", allResults = FALSE, ...){
  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -33,6 +33,13 @@ DA.qpo <- function(data, predictor, covars = NULL, relative = TRUE, out.anova = 
         assign(names(covars)[i], covars[[i]])
       }
     }
+  }
+  
+  # Out.anova
+  if(is.null(out.anova)){
+    if(is.numeric(predictor)) out.anova <- FALSE
+    if(length(unique(predictor)) == 2) out.anova <- FALSE
+    if(length(unique(predictor)) > 2) out.anova <- TRUE
   }
   
   if(relative) libSize <- colSums(count_table) else libSize <- 1

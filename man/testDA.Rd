@@ -5,12 +5,12 @@
 \title{Comparing differential abundance methods by FPR and AUC}
 \usage{
 testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
-  tests = c("sam", "qua", "fri", "zpo", "znb", "vli", "qpo", "poi", "pea",
-  "neb", "rai", "per", "bay", "adx", "wil", "ttt", "ltt", "ltt2", "erq", "erq2",
+  tests = c("neb", "rai", "per", "bay", "adx", "sam", "qua", "fri", "zpo",
+  "znb", "vli", "qpo", "poi", "pea", "wil", "ttt", "ltt", "ltt2", "erq", "erq2",
   "ere", "ere2", "msf", "zig", "ds2", "lim", "lli", "lli2", "aov", "lao",
   "lao2", "kru", "lrm", "llm", "llm2", "spe"), relative = TRUE,
   effectSize = 2, k = c(5, 5, 5), cores = (detectCores() - 1),
-  rng.seed = 123, args = list(), out.anova = TRUE, core.check = TRUE,
+  rng.seed = 123, args = list(), out.anova = NULL, core.check = TRUE,
   verbose = TRUE)
 }
 \arguments{
@@ -38,7 +38,7 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
 
 \item{args}{List. A list with lists of arguments passed to the different methods. See details for more.}
 
-\item{out.anova}{If TRUE (default) linear models will output results and p-values from anova/drop1. If FALSE will output results for 2. level of the predictor.}
+\item{out.anova}{If TRUE linear models will output results and p-values from anova/drop1. If FALSE will output results for 2. level of the predictor. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise}
 
 \item{core.check}{If TRUE will make an interactive check that the amount of cores specified are desired. Only if cores>10. This is to ensure that the function doesn't automatically overloads a server with workers.}
 

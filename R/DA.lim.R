@@ -7,14 +7,14 @@
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
 #' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
 #' @param relative Logical. Should count_table be normalized to relative abundances. Default TRUE
-#' @param out.anova If TRUE will output results from F-tests, if FALSE t-statistic results from 2. level of the predictor.
+#' @param out.anova If TRUE will output results from F-tests, if FALSE t-statistic results from 2. level of the predictor. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise
 #' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
 #' @param allResults If TRUE will return raw results from the eBayes function
 #' @param ... Additional arguments for the eBayes and lmFit functions
 #' @import statmod
 #' @export
 
-DA.lim <- function(data, predictor, paired = NULL, covars = NULL, relative = TRUE, out.anova = TRUE, p.adj = "fdr", allResults = FALSE, ...){
+DA.lim <- function(data, predictor, paired = NULL, covars = NULL, relative = TRUE, out.anova = NULL, p.adj = "fdr", allResults = FALSE, ...){
   
   suppressMessages(library(limma))
   
@@ -41,6 +41,13 @@ DA.lim <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
         assign(names(covars)[i], covars[[i]])
       }
     }
+  }
+  
+  # Out.anova
+  if(is.null(out.anova)){
+    if(is.numeric(predictor)) out.anova <- FALSE
+    if(length(unique(predictor)) == 2) out.anova <- FALSE
+    if(length(unique(predictor)) > 2) out.anova <- TRUE
   }
   
   if(relative){
