@@ -1,0 +1,3 @@
+$ cat .gitattributes
+special-vendored-path/* linguist-vendored
+Suppl_script.html linguist-vendored=false
