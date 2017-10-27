@@ -356,7 +356,7 @@ positives. This can be tuned with the `sig`/`multcorr` ("anc") and
 
 P-values for baySeq are defined as 1 - posterior likelihoods.
 
-### *High AUC, but Spike.detect.rate is 0.000?!*
+#### *High AUC, but Spike.detect.rate is 0.000?!*
 
 How can a method have high AUC, but not detect any features? AUC is
 calculated by ranking the raw p-values, but Spike.detect.rate is the
