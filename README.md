@@ -356,15 +356,17 @@ positives. This can be tuned with the `sig`/`multcorr` ("anc") and
 
 P-values for baySeq are defined as 1 - posterior likelihoods.
 
-### *How to choose the effect size:*
+### *High AUC, but Spike.detect.rate is 0.000?!*
 
-The default effect size of 2 (equal to a log2 fold change of 1) might
-not fit for your data. If the best method has an AUC below 0.7 you might
-want to increase the effect size. In contrast, if several methods have
-an AUC close to 1, you might want to decrease the effect size (towards
-one) to better differentiate the methods. It is also possible to test
-for negative associations with effect sizes between 0 and 1, but this
-has not been tested extensively.
+How can a method have high AUC, but not detect any features? AUC is
+calculated by ranking the raw p-values, but Spike.detect.rate is the
+proportion of spiked features with adjusted p-value below 0.05. If AUC
+is high but Spike.detect.rate is zero it means that p-values for spiked
+features are low, but not low enough to be below the 0.05 threshold.
+Consequently, you are not likely to detect features with the set
+`effectSize`, and increasing the `effectSize` should increase the
+Spike.detect.rate. Spike.detect.rate will rarely be above 0.5 for
+methods with FPR &lt; 0.05.
 
 How to run real data
 ====================
