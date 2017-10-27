@@ -313,7 +313,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("sam"
   if(length(Pval.raw) > 0){
     df.raw <- suppressWarnings(Reduce(function(x,y) merge(x, y, by= "Feature", all.x = TRUE, all.y = TRUE), Pval.raw))
     colnames(df.raw)[2:ncol(df.raw)] <- names(Pval.raw)
-    df.raw <- add.tax.DA(data, df.raw)
+    if(class(data) == "phyloseq") df.raw <- add.tax.DA(data, df.raw)
   } else {
     df.raw <- NULL
   }
@@ -340,7 +340,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("sam"
       df.adj <- merge(df.adj, results$anc[,c("Feature","Detected")], by = "Feature")
       colnames(df.adj)[ncol(df.adj)] <- "anc"
     }
-    df.adj <- add.tax.DA(data, df.adj)
+    if(class(data) == "phyloseq") df.adj <- add.tax.DA(data, df.adj)
   } else {
     df.adj <- NULL
   }
@@ -393,7 +393,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("sam"
     list.est <- list.est[!sapply(list.est, is.null)]
     if(length(list.est) > 0){
       df.est <- Reduce(function(x,y) merge(x, y, by= "Feature", all.x = TRUE, all.y = TRUE), list.est)
-      df.est <- add.tax.DA(data, df.est)
+      if(class(data) == "phyloseq") df.est <- add.tax.DA(data, df.est)
     } else {
       df.est <- NULL
     } 
