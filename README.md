@@ -29,6 +29,9 @@ in choosing a method for a specific dataset based on empirical testing.
     is the name of the test (see details with ?testDA)
     -   Check out your final results.
 
+See a full example on a test dataset
+[here](http://htmlpreview.github.com/?https://github.com/Russel88/DAtest/blob/master/Suppl_script.html)
+
 ### Citation
 
 Please cite the following publication if you use the DAtest package:
@@ -50,9 +53,6 @@ Overview of this tutorial
 -   [How to run real data](#how-to-run-real-data)
 -   [Implemented methods](#implemented-methods)
 -   [Extra features](#extra-features)
-
-See example on a test dataset
-[here](http://htmlpreview.github.com/?https://github.com/Russel88/DAtest/blob/master/Suppl_script.html)
 
 Installation of packages
 ========================
@@ -344,17 +344,15 @@ the same order as columns in `data`):
 
 **Note:**
 
-As ANCOM and SAMseq do not output p-values, AUC for "anc" and "sam" is
-based on pseudo p-values. They are calculated from the statistics/scores
-as these are perfectly ranked according to detection/significance
-calling. FPR is also based on pseudo p-values for "anc" and "sam", but
-as these cannot be adjusted as nominal p-values, FPR for these methods
-is the final false discovery rate and we should expect an FPR close to 0
-for these two methods, unless you are willing to accept some false
+As ANCOM and SAMseq do not output p-values, FPR for these methods is the
+final false discovery rate and we should expect an FPR close to 0 for
+these two methods, unless you are willing to accept some false
 positives. This can be tuned with the `sig`/`multcorr` ("anc") and
 `fdr.output` ("sam") arguments.
 
-P-values for baySeq are defined as 1 - posterior likelihoods.
+P-values for baySeq are defined as 1 - posterior likelihoods. Therefore,
+features with posterior likelihood higher than 95% are called
+significant.
 
 #### *High AUC, but Spike.detect.rate is 0.000?!*
 
@@ -379,12 +377,12 @@ test:
 All methods can be accessed in the same way; DA."test" where "test" is
 the abbreviation given in the details of the `testDA` function.
 
-If you have a categorical variable with more than two levels it is
-advised to set `allResults = TRUE` for checking final results. For all
-methods where relevant, this will output the raw results, often in a
-list with each element corresponding to a feature (OTU/gene/protein).
-For published methods, it is advised to check their tutorials on how to
-read the output.
+The default output should be fine for most users, but you can set
+`allResults = TRUE` to obtain the raw results. With the raw results you
+can run post-hoc tests on linear models and ANOVA models (for
+multi-class predictors), and you check for significance of covars. See
+more under [Extra features](#extra-features). For limma models
+`topTable` can be used on raw results.
 
 **Plot association between specific feature and predictor**
 
