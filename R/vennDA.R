@@ -28,11 +28,10 @@ vennDA <- function(x, tests = NULL, alpha = 0.05, split = FALSE, output = FALSE,
   featurelist <- list()
   for(i in seq_along(plottests)){
     sub <- x$adj[,c("Feature",plottests[i])]
-    featurelist[[i]] <- sub[sub[,2] < alpha,"Feature"]
-    if(plottests[i] == "sam") featurelist[[i]] <- sub[sub != "No","Feature"]
-    if(plottests[i] == "anc") featurelist[[i]] <- sub[sub == "Yes","Feature"]
+    if(!plottests[i] %in% c("sam","anc")) featurelist[[i]] <- sub[sub[,2] < alpha,"Feature"]
+    if(plottests[i] %in% c("sam","anc")) featurelist[[i]] <- sub[sub[,2] != "No","Feature"]
   }
-  
+
   if(split){
     featurelist.pos <- list()
     featurelist.neg <- list()

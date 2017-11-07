@@ -202,7 +202,7 @@ TS &lt;- prune_taxa(taxa_sums(TS) &gt; 100, TS)</code></pre>
 ## Predictor      Two-class
 ## Paired                No
 ## Covars                  
-## RunTime    16.58 Minutes
+## RunTime    16.41 Minutes
 ## Relative            TRUE
 ## EffectSize             4
 ## RandomSeed           123
@@ -213,10 +213,7 @@ TS &lt;- prune_taxa(taxa_sums(TS) &gt; 100, TS)</code></pre>
 <div id="run-metagenomeseq-featuremodel" class="section level2">
 <h2>Run MetagenomeSeq Featuremodel</h2>
 <p>This appeared to be the best method, with the highest AUC and FPR below 0.05</p>
-<pre><code>## Default value being used.</code></pre>
-<pre><code>## Warning: Partial NA coefficients for 6 probe(s)</code></pre>
-<pre><code>## Warning: glm.fit: algorithm did not converge</code></pre>
-<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre class="r"><code>results.msf &lt;- DA.msf(TS, predictor = &quot;HMPbodysubsite&quot;)</code></pre>
 <p>results.msf contains the final results</p>
 <p><strong>This is the end of the tutorial</strong></p>
 </div>
