@@ -33,8 +33,8 @@ in choosing a method for a specific dataset based on empirical testing.
 
 Please cite the following publication if you use the DAtest package:
 
-Russel *et al.* (2017) DAtest: A framework for comparing differential
-abundance and expression methods. *Submitted*
+Russel *et al.* (2017) DAtest: A framework for choosing differential
+abundance or expression method. *Submitted*
 
 Remember also to cite the method you end up using for your final
 analysis (See [implemented methods](#implemented-methods) for links). If
@@ -385,6 +385,17 @@ methods where relevant, this will output the raw results, often in a
 list with each element corresponding to a feature (OTU/gene/protein).
 For published methods, it is advised to check their tutorials on how to
 read the output.
+
+**Plot association between specific feature and predictor**
+
+`featurePlot` will plot abundance of a feature against the predictor to
+visually explore your data:
+
+    featurePlot(data, predictor, feature = "OTU1")
+
+If a paired variable is supplied it will make line plots grouped by the
+paired variable If covars are supplied plots are facetted according to
+these.
 
 **Alternatively, run all (or several) methods and check which features
 are found by several methods.**
