@@ -2,7 +2,7 @@
 % Please edit documentation in R/runtimeDA.R
 \name{runtimeDA}
 \alias{runtimeDA}
-\title{Estimate runtime of testDA on large datasets}
+\title{Estimate runtime of \code{testDA} on large datasets}
 \usage{
 runtimeDA(data, predictor, paired = NULL, covars = NULL,
   subsamples = c(500, 1000, 1500, 2000), subsamples.slow = c(100, 150, 200,
@@ -13,13 +13,13 @@ runtimeDA(data, predictor, paired = NULL, covars = NULL,
   R = 10, cores = (detectCores() - 1), print.res = TRUE, ...)
 }
 \arguments{
-\item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
+\item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
 
-\item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the predictor is numeric it will be treated as such in the analyses}
+\item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. If the \code{predictor} is numeric it will be treated as such in the analyses}
 
-\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "anc", "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"}
+\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. Only for "anc", "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"}
 
-\item{covars}{Either a named list with covariates, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)}
+\item{covars}{Either a named list with covariates, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}}
 
 \item{subsamples}{Vector with numbers of features to subsample to estimate runtime for fast methods}
 
@@ -29,19 +29,19 @@ runtimeDA(data, predictor, paired = NULL, covars = NULL,
 
 \item{tests.slow}{Slow methods to include}
 
-\item{R}{Intended number of repeats for the testDA function}
+\item{R}{Intended number of repeats for the \code{testDA} function}
 
 \item{cores}{Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.}
 
 \item{print.res}{If TRUE will print the results, alternatively will return a data.frame with the results.}
 
-\item{...}{Additional arguments for the testDA function}
+\item{...}{Additional arguments for the \code{testDA} function}
 }
 \value{
-A data.frame if print.res is FALSE
+A data.frame if \code{print.res=FALSE}
 }
 \description{
-Estimate the runtime of testDA from running on a subset of the features. Intended for datasets with at least 5000 features.
+Estimate the runtime of \code{testDA} from running on a subset of the features. Intended for datasets with at least 5000 features.
 }
 \details{
 Runtime of all methods are expected to scale linearly with the number of features, except "anc" and "bay" which are modelled with a 2. order polynomial.

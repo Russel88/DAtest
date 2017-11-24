@@ -1,10 +1,10 @@
-#' Plotting results from testDA
+#' Plotting results from \code{testDA}
 #'
-#' @param x The output from the testDA function
-#' @param sort Sort methods by c("AUC","FPR")
+#' @param x The output from the \code{testDA} function
+#' @param sort Sort methods by \code{c("AUC","FPR")}
 #' @param p Logical. Should the p-value distribution be plotted (only p-values from non-spiked features)
 #' @param bins Integer. Number of bins in p-value histograms
-#' @param ... Additional plotting arguments
+#' @param ... Additional arguments for \code{ggdraw}
 #' @import ggplot2
 #' @importFrom cowplot ggdraw
 #' @importFrom cowplot draw_plot
@@ -13,11 +13,14 @@
 plot.DA <- function(x, sort = "AUC", p = FALSE, bins = 20, ...){
   
   if(p){
+    # For plotting p-value histograms
+    ## Extract p-values and remove all Spiked
     pval.all <- lapply(x$results, function(x) lapply(x, function(y) y[,c("pval","Method","Spiked")]))
     df.all <- suppressWarnings(do.call(rbind, do.call(rbind,pval.all)))
     df.all <- df.all[df.all$Spiked == "No",]
     df.all <- df.all[!df.all$Method %in% c("ANCOM (anc)","SAMseq (sam)"),]
     
+    ## Plot
     ggplot(df.all, aes(pval)) +
       theme_bw() +
       geom_histogram(bins=bins) +
@@ -27,6 +30,7 @@ plot.DA <- function(x, sort = "AUC", p = FALSE, bins = 20, ...){
     
   } else {
     
+    # Sort the reults
     if(sort == "AUC") {
       auc.median <- aggregate(AUC ~ Method, data = x$table, FUN = median)
       x$table$Method <- factor(x$table$Method, levels = auc.median[order(auc.median$AUC, decreasing = TRUE),"Method"])
@@ -36,6 +40,7 @@ plot.DA <- function(x, sort = "AUC", p = FALSE, bins = 20, ...){
       x$table$Method <- factor(x$table$Method, levels = fpr.median[order(fpr.median$FPR, decreasing = FALSE),"Method"])
     }
     
+    # Define FPR and AUC plots
     p1 <- ggplot(x$table, aes(Method, FPR)) +
       theme_bw() +
       coord_cartesian(ylim = c(0,1)) +
@@ -59,6 +64,7 @@ plot.DA <- function(x, sort = "AUC", p = FALSE, bins = 20, ...){
       xlab(NULL) +
       scale_y_continuous(labels=function(x) sprintf("%.2f", x))
     
+    # Plot it
     pp <- cowplot::ggdraw(...) +
       cowplot::draw_plot(p2, 0, .5, 1, .5) +
       cowplot::draw_plot(p1, 0, 0, 1, .5)

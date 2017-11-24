@@ -1,36 +1,35 @@
 #' Wilcoxon Rank Sum and Signed Rank Test
-
-#' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
-#' @param predictor The predictor of interest. Factor, OR if data is a phyloseq object the name of the variable in sample_data in quotation
-#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
-#' @param relative Logical. Should count_table be normalized to relative abundances. Default TRUE
-#' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
-#' @param testStat Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))
-#' @param testStat.pair Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: mean(log((case abundances+1)/(control abundances+1)))
-#' @param allResults If TRUE will return raw results from the wilcox.test function
-#' @param ... Additional arguments for the wilcox.test function
+#' 
+#' Apply wilcoxon test for multiple features with one \code{predictor}
+#' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
+#' @param predictor The predictor of interest. Factor, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation
+#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation
+#' @param relative Logical. Should \code{data} be normalized to relative abundances. Default TRUE
+#' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
+#' @param testStat Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: \code{log2((mean(case abundances)+0.001)/(mean(control abundances)+0.001))}
+#' @param testStat.pair Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: \code{log2(mean((case abundances+0.001)/(control abundances+0.001)))}
+#' @param allResults If TRUE will return raw results from the \code{wilcox.test} function
+#' @param ... Additional arguments for the \code{wilcox.test} function
 #' @export
 
-DA.wil <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr", testStat = function(case,control){log((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){mean(log((case+1)/(control+1)))}, allResults = FALSE, ...){
+DA.wil <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr", testStat = function(case,control){log2((mean(case)+0.001)/(mean(control)+0.001))}, testStat.pair = function(case,control){log2(mean((case+0.001)/(control+0.001)))}, allResults = FALSE, ...){
  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
-    if(length(predictor) > 1 | length(paired) > 1) stop("When data is a phyloseq object predictor and paired should only contain the name of the variables in sample_data")
-    if(!predictor %in% sample_variables(data)) stop(paste(predictor,"is not present in sample_data(data)"))
-    if(!is.null(paired)){
-      if(!paired %in% sample_variables(data)) stop(paste(paired,"is not present in sample_data(data)"))
-    }
-    count_table <- otu_table(data)
-    if(!taxa_are_rows(data)) count_table <- t(count_table)
-    predictor <- unlist(sample_data(data)[,predictor])
-    if(!is.null(paired)) paired <- suppressWarnings(as.factor(as.matrix(sample_data(data)[,paired])))
+    DAdata <- DA.phyloseq(data, predictor, paired)
+    count_table <- DAdata$count_table
+    predictor <- DAdata$predictor
+    paired <- DAdata$paired
   } else {
     count_table <- data
   }
+
+  # Define function
   wil <- function(x){
     tryCatch(wilcox.test(x ~ predictor, ...)$p.value, error = function(e){NA}) 
   }
 
+  # Order data and define function for paired analysis
   if(!is.null(paired)){
     count_table <- count_table[,order(paired)]
     predictor <- predictor[order(paired)]
@@ -40,28 +39,14 @@ DA.wil <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
     }
   }
   
+  # Relative abundance
   if(relative){
     count.rel <- apply(count_table,2,function(x) x/sum(x))
   } else {
     count.rel <- count_table
   }
-  res <- data.frame(pval = apply(count.rel,1,wil))
-  res$pval.adj <- p.adjust(res$pval, method = p.adj)
-  # Teststat
-  predictor.num <- as.numeric(as.factor(predictor))-1
-  testfun <- function(x){
-    case <- x[predictor.num==1]
-    control <- x[predictor.num==0]
-    testStat(case,control) 
-  }
   
-  res$FC <- apply(count.rel,1,testfun)
-  
-  res$Feature <- rownames(res)
-  res$Method <- "Wilcox (wil)" 
-  
-  if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
-  
+  # Run tests
   if(allResults){
     if(is.null(paired)){
       wil <- function(x){
@@ -74,6 +59,22 @@ DA.wil <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
     }
     return(apply(count.rel,1,wil))
   } else {
+    res <- data.frame(pval = apply(count.rel,1,wil))
+    res$pval.adj <- p.adjust(res$pval, method = p.adj)
+    # Teststat
+    predictor.num <- as.numeric(as.factor(predictor))-1
+    testfun <- function(x){
+      case <- x[predictor.num==1]
+      control <- x[predictor.num==0]
+      testStat(case,control) 
+    }
+    res$log2FC <- apply(count.rel,1,testfun)
+    res$ordering <- NA
+    res[!is.na(res$log2FC) & res$log2FC > 0,"ordering"] <- paste0(levels(as.factor(predictor))[2],">",levels(as.factor(predictor))[1])
+    res[!is.na(res$log2FC) & res$log2FC < 0,"ordering"] <- paste0(levels(as.factor(predictor))[1],">",levels(as.factor(predictor))[2])
+    res$Feature <- rownames(res)
+    res$Method <- "Wilcox (wil)" 
+    if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
     return(res)
   }
  

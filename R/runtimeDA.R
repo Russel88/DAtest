@@ -1,21 +1,21 @@
-#' Estimate runtime of testDA on large datasets
+#' Estimate runtime of \code{testDA} on large datasets
 #' 
-#' Estimate the runtime of testDA from running on a subset of the features. Intended for datasets with at least 5000 features.
+#' Estimate the runtime of \code{testDA} from running on a subset of the features. Intended for datasets with at least 5000 features.
 #' 
 #' Runtime of all methods are expected to scale linearly with the number of features, except "anc" and "bay" which are modelled with a 2. order polynomial.
-#' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames
-#' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the predictor is numeric it will be treated as such in the analyses
-#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "anc", "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"
-#' @param covars Either a named list with covariates, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
+#' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames
+#' @param predictor The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. If the \code{predictor} is numeric it will be treated as such in the analyses
+#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. Only for "anc", "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"
+#' @param covars Either a named list with covariates, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}
 #' @param subsamples Vector with numbers of features to subsample to estimate runtime for fast methods
 #' @param subsamples.slow Vector with numbers of features to subsample to estimate runtime for slow methods
 #' @param tests Fast methods to include
 #' @param tests.slow Slow methods to include
-#' @param R Intended number of repeats for the testDA function
+#' @param R Intended number of repeats for the \code{testDA} function
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.
 #' @param print.res If TRUE will print the results, alternatively will return a data.frame with the results.
-#' @param ... Additional arguments for the testDA function
-#' @return A data.frame if print.res is FALSE
+#' @param ... Additional arguments for the \code{testDA} function
+#' @return A data.frame if \code{print.res=FALSE}
 #' @importFrom parallel detectCores
 #' @export
 runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples = c(500,1000,1500,2000), subsamples.slow = c(100,150,200,250), 
@@ -31,25 +31,18 @@ runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples 
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
-    if(length(predictor) > 1 | length(paired) > 1) stop("When data is a phyloseq object predictor and paired should only contain the name of the variables in sample_data")
-    if(!predictor %in% sample_variables(data)) stop(paste(predictor,"is not present in sample_data(data)"))
-    if(!is.null(paired)){
-      if(!paired %in% sample_variables(data)) stop(paste(paired,"is not present in sample_data(data)"))
-    }
-    count_table <- otu_table(data)
-    if(!taxa_are_rows(data)) count_table <- t(count_table)
-    predictor <- unlist(sample_data(data)[,predictor])
-    if(!is.null(paired)) paired <- suppressWarnings(as.factor(as.matrix(sample_data(data)[,paired])))
-    if(!is.null(covars)){
-      covars.n <- covars
-      covars <- list()
-      for(i in 1:length(covars.n)){
-        covars[[i]] <- unlist(sample_data(data)[,covars.n[i]])
-      }
-      names(covars) <- covars.n
-    } 
+    DAdata <- DA.phyloseq(data, predictor, paired, covars)
+    count_table <- DAdata$count_table
+    predictor <- DAdata$predictor
+    paired <- DAdata$paired
+    covars <- DAdata$covars
   } else {
     count_table <- data
+  }
+  if(!is.null(covars)){
+    for(i in 1:length(covars)){
+      assign(names(covars)[i], covars[[i]])
+    }
   }
   
   # Remove Features not present in any samples

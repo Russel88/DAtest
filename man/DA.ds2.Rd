@@ -4,26 +4,29 @@
 \alias{DA.ds2}
 \title{DESeq2}
 \usage{
-DA.ds2(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
-  allResults = FALSE, ...)
+DA.ds2(data, predictor, paired = NULL, covars = NULL, out.all = NULL,
+  p.adj = "fdr", coeff = 2, allResults = FALSE, ...)
 }
 \arguments{
-\item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
+\item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
-\item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+\item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation}
 
-\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation}
 
-\item{covars}{Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)}
+\item{covars}{Either a named list with covariables, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}}
 
-\item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+\item{out.all}{If TRUE, will run "LRT" which will produce one p-value for the \code{predictor}. If FALSE will run "Wald" test and will output p-value from one level of the predictor specified by \code{coeff}. If NULL (default) set as TRUE for multi-class \code{predictor} and FALSE otherwise}
 
-\item{allResults}{If TRUE will return raw results from the DESeq function}
+\item{p.adj}{Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details}
 
-\item{...}{Additional arguments for the DESeq function}
+\item{coeff}{Integer. The log2FoldChange (and p-value if test="Wald") will be associated with this coefficient. For "Wald" this coefficient is compared to the overall mean. For "LRT" this coefficient is compared to the intercept (1. level of \code{predictor}). Default 2, i.e. the 2. level of the \code{predictor}.}
+
+\item{allResults}{If TRUE will return raw results from the \code{DESeq} function}
+
+\item{...}{Additional arguments for the \code{DESeq} function}
 }
 \description{
-Implemented as in:
-https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8.
+Implementation of DESeq2 for \code{DAtest}
 Manual geometric means calculated to avoid errors, see https://github.com/joey711/phyloseq/issues/387
 }

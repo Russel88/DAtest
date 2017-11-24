@@ -9,32 +9,32 @@ featurePlot(data, predictor, paired = NULL, covars = NULL, feature = NULL,
   1/3, 2/3, 1))
 }
 \arguments{
-\item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
+\item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
 
-\item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation. If the predictor is numeric it will be treated as such in the analyses}
+\item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation.}
 
-\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation. Only for "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2", "zig" and "fri"}
+\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data} in quotation.}
 
-\item{covars}{Either a named list with covariates, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)}
+\item{covars}{Either a named list with covariates, OR if data is a phyloseq object a character vector with names of the variables in \code{sample_data(data)}}
 
-\item{feature}{Name of feature to plot. Should be in rownames of data (or taxa_names(data) if data is a phyloseq object)}
+\item{feature}{Name of feature to plot. Should be in rownames of \code{data} (or \code{taxa_names(data)} if \code{data} is a \code{phyloseq} object)}
 
 \item{relative}{Logical. If TRUE (default) abundances are made relative}
 
-\item{logScale}{Logical. Should abundances be log10-scaled? After normalization if relative is TRUE}
+\item{logScale}{Logical. Should abundances be log10-scaled? After normalization if relative is TRUE. Default FALSE}
 
 \item{delta}{Pseudocount for log10 normalization}
 
-\item{covar.quant}{Quantiles for cutting quantitative covars}
+\item{covar.quant}{Quantiles for cutting quantitative \code{covars}}
 }
 \value{
 A ggplot
 }
 \description{
-Plot association between abundance of a feature and predictor, modified if paired and covars are available
+Plot association between abundance of a feature and \code{predictor}, modified if \code{paired} and \code{covars} are available
 }
 \details{
 Boxplot for categorical variables, points and smooth line for quantitative variable.
-If a paired variable is supplied, it is always plotted as points with lines grouped by the paired variable
-If covars are supplied data is split in facets. Quantitative covars are cut in intervals according to the quantiles given in covar.quant
+If a \code{paired} variable is supplied, it is always plotted as points with lines grouped by the \code{paired} variable
+If \code{covars} are supplied data is split in facets. Quantitative covars are cut in intervals according to the quantiles given in \code{covar.quant}
 }

@@ -1,44 +1,42 @@
 #' DESeq2
 #'
-#' Implemented as in:
-#' https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8.
+#' Implementation of DESeq2 for \code{DAtest}
 #' Manual geometric means calculated to avoid errors, see https://github.com/joey711/phyloseq/issues/387
-#' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
-#' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
-#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
-#' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
-#' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
-#' @param allResults If TRUE will return raw results from the DESeq function
-#' @param ... Additional arguments for the DESeq function
+#' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
+#' @param predictor The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation
+#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation
+#' @param covars Either a named list with covariables, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}
+#' @param out.all If TRUE, will run "LRT" which will produce one p-value for the \code{predictor}. If FALSE will run "Wald" test and will output p-value from one level of the predictor specified by \code{coeff}. If NULL (default) set as TRUE for multi-class \code{predictor} and FALSE otherwise
+#' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
+#' @param coeff Integer. The log2FoldChange (and p-value if test="Wald") will be associated with this coefficient. For "Wald" this coefficient is compared to the overall mean. For "LRT" this coefficient is compared to the intercept (1. level of \code{predictor}). Default 2, i.e. the 2. level of the \code{predictor}.
+#' @param allResults If TRUE will return raw results from the \code{DESeq} function
+#' @param ... Additional arguments for the \code{DESeq} function
 #' @export
 
-DA.ds2 <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", allResults = FALSE, ...){
+DA.ds2 <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL, p.adj = "fdr", coeff = 2, allResults = FALSE, ...){
   
   suppressMessages(library(DESeq2))
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
-    if(length(predictor) > 1 | length(paired) > 1) stop("When data is a phyloseq object predictor and paired should only contain the name of the variables in sample_data")
-    if(!predictor %in% sample_variables(data)) stop(paste(predictor,"is not present in sample_data(data)"))
-    if(!is.null(paired)){
-      if(!paired %in% sample_variables(data)) stop(paste(paired,"is not present in sample_data(data)"))
-    }
-    count_table <- otu_table(data)
-    if(!taxa_are_rows(data)) count_table <- t(count_table)
-    predictor <- unlist(sample_data(data)[,predictor])
-    if(!is.null(paired)) paired <- suppressWarnings(as.factor(as.matrix(sample_data(data)[,paired])))
-    if(!is.null(covars)){
-      covars.n <- covars
-      covars <- list()
-      for(i in 1:length(covars.n)){
-        covars[[i]] <- unlist(sample_data(data)[,covars.n[i]])
-      }
-      names(covars) <- covars.n
-    } 
+    DAdata <- DA.phyloseq(data, predictor, paired, covars)
+    count_table <- DAdata$count_table
+    predictor <- DAdata$predictor
+    paired <- DAdata$paired
+    covars <- DAdata$covars
   } else {
     count_table <- data
   }
+  predictor <- as.factor(predictor)
   
+  # out.all
+  if(is.null(out.all)){
+    if(length(unique(predictor)) == 2) out.all <- FALSE
+    if(length(unique(predictor)) > 2) out.all <- TRUE
+    if(is.numeric(predictor)) out.all <- FALSE
+  }
+  
+  # Collect data
   if(is.null(paired)){
     if(is.null(covars)){
       predictordf <- data.frame(predictor = factor(predictor))
@@ -62,27 +60,43 @@ DA.ds2 <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
     }
   }
   
+  # Geometric means
   gm_mean = function(x, na.rm=TRUE){
     exp(sum(log(x[x > 0]), na.rm=na.rm) / length(x))
   }
   geoMeans = apply(counts(x), 1, gm_mean)
   x = estimateSizeFactors(x, geoMeans = geoMeans)
-  if(is.null(paired)){
-    if(is.null(covars)){
-      x <- DESeq(x,test="LRT",reduced = ~1, ...)
+  
+  # Run test
+  if(out.all){
+    if(is.null(paired)){
+      if(is.null(covars)){
+        x <- DESeq(x,test="LRT",reduced = ~1, ...)
+      } else {
+        x <- DESeq(x,test="LRT",reduced = as.formula(paste("~ ",paste(names(covars), collapse="+"),sep = "")), ...)
+      } 
     } else {
-      x <- DESeq(x,test="LRT",reduced = as.formula(paste("~ ",paste(names(covars), collapse="+"),sep = "")), ...)
-    } 
-  } else {
-    if(is.null(covars)){
-      x <- DESeq(x,test="LRT",reduced = ~ paired, ...)
-    } else {
-      x <- DESeq(x,test="LRT",reduced = as.formula(paste("~ paired +",paste(names(covars), collapse="+"),sep = "")), ...)
+      if(is.null(covars)){
+        x <- DESeq(x,test="LRT",reduced = ~ paired, ...)
+      } else {
+        x <- DESeq(x,test="LRT",reduced = as.formula(paste("~ paired +",paste(names(covars), collapse="+"),sep = "")), ...)
+      }
     }
+    res <- as.data.frame(results(x, name = paste("predictor",levels(predictor)[coeff],"vs",levels(predictor)[1],sep = "_"))@listData)
+    res$ordering <- NA
+    res[!is.na(res$log2FoldChange) & res$log2FoldChange > 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff],">",levels(as.factor(predictor))[1])
+    res[!is.na(res$log2FoldChange) & res$log2FoldChange < 0,"ordering"] <- paste0(levels(as.factor(predictor))[1],">",levels(as.factor(predictor))[coeff])
+  }
+  if(!out.all){
+    x <- DESeq(x,test="Wald", ...)
+    res <- as.data.frame(results(x, name = paste0("predictor",levels(predictor)[coeff]))@listData)
+    res$ordering <- NA
+    res[!is.na(res$log2FoldChange) & res$log2FoldChange > 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff],">mean")
+    res[!is.na(res$log2FoldChange) & res$log2FoldChange < 0,"ordering"] <- paste0("mean>",levels(as.factor(predictor))[coeff])
   }
   
-  res <- as.data.frame(results(x)@listData)
   colnames(res)[5] <- "pval"
+  res <- res[,-(ncol(res)-1)]
   res$pval.adj <- p.adjust(res$pval, method = p.adj)
   res$Feature <- results(x)@rownames
   res$Method <- "DESeq2 (ds2)"

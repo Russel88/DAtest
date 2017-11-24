@@ -4,24 +4,28 @@
 \alias{DA.erq}
 \title{EdgeR quasi-likelihood - TMM normalization}
 \usage{
-DA.erq(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
-  allResults = FALSE, ...)
+DA.erq(data, predictor, paired = NULL, covars = NULL, out.all = NULL,
+  p.adj = "fdr", coeff = 2, allResults = FALSE, ...)
 }
 \arguments{
-\item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
+\item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
-\item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+\item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation}
 
-\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation}
 
-\item{covars}{Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)}
+\item{covars}{Either a named list with covariables, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}}
 
-\item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+\item{out.all}{If TRUE will output one p-value for all levels of the \code{predictor}. If FALSE outputs p-value and logFC from one level of the \code{predictor} specified by \code{coeff}. If NULL (default) set as TRUE for multi-class \code{predictor} and FALSE otherwise}
 
-\item{allResults}{If TRUE will return raw results from the glmQLFTest function}
+\item{p.adj}{Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details}
 
-\item{...}{Additional arguments for the calcNormFactors, estimateDisp, glmQLFit and glmQLFTest functions}
+\item{coeff}{Integer. The p-value and logFC will be associated with this coefficient when \code{out.all = FALSE}. Default 2, i.e. the 2. level of the \code{predictor}.}
+
+\item{allResults}{If TRUE will return raw results from the \code{glmQLFTest} function}
+
+\item{...}{Additional arguments for the \code{calcNormFactors}, \code{estimateDisp}, \code{glmQLFit} and \code{glmQLFTest} functions}
 }
 \description{
-EdgeR quasi-likelihood - TMM normalization
+Implementation of edgeR quasi-likelihood test for \code{DAtest}
 }

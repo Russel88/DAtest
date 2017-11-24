@@ -2,21 +2,21 @@
 % Please edit documentation in R/plot.DA.R
 \name{plot.DA}
 \alias{plot.DA}
-\title{Plotting results from testDA}
+\title{Plotting results from \code{testDA}}
 \usage{
 \method{plot}{DA}(x, sort = "AUC", p = FALSE, bins = 20, ...)
 }
 \arguments{
-\item{x}{The output from the testDA function}
+\item{x}{The output from the \code{testDA} function}
 
-\item{sort}{Sort methods by c("AUC","FPR")}
+\item{sort}{Sort methods by \code{c("AUC","FPR")}}
 
 \item{p}{Logical. Should the p-value distribution be plotted (only p-values from non-spiked features)}
 
 \item{bins}{Integer. Number of bins in p-value histograms}
 
-\item{...}{Additional plotting arguments}
+\item{...}{Additional arguments for \code{ggdraw}}
 }
 \description{
-Plotting results from testDA
+Plotting results from \code{testDA}
 }

@@ -2,18 +2,18 @@
 % Please edit documentation in R/posthocs.R
 \name{DA.drop1}
 \alias{DA.drop1}
-\title{Run drop1 on all features from DAtest results with allResults = TRUE}
+\title{Run \code{drop1} on all features from \code{DAtest} results with \code{allResults = TRUE}}
 \usage{
 DA.drop1(results, test = "Chisq", p.adj = "fdr", ...)
 }
 \arguments{
-\item{results}{Output from a DA."test" function with allResults = TRUE}
+\item{results}{Output from a \code{DA."test"} function with \code{allResults = TRUE}}
 
-\item{test}{Which test to use to calculate p-values. See ?drop1 for details}
+\item{test}{Which test to use to calculate p-values. See \code{drop1} for details. Default "Chisq"}
 
-\item{p.adj}{P-value adjustment method. See ?p.adjust for details}
+\item{p.adj}{P-value adjustment method. See \code{p.adjust} for details. Default "fdr"}
 
-\item{...}{Additional arguments for drop1 function}
+\item{...}{Additional arguments for \code{drop1} function}
 }
 \description{
 Works on "zpo", "znb", "qpo", "neb", "poi". Non-paired "lrm", "llm", "llm2"

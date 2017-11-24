@@ -1,25 +1,24 @@
 #' Pearson Correlation
-#'
-#' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
-#' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
-#' @param relative Logical. Should count_table be normalized to relative abundances. Default TRUE
-#' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
-#' @param ... Additional arguments for the cor.test function
+#' 
+#' Apply pearson correlation between multiple features and one \code{predictor}
+#' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
+#' @param predictor The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation
+#' @param relative Logical. Should \code{data} be normalized to relative abundances. Default TRUE
+#' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
+#' @param ... Additional arguments for the \code{cor.test} function
 #' @export
 
 DA.pea <- function(data, predictor, relative = TRUE, p.adj = "fdr", ...){
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
-    if(length(predictor) > 1) stop("When data is a phyloseq object predictor should only contain the name of the variables in sample_data")
-    if(!predictor %in% sample_variables(data)) stop(paste(predictor,"is not present in sample_data(data)"))
-    count_table <- otu_table(data)
-    if(!taxa_are_rows(data)) count_table <- t(count_table)
-    predictor <- unlist(sample_data(data)[,predictor])
+    DAdata <- DA.phyloseq(data, predictor)
+    count_table <- DAdata$count_table
+    predictor <- DAdata$predictor
   } else {
     count_table <- data
   }
-  
+
   # Relative abundance
   if(relative){
     count.rel <- apply(count_table,2,function(x) x/sum(x))
@@ -27,22 +26,23 @@ DA.pea <- function(data, predictor, relative = TRUE, p.adj = "fdr", ...){
     count.rel <- count_table
   }
   
-  # Define functions
+  # Define function
   pea <- function(x){
-    tryCatch(cor.test(x,predictor, ...)$p.value, error = function(e){NA}) 
+    tryCatch(cor.test(x,predictor, ...), error = function(e){NA}) 
   }
   
-  pea.cor <- function(x){
-    tryCatch(cor(x,predictor), error = function(e){NA}) 
-  }
-
-  # Apply functions
-  res <- data.frame(pval = apply(count.rel,1,pea))
+  # Run tests
+  peas <- apply(count.rel, 1, pea)
+  
+  # Collect results
+  res <- data.frame(pval = sapply(peas, function(x) x$p.value))
   res$pval.adj <- p.adjust(res$pval, method = p.adj)
-  res$cor <- apply(count.rel,1,pea.cor)
+  res$cor <- sapply(peas, function(x) x$estimate)
+  res$`cor_2.5%` <- sapply(peas, function(x) x$conf.int[1])
+  res$`cor_97.5%` <- sapply(peas, function(x) x$conf.int[2])
   res$Feature <- rownames(res)
   res$Method <- "Pearson (pea)"
-  
+
   # Add tax table if available
   if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
 

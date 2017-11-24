@@ -1,10 +1,10 @@
-#' Plot Venn diagram from allDA object
+#' Plot Venn diagram from \code{allDA} object
 #'
 #' Plot a Venn (Euler) diagram of features found by different methods.
 #' 
 #' Require the eulerr package unless output is TRUE.
-#' @param x Output from the allDA function
-#' @param tests Character vector with tests to plot (E.g. c("ttt","adx.t","wil"), see names(x$results)). Default none
+#' @param x (Required) Output from the \code{allDA} function
+#' @param tests (Required) Character vector with tests to plot (E.g. \code{c("ttt","adx.t","wil")}, see \code{names(x$results)}). Default none
 #' @param alpha Numeric. q-value threshold for significant features. Default 0.05
 #' @param split If TRUE will split diagrams in positive and negative estimates if possible
 #' @param output If TRUE will return a data.frame instead of a plot
@@ -14,10 +14,12 @@
 #' @export
 vennDA <- function(x, tests = NULL, alpha = 0.05, split = FALSE, output = FALSE, pkg = "eulerr", ...){
 
+  # Load package
   if(pkg == "eulerr") library(eulerr)
   if(pkg == "venneuler") library(venneuler)
   
-  if(!all(names(x) == c("raw","adj","est","results"))) stop("x is not an allDA object")
+  # Check input
+  if(!all(names(x) == c("raw","adj","est","details","results"))) stop("x is not an allDA object")
   
   plottests <- tests[tests %in% names(x[[2]])]  
   if(!all(tests %in% names(x[[2]]))){
@@ -25,6 +27,7 @@ vennDA <- function(x, tests = NULL, alpha = 0.05, split = FALSE, output = FALSE,
   }
   if(length(plottests) == 0) stop("Nothing to plot")
   
+  # Which are significant
   featurelist <- list()
   for(i in seq_along(plottests)){
     sub <- x$adj[,c("Feature",plottests[i])]
@@ -32,6 +35,7 @@ vennDA <- function(x, tests = NULL, alpha = 0.05, split = FALSE, output = FALSE,
     if(plottests[i] %in% c("sam","anc")) featurelist[[i]] <- sub[sub[,2] != "No","Feature"]
   }
 
+  # Split in negative and positive significant
   if(split){
     featurelist.pos <- list()
     featurelist.neg <- list()
@@ -39,19 +43,13 @@ vennDA <- function(x, tests = NULL, alpha = 0.05, split = FALSE, output = FALSE,
       
       subs <- x$est[,c(1,which(gsub("_.*","",colnames(x$est)) == plottests[i]))]
 
-      if(plottests[i] == "sam"){
-        sub.p <- subs[subs[,2] > 1,"Feature"]
-        sub.n <- subs[subs[,2] < 1,"Feature"]
-        featurelist.pos[[i]] <- featurelist[[i]][featurelist[[i]] %in% sub.p]
-        featurelist.neg[[i]] <- featurelist[[i]][featurelist[[i]] %in% sub.n]
-      }
       if(plottests[i] == "bay"){
         sub.p <- subs[subs[,2] == levels(subs[,2])[1],"Feature"]
         sub.n <- subs[subs[,2] == levels(subs[,2])[2],"Feature"]
         featurelist.pos[[i]] <- featurelist[[i]][featurelist[[i]] %in% sub.p]
         featurelist.neg[[i]] <- featurelist[[i]][featurelist[[i]] %in% sub.n]
       }
-      if(plottests[i] %in% c("znb","zpo","poi","qpo","neb","lrm","llm","llm2","lim","lli","lli2","vli","pea","spe","per","adx.t","adx.w","wil","ttt","ltt","ltt2","ere","ere2","erq","erq2","ds2","msf","zig")){
+      if(plottests[i] %in% c("sam","znb","zpo","poi","qpo","neb","lrm","llm","llm2","lim","lli","lli2","vli","pea","spe","per","adx.t","adx.w","wil","ttt","ltt","ltt2","ere","ere2","erq","erq2","ds2","msf","zig","rai")){
         if(is.null(ncol(subs))){
           featurelist.pos[[i]] <- featurelist[[i]]
           featurelist.neg[[i]] <- featurelist[[i]]
@@ -62,14 +60,17 @@ vennDA <- function(x, tests = NULL, alpha = 0.05, split = FALSE, output = FALSE,
           featurelist.neg[[i]] <- featurelist[[i]][featurelist[[i]] %in% sub.n]
         }
       }
-      if(!plottests[i] %in% c("sam","bay","znb","zpo","poi","qpo","neb","lrm","llm","llm2","lim","lli","lli2","vli","pea","spe","per","adx.t","adx.w","wil","ttt","ltt","ltt2","ere","ere2","erq","erq2","ds2","msf","zig")){
+      # If not estimate/logFC provided throw all significant in both positive and negative list
+      if(!plottests[i] %in% c("sam","bay","znb","zpo","poi","qpo","neb","lrm","llm","llm2","lim","lli","lli2","vli","pea","spe","per","adx.t","adx.w","wil","ttt","ltt","ltt2","ere","ere2","erq","erq2","ds2","msf","zig","rai")){
         featurelist.pos[[i]] <- featurelist[[i]]
         featurelist.neg[[i]] <- featurelist[[i]]
       }
     }
   } 
 
+  # Collect significant features and make correct naming
   if(split){
+    
     vennfeat.p <- do.call(c, featurelist.pos)
     vennfeat.n <- do.call(c, featurelist.neg)
     vennfeat <- c(vennfeat.p,vennfeat.n)
@@ -90,6 +91,7 @@ vennDA <- function(x, tests = NULL, alpha = 0.05, split = FALSE, output = FALSE,
     vennname <- c(vennname.pos,vennname.neg)
 
   } else {
+    
     vennfeat <- do.call(c, featurelist)
     if(length(vennfeat) == 0) stop("No significant features")
     naming <- list()
@@ -97,23 +99,33 @@ vennDA <- function(x, tests = NULL, alpha = 0.05, split = FALSE, output = FALSE,
       naming[[i]] <- rep(plottests[i],length(featurelist[[i]]))
     }
     vennname <- do.call(c, naming)
+    
   }
   
+  # Make dataframe with significant features for each method
   venndf <- data.frame(vennfeat,vennname)
 
-  for(i in seq_along(plottests)){
-    if(!plottests[i] %in% c("sam","bay","znb","zpo","poi","qpo","neb","lrm","llm","llm2","lim","lli","lli2","vli","pea","spe","per","adx.t","adx.w","wil","ttt","ltt","ltt2","ere","ere2","erq","erq2","ds2","msf","zig")){
-      venndf <- venndf[venndf$vennname != paste0(plottests[i],"_Negative"),]
-      venndf$vennname <- as.character(venndf$vennname)
-      venndf[venndf$vennname == paste0(plottests[i],"_Positive"),"vennname"] <- plottests[i]
+  # Remove the duplicate ones created earlier for methods without estimates/logFC
+  if(split){
+    for(i in seq_along(plottests)){
+      if(!plottests[i] %in% c("sam","bay","znb","zpo","poi","qpo","neb","lrm","llm","llm2","lim","lli","lli2","vli","pea","spe","per","adx.t","adx.w","wil","ttt","ltt","ltt2","ere","ere2","erq","erq2","ds2","msf","zig","rai")){
+        venndf <- venndf[venndf$vennname != paste0(plottests[i],"_Negative"),]
+        venndf$vennname <- as.character(venndf$vennname)
+        venndf[venndf$vennname == paste0(plottests[i],"_Positive"),"vennname"] <- plottests[i]
+      }
+      if(plottests[i] %in% c("znb","zpo","poi","qpo","neb","lrm","llm","llm2") & !plottests[i] %in% gsub("_.*","",colnames(x$est))){
+        venndf <- venndf[venndf$vennname != paste0(plottests[i],"_Negative"),]
+        venndf$vennname <- as.character(venndf$vennname)
+        venndf[venndf$vennname == paste0(plottests[i],"_Positive"),"vennname"] <- plottests[i]
+      }
     }
-    if(plottests[i] %in% c("znb","zpo","poi","qpo","neb","lrm","llm","llm2") & !plottests[i] %in% gsub("_.*","",colnames(x$est))){
-      venndf <- venndf[venndf$vennname != paste0(plottests[i],"_Negative"),]
-      venndf$vennname <- as.character(venndf$vennname)
-      venndf[venndf$vennname == paste0(plottests[i],"_Positive"),"vennname"] <- plottests[i]
-    }
+    
   }
+
+  # Remove NAs
+  venndf <- na.omit(venndf)
   
+  # Return data.frame or plot
   if(output){
     colnames(venndf) <- c("Feature","Method")
     return(venndf)

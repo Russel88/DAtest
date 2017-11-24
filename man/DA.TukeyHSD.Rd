@@ -2,18 +2,18 @@
 % Please edit documentation in R/posthocs.R
 \name{DA.TukeyHSD}
 \alias{DA.TukeyHSD}
-\title{Run TukeyHSD on all features from DAtest results with allResults = TRUE}
+\title{Run \code{TukeyHSD} on all features from \code{DAtest} results with \code{allResults = TRUE}}
 \usage{
 DA.TukeyHSD(results, variable = "predictor", p.adj = "fdr", ...)
 }
 \arguments{
-\item{results}{Output from a DA."test" function with allResults = TRUE}
+\item{results}{Output from a \code{DA."test"} function with \code{allResults = TRUE}}
 
 \item{variable}{Which variable to test. Default predictor. Alternatively, the name of a covar}
 
-\item{p.adj}{P-value adjustment method. See ?p.adjust for details}
+\item{p.adj}{P-value adjustment method. See \code{p.adjust} for details}
 
-\item{...}{Additional arguments for TukeyHSD function}
+\item{...}{Additional arguments for \code{TukeyHSD} function}
 }
 \description{
 Works on "aov", "lao", "lao2"

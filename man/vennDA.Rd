@@ -2,15 +2,15 @@
 % Please edit documentation in R/vennDA.R
 \name{vennDA}
 \alias{vennDA}
-\title{Plot Venn diagram from allDA object}
+\title{Plot Venn diagram from \code{allDA} object}
 \usage{
 vennDA(x, tests = NULL, alpha = 0.05, split = FALSE, output = FALSE,
   pkg = "eulerr", ...)
 }
 \arguments{
-\item{x}{Output from the allDA function}
+\item{x}{(Required) Output from the \code{allDA} function}
 
-\item{tests}{Character vector with tests to plot (E.g. c("ttt","adx.t","wil"), see names(x$results)). Default none}
+\item{tests}{(Required) Character vector with tests to plot (E.g. \code{c("ttt","adx.t","wil")}, see \code{names(x$results)}). Default none}
 
 \item{alpha}{Numeric. q-value threshold for significant features. Default 0.05}
 

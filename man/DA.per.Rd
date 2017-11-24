@@ -5,34 +5,37 @@
 \title{Permutation test of user-defined test statistic}
 \usage{
 DA.per(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr",
-  testStat = function(case, control) {     log((mean(case) + 1)/(mean(control)
-  + 1)) }, testStat.pair = function(case, control) {     mean(log((case +
-  1)/(control + 1))) }, noOfIterations = 10000, margin = 50)
+  testStat = function(case, control) {     log2((mean(case) +
+  1)/(mean(control) + 1)) }, testStat.pair = function(case, control) {    
+  log2(mean((case + 1)/(control + 1))) }, noOfIterations = 10000,
+  margin = 50)
 }
 \arguments{
-\item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
+\item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
-\item{predictor}{The predictor of interest. Factor, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+\item{predictor}{The predictor of interest. Factor, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation}
 
-\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation}
 
-\item{relative}{Logical. Should count_table be normalized to relative abundances. Default TRUE}
+\item{relative}{Logical. Should \code{data} be normalized to relative abundances. Default TRUE}
 
-\item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+\item{p.adj}{Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details}
 
-\item{testStat}{Function. Function for the test statistic. Should take two vectors as arguments. Default is a log fold change: log((mean(case abundances)+1)/(mean(control abundances)+1))}
+\item{testStat}{Function. Function for the test statistic. Should take two vectors as arguments. Default is a log fold change: \code{log2((mean(case abundances)+1)/(mean(control abundances)+1))}}
 
-\item{testStat.pair}{Function. Function for test statistc for paired analysis. Should take two vectors as arguments. Default is a log fold change: mean(log((case abundances+1)/(control abundances+1)))}
+\item{testStat.pair}{Function. Function for test statistic for paired analysis. Should take two vectors as arguments. Default is a log fold change: \code{log2(mean((case abundances+1)/(control abundances+1)))}}
 
 \item{noOfIterations}{Integer. Iterations for permutations. Default 10000}
 
 \item{margin}{Numeric. Margin for when to stop iterations if p-value is high and unlikely to become low}
 }
 \description{
+Test significance of multiple features with a binary \code{predictor} with a permutation scheme.
+}
+\details{
 Modified version of the one from:
 https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8.
 P-values are now two-sided, and test statistic is a simple log fold change
-}
-\details{
+
 A paired permutation test is implemented specifically for this package. The test is similar to the original, but with a different test statistic and permutation scheme. The permutations are constrained in the paired version such that the predictor is only permuted within each level of the paired argument (e.g. subjects). The test statistic first finds the log-ratio between the two predictor levels (e.g. case and control) for each level of the paired argument and the final statistic is the mean of these log-ratios.
 }

@@ -1,166 +1,155 @@
 #' Zero inflated Negative Binomial glm
 #'
-#' With log(librarySize) as offset.
-#' Mixed-effect model is used when a paired argument is included, with the paired variable as a random intercept.
-#' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
-#' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
-#' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
-#' @param relative Logical. Whether log(librarySize) should be used as offset. Default TRUE
-#' @param out.anova If TRUE will output results and p-values from drop1. If false will output results for 2. level of the predictor. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise
-#' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
-#' @param allResults If TRUE will return raw results from the zeroinfl function
-#' @param ... Additional arguments for the zeroinfl function
+#' Apply zero-inflated negative binomial generalized linear model to multiple features, with one independent variable
+#' With \code{log(librarySize)} as offset.
+#' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
+#' @param predictor The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation
+#' @param covars Either a named list with covariables, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}
+#' @param relative Logical. Whether \code{log(librarySize)} should be used as offset. Default TRUE
+#' @param out.all If TRUE will output results and p-values from \code{drop1}. If false will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class \code{predictor} and FALSE otherwise
+#' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
+#' @param coeff Integer. The p-value and log2FoldChange will be associated with this coefficient. Default 2, i.e. the 2. level of the \code{predictor}.
+#' @param allResults If TRUE will return raw results from the \code{zeroinfl} function
+#' @param ... Additional arguments for the \code{zeroinfl} function
 #' @import pscl
 #' @export
 
-DA.znb <- function(data, predictor, covars = NULL, relative = TRUE, out.anova = NULL, p.adj = "fdr", allResults = FALSE, ...){
+DA.znb <- function(data, predictor, covars = NULL, relative = TRUE, out.all = NULL, p.adj = "fdr", coeff = 2, allResults = FALSE, ...){
  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
-    if(length(predictor) > 1) stop("When data is a phyloseq object predictor should only contain the name of the variables in sample_data")
-    if(!predictor %in% sample_variables(data)) stop(paste(predictor,"is not present in sample_data(data)"))
-    count_table <- otu_table(data)
-    if(!taxa_are_rows(data)) count_table <- t(count_table)
-    predictor <- unlist(sample_data(data)[,predictor])
-    if(!is.null(covars)){
-      for(i in 1:length(covars)){
-        assign(covars[i], unlist(sample_data(data)[,covars[i]]))
-      }
-    } 
+    DAdata <- DA.phyloseq(data, predictor, paired = NULL, covars)
+    count_table <- DAdata$count_table
+    predictor <- DAdata$predictor
+    covars <- DAdata$covars
   } else {
     count_table <- data
-    if(!is.null(covars)){
-      for(i in 1:length(covars)){
-        assign(names(covars)[i], covars[[i]])
-      }
+  }
+  if(!is.null(covars)){
+    for(i in 1:length(covars)){
+      assign(names(covars)[i], covars[[i]])
     }
   }
   
-  # Out.anova
-  if(is.null(out.anova)){
-    if(is.numeric(predictor)) out.anova <- FALSE
-    if(length(unique(predictor)) == 2) out.anova <- FALSE
-    if(length(unique(predictor)) > 2) out.anova <- TRUE
+  # out.all
+  if(is.null(out.all)){
+    if(length(unique(predictor)) == 2) out.all <- FALSE
+    if(length(unique(predictor)) > 2) out.all <- TRUE
+    if(is.numeric(predictor)) out.all <- FALSE
   }
   
-  if(relative) libSize <- colSums(count_table) else libSize <- 1
+  # Library sizes
+  if(relative) libSize <- colSums(count_table) else libSize <- rep(1,ncol(count_table))
   count_table <- as.data.frame.matrix(count_table)
   
+  # Define function
   if(is.null(covars)){
-      pois <- function(x){
+    negbin <- function(x){
         fit <- NULL
         tryCatch(
           fit <- pscl::zeroinfl(x ~ predictor + offset(log(libSize)),dist="negbin",...), 
           error = function(x) fit <- NULL)
         if(!is.null(fit)) {
           if(nrow(summary(fit)$coefficients$count) > 1) {
-            summary(fit)$coefficients$count[2,]
+            pval <- summary(fit)$coefficients$count[coeff,4]
+            ests <- summary(fit)$coefficients$count[,1]
+            c(ests,pval)
           } else NA
         } else NA 
       }
-    } else {
-      if(class(data) == "phyloseq"){
-        pois <- function(x){
-          fit <- NULL
-          tryCatch(
-            fit <- pscl::zeroinfl(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(covars, collapse="+"),sep = "")),dist="negbin",...), 
-            error = function(x) fit <- NULL)
-          if(!is.null(fit)) {
-            if(nrow(summary(fit)$coefficients$count) > 1) {
-              summary(fit)$coefficients$count[2,]
-            } else NA
-          } else NA 
-        }
-      } else {
-        pois <- function(x){
+  } else {
+    negbin <- function(x){
           fit <- NULL
           tryCatch(
             fit <- pscl::zeroinfl(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(names(covars), collapse="+"),sep = "")),dist="negbin",...), 
             error = function(x) fit <- NULL)
           if(!is.null(fit)) {
             if(nrow(summary(fit)$coefficients$count) > 1) {
-              summary(fit)$coefficients$count[2,]
+              pval <- summary(fit)$coefficients$count[coeff,4]
+              ests <- summary(fit)$coefficients$count[,1]
+              c(ests,pval)
             } else NA
           } else NA 
         }
-      }
-    }
+  }
 
-  if(out.anova){
+  ## for out.all TRUE
+  if(out.all){
     if(is.null(covars)){
-      pois <- function(x){
+      negbin <- function(x){
         fit <- NULL
         tryCatch(
-          fit <- drop1(pscl::zeroinfl(x ~ predictor + offset(log(libSize)),dist="negbin",...),test="Chisq")[2,], 
+          fit <- pscl::zeroinfl(x ~ predictor + offset(log(libSize)),dist="negbin",...), 
           error = function(x) fit <- NULL)
+        if(!is.null(fit)){
+          ests <- summary(fit)$coefficients$count[,1]
+          ano <- tryCatch(drop1(fit, test = "Chisq")[2,],error = function(e) ano <- NULL)
+          c(ano,ests)
+        }
       }
     } else {
-      if(class(data) == "phyloseq"){
-        pois <- function(x){
+      negbin <- function(x){
           fit <- NULL
           tryCatch(
-            fit <- drop1(pscl::zeroinfl(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(covars, collapse="+"),sep = "")),dist="negbin",...),test="Chisq")[2,], 
+            fit <- pscl::zeroinfl(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(names(covars), collapse="+"),sep = "")),dist="negbin",...), 
             error = function(x) fit <- NULL)
+          if(!is.null(fit)){
+            ests <- summary(fit)$coefficients$count[,1]
+            ano <- tryCatch(drop1(fit, test = "Chisq")[2,],error = function(e) ano <- NULL)
+            c(ano,ests)
+          }
         }
-      } else {
-        pois <- function(x){
-          fit <- NULL
-          tryCatch(
-            fit <- drop1(pscl::zeroinfl(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(names(covars), collapse="+"),sep = "")),dist="negbin",...),test="Chisq")[2,], 
-            error = function(x) fit <- NULL)
-        }
-      }
     }
-    res <- as.data.frame(do.call(rbind,apply(count_table,1,pois)))
-    colnames(res) <- c("Df","AIC","LRT","pval")
-  } else {
-    res <- as.data.frame(t(as.data.frame(apply(count_table,1,pois))))
-    colnames(res) <- c("Estimate","Std.Error","z value","pval")
   }
   
-
-  if(nrow(res) == 1){
-    res <- data.frame(Estimate = rep(NA,nrow(count_table)), Std.Error = rep(NA,nrow(count_table)), z.value = rep(NA,nrow(count_table)), pval = rep(NA,nrow(count_table)))
-    rownames(res) <- rownames(count_table) 
-    colnames(res) <- c("Estimate","Std.Error","z value","pval")
-  } 
-
-  res$pval.adj <- p.adjust(res$pval, method = p.adj)
-  res$Feature <- rownames(res)
-  res$Method <- "ZI-NegBin GLM (znb)"
-  
-  if(nrow(res) > 1){
-    if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
-  }
-
+  ## for allResults TRUE
   if(allResults){
     if(is.null(covars)){
-      pois <- function(x){
+      negbin <- function(x){
         fit <- NULL
         tryCatch(
           fit <- pscl::zeroinfl(x ~ predictor + offset(log(libSize)),dist="negbin",...), 
           error = function(x) fit <- NULL)
       }
     } else {
-      if(class(data) == "phyloseq"){
-        pois <- function(x){
-          fit <- NULL
-          tryCatch(
-            fit <- pscl::zeroinfl(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(covars, collapse="+"),sep = "")),dist="negbin",...), 
-            error = function(x) fit <- NULL)
-        }
-      } else {
-        pois <- function(x){
+      negbin <- function(x){
           fit <- NULL
           tryCatch(
             fit <- pscl::zeroinfl(as.formula(paste("x ~ predictor+offset(log(libSize))+",paste(names(covars), collapse="+"),sep = "")),dist="negbin",...), 
             error = function(x) fit <- NULL)
         }
+    }
+    return(apply(count_table,1,negbin))
+  } else {
+    
+    # Run the tests for allResults FALSE
+    if(out.all){
+      res <- as.data.frame(do.call(rbind,apply(count_table,1,negbin)))
+      colnames(res)[1:4] <- c("Df","AIC","LRT","pval")
+      res <- as.data.frame(lapply(res, unlist))
+    } else {
+      res <- as.data.frame(t(as.data.frame(apply(count_table,1,negbin))))
+      colnames(res)[ncol(res)] <- "pval"
+      res$log2FC <- log2(exp(res[,1]+res[,coeff]) / exp(res[,1]))
+      if(!is.numeric(predictor)){
+        res$ordering <- NA
+        res[!is.na(res[,coeff]) & res[,coeff] > 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff],">",levels(as.factor(predictor))[1])
+        res[!is.na(res[,coeff]) & res[,coeff] < 0,"ordering"] <- paste0(levels(as.factor(predictor))[1],">",levels(as.factor(predictor))[coeff])
       }
     }
     
-    return(apply(count_table,1,pois))
-  } else {
+    if(nrow(res) == 1){
+      res <- data.frame(pval = rep(NA,nrow(count_table)))
+      rownames(res) <- rownames(count_table) 
+    } 
+    
+    res$pval.adj <- p.adjust(res$pval, method = p.adj)
+    res$Feature <- rownames(res)
+    res$Method <- "ZI-NegBin GLM (znb)"
+    
+    if(nrow(res) > 1){
+      if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
+    }
     return(res)
   }
   

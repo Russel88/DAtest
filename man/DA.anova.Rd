@@ -2,16 +2,16 @@
 % Please edit documentation in R/posthocs.R
 \name{DA.anova}
 \alias{DA.anova}
-\title{Run anova on all features from DAtest results with allResults = TRUE}
+\title{Run \code{anova} on all features from \code{DAtest} results with \code{allResults = TRUE}}
 \usage{
 DA.anova(results, p.adj = "fdr", ...)
 }
 \arguments{
-\item{results}{Output from a DA."test" function with allResults = TRUE}
+\item{results}{Output from a \code{DA."test"} function with \code{allResults = TRUE}}
 
-\item{p.adj}{P-value adjustment method. See ?p.adjust for details}
+\item{p.adj}{P-value adjustment method. See \code{p.adjust for details}. Default "fdr"}
 
-\item{...}{Additional arguments for anova function}
+\item{...}{Additional arguments for \code{anova} function}
 }
 \description{
 Works on "lrm", "llm", "llm2". Non-paired "neb"

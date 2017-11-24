@@ -2,15 +2,15 @@
 % Please edit documentation in R/print.DA.R
 \name{print.DA}
 \alias{print.DA}
-\title{Print results from testDA}
+\title{Print results from \code{testDA}}
 \usage{
 \method{print}{DA}(x, ...)
 }
 \arguments{
-\item{x}{The output from the testDA function}
+\item{x}{The output from the \code{testDA} function}
 
-\item{...}{Additional printing arguments}
+\item{...}{Additional arguments for \code{print}}
 }
 \description{
-Print results from testDA
+Print results from \code{testDA}
 }

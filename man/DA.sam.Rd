@@ -2,24 +2,24 @@
 % Please edit documentation in R/DA.sam.R
 \name{DA.sam}
 \alias{DA.sam}
-\title{SamSeq}
+\title{SAMSeq}
 \usage{
 DA.sam(data, predictor, paired = NULL, fdr.output = 0.05,
   allResults = FALSE, ...)
 }
 \arguments{
-\item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
+\item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
-\item{predictor}{The predictor of interest. Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+\item{predictor}{The predictor of interest. Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation}
 
-\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation}
 
-\item{fdr.output}{Passed to SAMseq. (Approximate) False Discovery Rate cutoff for output in significant genes table}
+\item{fdr.output}{Passed to \code{SAMseq}. (Approximate) False Discovery Rate cutoff for output in significant genes table}
 
-\item{allResults}{If TRUE will return raw results from the SAMseq function}
+\item{allResults}{If TRUE will return raw results from the \code{SAMseq} function}
 
-\item{...}{Additional arguments for the SAMseq function}
+\item{...}{Additional arguments for the \code{SAMseq} function}
 }
 \description{
-SamSeq
+SAMSeq implementation for \code{DAtest}
 }

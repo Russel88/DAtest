@@ -20,17 +20,14 @@ in choosing a method for a specific dataset based on empirical testing.
     -   whether they can find the spike-ins
     -   whether the false positive rate is controlled
 
-#### The workflow (details can be found below):
+#### The intended workflow (details can be found below):
 
 -   Compare methods with `testDA` function
     -   Check the results with `plot` or `summary`
     -   Choose method that has high AUC, and FPR not higher than ~0.05
--   Run data with the chosen test with DA."test" function, where "test"
-    is the name of the test (see details with ?testDA)
+-   Run data with the chosen test with `DA."test"` function, where
+    "test" is the name of the test (see details with `?testDA`)
     -   Check out your final results.
-
-See a full example on a test dataset
-[here](http://htmlpreview.github.com/?https://github.com/Russel88/DAtest/blob/master/Suppl_script.html)
 
 ### Citation
 
@@ -53,6 +50,21 @@ Overview of this tutorial
 -   [How to run real data](#how-to-run-real-data)
 -   [Implemented methods](#implemented-methods)
 -   [Extra features](#extra-features)
+
+Examples
+--------
+
+See full examples on a test dataset here:
+
+-   [Two-class
+    (or Quantitative)](http://htmlpreview.github.com/?https://github.com/Russel88/DAtest/blob/master/script/script_twoclass.html)
+-   [Multi-class](http://htmlpreview.github.com/?https://github.com/Russel88/DAtest/blob/master/script/script_multiclass.html)
+-   [Covariates](http://htmlpreview.github.com/?https://github.com/Russel88/DAtest/blob/master/script/script_covars.html)
+
+The examples use the [phyloseq
+package](https://joey711.github.io/phyloseq/), but the workflow would be
+the similar if the input is a count table in the form of a data.frame or
+matrix.
 
 Installation of packages
 ========================
@@ -151,6 +163,10 @@ analysis. The higher Spike.detect.rate, the better.
     -   If several methods have very similar AUCs, the Spike.detect.rate
         can be used to differentiate among the methods
 
+### \*\*Pre-process <data:**> An optional step is to pre-process the data to reduce the number of features tested. With `preDA` low-abundance features can be grouped as "Others". Note that the features are not simply pruned, they are grouped to retain samples sums (library sizes). Filtering can be based on number of samples the features are present in, the total number of reads for the features, the mean relative abundance of the features, or a combination of all three.
+
+    data.new <- preDA(data, min.samples = 2, min.reads = 10, min.abundance = 0)
+
 ### **Run the test:**
 
 (if you have a phyloseq object, see details further down)
@@ -197,10 +213,10 @@ But if you have terminated the function before it ended and your
 computer runs slow, you might want to restart R to close all
 connections.
 
-If you run out of memory/RAM, reduce the number of cores used for
-computing.
+If you run out of memory/RAM, try again with a clean R environment or
+reduce the number of cores used for computing.
 
-### *If you have more than 10k features (or 2k for paired analysis):*
+### *If you have more than 10k features (or 5k for paired analysis):*
 
 Runtime of the different methods can vary quite a lot, and some methods
 are simply unfeasible for datasets with several thousands of features.
@@ -221,53 +237,58 @@ method.
 There are generally two ways to output results with a categorical
 predictor with multiple levels; either there is one p-value indicating
 whether the categories are similar or different (e.g. as in ANOVA), or
-there is one p-value for each level, often where the first level is set
-as intercept and the remaining levels are tested against the intercept
+there is one p-value for each level, where the first level is set as
+intercept and the remaining levels are tested against the intercept
 (e.g. in linear regression). For some methods you can choose which
 option fits you, with other methods not, but it is crucial that this
 option is similar in the `testDA` function as in the final analysis.
 
-In general, the default settings for `testDA` should be fine for
-multi-class predictors. If you are interested in testing two or more
-levels against a baseline, you should set the levels of the `predictor`
-such that the baseline is the first level (e.g. factor(predictor, levels
-= c("baseline","treatment1","treatment2"))), and you should set
-`out.anova = FALSE` in both `testDA` and in your final analysis.
+By default, for all methods possible you get one p-value for multi-class
+predictor variables. For ANOVA and linear models (+GLMs) you can
+subsequently run post-hoc tests for all pairwise comparisons (see [extra
+features](#extra-features)).
 
-**Below is a description of how the methods treat multi-class
-predictors:**
+For linear models (lrm, llm, llm2), GLMs (poi, neb, qpo, zpo, znb),
+limma models (vli, lim, lli, lli2), edgeR (erq, erq2) and DESeq (ds2),
+you can use the `out.all` argument to toggle how multi-class predictors
+are treated. If `out.all = TRUE` (default for multi-class predictors)
+you get one p-value for the predictor (no matter how many
+levels/categories it has). If `out.all = FALSE` you get the p-value for
+the level of the predictor specificed by `coeff` tested against the
+intercept (default 2. level, as it is the one spiked in `testDA`). Use
+this if you are interested in testing two or more levels against a
+baseline, and remember to set the levels of the `predictor` such that
+the baseline is the first level (e.g. factor(predictor, levels =
+c("baseline","treatment1","treatment2"))).
 
-Methods not mentioned here are not tunable for multi-class predictors.
+*Important:* log2FC is by default the fold change between the 2. and 1.
+level of the `predictor`, no matter what `out.all` is set to. Use the
+`coeff` argument to change this.
 
-For multi-class predictors all linear models (also GLMs) output results
-(including p-values) from `anova`/`drop1` functions and are thus testing
-the `predictor` variable in one go. If you are interested in testing
-treatments against a common baseline/control (i.e. intercept), you can
-set `out.anova = FALSE`. This will output results from the 2. level of
-the `predictor` compared to the intercept. This is because only the 2.
-level is spiked when `predictor` contains multiple levels. In your final
-analysis you can get an output with all p-values, see more in [how to
-run real data](#how-to-run-real-data)). No matter what `out.anova` is
-set to, you can run post-hoc tests for all pairwise comparisons, see
-[extra features](#extra-features).
+#### *Below is a description of how the different methods treat multi-class predictors:*
 
-For multi-class predictors all limma models output results (including
-p-values) from `topTable` testing all levels (minus 1) against the
-intercept. This can be changed with `out.anova`. `out.anova = FALSE`
-will output results from the 2. level of the predictor. In your final
-analysis you can set `allResults = TRUE` and use `topTable` on the
+Linear models (lrm, llm, llm2) and GLMs (poi, neb, qpo, zpo, znb) use
+`anova`/`drop1` if `out.all=TRUE`
+
+Limma models run moderate F-test if `out.all=TRUE` and moderated t-test
+otherwise. You can set `allResults = TRUE` and use `topTable` on the
 output to get the desired results.
-
-DESeq2 is always set to run Log Ratio Test (LRT) and is thus testing all
-levels of the `predictor` in one go.
-
-EdgeR is always set to test if all levels of `predictor` (minus
-intercept) are zero.
 
 MetagenomeSeq Zig is set to always output p.values from the 2. level of
 the `predictor`. For your final analysis use the `by` argument to change
 this, or set `allResults = TRUE` and then use `MRtable` on the output to
 get the desired results.
+
+DESeq2 is running Log Ratio Test (LRT) if `out.all=TRUE` and Wald test
+otherwise. log2FoldChange is by default the fold change between the
+second and first level of the predictor for LRT, and fold change between
+second level and overall mean for Wald test, use the `coeff` argument to
+change this. For your final analysis you can set `allResults = TRUE` and
+use `results` on the output, e.g. for getting pairwise comparisons or
+p-values/log2FC for covariates.
+
+For SAMSeq, ANOVAs, Quade test, Friedman test, Kruskal-Wallis test you
+always get one p-value for the `predictor`
 
 ### *If you have a paired/blocked experimental design:*
 
@@ -301,7 +322,7 @@ covariable in the model and are also generally flexible in the design.
 
 ANCOM use the `paired` variable in a repeated measures manner
 
-### *If you have non-relative abundances, e.g. for normalized protein abundance:*
+### *If you have non-relative abundances, e.g. for normalized protein abundance or absolute microbiome abundance:*
 
     mytest <- testDA(data, predictor, relative = FALSE)
 
@@ -344,15 +365,15 @@ the same order as columns in `data`):
 
 **Note:**
 
-As ANCOM and SAMseq do not output p-values, FPR for these methods is the
-final false discovery rate and we should expect an FPR close to 0 for
-these two methods, unless you are willing to accept some false
-positives. This can be tuned with the `sig`/`multcorr` ("anc") and
-`fdr.output` ("sam") arguments.
+As SAMseq does not output p-values, FPR for this method is estimated
+from the final false discovery rate. FPR might therefore vary quite a
+lot. If SAMSeq is one of the methods with highest AUC, you can run
+`testDA` again but with a higher `fdr.output` argument for "sam" (e.g.
+`testDA(...,args = list(sam = list(fdr.output = 0.25))))` to get a
+better estimate. If `fdr.output=0.25` we should expect FPR for "sam"
+from `testDA` to be 0.25 or lower.
 
-P-values for baySeq are defined as 1 - posterior likelihoods. Therefore,
-features with posterior likelihood higher than 95% are called
-significant.
+P-values for baySeq are defined as 1 - posterior likelihoods.
 
 #### *High AUC, but Spike.detect.rate is 0.000?!*
 
@@ -381,22 +402,46 @@ The default output should be fine for most users, but you can set
 `allResults = TRUE` to obtain the raw results. With the raw results you
 can run post-hoc tests on linear models and ANOVA models (for
 multi-class predictors), and you check for significance of covars. See
-more under [Extra features](#extra-features). For limma models
-`topTable` can be used on raw results.
+more under [Extra features](#extra-features).
 
 **Plot association between specific feature and predictor**
 
-`featurePlot` will plot abundance of a feature against the predictor to
-visually explore your data:
+`featurePlot` will plot abundance of a feature against the `predictor`
+to visually explore your data:
 
     featurePlot(data, predictor, feature = "OTU1")
 
-If a paired variable is supplied it will make line plots grouped by the
-paired variable If covars are supplied plots are facetted according to
-these.
+If a `paired` variable is supplied it will make coloured line plots
+grouped by the `paired` variable If `covars` are supplied plots are
+facetted according to these.
 
-**Alternatively, run all (or several) methods and check which features
-are found by several methods.**
+**Test if groups of features are overrepresented among significant
+features**
+
+`groupSig` will test if there is a significant overrepresentation of
+certain groups of features among the significant ones. For microbiome
+data you can, for example, test if OTUs from some specific phyla or
+family are more likely to be significant than others. For proteomics you
+can, for example, test if proteins from some specific KEGG pathways are
+more likely to be significant than others. The groups can in principle
+be anything.
+
+    groupSig(results, group.df, group.cols)
+
+`results` is the output from a `DA."test"` function. `group.df` is a
+data.frame giving one or more grouping variables, with row.names
+mathcing the `Feature` column in `results` (e.g. the `tax_table` from a
+phyloseq object). `group.cols` denotes which columns in `group.df` are
+used for testing (E.g. `group.cols = 1:3` will use the first three
+columns).
+
+Run all (or several) methods and check which features are found by several methods
+----------------------------------------------------------------------------------
+
+With `allDA` we can run several methods and easily compare their results
+
+A subset of methods can be run by setting the `tests` argument. E.g.
+only those performing well based on results from `testDA`.
 
     # Run many methods:
     res.all <- allDA(data, predictor)
@@ -404,7 +449,7 @@ are found by several methods.**
     # Adjusted p-values from all methods (detection/no-detection from sam and anc)
     res.all$adj
 
-    # Estimates/fold.changes from all methods which output anything relevant for this
+    # Estimates/fold.changes from all methods that output anything relevant for this
     res.all$est
 
     # Venn (Euler) diagram of detected features from selected methods:
@@ -417,9 +462,6 @@ are found by several methods.**
     # See results from a method (e.g. t.test "ttt"):
     View(res.all$results$ttt)
 
-A subset of methods can be run by setting the `tests` argument. E.g.
-only those performing well based on results from `testDA`.
-
 Implemented methods
 ===================
 
@@ -427,7 +469,7 @@ Implemented methods
 
 Either add it yourself [(see under 'Extra features')](#extra-features),
 or write to me, preferably with a code snippet of the implementation
-(see email in Description).
+(see email in Description, R/DA.zzz.R can be used as a template).
 
 ### Methods:
 
@@ -611,6 +653,8 @@ abundances:
       rel <- apply(count_table, 2, function(x) x/sum(x))
       
       # t-test function
+      ## Wrapping this function in tryCatch(..., error = function(e){NA}) 
+      ## ensures that our main function won't fail if t.test fails on some features
       tfun <- function(x){
         tryCatch(t.test(x ~ predictor)$p.value, error = function(e){NA}) 
       }
@@ -618,9 +662,13 @@ abundances:
       # P-values for each feature
       pvals <- apply(rel, 1, tfun)
       
+      # Adjust p-values
+      pvals.adj <- p.adjust(pvals, method = "fdr")
+      
       # Collect and return data
       df <- data.frame(Feature = rownames(count_table),
-                       pval = pvals)
+                       pval = pvals,
+                       pval.adj = pvals.adj)
       df$Method <- "My own t-test"
       return(df)
       
@@ -661,40 +709,40 @@ Additional arguments are simply seperated by commas.
 Below is an overview of which functions get the arguments that are
 passed to a specific test:
 
--   per - Passed to DA.per
--   bay - Passed to getPriors and getLikelihoods
--   adx - Passed to aldex
--   wil - Passed to wilcox.test and DA.wil
--   ttt - Passed to t.test and DA.ttt
--   ltt - Passed to t.test and DA.ltt
--   ltt2 - Passed to t.test and DA.ltt2
--   neb - Passed to glm.nb and glmer.nb
--   ere - Passed to calcNormFactors, estimateCommonDisp,
-    estimateTagwiseDisp and exactTest
--   erq - Passed to calcNormFactors, estimateDisp, glmQLFit and
-    glmQLFTest
--   msf - Passed to fitFeatureModel
--   zig - Passed to fitZig
--   ds2 - Passed to DESeq
--   lim - Passed to eBayes and lmFit
--   lli - Passed to eBayes, lmFit and DA.lli
--   lli2 - Passed to eBayes, lmFit and DA.lli2
--   kru - Passed to kruskal.test
--   aov - Passed to aov
--   lao - Passed to aov and DA.lao
--   lao2 - Passed to aov and DA.lao2
--   lrm - Passed to lm and lme
--   llm - Passed to lm, lme and DA.llm
--   llm2 - Passed to lm, lme and DA.llm2
--   rai - Passed to raida
--   spe - Passed to cor.test
--   pea - Passed to cor.test
--   poi - Passed to glm and glmer
--   qpo - Passed to glm
--   vli - Passed to voom, eBayes and lmFit
--   zpo - Passed to zeroinfl
--   znb - Passed to zeroinfl
--   fri - Passed to friedman.test
--   qua - Passed to quade.test
--   anc - Passed to ANCOM
--   sam - Passed to SAMseq
+-   per - Passed to `DA.per`
+-   bay - Passed to `getPriors`, `getLikelihoods` and `DA.bay`
+-   adx - Passed to `aldex` and `DA.adx`
+-   wil - Passed to `wilcox.test` and `DA.wil`
+-   ttt - Passed to `t.test` and `DA.ttt`
+-   ltt - Passed to `t.test` and `DA.ltt`
+-   ltt2 - Passed to `t.test` and `DA.ltt2`
+-   neb - Passed to `glm.nb`, `glmer.nb` and `DA.neb`
+-   erq - Passed to `calcNormFactors`, `estimateDisp`, `glmQLFit`,
+    `glmQLFTest` and `DA.erq`
+-   ere - Passed to `calcNormFactors`, `estimateCommonDisp`,
+    `estimateTagwiseDisp`, `exactTest` and `DA.ere`
+-   msf - Passed to `fitFeatureModel` and `DA.msf`
+-   zig - Passed to `fitZig` and `DA.zig`
+-   ds2 - Passed to `DESeq` and `DA.ds2`
+-   lim - Passed to `eBayes`, `lmFit` and `DA.lim`
+-   lli - Passed to `eBayes`, `lmFit` and `DA.lli`
+-   lli2 - Passed to `eBayes`, `lmFit` and `DA.lli2`
+-   kru - Passed to `kruskal.test` and `DA.kru`
+-   aov - Passed to `aov` and `DA.aov`
+-   lao - Passed to `aov` and `DA.lao`
+-   lao2 - Passed to `aov` and `DA.lao2`
+-   lrm - Passed to `lm`, `lme` and `DA.lrm`
+-   llm - Passed to `lm`, `lme` and `DA.llm`
+-   llm2 - Passed to `lm`, `lme` and `DA.llm2`
+-   rai - Passed to `raida` and `DA.rai`
+-   spe - Passed to `cor.test` and `DA.spe`
+-   pea - Passed to `cor.test` and `DA.pea`
+-   poi - Passed to `glm`, `glmer` and `DA.poi`
+-   qpo - Passed to `glm` and `DA.qpo`
+-   vli - Passed to `voom`, `eBayes`, `lmFit` and `DA.vli`
+-   zpo - Passed to `zeroinfl` and `DA.zpo`
+-   znb - Passed to `zeroinfl` and `DA.znb`
+-   fri - Passed to `friedman.test` and `DA.fri`
+-   qua - Passed to `quade.test` and `DA.qua`
+-   anc - Passed to `ANCOM` and `DA.anc`
+-   sam - Passed to `SAMseq` and `DA.sam`

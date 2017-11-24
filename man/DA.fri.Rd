@@ -8,20 +8,20 @@ DA.fri(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr",
   allResults = FALSE, ...)
 }
 \arguments{
-\item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
+\item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
-\item{predictor}{The predictor of interest. Factor, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+\item{predictor}{The predictor of interest. Factor, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation}
 
-\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation}
 
-\item{relative}{Logical. Should count_table be normalized to relative abundances. Default TRUE}
+\item{relative}{Logical. Should \code{data} be normalized to relative abundances. Default TRUE}
 
-\item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+\item{p.adj}{Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details}
 
-\item{allResults}{If TRUE will return raw results from the friedman.test function}
+\item{allResults}{If TRUE will return raw results from the \code{friedman.test} function}
 
-\item{...}{Additional arguments for the friedman.test function}
+\item{...}{Additional arguments for the \code{friedman.test} function}
 }
 \description{
-Friedman Rank Sum test
+Apply friedman test to multiple features with one \code{predictor}
 }

@@ -7,15 +7,14 @@
 DA.ere(data, predictor, p.adj = "fdr", ...)
 }
 \arguments{
-\item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
+\item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
-\item{predictor}{The predictor of interest. Factor, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+\item{predictor}{The predictor of interest. Factor, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation}
 
-\item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+\item{p.adj}{Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details}
 
-\item{...}{Additional arguments for the calcNormFactors, estimateCommonDisp, estimateTagwiseDisp and exactTest functions}
+\item{...}{Additional arguments for the \code{calcNormFactors}, \code{estimateCommonDisp}, \code{estimateTagwiseDisp} and \code{exactTest} functions}
 }
 \description{
-Implemented as in:
-https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8
+Implementation of edgeR exact test for \code{DAtest}
 }

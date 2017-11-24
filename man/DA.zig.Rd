@@ -5,28 +5,27 @@
 \title{MetageonomeSeq ZIG}
 \usage{
 DA.zig(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
-  by = 2, eff = 0, allResults = FALSE, ...)
+  by = 2, eff = 0.5, allResults = FALSE, ...)
 }
 \arguments{
-\item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
+\item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
-\item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+\item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation}
 
-\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation}
 
-\item{covars}{Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)}
+\item{covars}{Either a named list with covariables, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}}
 
-\item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+\item{p.adj}{Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details}
 
-\item{by}{Column number or column name specifying which coefficient or contrast of the linear model is of interest (only for categorical predictors). Default 2}
+\item{by}{Column number or column name specifying which coefficient or contrast of the linear model is of interest (only for categorical \code{predictor}). Default 2}
 
-\item{eff}{Filter features to have at least a "eff" quantile or number of effective samples.}
+\item{eff}{Filter features to have at least a \code{eff} quantile or number of effective samples, passed to \code{MRtable}}
 
-\item{allResults}{If TRUE will return raw results from the fitZig function}
+\item{allResults}{If TRUE will return raw results from the \code{fitZig} function}
 
-\item{...}{Additional arguments for the fitZig function}
+\item{...}{Additional arguments for the \code{fitZig} function}
 }
 \description{
-Implemented as in:
-https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8
+Implementation of Metagenome zero-inflated gaussian model for \code{DAtest}
 }

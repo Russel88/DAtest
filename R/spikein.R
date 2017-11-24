@@ -1,15 +1,15 @@
 #' Spike-in
 #'
-#' Internal function for the testDA function.
+#' Internal function for the \code{testDA} function.
 #' 
 #' Modified version of the one from:
 #' https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8.
 #' 
 #' @param count_table Matrix or data.frame. Table with taxa/genes/proteins as rows and samples as columns
-#' @param predictor Factor or Numeric. The predictor of interest. E.g. case and control. If the predictor has more than two levels, only the 2. level will be spiked. If the predictor is numeric it will be treated as such in the analyses
+#' @param predictor Factor or Numeric. The predictor of interest. E.g. case and control. If the \code{predictor} has more than two levels, only the 2. level will be spiked.
 #' @param effectSize Integer. The effect size for the spike-ins. Default 2
 #' @param k Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). k=c(5,10,15): 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default c(5,5,5)
-#' @param num.pred Logical. Is the predictor numeric? Default FALSE
+#' @param num.pred Logical. Is the \code{predictor} numeric? Default FALSE
 #' @param relative Logical. Are abundances relative? Default TRUE
 #' @export
 
@@ -27,14 +27,15 @@ spikein <- function(count_table, predictor, effectSize = 2, k, num.pred = FALSE,
   propcount <- apply(count_table,2,function(x) x/sum(x))
   count_abundances <- sort(rowSums(propcount)/ncol(propcount))
     
-  # Only spike Features present in cases (except if predictor is numeric)
+  ## Only spike Features present in cases (except if predictor is numeric)
   if(num.pred){
     approved_count_abundances <- count_abundances
   } else {
     approved_count_abundances <- count_abundances[ 
       names(count_abundances) %in% row.names( count_table[ rowSums(count_table[,predictor == 1]) > 0, predictor == 1] ) ]
   }
-    
+  
+  # Which to spike in each tertile  
   lower_tert <- names(approved_count_abundances[approved_count_abundances < quantile(approved_count_abundances,1/3)])
   mid_tert <- names(approved_count_abundances[approved_count_abundances >= quantile(approved_count_abundances,1/3) & approved_count_abundances < quantile(approved_count_abundances,2/3)])
   upper_tert <- names(approved_count_abundances[approved_count_abundances >= quantile(approved_count_abundances,2/3)])

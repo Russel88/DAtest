@@ -1,68 +1,60 @@
 #' ANOVA
 #' 
-#' With log transformation of relative abundances.
-#' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
-#' @param predictor The predictor of interest. Factor, OR if data is a phyloseq object the name of the variable in sample_data in quotation
-#' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
-#' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
+#' Apply ANOVA to multiple features with one \code{predictor}, with log transformation of relative abundances.
+#' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
+#' @param predictor The predictor of interest. Factor, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation
+#' @param covars Either a named list with covariables, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}
+#' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
 #' @param delta Numeric. Pseudocount for the log transformation. Default 0.001
-#' @param allResults If TRUE will return raw results from the aov function
-#' @param ... Additional arguments for the aov functions
+#' @param allResults If TRUE will return raw results from the \code{aov} function
+#' @param ... Additional arguments for the \code{aov} functions
 #' @export
 
 DA.lao2 <- function(data, predictor, covars = NULL, p.adj = "fdr", delta = 0.001, allResults = FALSE, ...){
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
-    if(length(predictor) > 1) stop("When data is a phyloseq object predictor and paired should only contain the name of the variables in sample_data")
-    if(!predictor %in% sample_variables(data)) stop(paste(predictor,"is not present in sample_data(data)"))
-    count_table <- otu_table(data)
-    if(!taxa_are_rows(data)) count_table <- t(count_table)
-    predictor <- unlist(sample_data(data)[,predictor])
-    if(!is.null(covars)){
-      for(i in 1:length(covars)){
-        assign(covars[i], unlist(sample_data(data)[,covars[i]]))
-      }
-    } 
+    DAdata <- DA.phyloseq(data, predictor, paired = NULL, covars)
+    count_table <- DAdata$count_table
+    predictor <- DAdata$predictor
+    covars <- DAdata$covars
   } else {
     count_table <- data
-    if(!is.null(covars)){
-      for(i in 1:length(covars)){
-        assign(names(covars)[i], covars[[i]])
-      }
+  }
+  if(!is.null(covars)){
+    for(i in 1:length(covars)){
+      assign(names(covars)[i], covars[[i]])
     }
   }
   
+  # Define model
   if(is.null(covars)){
     form <- paste("x ~ predictor")
   } else {
-    if(class(data) == "phyloseq"){
-      form <- paste("x ~ ",paste(covars, collapse="+"),"+ predictor",sep = "")
-    } else {
-      form <- paste("x ~ ",paste(names(covars), collapse="+"),"+ predictor",sep = "")
-    }
+    form <- paste("x ~ ",paste(names(covars), collapse="+"),"+ predictor",sep = "")
   }
   
+  # Define function
   ao <- function(x){
     tryCatch(as.numeric(summary(aov(as.formula(form), ...))[[1]][(length(covars)+1),5]), error = function(e){NA}) 
   }
   
+  # Relative abundance and log
   count.rel <- apply(count_table,2,function(x) x/sum(x))
   count.rel <- log(count.rel + delta)
   
-  res <- data.frame(pval = apply(count.rel,1,ao))
-  res$pval.adj <- p.adjust(res$pval, method = p.adj)
-    res$Feature <- rownames(res)
-  res$Method <- "Log ANOVA 2 (lao2)"
-  
-  if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
-  
+  # Run tests
   if(allResults){
     ao <- function(x){
       tryCatch(aov(as.formula(form), ...), error = function(e){NA}) 
     }
     return(apply(count.rel,1,ao))
   } else {
+    res <- data.frame(pval = apply(count.rel,1,ao))
+    res$pval.adj <- p.adjust(res$pval, method = p.adj)
+    res$Feature <- rownames(res)
+    res$Method <- "Log ANOVA 2 (lao2)"
+    if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
     return(res)
   }
 }

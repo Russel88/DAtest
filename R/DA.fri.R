@@ -1,12 +1,13 @@
 #' Friedman Rank Sum test
 #' 
-#' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
-#' @param predictor The predictor of interest. Factor, OR if data is a phyloseq object the name of the variable in sample_data in quotation
-#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
-#' @param relative Logical. Should count_table be normalized to relative abundances. Default TRUE
-#' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
-#' @param allResults If TRUE will return raw results from the friedman.test function
-#' @param ... Additional arguments for the friedman.test function
+#' Apply friedman test to multiple features with one \code{predictor}
+#' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
+#' @param predictor The predictor of interest. Factor, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation
+#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation
+#' @param relative Logical. Should \code{data} be normalized to relative abundances. Default TRUE
+#' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
+#' @param allResults If TRUE will return raw results from the \code{friedman.test} function
+#' @param ... Additional arguments for the \code{friedman.test} function
 #' @export
 
 DA.fri <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr", allResults = FALSE, ...){
@@ -15,29 +16,30 @@ DA.fri <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
-    if(length(predictor) > 1 | length(paired) > 1) stop("When data is a phyloseq object predictor and paired should only contain the name of the variables in sample_data")
-    if(!predictor %in% sample_variables(data)) stop(paste(predictor,"is not present in sample_data(data)"))
-    if(!paired %in% sample_variables(data)) stop(paste(paired,"is not present in sample_data(data)"))
-    count_table <- otu_table(data)
-    if(!taxa_are_rows(data)) count_table <- t(count_table)
-    predictor <- unlist(sample_data(data)[,predictor])
-    paired <- suppressWarnings(as.factor(as.matrix(sample_data(data)[,paired])))
+    DAdata <- DA.phyloseq(data, predictor, paired)
+    count_table <- DAdata$count_table
+    predictor <- DAdata$predictor
+    paired <- DAdata$paired
   } else {
     count_table <- data
   }
-  
+
+  # Define function
   fri <- function(x){
     tryCatch(friedman.test(as.numeric(x), predictor, paired, ...), error = function(e){NA}) 
   }
 
+  # Relative abundance
   if(relative){
     count.rel <- apply(count_table,2,function(x) x/sum(x))
   } else {
     count.rel <- count_table
   }
   
+  # Run tests
   reslist <- apply(count.rel,1,fri)
 
+  # Collect results
   if(allResults){
     return(reslist)
   } else {

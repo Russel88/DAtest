@@ -1,12 +1,15 @@
-#' Run drop1 on all features from DAtest results with allResults = TRUE
+#' Run \code{drop1} on all features from \code{DAtest} results with \code{allResults = TRUE}
 #'
 #' Works on "zpo", "znb", "qpo", "neb", "poi". Non-paired "lrm", "llm", "llm2"
-#' @param results Output from a DA."test" function with allResults = TRUE
-#' @param test Which test to use to calculate p-values. See ?drop1 for details
-#' @param p.adj P-value adjustment method. See ?p.adjust for details
-#' @param ... Additional arguments for drop1 function
+#' @param results Output from a \code{DA."test"} function with \code{allResults = TRUE}
+#' @param test Which test to use to calculate p-values. See \code{drop1} for details. Default "Chisq"
+#' @param p.adj P-value adjustment method. See \code{p.adjust} for details. Default "fdr"
+#' @param ... Additional arguments for \code{drop1} function
 #' @export
 DA.drop1 <- function(results, test = "Chisq", p.adj = "fdr", ...){
+  
+  # Check input
+  if(is.data.frame(results) | !is.list(results)) stop("results should be the output from a DAtest function with allResults=TRUE")
   
   # Class
   k <- 1
@@ -15,21 +18,24 @@ DA.drop1 <- function(results, test = "Chisq", p.adj = "fdr", ...){
   } 
   xclass <- class(results[[k]])
   
+  # Check class
   if(!any(c("lm","glm","zeroinfl","negbin","glmerMod") %in% xclass)) stop(paste("Class should be one of lm, glm, zeroinfl, negbin or glmerMod and not:",xclass))
   
+  # Run tests
   xres <- lapply(results, function(x) tryCatch(drop1(x, test = test, ...),error = function(e) NA))
   
+  # Extract results
   if(all(xclass == "lm")){
-    AIC <- lapply(xres, function(x) x[,4])
-    pv <-  lapply(xres, function(x) x[,5])
+    AIC <- lapply(xres, function(x) tryCatch(x[,4],error = function(e) NA))
+    pv <-  lapply(xres, function(x) tryCatch(x[,5],error = function(e) NA))
     
     AIC <- do.call(rbind,AIC[lapply(AIC, length) > 1])
     pv <- do.call(rbind,pv[lapply(pv, length) > 1])
     pva <- apply(pv, 2, function(x) p.adjust(x, method=p.adj))
     
-    colnames(AIC) <- paste0("AIC_",rownames(drop1(results[[1]], ...)))
-    colnames(pv) <- paste0("pval_",rownames(drop1(results[[1]], ...)))
-    colnames(pva) <- paste0("pval.adj_",rownames(drop1(results[[1]], ...)))
+    colnames(AIC) <- paste0("AIC_",rownames(drop1(results[[k]], ...)))
+    colnames(pv) <- paste0("pval_",rownames(drop1(results[[k]], ...)))
+    colnames(pva) <- paste0("pval.adj_",rownames(drop1(results[[k]], ...)))
     
     res <- cbind(AIC,pv,pva)
     
@@ -39,34 +45,34 @@ DA.drop1 <- function(results, test = "Chisq", p.adj = "fdr", ...){
     
     if(is.na(results[[k]]$aic)){
       
-      Dev <- lapply(xres, function(x) x[,2])
-      pv <-  lapply(xres, function(x) x[,4])
+      Dev <- lapply(xres, function(x) tryCatch(x[,2],error = function(e) NA))
+      pv <-  lapply(xres, function(x) tryCatch(x[,4],error = function(e) NA))
       
       Dev <- do.call(rbind,Dev[lapply(Dev, length) > 1])
       pv <- do.call(rbind,pv[lapply(pv, length) > 1])
       pva <- apply(pv, 2, function(x) p.adjust(x, method=p.adj))
       
-      colnames(Dev) <- paste0("Deviance_",rownames(drop1(results[[1]], ...)))
-      colnames(pv) <- paste0("pval_",rownames(drop1(results[[1]], ...)))
-      colnames(pva) <- paste0("pval.adj_",rownames(drop1(results[[1]], ...)))
+      colnames(Dev) <- paste0("Deviance_",rownames(drop1(results[[k]], ...)))
+      colnames(pv) <- paste0("pval_",rownames(drop1(results[[k]], ...)))
+      colnames(pva) <- paste0("pval.adj_",rownames(drop1(results[[k]], ...)))
       
       res <- cbind(Dev,pv,pva)
       
     } else {
       
-      AIC <- lapply(xres, function(x) x[,3])
-      LRT <- lapply(xres, function(x) x[,4])
-      pv <-  lapply(xres, function(x) x[,5])
+      AIC <- lapply(xres, function(x) tryCatch(x[,3],error = function(e) NA))
+      LRT <- lapply(xres, function(x) tryCatch(x[,4],error = function(e) NA))
+      pv <-  lapply(xres, function(x) tryCatch(x[,5],error = function(e) NA))
       
       AIC <- do.call(rbind,AIC[lapply(AIC, length) > 1])
       LRT <- do.call(rbind,LRT[lapply(LRT, length) > 1])
       pv <- do.call(rbind,pv[lapply(pv, length) > 1])
       pva <- apply(pv, 2, function(x) p.adjust(x, method=p.adj))
       
-      colnames(AIC) <- paste0("AIC_",rownames(drop1(results[[1]], ...)))
-      colnames(LRT) <- paste0("LRT",rownames(drop1(results[[1]], ...)))
-      colnames(pv) <- paste0("pval_",rownames(drop1(results[[1]], ...)))
-      colnames(pva) <- paste0("pval.adj_",rownames(drop1(results[[1]], ...)))
+      colnames(AIC) <- paste0("AIC_",rownames(drop1(results[[k]], ...)))
+      colnames(LRT) <- paste0("LRT",rownames(drop1(results[[k]], ...)))
+      colnames(pv) <- paste0("pval_",rownames(drop1(results[[k]], ...)))
+      colnames(pva) <- paste0("pval.adj_",rownames(drop1(results[[k]], ...)))
       
       res <- cbind(AIC,LRT,pv,pva)
       
@@ -75,28 +81,9 @@ DA.drop1 <- function(results, test = "Chisq", p.adj = "fdr", ...){
   }
   
   if(all(xclass == "zeroinfl" | xclass == "glmerMod")){
-    AIC <- lapply(xres, function(x) x[,2])
-    LRT <- lapply(xres, function(x) x[,3])
-    pv <-  lapply(xres, function(x) x[,4])
-    
-    AIC <- do.call(rbind,AIC[lapply(AIC, length) > 1])
-    LRT <- do.call(rbind,LRT[lapply(LRT, length) > 1])
-    pv <- do.call(rbind,pv[lapply(pv, length) > 1])
-    pva <- apply(pv, 2, function(x) p.adjust(x, method=p.adj))
-    
-    colnames(AIC) <- paste0("AIC_",rownames(drop1(results[[1]], ...)))
-    colnames(LRT) <- paste0("LRT",rownames(drop1(results[[1]], ...)))
-    colnames(pv) <- paste0("pval_",rownames(drop1(results[[1]], ...)))
-    colnames(pva) <- paste0("pval.adj_",rownames(drop1(results[[1]], ...)))
-    
-    res <- cbind(AIC,LRT,pv,pva)
-    
-  }
-  
-  if(xclass[1] == "negbin"){
-    AIC <- lapply(xres, function(x) x[,3])
-    LRT <- lapply(xres, function(x) x[,4])
-    pv <-  lapply(xres, function(x) x[,5])
+    AIC <- lapply(xres, function(x) tryCatch(x[,2],error = function(e) NA))
+    LRT <- lapply(xres, function(x) tryCatch(x[,3],error = function(e) NA))
+    pv <-  lapply(xres, function(x) tryCatch(x[,4],error = function(e) NA))
     
     AIC <- do.call(rbind,AIC[lapply(AIC, length) > 1])
     LRT <- do.call(rbind,LRT[lapply(LRT, length) > 1])
@@ -112,18 +99,41 @@ DA.drop1 <- function(results, test = "Chisq", p.adj = "fdr", ...){
     
   }
   
+  if(xclass[1] == "negbin"){
+    AIC <- lapply(xres, function(x) tryCatch(x[,3],error = function(e) NA))
+    LRT <- lapply(xres, function(x) tryCatch(x[,4],error = function(e) NA))
+    pv <-  lapply(xres, function(x) tryCatch(x[,5],error = function(e) NA))
+    
+    AIC <- do.call(rbind,AIC[lapply(AIC, length) > 1])
+    LRT <- do.call(rbind,LRT[lapply(LRT, length) > 1])
+    pv <- do.call(rbind,pv[lapply(pv, length) > 1])
+    pva <- apply(pv, 2, function(x) p.adjust(x, method=p.adj))
+    
+    colnames(AIC) <- paste0("AIC_",rownames(drop1(results[[k]], ...)))
+    colnames(LRT) <- paste0("LRT",rownames(drop1(results[[k]], ...)))
+    colnames(pv) <- paste0("pval_",rownames(drop1(results[[k]], ...)))
+    colnames(pva) <- paste0("pval.adj_",rownames(drop1(results[[k]], ...)))
+    
+    res <- cbind(AIC,LRT,pv,pva)
+    
+  }
+  
+  res <- res[,colSums(is.na(res)) != nrow(res)]
   return(res)
 }
 
 
-#' Run anova on all features from DAtest results with allResults = TRUE
+#' Run \code{anova} on all features from \code{DAtest} results with \code{allResults = TRUE}
 #'
 #' Works on "lrm", "llm", "llm2". Non-paired "neb"
-#' @param results Output from a DA."test" function with allResults = TRUE
-#' @param p.adj P-value adjustment method. See ?p.adjust for details
-#' @param ... Additional arguments for anova function
+#' @param results Output from a \code{DA."test"} function with \code{allResults = TRUE}
+#' @param p.adj P-value adjustment method. See \code{p.adjust for details}. Default "fdr"
+#' @param ... Additional arguments for \code{anova} function
 #' @export
 DA.anova <- function(results, p.adj = "fdr", ...){
+  
+  # Check input
+  if(is.data.frame(results) | !is.list(results)) stop("results should be the output from a DAtest function with allResults=TRUE")
   
   # Class
   k <- 1
@@ -132,8 +142,10 @@ DA.anova <- function(results, p.adj = "fdr", ...){
   } 
   xclass <- class(results[[k]])
   
+  # Check class
   if(!any(c("lm","nebgin","lme") %in% xclass)) stop(paste("Class should be one of lm, lme or negbin and not:",xclass))
   
+  # Run tests
   if(all(xclass == "lme")){
     
     pv <-  lapply(results, function(x) tryCatch(anova(x, ...)[,4],error = function(e) NA))
@@ -141,8 +153,8 @@ DA.anova <- function(results, p.adj = "fdr", ...){
     pv <- do.call(rbind,pv[lapply(pv, length) > 1])
     pva <- apply(pv, 2, function(x) p.adjust(x, method=p.adj))
     
-    colnames(pv) <- paste0("pval_",rownames(anova(results[[1]], ...)))
-    colnames(pva) <- paste0("pval.adj_",rownames(anova(results[[1]], ...)))
+    colnames(pv) <- paste0("pval_",rownames(anova(results[[k]], ...)))
+    colnames(pva) <- paste0("pval.adj_",rownames(anova(results[[k]], ...)))
     
     res <- cbind(pv,pva)
     
@@ -155,27 +167,30 @@ DA.anova <- function(results, p.adj = "fdr", ...){
     pv <- do.call(rbind,pv[lapply(pv, length) > 1])
     pva <- apply(pv, 2, function(x) p.adjust(x, method=p.adj))
     
-    colnames(pv) <- paste0("pval_",rownames(anova(results[[1]])))
-    colnames(pva) <- paste0("pval.adj_",rownames(anova(results[[1]])))
+    colnames(pv) <- paste0("pval_",rownames(anova(results[[k]])))
+    colnames(pva) <- paste0("pval.adj_",rownames(anova(results[[k]])))
     
     res <- cbind(pv,pva)
     
   }
   
-  
+  res <- res[,colSums(is.na(res)) != nrow(res)]
   return(res)
 }
 
 
-#' Run TukeyHSD on all features from DAtest results with allResults = TRUE
+#' Run \code{TukeyHSD} on all features from \code{DAtest} results with \code{allResults = TRUE}
 #'
 #' Works on "aov", "lao", "lao2"
-#' @param results Output from a DA."test" function with allResults = TRUE
+#' @param results Output from a \code{DA."test"} function with \code{allResults = TRUE}
 #' @param variable Which variable to test. Default predictor. Alternatively, the name of a covar
-#' @param p.adj P-value adjustment method. See ?p.adjust for details
-#' @param ... Additional arguments for TukeyHSD function
+#' @param p.adj P-value adjustment method. See \code{p.adjust} for details
+#' @param ... Additional arguments for \code{TukeyHSD} function
 #' @export
 DA.TukeyHSD <- function(results, variable = "predictor", p.adj = "fdr", ...){
+  
+  # Check input
+  if(is.data.frame(results) | !is.list(results)) stop("results should be the output from a DAtest function with allResults=TRUE")
   
   # Class
   k <- 1
@@ -184,11 +199,14 @@ DA.TukeyHSD <- function(results, variable = "predictor", p.adj = "fdr", ...){
   } 
   xclass <- class(results[[k]])
   
+  # Check class and results
   if(xclass[1] != "aov") stop(paste("Class should be aov and not:",xclass))
   if(!variable %in% attr(results[[k]]$terms,"term.labels")) stop(paste(variable,"not found in the models."))
   
+  # Run test
   pv <-  lapply(results, function(x) tryCatch(as.data.frame(TukeyHSD(x, ...)[variable])[,4],error = function(e) NA))
   
+  # Extract results
   pvs <- do.call(rbind,pv[lapply(pv, length) > 1])
   colnames(pvs) <- rownames(as.data.frame(TukeyHSD(results[[k]], ...)[variable]))
   pva <- apply(pvs, 2, function(x) p.adjust(x, method=p.adj))
@@ -202,19 +220,22 @@ DA.TukeyHSD <- function(results, variable = "predictor", p.adj = "fdr", ...){
 }
 
 
-#' Run lsmeans on all features from DAtest results with allResults = TRUE
+#' Run \code{lsmeans} on all features from \code{DAtest} results with \code{allResults = TRUE}
 #'
 #' Pairwise testing on predictor and covars. Works on "poi", "neb", "lrm", "llm", "llm2", "qpo", "znb", "zpo".
 #' 
-#' Require the lsmeans package
-#' @param results Output from a DA."test" function with allResults = TRUE
+#' Require the \code{lsmeans} package
+#' @param results Output from a \code{DA."test"} function with \code{allResults = TRUE}
 #' @param variable Which variable to test. Default predictor. Alternatively, the name of a covar
 #' @param predictor If results come from a paired "lrm", "llm" or "llm2" supply the original predictor variable in the form of as a vector
 #' @param covars If results come from a paired "lrm", "llm" or "llm2" supply the original covars in the form of a named list
-#' @param p.adj P-value adjustment method. See ?p.adjust for details
-#' @param ... Additional arguments for lsmeans function
+#' @param p.adj P-value adjustment method. See \code{p.adjust} for details
+#' @param ... Additional arguments for \code{lsmeans} function
 #' @export
 DA.lsmeans <- function(results, variable = "predictor", predictor = NULL, covars = NULL, p.adj = "fdr", ...){
+  
+  # Check input
+  if(is.data.frame(results) | !is.list(results)) stop("results should be the output from a DAtest function with allResults=TRUE")
   
   library(lsmeans)
   
@@ -224,6 +245,7 @@ DA.lsmeans <- function(results, variable = "predictor", predictor = NULL, covars
     k<- k+1
   } 
   
+  # Check class and extract covars if necessary
   if(class(results[[k]])[1] == "lme"){
     form <<- as.formula(paste("x ~",paste(attr(results[[1]]$terms,"term.labels"), collapse = "+")))
     if(is.null(predictor)) stop("predictor has to be supplied for a paired lrm, llm and llm2")
@@ -234,10 +256,12 @@ DA.lsmeans <- function(results, variable = "predictor", predictor = NULL, covars
     }
   }
   
+  # Run test and extract p-values and estimates
   mc <- lapply(results, function(x) tryCatch(summary(pairs(lsmeans(x, variable))),error = function(e) NA))
   pv <- lapply(mc, function(x) as.data.frame(x)$p.value)
   est <- lapply(mc, function(x) as.data.frame(x)$estimate)
   
+  # Combine results
   pvs <- do.call(rbind,pv[lapply(pv, length) > 1])
   est <- do.call(rbind,est[lapply(est, length) > 1])
   colnames(pvs) <- summary(pairs(lsmeans(results[[k]], variable)))$contrast

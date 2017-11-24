@@ -5,29 +5,30 @@
 \title{Welch t-test}
 \usage{
 DA.ltt2(data, predictor, paired = NULL, p.adj = "fdr", delta = 0.001,
-  testStat = function(case, control) {     (mean(case)) - (mean(control)) },
-  testStat.pair = function(case, control) {     mean(case - control) },
-  allResults = FALSE, ...)
+  testStat = function(case, control) {    
+  log2((mean(exp(case)))/(mean(exp(control)))) },
+  testStat.pair = function(case, control) {    
+  log2(mean((exp(case))/(exp(control)))) }, allResults = FALSE, ...)
 }
 \arguments{
-\item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
+\item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
-\item{predictor}{The predictor of interest. Factor, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+\item{predictor}{The predictor of interest. Factor, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation}
 
-\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation}
 
-\item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+\item{p.adj}{Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details}
 
 \item{delta}{Numeric. Pseudocount for log transformation. Default 0.001}
 
-\item{testStat}{Function. Function for calculating fold change. Should take two vectors as arguments. Default is a mean(case abundances)-mean(control abundances)}
+\item{testStat}{Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: \code{log2(mean(exp(case abundances)) / mean(exp(control abundances)))}}
 
-\item{testStat.pair}{Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: mean(case abundances - control abundances)}
+\item{testStat.pair}{Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: \code{log2(mean(exp(case abundances) / exp(control abundances)))}}
 
-\item{allResults}{If TRUE will return raw results from the t.test function}
+\item{allResults}{If TRUE will return raw results from the \code{t.test} function}
 
-\item{...}{Additional arguments for the t.test function}
+\item{...}{Additional arguments for the \code{t.test} function}
 }
 \description{
-With log transformed relative abundances
+Apply welch t-test to multiple features and one \code{predictor}, and with log transformed relative abundances
 }

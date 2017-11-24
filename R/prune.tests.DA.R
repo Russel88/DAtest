@@ -1,3 +1,10 @@
+#' Prune tests argument for \code{testDA}
+#'
+#' @param tests A character vector with names of tests
+#' @param predictor Vector with predictor variable
+#' @param paired Factor with paired variable
+#' @param covars Named list with covariables
+#' @param relative Include tests that work with relative abundances (TRUE) or only absolute abundances (FALSE)
 #' @export
 
 prune.tests.DA <- function(tests, predictor, paired, covars, relative){

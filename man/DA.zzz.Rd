@@ -8,18 +8,18 @@ DA.zzz(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
   FUN = NULL)
 }
 \arguments{
-\item{data}{Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
+\item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
-\item{predictor}{The predictor of interest. Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+\item{predictor}{The predictor of interest. Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation}
 
-\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation}
+\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation}
 
-\item{covars}{Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)}
+\item{covars}{Either a named list with covariables, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}}
 
-\item{p.adj}{Character. P-value adjustment. Default "fdr". See p.adjust for details}
+\item{p.adj}{Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details}
 
-\item{FUN}{Function to apply to data. Should take input in the following order: count_table (data.frame, samples are columns), predictor (vector), paired (factor), covars (named list with vector). Output should be a dataframe with at least the following columns: Feature, pval and Method.}
+\item{FUN}{Function to apply to data. Should take input in the following order: \code{count_table} (data.frame, samples are columns), \code{predictor} (vector), \code{paired} (factor), \code{covars} (named list with vector). Output should be a dataframe with at least the following columns: \code{Feature}, \code{pval} and \code{Method}.}
 }
 \description{
-User-defined function
+Apply a user-defined function to all features of a count table. For implemetation in \code{testDA} and \code{allDA}
 }

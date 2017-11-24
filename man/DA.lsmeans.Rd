@@ -2,13 +2,13 @@
 % Please edit documentation in R/posthocs.R
 \name{DA.lsmeans}
 \alias{DA.lsmeans}
-\title{Run lsmeans on all features from DAtest results with allResults = TRUE}
+\title{Run \code{lsmeans} on all features from \code{DAtest} results with \code{allResults = TRUE}}
 \usage{
 DA.lsmeans(results, variable = "predictor", predictor = NULL,
   covars = NULL, p.adj = "fdr", ...)
 }
 \arguments{
-\item{results}{Output from a DA."test" function with allResults = TRUE}
+\item{results}{Output from a \code{DA."test"} function with \code{allResults = TRUE}}
 
 \item{variable}{Which variable to test. Default predictor. Alternatively, the name of a covar}
 
@@ -16,13 +16,13 @@ DA.lsmeans(results, variable = "predictor", predictor = NULL,
 
 \item{covars}{If results come from a paired "lrm", "llm" or "llm2" supply the original covars in the form of a named list}
 
-\item{p.adj}{P-value adjustment method. See ?p.adjust for details}
+\item{p.adj}{P-value adjustment method. See \code{p.adjust} for details}
 
-\item{...}{Additional arguments for lsmeans function}
+\item{...}{Additional arguments for \code{lsmeans} function}
 }
 \description{
 Pairwise testing on predictor and covars. Works on "poi", "neb", "lrm", "llm", "llm2", "qpo", "znb", "zpo".
 }
 \details{
-Require the lsmeans package
+Require the \code{lsmeans} package
 }

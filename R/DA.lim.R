@@ -1,106 +1,94 @@
 #' LIMMA
 #'
-#' Some implementation is borrowed from:
-#' http://www.biostat.jhsph.edu/~kkammers/software/eupa/R_guide.html
-#' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
-#' @param predictor The predictor of interest. Either a Factor or Numeric, OR if data is a phyloseq object the name of the variable in sample_data in quotation
-#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if data is a phyloseq object the name of the variable in sample_data in quotation
-#' @param covars Either a named list with covariables, OR if data is a phyloseq object a character vector with names of the variables in sample_data(data)
+#' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
+#' @param predictor The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation
+#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation
+#' @param covars Either a named list with covariables, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}
 #' @param relative Logical. Should count_table be normalized to relative abundances. Default TRUE
-#' @param out.anova If TRUE will output results from F-tests, if FALSE t-statistic results from 2. level of the predictor. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise
-#' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
-#' @param allResults If TRUE will return raw results from the eBayes function
-#' @param ... Additional arguments for the eBayes and lmFit functions
+#' @param out.all If TRUE will output results from F-tests, if FALSE t-statistic results from 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class \code{predictor} and FALSE otherwise
+#' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
+#' @param coeff Integer. The p-value and log2FoldChange will be associated with this coefficient. Default 2, i.e. the 2. level of the \code{predictor}.
+#' @param allResults If TRUE will return raw results from the \code{eBayes} function
+#' @param ... Additional arguments for the \code{eBayes} and \code{lmFit} functions
 #' @import statmod
 #' @export
 
-DA.lim <- function(data, predictor, paired = NULL, covars = NULL, relative = TRUE, out.anova = NULL, p.adj = "fdr", allResults = FALSE, ...){
+DA.lim <- function(data, predictor, paired = NULL, covars = NULL, relative = TRUE, out.all = NULL, p.adj = "fdr", coeff = 2, allResults = FALSE, ...){
   
   suppressMessages(library(limma))
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
-    if(length(predictor) > 1 | length(paired) > 1) stop("When data is a phyloseq object predictor and paired should only contain the name of the variables in sample_data")
-    if(!predictor %in% sample_variables(data)) stop(paste(predictor,"is not present in sample_data(data)"))
-    if(!is.null(paired)){
-      if(!paired %in% sample_variables(data)) stop(paste(paired,"is not present in sample_data(data)"))
-    }
-    count_table <- otu_table(data)
-    if(!taxa_are_rows(data)) count_table <- t(count_table)
-    predictor <- unlist(sample_data(data)[,predictor])
-    if(!is.null(paired)) paired <- suppressWarnings(as.factor(as.matrix(sample_data(data)[,paired])))
-    if(!is.null(covars)){
-      for(i in 1:length(covars)){
-        assign(covars[i], unlist(sample_data(data)[,covars[i]]))
-      }
-    } 
+    DAdata <- DA.phyloseq(data, predictor, paired, covars)
+    count_table <- DAdata$count_table
+    predictor <- DAdata$predictor
+    paired <- DAdata$paired
+    covars <- DAdata$covars
   } else {
     count_table <- data
-    if(!is.null(covars)){
-      for(i in 1:length(covars)){
-        assign(names(covars)[i], covars[[i]])
-      }
+  }
+  if(!is.null(covars)){
+    for(i in 1:length(covars)){
+      assign(names(covars)[i], covars[[i]])
     }
   }
   
-  # Out.anova
-  if(is.null(out.anova)){
-    if(is.numeric(predictor)) out.anova <- FALSE
-    if(length(unique(predictor)) == 2) out.anova <- FALSE
-    if(length(unique(predictor)) > 2) out.anova <- TRUE
+  # out.all
+  if(is.null(out.all)){
+    if(length(unique(predictor)) == 2) out.all <- FALSE
+    if(length(unique(predictor)) > 2) out.all <- TRUE
+    if(is.numeric(predictor)) out.all <- FALSE
   }
   
+  # Relative abundance
   if(relative){
     count.rel <- apply(count_table,2,function(x) x/sum(x))
   } else {
     count.rel <- count_table
   }
+  count.rel <- as.data.frame(count.rel)
   
+  # Arguments
   limma.args <- list(...)
   lmFit.args <- limma.args[names(limma.args) %in% names(formals(lmFit))]
   eBayes.args <- limma.args[names(limma.args) %in% names(formals(eBayes))]
   
+  # The design
   if(is.null(covars)){
     form <- paste("~ predictor")
   } else {
-    if(class(data) == "phyloseq"){
-      form <- paste("~ predictor+",paste(covars, collapse="+"),sep = "")
-    } else {
-      form <- paste("~ predictor+",paste(names(covars), collapse="+"),sep = "")
-    }
+    form <- paste("~ predictor+",paste(names(covars), collapse="+"),sep = "")
   }
-  count.rel <- as.data.frame(count.rel)
   design <- model.matrix(as.formula(form))
-  n <- dim(count.rel)[1]
+  
+  # Linear fit
   if(is.null(paired)){
     fit <- do.call(lmFit,c(list(count.rel, design),lmFit.args))
   } else {
     dupcor <-  duplicateCorrelation(count.rel, design, block = paired)
     fit <- do.call(lmFit,c(list(count.rel, design, block = paired, correlation = dupcor$cor),lmFit.args))
   }
+  
+  # Empirical bayes
   fit.eb <- do.call(eBayes, c(list(fit),eBayes.args))
 
-  if(out.anova){
-    if(is.numeric(predictor[1])){
+  # Extract results
+  if(is.numeric(predictor[1])){
       res <- topTable(fit.eb, number = nrow(count.rel), adjust.method = p.adj, coef = 2)
       colnames(res)[4:5] <- c("pval","pval.adj")
     } else {
-      res <- topTable(fit.eb, number = nrow(count.rel), adjust.method = p.adj, coef = 2:length(levels(as.factor(predictor))))
-      colnames(res)[length(levels(as.factor(predictor)))+2:3] <- c("pval","pval.adj")
-    }
-  } else {
-    Estimate <- fit.eb$coefficients
-    df.residual <- fit.eb$df.residual
-    df.prior <- rep(fit.eb$df.prior, n)
-    s2.prior <- rep(fit.eb$s2.prior, n)
-    s2 <- (fit.eb$sigma)^2
-    s2.post <- fit.eb$s2.post
-    stat <- fit.eb$t[,2]
-    pval <- fit.eb$p.value[,2]
-    pval.adj <- p.adjust(pval, method = p.adj)
-    res <- data.frame(Estimate, stat, pval, pval.adj, df.residual, df.prior, s2.prior, s2, s2.post)
-  }
-
+      if(out.all){
+        res <- topTable(fit.eb, number = nrow(count_table), adjust.method = p.adj, coef = 2:length(levels(as.factor(predictor))))
+        colnames(res)[length(levels(as.factor(predictor)))+2:3] <- c("pval","pval.adj")
+      } else {
+        res <- topTable(fit.eb, number = nrow(count_table), adjust.method = p.adj, coef = coeff)
+        colnames(res)[4:5] <- c("pval","pval.adj")
+        res$ordering <- NA
+        res[!is.na(res$logFC) & res$logFC > 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff],">",levels(as.factor(predictor))[1])
+        res[!is.na(res$logFC) & res$logFC < 0,"ordering"] <- paste0(levels(as.factor(predictor))[1],">",levels(as.factor(predictor))[coeff])
+      }
+   }
+  
   res$Feature <- rownames(res)
   res$Method <- "LIMMA (lim)"
   

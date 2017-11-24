@@ -1,11 +1,10 @@
 #' EdgeR exact test - TMM normalization
 #'
-#' Implemented as in:
-#' https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8
-#' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
-#' @param predictor The predictor of interest. Factor, OR if data is a phyloseq object the name of the variable in sample_data in quotation
-#' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
-#' @param ... Additional arguments for the calcNormFactors, estimateCommonDisp, estimateTagwiseDisp and exactTest functions
+#' Implementation of edgeR exact test for \code{DAtest}
+#' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
+#' @param predictor The predictor of interest. Factor, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation
+#' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
+#' @param ... Additional arguments for the \code{calcNormFactors}, \code{estimateCommonDisp}, \code{estimateTagwiseDisp} and \code{exactTest} functions
 #' @export
 
 DA.ere <- function(data, predictor, p.adj = "fdr", ...){
@@ -14,11 +13,9 @@ DA.ere <- function(data, predictor, p.adj = "fdr", ...){
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
-    if(length(predictor) > 1) stop("When data is a phyloseq object predictor should only contain the name of the variables in sample_data")
-    if(!predictor %in% sample_variables(data)) stop(paste(predictor,"is not present in sample_data(data)"))
-    count_table <- otu_table(data)
-    if(!taxa_are_rows(data)) count_table <- t(count_table)
-    predictor <- unlist(sample_data(data)[,predictor])
+    DAdata <- DA.phyloseq(data, predictor)
+    count_table <- DAdata$count_table
+    predictor <- DAdata$predictor
   } else {
     count_table <- data
   }
@@ -26,18 +23,24 @@ DA.ere <- function(data, predictor, p.adj = "fdr", ...){
   count_table <- as.data.frame(count_table)
   x <- DGEList(counts = count_table, group = predictor, genes = data.frame(Feature = row.names(count_table)))
   
+  # Extract arguments
   DA.ere.args <- list(...)
   calcNormFactors.args <- DA.ere.args[names(DA.ere.args) %in% names(formals(calcNormFactors))]
   estimateCommonDisp.args <- DA.ere.args[names(DA.ere.args) %in% names(formals(estimateCommonDisp))]
   estimateTagwiseDisp.args <- DA.ere.args[names(DA.ere.args) %in% names(formals(estimateTagwiseDisp))]
   exactTest.args <- DA.ere.args[names(DA.ere.args) %in% names(formals(exactTest))]
   
+  # Normalize and fit model
   x <- do.call(edgeR::calcNormFactors,c(list(x, method = "TMM"),calcNormFactors.args))
   x <- do.call(estimateCommonDisp,c(list(x),estimateCommonDisp.args))
   x <- do.call(estimateTagwiseDisp,c(list(x),estimateTagwiseDisp.args))
   ta <- do.call(exactTest,c(list(x),exactTest.args))[[1]]
+  
   colnames(ta)[3] <- "pval"
   ta$pval.adj <- p.adjust(ta$pval, method = p.adj)
+  ta$ordering <- NA
+  ta[!is.na(ta$logFC) & ta$logFC > 0,"ordering"] <- paste0(levels(as.factor(predictor))[2],">",levels(as.factor(predictor))[1])
+  ta[!is.na(ta$logFC) & ta$logFC < 0,"ordering"] <- paste0(levels(as.factor(predictor))[1],">",levels(as.factor(predictor))[2])
   ta$Feature <- rownames(ta)
   ta$Method <- "EdgeR exact - TMM (ere)"
  

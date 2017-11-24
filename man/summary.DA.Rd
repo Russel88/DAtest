@@ -2,17 +2,17 @@
 % Please edit documentation in R/print.DA.R
 \name{summary.DA}
 \alias{summary.DA}
-\title{Summary of results from testDA}
+\title{Summary of results from \code{testDA}}
 \usage{
 \method{summary}{DA}(object, sort = "AUC", ...)
 }
 \arguments{
-\item{object}{The output from the testDA function}
+\item{object}{The output from the \code{testDA} function}
 
-\item{sort}{Sort methods by c("AUC","FPR","Spike.detect.rate")}
+\item{sort}{Sort methods by \code{c("AUC","FPR","Spike.detect.rate")}}
 
-\item{...}{Additional printing arguments}
+\item{...}{Additional arguments for \code{print}}
 }
 \description{
-Summary of results from testDA
+Summary of results from \code{testDA}
 }

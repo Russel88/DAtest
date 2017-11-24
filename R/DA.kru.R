@@ -1,45 +1,40 @@
 #' Kruskal-Wallis test
 #' 
-#' @param data Either a matrix with counts/abundances, OR a phyloseq object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
-#' @param predictor The predictor of interest. Factor, OR if data is a phyloseq object the name of the variable in sample_data in quotation
-#' @param relative Logical. Should count_table be normalized to relative abundances. Default TRUE
-#' @param p.adj Character. P-value adjustment. Default "fdr". See p.adjust for details
-#' @param allResults If TRUE will return raw results from the kruskal.test function
-#' @param ... Additional arguments for the kruskal.test function
+#' Apply kruskal-wallis test on multiple features with one \code{predictor}
+#' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
+#' @param predictor The predictor of interest. Factor, OR if \code{data} is a phyloseq object the name of the variable in \code{sample_data(data)} in quotation
+#' @param relative Logical. Should \code{data} be normalized to relative abundances. Default TRUE
+#' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
+#' @param allResults If TRUE will return raw results from the \code{kruskal.test} function
+#' @param ... Additional arguments for the \code{kruskal.test} function
 #' @export
 
 DA.kru <- function(data, predictor, relative = TRUE, p.adj = "fdr", allResults = FALSE, ...){
  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
-    if(length(predictor) > 1) stop("When data is a phyloseq object predictor should only contain the name of the variables in sample_data")
-    if(!predictor %in% sample_variables(data)) stop(paste(predictor,"is not present in sample_data(data)"))
-    count_table <- otu_table(data)
-    if(!taxa_are_rows(data)) count_table <- t(count_table)
-    predictor <- unlist(sample_data(data)[,predictor])
+    DAdata <- DA.phyloseq(data, predictor)
+    count_table <- DAdata$count_table
+    predictor <- DAdata$predictor
   } else {
     count_table <- data
   }
-  
+
+  # Define function
   kru <- function(x){
     tryCatch(kruskal.test(as.numeric(x) ~ predictor, ...)$p.value, error = function(e){NA}) 
   }
 
+  # Relative abundance
   if(relative){
     count.rel <- apply(count_table,2,function(x) x/sum(x))
   } else {
     count.rel <- count_table
   }
   
-  res <- data.frame(pval = apply(count.rel,1,kru))
-  res$pval.adj <- p.adjust(res$pval, method = p.adj)
-  
-  res$Feature <- rownames(res)
-  res$Method <- "Kruskal-Wallis (kru)" 
-  
-  if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
-  
+  # Run tests
   if(allResults){
+    ## Define function for allResults 
     if(is.null(paired)){
       kru <- function(x){
         tryCatch(kruskal.test(x ~ predictor, ...), error = function(e){NA}) 
@@ -51,6 +46,11 @@ DA.kru <- function(data, predictor, relative = TRUE, p.adj = "fdr", allResults =
     }
     return(apply(count.rel,1,kru))
   } else {
+    res <- data.frame(pval = apply(count.rel,1,kru))
+    res$pval.adj <- p.adjust(res$pval, method = p.adj)
+    res$Feature <- rownames(res)
+    res$Method <- "Kruskal-Wallis (kru)" 
+    if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
     return(res)
   }
  
