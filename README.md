@@ -163,7 +163,15 @@ analysis. The higher Spike.detect.rate, the better.
     -   If several methods have very similar AUCs, the Spike.detect.rate
         can be used to differentiate among the methods
 
-### \*\*Pre-process <data:**> An optional step is to pre-process the data to reduce the number of features tested. With `preDA` low-abundance features can be grouped as "Others". Note that the features are not simply pruned, they are grouped to retain samples sums (library sizes). Filtering can be based on number of samples the features are present in, the total number of reads for the features, the mean relative abundance of the features, or a combination of all three.
+### \*\*Pre-process <data:**>
+
+An optional step is to pre-process the data to reduce the number of
+features tested. With `preDA` low-abundance features can be grouped as
+"Others". Note that the features are not simply pruned, they are grouped
+to retain samples sums (library sizes). Filtering can be based on number
+of samples the features are present in, the total number of reads for
+the features, the mean relative abundance of the features, or a
+combination of all three.
 
     data.new <- preDA(data, min.samples = 2, min.reads = 10, min.abundance = 0)
 
