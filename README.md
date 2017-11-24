@@ -163,7 +163,7 @@ analysis. The higher Spike.detect.rate, the better.
     -   If several methods have very similar AUCs, the Spike.detect.rate
         can be used to differentiate among the methods
 
-### \*\*Pre-process <data:**>
+### Pre-process data:
 
 An optional step is to pre-process the data to reduce the number of
 features tested. With `preDA` low-abundance features can be grouped as
@@ -175,7 +175,7 @@ combination of all three.
 
     data.new <- preDA(data, min.samples = 2, min.reads = 10, min.abundance = 0)
 
-### **Run the test:**
+### Run the test:
 
 (if you have a phyloseq object, see details further down)
 
