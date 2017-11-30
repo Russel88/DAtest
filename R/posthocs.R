@@ -9,7 +9,7 @@
 DA.drop1 <- function(results, test = "Chisq", p.adj = "fdr", ...){
   
   # Check input
-  if(is.data.frame(results) | !is.list(results)) stop("results should be the output from a DAtest function with allResults=TRUE")
+  if(is.data.frame(results) | !is.list(results)) stop("results should be the output from DA.zpo, DA.znb, DA.qpo, DA.neb, DA.poi, DA.lrm, DA.llm or DA.llm2 with allResults=TRUE")
   
   # Class
   k <- 1
@@ -19,7 +19,8 @@ DA.drop1 <- function(results, test = "Chisq", p.adj = "fdr", ...){
   xclass <- class(results[[k]])
   
   # Check class
-  if(!any(c("lm","glm","zeroinfl","negbin","glmerMod") %in% xclass)) stop(paste("Class should be one of lm, glm, zeroinfl, negbin or glmerMod and not:",xclass))
+  if(any("lme" %in% xclass)) stop("drop1 does not work on mixed-effect linear models. Use DA.anova")
+  if(!any(c("lm","glm","zeroinfl","negbin","glmerMod") %in% xclass)) stop("results should be the output from DA.zpo, DA.znb, DA.qpo, DA.neb, DA.poi, DA.lrm, DA.llm or DA.llm2 with allResults=TRUE")
   
   # Run tests
   xres <- lapply(results, function(x) tryCatch(drop1(x, test = test, ...),error = function(e) NA))
@@ -118,7 +119,7 @@ DA.drop1 <- function(results, test = "Chisq", p.adj = "fdr", ...){
     
   }
   
-  res <- res[,colSums(is.na(res)) != nrow(res)]
+  res <- as.data.frame(res[,colSums(is.na(res)) != nrow(res)])
   return(res)
 }
 
@@ -133,7 +134,7 @@ DA.drop1 <- function(results, test = "Chisq", p.adj = "fdr", ...){
 DA.anova <- function(results, p.adj = "fdr", ...){
   
   # Check input
-  if(is.data.frame(results) | !is.list(results)) stop("results should be the output from a DAtest function with allResults=TRUE")
+  if(is.data.frame(results) | !is.list(results)) stop("results should be the output from DA.lrm, DA.llm, DA.llm2 or DA.neb with allResults=TRUE")
   
   # Class
   k <- 1
@@ -143,7 +144,8 @@ DA.anova <- function(results, p.adj = "fdr", ...){
   xclass <- class(results[[k]])
   
   # Check class
-  if(!any(c("lm","nebgin","lme") %in% xclass)) stop(paste("Class should be one of lm, lme or negbin and not:",xclass))
+  if(any("glmerMod" %in% xclass)) stop("anova does not work on mixed-effect negative binomial models. Use DA.drop1")
+  if(!any(c("lm","nebgin","lme") %in% xclass)) stop("results should be the output from DA.lrm, DA.llm, DA.llm2 or DA.neb with allResults=TRUE")
   
   # Run tests
   if(all(xclass == "lme")){
@@ -174,7 +176,7 @@ DA.anova <- function(results, p.adj = "fdr", ...){
     
   }
   
-  res <- res[,colSums(is.na(res)) != nrow(res)]
+  res <- as.data.frame(res[,colSums(is.na(res)) != nrow(res)])
   return(res)
 }
 
@@ -190,7 +192,7 @@ DA.anova <- function(results, p.adj = "fdr", ...){
 DA.TukeyHSD <- function(results, variable = "predictor", p.adj = "fdr", ...){
   
   # Check input
-  if(is.data.frame(results) | !is.list(results)) stop("results should be the output from a DAtest function with allResults=TRUE")
+  if(is.data.frame(results) | !is.list(results)) stop("results should be the output from DA.aov, DA.lao or DA.lao2 with allResults=TRUE")
   
   # Class
   k <- 1
@@ -200,7 +202,7 @@ DA.TukeyHSD <- function(results, variable = "predictor", p.adj = "fdr", ...){
   xclass <- class(results[[k]])
   
   # Check class and results
-  if(xclass[1] != "aov") stop(paste("Class should be aov and not:",xclass))
+  if(xclass[1] != "aov") stop("results should be the output from DA.aov, DA.lao or DA.lao2 with allResults=TRUE")
   if(!variable %in% attr(results[[k]]$terms,"term.labels")) stop(paste(variable,"not found in the models."))
   
   # Run test
@@ -214,7 +216,7 @@ DA.TukeyHSD <- function(results, variable = "predictor", p.adj = "fdr", ...){
   colnames(pvs) <- paste0("pval_",colnames(pvs))
   colnames(pva) <- paste0("pval.adj_",colnames(pva))
   
-  res <- cbind(pvs,pva)
+  res <- as.data.frame(cbind(pvs,pva))
   
   return(res)
 }
@@ -233,10 +235,10 @@ DA.TukeyHSD <- function(results, variable = "predictor", p.adj = "fdr", ...){
 #' @param ... Additional arguments for \code{lsmeans} function
 #' @export
 DA.lsmeans <- function(results, variable = "predictor", predictor = NULL, covars = NULL, p.adj = "fdr", ...){
-  
+
   # Check input
-  if(is.data.frame(results) | !is.list(results)) stop("results should be the output from a DAtest function with allResults=TRUE")
-  
+  if(is.data.frame(results) | !is.list(results)) stop("results should be the output from DA.poi, DA.neb, DA.lrm, DA.llm, DA.llm2, DA.qpo, DA.znb or DA.zpo with allResults=TRUE")
+
   library(lsmeans)
   
   # Class
@@ -244,8 +246,11 @@ DA.lsmeans <- function(results, variable = "predictor", predictor = NULL, covars
   while(class(results[[k]])[1] == "NULL"){
     k<- k+1
   } 
+  xclass <- class(results[[k]])
   
   # Check class and extract covars if necessary
+  if(!any(c("lm","lme","glm","zeroinfl","negbin","glmerMod") %in% xclass)) stop("results should be the output from DA.zpo, DA.znb, DA.qpo, DA.neb, DA.poi, DA.lrm, DA.llm or DA.llm2 with allResults=TRUE")
+  
   if(class(results[[k]])[1] == "lme"){
     form <<- as.formula(paste("x ~",paste(attr(results[[1]]$terms,"term.labels"), collapse = "+")))
     if(is.null(predictor)) stop("predictor has to be supplied for a paired lrm, llm and llm2")
@@ -255,7 +260,7 @@ DA.lsmeans <- function(results, variable = "predictor", predictor = NULL, covars
       }
     }
   }
-  
+
   # Run test and extract p-values and estimates
   mc <- lapply(results, function(x) tryCatch(summary(pairs(lsmeans(x, variable))),error = function(e) NA))
   pv <- lapply(mc, function(x) as.data.frame(x)$p.value)
@@ -271,8 +276,7 @@ DA.lsmeans <- function(results, variable = "predictor", predictor = NULL, covars
   colnames(pvs) <- paste0("pval_",colnames(pvs))
   colnames(pva) <- paste0("pval.adj_",colnames(pva))
   
-  res <- cbind(est,pvs,pva)
+  res <- as.data.frame(cbind(est,pvs,pva))
   if(class(results[[k]])[1] == "lme") rm(form, envir = .GlobalEnv)
   return(res)
 }
-
