@@ -1,14 +1,14 @@
 #' Pre-processing for DAtest
 #'
-#' Pre-process the count table for before running \code{DAtest} functions
+#' Pre-process the count table before running \code{DAtest} functions
 #' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
-#' @param min.samples Minimum number of samples the features should be present in. Default 2
+#' @param min.samples Minimum number of samples the features should be present in. Default 0
 #' @param min.reads Minimum number of total reads the features should have. Default 0
 #' @param min.abundance Minimum mean relative abundance features should have. Default 0
 #' @return Similar to input, but with features not reaching the criteria given grouped as "Others"
 #' @export
 
-preDA <- function(data, min.samples = 2, min.reads = 0, min.abundance = 0){
+preDA <- function(data, min.samples = 0, min.reads = 0, min.abundance = 0){
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){

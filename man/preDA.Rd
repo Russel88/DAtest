@@ -4,12 +4,12 @@
 \alias{preDA}
 \title{Pre-processing for DAtest}
 \usage{
-preDA(data, min.samples = 2, min.reads = 0, min.abundance = 0)
+preDA(data, min.samples = 0, min.reads = 0, min.abundance = 0)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
-\item{min.samples}{Minimum number of samples the features should be present in. Default 2}
+\item{min.samples}{Minimum number of samples the features should be present in. Default 0}
 
 \item{min.reads}{Minimum number of total reads the features should have. Default 0}
 
@@ -19,5 +19,5 @@ preDA(data, min.samples = 2, min.reads = 0, min.abundance = 0)
 Similar to input, but with features not reaching the criteria given grouped as "Others"
 }
 \description{
-Pre-process the count table for before running \code{DAtest} functions
+Pre-process the count table before running \code{DAtest} functions
 }
