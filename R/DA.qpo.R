@@ -9,11 +9,12 @@
 #' @param out.all If TRUE will output results and p-values from \code{anova}. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class \code{predictor} and FALSE otherwise
 #' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
 #' @param coeff Integer. The p-value and log2FoldChange will be associated with this coefficient. Default 2, i.e. the 2. level of the \code{predictor}.
+#' @param coeff.ref Integer. Reference level of the \code{predictor}. Will only affect the log2FC and ordering columns on the output. Default the intercept, = 1 
 #' @param allResults If TRUE will return raw results from the \code{glm} function
 #' @param ... Additional arguments for the \code{glm} functions
 #' @export
 
-DA.qpo <- function(data, predictor, covars = NULL, relative = TRUE, out.all = NULL, p.adj = "fdr", coeff = 2, allResults = FALSE, ...){
+DA.qpo <- function(data, predictor, covars = NULL, relative = TRUE, out.all = NULL, p.adj = "fdr", coeff = 2, coeff.ref = 1, allResults = FALSE, ...){
  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -29,6 +30,9 @@ DA.qpo <- function(data, predictor, covars = NULL, relative = TRUE, out.all = NU
       assign(names(covars)[i], covars[[i]])
     }
   }
+  
+  if(coeff == coeff.ref) stop("coeff and coeff.ref cannot be the same")
+  if(!coeff %in% 1:length(unique(predictor)) | !coeff.ref %in% 1:length(unique(predictor))) stop(paste("coeff and coeff.ref should be integers between 1 and",length(unique(predictor))))
   
   # out.all
   if(is.null(out.all)){
@@ -127,11 +131,11 @@ DA.qpo <- function(data, predictor, covars = NULL, relative = TRUE, out.all = NU
     } else {
       res <- as.data.frame(t(as.data.frame(apply(count_table,1,pois))))
       colnames(res)[ncol(res)] <- "pval"
-      res$log2FC <- log2(exp(res[,1]+res[,coeff]) / exp(res[,1]))
+      res$log2FC <- log2(exp(res[,coeff.ref]+res[,coeff]) / exp(res[,coeff.ref]))
       if(!is.numeric(predictor)){
         res$ordering <- NA
-        res[!is.na(res[,coeff]) & res[,coeff] > 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff],">",levels(as.factor(predictor))[1])
-        res[!is.na(res[,coeff]) & res[,coeff] < 0,"ordering"] <- paste0(levels(as.factor(predictor))[1],">",levels(as.factor(predictor))[coeff])
+        res[!is.na(res[,coeff]) & res[,coeff] > 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff],">",levels(as.factor(predictor))[coeff.ref])
+        res[!is.na(res[,coeff]) & res[,coeff] < 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff.ref],">",levels(as.factor(predictor))[coeff])
       }
     }
     

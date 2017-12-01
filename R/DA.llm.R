@@ -11,12 +11,13 @@
 #' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
 #' @param delta Numeric. Pseudocount for the log transformation. Default 1
 #' @param coeff Integer. The p-value and log2FoldChange will be associated with this coefficient. Default 2, i.e. the 2. level of the \code{predictor}.
+#' @param coeff.ref Integer. Reference level of the \code{predictor}. Will only affect the log2FC and ordering columns on the output. Default the intercept, = 1 
 #' @param allResults If TRUE will return raw results from the \code{lm}/\code{lme} function
 #' @param ... Additional arguments for the \code{lm}/\code{lme} functions
 #' @import nlme
 #' @export
 
-DA.llm <- function(data, predictor, paired = NULL, covars = NULL, relative = TRUE, out.all = NULL, p.adj = "fdr", delta = 1, coeff = 2, allResults = FALSE, ...){
+DA.llm <- function(data, predictor, paired = NULL, covars = NULL, relative = TRUE, out.all = NULL, p.adj = "fdr", delta = 1, coeff = 2, coeff.ref = 1, allResults = FALSE, ...){
  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -33,6 +34,9 @@ DA.llm <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
       assign(names(covars)[i], covars[[i]])
     }
   }
+  
+  if(coeff == coeff.ref) stop("coeff and coeff.ref cannot be the same")
+  if(!coeff %in% 1:length(unique(predictor)) | !coeff.ref %in% 1:length(unique(predictor))) stop(paste("coeff and coeff.ref should be integers between 1 and",length(unique(predictor))))
   
   # out.all
   if(is.null(out.all)){
@@ -141,12 +145,12 @@ DA.llm <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
     } else {
       res <- as.data.frame(t(as.data.frame(apply(count_table,1,lmr))))
       colnames(res)[ncol(res)] <- "pval"
-      res$log2FC <- log2((res[,1]+res[,coeff]) / res[,1])
-      res[res[,1] < 0 & !is.na(res[,1]), "log2FC"] <- NA
+      res$log2FC <- log2((res[,coeff.ref]+res[,coeff]) / res[,coeff.ref])
+      res[res[,coeff.ref] < 0 & !is.na(res[,coeff.ref]), "log2FC"] <- NA
       if(!is.numeric(predictor)){
         res$ordering <- NA
-        res[!is.na(res[,coeff]) & res[,coeff] > 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff],">",levels(as.factor(predictor))[1])
-        res[!is.na(res[,coeff]) & res[,coeff] < 0,"ordering"] <- paste0(levels(as.factor(predictor))[1],">",levels(as.factor(predictor))[coeff])
+        res[!is.na(res[,coeff]) & res[,coeff] > 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff],">",levels(as.factor(predictor))[coeff.ref])
+        res[!is.na(res[,coeff]) & res[,coeff] < 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff.ref],">",levels(as.factor(predictor))[coeff])
       }
     }
     

@@ -5,7 +5,7 @@
 \title{DESeq2}
 \usage{
 DA.ds2(data, predictor, paired = NULL, covars = NULL, out.all = NULL,
-  p.adj = "fdr", coeff = 2, allResults = FALSE, ...)
+  p.adj = "fdr", coeff = 2, coeff.ref = 1, allResults = FALSE, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -20,7 +20,9 @@ DA.ds2(data, predictor, paired = NULL, covars = NULL, out.all = NULL,
 
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details}
 
-\item{coeff}{Integer. The log2FoldChange (and p-value if test="Wald") will be associated with this coefficient. For "Wald" this coefficient is compared to the overall mean. For "LRT" this coefficient is compared to the intercept (1. level of \code{predictor}). Default 2, i.e. the 2. level of the \code{predictor}.}
+\item{coeff}{Integer. The log2FoldChange (and p-value if test="Wald") will be associated with this coefficient. This coefficient is by default compared to the intercept (1. level of \code{predictor}), change this with \code{coeff.ref}. Default 2, i.e. the 2. level of the \code{predictor}.}
+
+\item{coeff.ref}{Integer. Reference level of the \code{predictor}. Default the intercept, = 1}
 
 \item{allResults}{If TRUE will return raw results from the \code{DESeq} function}
 

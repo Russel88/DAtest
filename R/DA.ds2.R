@@ -8,12 +8,13 @@
 #' @param covars Either a named list with covariables, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}
 #' @param out.all If TRUE, will run "LRT" which will produce one p-value for the \code{predictor}. If FALSE will run "Wald" test and will output p-value from one level of the predictor specified by \code{coeff}. If NULL (default) set as TRUE for multi-class \code{predictor} and FALSE otherwise
 #' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
-#' @param coeff Integer. The log2FoldChange (and p-value if test="Wald") will be associated with this coefficient. For "Wald" this coefficient is compared to the overall mean. For "LRT" this coefficient is compared to the intercept (1. level of \code{predictor}). Default 2, i.e. the 2. level of the \code{predictor}.
+#' @param coeff Integer. The log2FoldChange (and p-value if test="Wald") will be associated with this coefficient. This coefficient is by default compared to the intercept (1. level of \code{predictor}), change this with \code{coeff.ref}. Default 2, i.e. the 2. level of the \code{predictor}.
+#' @param coeff.ref Integer. Reference level of the \code{predictor}. Default the intercept, = 1 
 #' @param allResults If TRUE will return raw results from the \code{DESeq} function
 #' @param ... Additional arguments for the \code{DESeq} function
 #' @export
 
-DA.ds2 <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL, p.adj = "fdr", coeff = 2, allResults = FALSE, ...){
+DA.ds2 <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL, p.adj = "fdr", coeff = 2, coeff.ref = 1, allResults = FALSE, ...){
   
   suppressMessages(library(DESeq2))
   
@@ -28,6 +29,9 @@ DA.ds2 <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL
     count_table <- data
   }
   predictor <- as.factor(predictor)
+  
+  if(coeff == coeff.ref) stop("coeff and coeff.ref cannot be the same")
+  if(!coeff %in% 1:length(unique(predictor)) | !coeff.ref %in% 1:length(unique(predictor))) stop(paste("coeff and coeff.ref should be integers between 1 and",length(unique(predictor))))
   
   # out.all
   if(is.null(out.all)){
@@ -82,17 +86,28 @@ DA.ds2 <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL
         x <- DESeq(x,test="LRT",reduced = as.formula(paste("~ paired +",paste(names(covars), collapse="+"),sep = "")), ...)
       }
     }
-    res <- as.data.frame(results(x, name = paste("predictor",levels(predictor)[coeff],"vs",levels(predictor)[1],sep = "_"))@listData)
+    res <- as.data.frame(results(x, name = paste("predictor",levels(predictor)[coeff],"vs",levels(predictor)[coeff.ref],sep = "_"))@listData)
     res$ordering <- NA
-    res[!is.na(res$log2FoldChange) & res$log2FoldChange > 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff],">",levels(as.factor(predictor))[1])
-    res[!is.na(res$log2FoldChange) & res$log2FoldChange < 0,"ordering"] <- paste0(levels(as.factor(predictor))[1],">",levels(as.factor(predictor))[coeff])
+    res[!is.na(res$log2FoldChange) & res$log2FoldChange > 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff],">",levels(as.factor(predictor))[coeff.ref])
+    res[!is.na(res$log2FoldChange) & res$log2FoldChange < 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff.ref],">",levels(as.factor(predictor))[coeff])
   }
   if(!out.all){
     x <- DESeq(x,test="Wald", ...)
-    res <- as.data.frame(results(x, name = paste0("predictor",levels(predictor)[coeff]))@listData)
-    res$ordering <- NA
-    res[!is.na(res$log2FoldChange) & res$log2FoldChange > 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff],">mean")
-    res[!is.na(res$log2FoldChange) & res$log2FoldChange < 0,"ordering"] <- paste0("mean>",levels(as.factor(predictor))[coeff])
+    if(paste("predictor",levels(predictor)[coeff],"vs",levels(predictor)[coeff.ref],sep = "_") %in% resultsNames(x)){
+      res <- as.data.frame(results(x, name = paste("predictor",levels(predictor)[coeff],"vs",levels(predictor)[coeff.ref],sep = "_"))@listData)
+      res$ordering <- NA
+      res[!is.na(res$log2FoldChange) & res$log2FoldChange > 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff],">",levels(as.factor(predictor))[coeff.ref])
+      res[!is.na(res$log2FoldChange) & res$log2FoldChange < 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff.ref],">",levels(as.factor(predictor))[coeff])
+    } else {
+      if(paste0("predictor",levels(predictor)[coeff]) %in% resultsNames(x)){
+        res <- as.data.frame(results(x, name = paste0("predictor",levels(predictor)[coeff]))@listData)
+        res$ordering <- NA
+        res[!is.na(res$log2FoldChange) & res$log2FoldChange > 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff],">mean")
+        res[!is.na(res$log2FoldChange) & res$log2FoldChange < 0,"ordering"] <- paste0("mean>",levels(as.factor(predictor))[coeff])
+      } else {
+        stop("Cannot find coefficient in DESeq2 model coefficient. Check coeff and coeff.ref")
+      }
+    }
   }
   
   colnames(res)[5] <- "pval"

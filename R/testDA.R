@@ -9,7 +9,7 @@
 #' @param tests Character. Which tests to include. Default all (Except ANCOM, see below for details)
 #' @param relative Logical. If TRUE (default) abundances are made relative for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea", and there is an offset of \code{log(LibrarySize)} for "neb", "poi", "qpo", "zpo" and "znb"
 #' @param effectSize Integer. The effect size for the spike-ins. Default 4
-#' @param k Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. \code{k=c(5,10,15)}: 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default \code{c(5,5,5)}
+#' @param k Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. \code{k=c(5,10,15)}: 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default NULL, which will spike 1% of the total amount of features in each tertile (a total of 3%)
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.
 #' @param rng.seed Numeric. Seed for reproducibility. Default 123
 #' @param args List. A list with lists of arguments passed to the different methods. See details for more.
@@ -119,7 +119,7 @@
 #' @importFrom pROC roc
 #' @export
 
-testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests = c("neb","rai","per","bay","adx","sam","qua","fri","zpo","znb","vli","qpo","poi","pea","wil","ttt","ltt","ltt2","erq","erq2","ere","ere2","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 4, k = c(5,5,5), cores = (detectCores()-1), rng.seed = 123, args = list(), out.all = NULL, alpha = 0.05, core.check = TRUE, verbose = TRUE){
+testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests = c("neb","rai","per","bay","adx","sam","qua","fri","zpo","znb","vli","qpo","poi","pea","wil","ttt","ltt","ltt2","erq","erq2","ere","ere2","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 4, k = NULL, cores = (detectCores()-1), rng.seed = 123, args = list(), out.all = NULL, alpha = 0.05, core.check = TRUE, verbose = TRUE){
 
   stopifnot(exists("data"),exists("predictor"))
   # Check for servers
@@ -188,8 +188,12 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   count_table <- count_table[rowSums(count_table) > 0,]
   
   # Spike vs no features
+  if(is.null(k)){
+    k <- rep(round(nrow(count_table)*0.01),3)
+  } 
   if(sum(k) == nrow(count_table)) stop("Set to spike all features. Can't calculate FPR or AUC. Change k argument")
   if(sum(k) > nrow(count_table)) stop("Set to spike more features than are present in the data. Change k argument")
+  if(sum(k) < 15) message("Few features spiked. Set 'R' to more than 10 to ensure proper estimation of AUC and FPR")
   
   # predictor
   if(verbose) if(any(is.na(predictor))) message("Warning: Predictor contains NAs!")
@@ -495,7 +499,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   } else {
     if(length(levels(as.factor(predictor))) == 2){
       pred.det <- "Two-class"
-      pred.ord <- paste0(levels(as.factor(predictor))[2],">",levels(as.factor(predictor))[1])
+      pred.ord <- paste(levels(as.factor(predictor))[1],"<",levels(as.factor(predictor))[2])
     } else {
       pred.det <- "Multi-class" 
       pred.ord <- paste(levels(as.factor(predictor)), collapse = ", ")
@@ -521,6 +525,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
                                RunTime = run.time,
                                Relative = relative,
                                EffectSize = effectSize,
+                               Spiked = paste(paste0(c("Low:","Mid:","High:"),k), collapse = ", "),
                                RandomSeed = rng.seed,
                                OutAll = out.all)
   rownames(output.details) <- ""

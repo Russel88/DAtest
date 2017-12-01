@@ -5,7 +5,7 @@
 \title{Log linear regression}
 \usage{
 DA.llm(data, predictor, paired = NULL, covars = NULL, relative = TRUE,
-  out.all = NULL, p.adj = "fdr", delta = 1, coeff = 2,
+  out.all = NULL, p.adj = "fdr", delta = 1, coeff = 2, coeff.ref = 1,
   allResults = FALSE, ...)
 }
 \arguments{
@@ -26,6 +26,8 @@ DA.llm(data, predictor, paired = NULL, covars = NULL, relative = TRUE,
 \item{delta}{Numeric. Pseudocount for the log transformation. Default 1}
 
 \item{coeff}{Integer. The p-value and log2FoldChange will be associated with this coefficient. Default 2, i.e. the 2. level of the \code{predictor}.}
+
+\item{coeff.ref}{Integer. Reference level of the \code{predictor}. Will only affect the log2FC and ordering columns on the output. Default the intercept, = 1}
 
 \item{allResults}{If TRUE will return raw results from the \code{lm}/\code{lme} function}
 
