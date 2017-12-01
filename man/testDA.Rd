@@ -30,7 +30,7 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
 
 \item{effectSize}{Integer. The effect size for the spike-ins. Default 4}
 
-\item{k}{Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. \code{k=c(5,10,15)}: 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default NULL, which will spike 1% of the total amount of features in each tertile (a total of 3%)}
+\item{k}{Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. \code{k=c(5,10,15)}: 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default NULL, which will spike 1 percent of the total amount of features in each tertile (a total of 3 percent)}
 
 \item{cores}{Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.}
 

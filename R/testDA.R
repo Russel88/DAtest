@@ -9,7 +9,7 @@
 #' @param tests Character. Which tests to include. Default all (Except ANCOM, see below for details)
 #' @param relative Logical. If TRUE (default) abundances are made relative for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea", and there is an offset of \code{log(LibrarySize)} for "neb", "poi", "qpo", "zpo" and "znb"
 #' @param effectSize Integer. The effect size for the spike-ins. Default 4
-#' @param k Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. \code{k=c(5,10,15)}: 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default NULL, which will spike 1% of the total amount of features in each tertile (a total of 3%)
+#' @param k Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. \code{k=c(5,10,15)}: 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default NULL, which will spike 1 percent of the total amount of features in each tertile (a total of 3 percent)
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.
 #' @param rng.seed Numeric. Seed for reproducibility. Default 123
 #' @param args List. A list with lists of arguments passed to the different methods. See details for more.
