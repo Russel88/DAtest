@@ -193,8 +193,11 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   } 
   if(sum(k) == nrow(count_table)) stop("Set to spike all features. Can't calculate FPR or AUC. Change k argument")
   if(sum(k) > nrow(count_table)) stop("Set to spike more features than are present in the data. Change k argument")
-  if(sum(k) < 15) message("Few features spiked. Set 'R' to more than 10 to ensure proper estimation of AUC and FPR")
-  
+  if(sum(k) == 0) k <- c(1,1,1)                                  
+  if(sum(k) < 15 & sum(k) >= 10 & R <= 10) message("Few features spiked. Increase 'k' or set 'R' to more than 10 to ensure proper estimation of AUC and FPR")
+  if(sum(k) < 10 & sum(k) >= 5 & R <= 20) message("Few features spiked. Increase 'k' or set 'R' to more than 20 to ensure proper estimation of AUC and FPR")                                  
+  if(sum(k) < 5 & R <= 50) message("Very few features spiked. Increase 'k' or set 'R' to more than 50 to ensure proper estimation of AUC and FPR")
+                                    
   # predictor
   if(verbose) if(any(is.na(predictor))) message("Warning: Predictor contains NAs!")
   if(is.numeric(predictor[1])){
