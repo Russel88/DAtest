@@ -373,11 +373,11 @@ the same order as columns in `data`):
 
 **Note:**
 
-As SAMseq does not output p-values, FPR for this method is estimated
-from the final false discovery rate. FPR might therefore vary quite a
-lot. If SAMSeq is one of the methods with highest AUC, you can run
+As SAMseq does not output p-values, FPR for this method is the false discovery rate. 
+For small datasets FPR might therefore vary quite a lot. 
+If SAMSeq is one of the methods with highest AUC, you can run
 `testDA` again but with a higher `fdr.output` argument for "sam" (e.g.
-`testDA(...,args = list(sam = list(fdr.output = 0.25))))` to get a
+`testDA(...,tests = "sam", args = list(sam = list(fdr.output = 0.25))))` to get a
 better estimate. If `fdr.output=0.25` we should expect FPR for "sam"
 from `testDA` to be 0.25 or lower.
 
