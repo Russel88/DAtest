@@ -447,8 +447,8 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
     
     # FPR 
     fprs <- sapply(1:length(res.sub), function(x) {
-      if(totalPos[x] != 0){
-        falsePos[x] / (totalPos[x] + totalNeg[x])
+      if((falsePos[x] + trueNeg[x]) != 0){
+        falsePos[x] / (falsePos[x] + trueNeg[x])
       } else {0}})
     
     
@@ -486,8 +486,14 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
     rownames(df.combined) <- NULL
 
     # Convert SAMseq FPR to FDR
-    df.combined[df.combined$Method == "SAMseq (sam)","FPR"] <- df.combined[df.combined$Method == "SAMseq (sam)","FPR"]*(nrow(count_table)/sum(k))
-    df.combined[df.combined$FPR > 1,"FPR"] <- 1
+    # "sam" FPR is multiplied by total non-spiked and divided by total significant to get the FDR                           
+    if("sam" %in% newnames){
+      if(nrow(res.sub[["sam"]][res.sub[["sam"]]$pval.adj <= alpha,]) == 0){
+        df.combined[df.combined$Method == "SAMseq (sam)","FPR"] <- 0
+      } else {
+        df.combined[df.combined$Method == "SAMseq (sam)","FPR"] <- df.combined[df.combined$Method == "SAMseq (sam)","FPR"]*(nrow(count_table)-sum(k))/nrow(res.sub[["sam"]][res.sub[["sam"]]$pval.adj <= alpha,])
+      }
+    }
     
     return(list(df.combined,res.sub))
     
