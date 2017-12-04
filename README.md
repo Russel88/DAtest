@@ -373,27 +373,35 @@ the same order as columns in `data`):
 
 **Note:**
 
-As SAMseq does not output p-values, FPR for this method is the false discovery rate. 
-For small datasets FPR might therefore vary quite a lot. 
-If SAMSeq is one of the methods with highest AUC, you can run
-`testDA` again but with a higher `fdr.output` argument for "sam" (e.g.
-`testDA(...,tests = "sam", args = list(sam = list(fdr.output = 0.25))))` to get a
+As SAMseq does not output p-values, FPR for this method is the final
+false discovery rate (false positives / total positives). FPR might
+therefore vary quite a lot. If SAMSeq is one of the methods with highest
+AUC, you can run `testDA` again but with a higher `fdr.output` argument
+for "sam" (e.g.
+`testDA(...,args = list(sam = list(fdr.output = 0.25))))` to get a
 better estimate. If `fdr.output=0.25` we should expect FPR for "sam"
 from `testDA` to be 0.25 or lower.
 
 P-values for baySeq are defined as 1 - posterior likelihoods.
 
-#### *High AUC, but Spike.detect.rate is 0.000?!*
+### Power analysis:
 
-How can a method have high AUC, but not detect any features? AUC is
-calculated by ranking the raw p-values, but Spike.detect.rate is the
-proportion of spiked features with adjusted p-value below 0.05. If AUC
-is high but Spike.detect.rate is zero it means that p-values for spiked
-features are low, but not low enough to be below the 0.05 threshold.
-Consequently, you are not likely to detect features with the set
-`effectSize`, and increasing the `effectSize` should increase the
-Spike.detect.rate. Spike.detect.rate will rarely be above 0.5 for
-methods with FPR &lt; 0.05.
+After a method has been chosen, you can run a power analysis. This can
+also be run to distinguish between methods appearing to be equally good
+in . spikes the data with different effects sizes and along with AUC and
+FPR it estimates with Empircal Power (aka Spike.detect.rate aka
+sensitivity) and the False Discovery Rate (FDR). The Empirical Power
+gives you an estimate of the proportion of true effects at a given
+effect size you are likely to discover (after p-value adjustment). The
+FDR tells you what proportion of the detected features are likely false
+positives (after p-value adjustment).
+
+Only one test can be run at a time, here MetagenomeSeq Feature model is
+run (see details in for test abbreviations):
+
+    po.msf <- powerDA(data, predictor, test = "msf")
+    plot(po.msf)
+    summary(po.msf)
 
 How to run real data
 ====================
