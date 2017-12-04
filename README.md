@@ -388,16 +388,16 @@ P-values for baySeq are defined as 1 - posterior likelihoods.
 
 After a method has been chosen, you can run a power analysis. This can
 also be run to distinguish between methods appearing to be equally good
-in . spikes the data with different effects sizes and along with AUC and
-FPR it estimates with Empircal Power (aka Spike.detect.rate aka
-sensitivity) and the False Discovery Rate (FDR). The Empirical Power
-gives you an estimate of the proportion of true effects at a given
-effect size you are likely to discover (after p-value adjustment). The
-FDR tells you what proportion of the detected features are likely false
-positives (after p-value adjustment).
+in `testDA`. `powerDA` spikes the data with different effects sizes and
+along with AUC and FPR it estimates with Empircal Power (aka
+Spike.detect.rate aka sensitivity) and the False Discovery Rate (FDR).
+The Empirical Power gives you an estimate of the proportion of true
+effects at a given effect size you are likely to discover (after p-value
+adjustment). The FDR tells you what proportion of the detected features
+are likely false positives (after p-value adjustment).
 
 Only one test can be run at a time, here MetagenomeSeq Feature model is
-run (see details in for test abbreviations):
+run (see details in `testDA` for test abbreviations):
 
     po.msf <- powerDA(data, predictor, test = "msf")
     plot(po.msf)
