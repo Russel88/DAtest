@@ -331,8 +331,9 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
                         
                         error = function(e) NULL)
     
-    if(!is.null(res.sub) & (!i %in% c("anc","sam"))){
+    if(!is.null(res.sub) & (!i %in% c("anc","sam","adx"))){
       res.sub[is.na(res.sub$pval),"pval"] <- 1
+      res.sub[is.na(res.sub$pval.adj),"pval.adj"] <- 1
     }
 
     run.time.sub <- (proc.time()-t1.sub)[3]
@@ -398,24 +399,10 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
       samdf <- as.data.frame(res.sub[paste0(r,"_","sam")])
       colnames(samdf) <- gsub(".*_sam.","",colnames(samdf))
       
-      if(length(levels(as.factor(predictor))) > 2 & num.pred == FALSE){
-        suppressWarnings(min.sig <- min(samdf[samdf$Sig == "Yes","Score"]))
-        if(min.sig == Inf) min.sig <- max(samdf$Score)+1
-        samdf$pval <- 1/samdf$Score * 0.05/(1/min.sig)
-      } else {
-        samdf$ScoreRank <- rank(samdf$Score)
-        suppressWarnings(min.up <- min(samdf[samdf$Sig.up == "Yes","ScoreRank"]))
-        suppressWarnings(max.lo <- max(samdf[samdf$Sig.lo == "Yes","ScoreRank"]))
-        if(effectSize >= 1){
-          if(min.up == Inf) min.up <- max(samdf$ScoreRank)+1
-          samdf$pval <- 1/samdf$ScoreRank * 0.05/(1/min.up)
-        } 
-        if(effectSize < 1){
-          if(max.lo == -Inf) max.lo <- 0.5
-          samdf$pval <- samdf$ScoreRank * 0.05/max.lo
-        } 
-      }
-      samdf$pval.adj <- samdf$pval
+      samdf$pval <- 1/rank(samdf$Score)
+      samdf$pval.adj <- 1
+      samdf[samdf$Sig == "Yes","pval.adj"] <- 0 
+      
       res.sub[paste0(r,"_","sam")] <- NULL
       res.names <- names(res.sub)
       res.sub <- c(res.sub,list(samdf))
@@ -485,13 +472,12 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
                               Run = r)
     rownames(df.combined) <- NULL
 
-    # Convert SAMseq FPR to FDR
-    # "sam" FPR is multiplied by total non-spiked and divided by total significant to get the FDR                           
+    # SAMseq FDR
     if("sam" %in% newnames){
       if(nrow(res.sub[["sam"]][res.sub[["sam"]]$pval.adj <= alpha,]) == 0){
         df.combined[df.combined$Method == "SAMseq (sam)","FPR"] <- 0
       } else {
-        df.combined[df.combined$Method == "SAMseq (sam)","FPR"] <- df.combined[df.combined$Method == "SAMseq (sam)","FPR"]*(nrow(count_table)-sum(k))/nrow(res.sub[["sam"]][res.sub[["sam"]]$pval.adj <= alpha,])
+        df.combined[df.combined$Method == "SAMseq (sam)","FPR"] <- nrow(res.sub[["sam"]][res.sub[["sam"]]$pval.adj <= alpha & res.sub[["sam"]]$Spiked == "No",])/nrow(res.sub[["sam"]][res.sub[["sam"]]$pval.adj <= alpha,])
       }
     }
     

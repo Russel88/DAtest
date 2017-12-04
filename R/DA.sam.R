@@ -65,6 +65,8 @@ DA.sam <- function(data, predictor, paired = NULL, fdr.output = 0.05, allResults
                        Sig.lo = factor("No",levels = c("No","Yes")))
       tryCatch(df[df$Feature %in% as.matrix(res$siggenes.table$genes.up)[,1],"Sig.up"] <- "Yes",error = function(e) NULL)
       tryCatch(df[df$Feature %in% as.matrix(res$siggenes.table$genes.lo)[,1],"Sig.lo"] <- "Yes",error = function(e) NULL)
+      df$Sig <- "No"
+      df[df$Sig.up == "Yes" | df$Sig.lo == "Yes","Sig"] <- "Yes"
     } else {
       df <- data.frame(Feature = rownames(count_table),
                        Score = res$samr.obj$tt,
@@ -77,6 +79,8 @@ DA.sam <- function(data, predictor, paired = NULL, fdr.output = 0.05, allResults
       df[!is.na(df$log2FC) & df$log2FC < 0,"ordering"] <- paste0(pred.lev[1],">",pred.lev[2])
       tryCatch(df[df$Feature %in% as.matrix(res$siggenes.table$genes.up)[,1],"Sig.up"] <- "Yes",error = function(e) NULL)
       tryCatch(df[df$Feature %in% as.matrix(res$siggenes.table$genes.lo)[,1],"Sig.lo"] <- "Yes",error = function(e) NULL)
+      df$Sig <- "No"
+      df[df$Sig.up == "Yes" | df$Sig.lo == "Yes","Sig"] <- "Yes"
     }
   }
   

@@ -225,7 +225,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb"
     on.exit(suppressWarnings(rm(list=test.args, pos = 1)), add = TRUE)
     
     res.sub <- tryCatch(switch(i,
-                               zzz = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars, p.adj),zzz.DAargs)),
+                               zzz = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars),zzz.DAargs)),
                                wil = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired, relative, p.adj),wil.DAargs)),
                                ttt = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired, relative, p.adj),ttt.DAargs)),
                                ltt = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,relative, p.adj),ltt.DAargs)),
