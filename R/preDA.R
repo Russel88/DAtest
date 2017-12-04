@@ -19,7 +19,7 @@ preDA <- function(data, min.samples = 0, min.reads = 0, min.abundance = 0){
   }
   
   # Check
-  if(any("Others" %in% rownames(count_table)) stop("There is already a feature named 'Others' in data. Maybe data has been pre-processed already")
+  if(any("Others" %in% rownames(count_table))) stop("There is already a feature named 'Others' in data. Maybe data has been pre-processed already")
   
   # Exclude by samples
   exclude.samples <- which(rowSums(count_table > 0) < min.samples)
