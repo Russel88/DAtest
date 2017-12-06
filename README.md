@@ -586,7 +586,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">Bivariate Normal</td>
 </tr>
 <tr class="even">
-<td>Correlation - Spearman Rank</td>
+<td>Correlation - Spearman</td>
 <td align="left"><a href="https://en.wikipedia.org/wiki/Spearman%27s_rank_correlation_coefficient">spe</a></td>
 <td align="left">Quantitative</td>
 <td align="left">No</td>
@@ -782,11 +782,11 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">Yes, as random effects</td>
 <td align="left">Yes</td>
 <td align="left">TSS</td>
-<td align="left">Log</td>
+<td align="left">Log (3)</td>
 <td align="left">Gaussian</td>
 </tr>
 <tr class="even">
-<td>MetagenomeSeq feature model</td>
+<td>MetagenomeSeq featuremodel</td>
 <td align="left"><a href="https://bioconductor.org/packages/release/bioc/html/metagenomeSeq.html">msf</a></td>
 <td align="left">Two-class</td>
 <td align="left">No</td>
