@@ -25,8 +25,10 @@ in choosing a method for a specific dataset based on empirical testing.
 -   Compare methods with `testDA` function
     -   Check the results with `plot` or `summary`
     -   Choose method that has high AUC, and FPR not higher than ~0.05
+    -   (Optional but recommended) Explore the sensitivity and false
+        discovery rate of the chosen method with `powerDA`
 -   Run data with the chosen test with `DA."test"` function, where
-    "test" is the name of the test (see details with `?testDA`)
+    "test" is the name of the test
     -   Check out your final results.
 
 ### Citation
@@ -47,7 +49,17 @@ Overview of this tutorial
 
 -   [Installation of packages](#installation-of-packages)
 -   [How to compare methods](#how-to-compare-methods)
+    -   [The test](#run-the-test)
+    -   [Multi-class
+        predictors](#if-your-predictor-is-categorical-with-more-than-two-levels)
+    -   [Paired or blocked experimental
+        design](#if-you-have-a-paired-or-blocked-experimental-design)
+    -   [Covariates](#if-you-have-covariates)
+    -   [Phyloseq objects](#if-you-have-a-phyloseq-object)
+    -   [Power analysis](#power-analysis)
 -   [How to run real data](#how-to-run-real-data)
+    -   [Compare results from many
+        methods](#run-all-or-several-methods-and-check-which-features-are-found-by-several-methods)
 -   [Implemented methods](#implemented-methods)
 -   [Extra features](#extra-features)
 
@@ -175,7 +187,7 @@ combination of all three.
 
     data.new <- preDA(data, min.samples = 2, min.reads = 10, min.abundance = 0)
 
-### Run the test:
+### Run the test
 
 (if you have a phyloseq object, see details further down)
 
@@ -224,7 +236,7 @@ connections.
 If you run out of memory/RAM, try again with a clean R environment or
 reduce the number of cores used for computing.
 
-### *If you have more than 10k features (or 5k for paired analysis):*
+### If you have more than 10k features (or 5k for paired analysis)
 
 Runtime of the different methods can vary quite a lot, and some methods
 are simply unfeasible for datasets with several thousands of features.
@@ -240,7 +252,7 @@ method.
 
     runtimeDA(data, predictor)
 
-### *If your predictor is categorical with more than two levels:*
+### If your predictor is categorical with more than two levels
 
 There are generally two ways to output results with a categorical
 predictor with multiple levels; either there is one p-value indicating
@@ -298,7 +310,7 @@ p-values/log2FC for covariates.
 For SAMSeq, ANOVAs, Quade test, Friedman test, Kruskal-Wallis test you
 always get one p-value for the `predictor`
 
-### *If you have a paired/blocked experimental design:*
+### If you have a paired or blocked experimental design
 
 E.g. repeated samples from same patients, or control/treatments inside
 blocks.
@@ -330,7 +342,7 @@ covariable in the model and are also generally flexible in the design.
 
 ANCOM use the `paired` variable in a repeated measures manner
 
-### *If you have non-relative abundances, e.g. for normalized protein abundance or absolute microbiome abundance:*
+### If you have non-relative abundances, e.g. for normalized protein abundance or absolute microbiome abundance
 
     mytest <- testDA(data, predictor, relative = FALSE)
 
@@ -344,14 +356,14 @@ MetagenomeSeq, ANCOM, RAIDA, ALDEx2 and baySeq. Therefore, the `data` is
 analysed as provided, except for the tests that log-transform the data:
 "ltt", "llm", "lli" and "lao".
 
-### *If you have covariates:*
+### If you have covariates
 
 The `covars` argument should be a named list with the covariables (in
 the same order as columns in `data`):
 
     mytest <- testDA(data, predictor, covars = list(Age = subject.age, Date = exp.date))
 
-### *If you have a phyloseq object:*
+### If you have a phyloseq object
 
 `data` can also be a phyloseq object. In this case, the `predictor`,
 `paired` and `covars` arguments are the names of the variables in
@@ -384,7 +396,7 @@ from `testDA` to be 0.25 or lower.
 
 P-values for baySeq are defined as 1 - posterior likelihoods.
 
-### Power analysis:
+### Power analysis
 
 After a method has been chosen, you can run a power analysis. This can
 also be run to distinguish between methods appearing to be equally good
@@ -451,8 +463,8 @@ phyloseq object). `group.cols` denotes which columns in `group.df` are
 used for testing (E.g. `group.cols = 1:3` will use the first three
 columns).
 
-Run all (or several) methods and check which features are found by several methods
-----------------------------------------------------------------------------------
+Run all or several methods and check which features are found by several methods
+--------------------------------------------------------------------------------
 
 With `allDA` we can run several methods and easily compare their results
 
@@ -489,106 +501,402 @@ or write to me, preferably with a code snippet of the implementation
 
 ### Methods:
 
--   per - [Permutation test with user defined test
-    statistic](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8)
-    (See below for description of the paired permutation test)
--   bay -
-    [baySeq](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-11-422)
--   adx - [ALDEx t-test and
-    wilcoxon](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0067019)
--   wil - [Wilcoxon Rank
-    Sum](https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test) on
-    relative abundances (Paired is a [Wilcoxon Signed Rank
-    test](https://en.wikipedia.org/wiki/Wilcoxon_signed-rank_test)
--   ttt - [Welch t.test](https://en.wikipedia.org/wiki/Welch%27s_t-test)
-    on relative abundances (Paired is [paired
-    t-test](https://en.wikipedia.org/wiki/Student%27s_t-test#Dependent_t-test_for_paired_samples))
--   ltt - [Welch
-    t.test](https://en.wikipedia.org/wiki/Welch%27s_t-test), but reads
-    are first transformed with log(abundance + delta) then turned into
-    relative abundances
--   ltt2 - [Welch
-    t.test](https://en.wikipedia.org/wiki/Welch%27s_t-test), but with
-    relative abundances transformed with log(relative abundance + delta)
--   neb - [Negative binomial
-    GLM](https://en.wikipedia.org/wiki/Negative_binomial_distribution)
-    (The paired version is a [mixed-effect
-    model](https://en.wikipedia.org/wiki/Mixed_model))
--   erq - [EdgeR - Quasi
-    likelihood](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2796818/)
-    (The paired version is a model with the paired variable
-    as covariate)
--   ere - [EdgeR - Exact
-    test](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2796818/)
--   msf - [MetagenomeSeq feature
-    model](https://bioconductor.org/packages/release/bioc/html/metagenomeSeq.html)
--   zig - [MetagenomeSeq zero-inflated
-    gaussian](https://www.nature.com/nmeth/journal/v10/n12/full/nmeth.2658.html)
-    (The paired version is a model with the paired variable
-    as covariate)
--   ds2 -
-    [DESeq2](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0550-8)
-    (The paired version is a model with the paired variable
-    as covariate)
--   lim -
-    [LIMMA](https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true)
-    (The paired version is using the block argument in lmFit)
--   lli -
-    [LIMMA](https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true),
-    but reads are first transformed with log(abundance + delta) then
-    turned into relative abundances
--   lli2 -
-    [LIMMA](https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true),
-    but with relative abundances transformed with log(relative
-    abundance + delta)
--   vli - [LIMMA with
-    voom](https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true)
-    (The paired version is using the block argument in lmFit)
--   kru - [Kruskal-Wallis
-    test](https://en.wikipedia.org/wiki/Kruskal%E2%80%93Wallis_one-way_analysis_of_variance)
-    on relative abundances
--   aov - [ANOVA](https://en.wikipedia.org/wiki/Analysis_of_variance) on
-    relative abundances
--   lao - [ANOVA](https://en.wikipedia.org/wiki/Analysis_of_variance),
-    but reads are first transformed with log(abundance + delta) then
-    turned into relative abundances
--   lao2 - [ANOVA](https://en.wikipedia.org/wiki/Analysis_of_variance),
-    but with relative abundances transformed with log(relative
-    abundance + delta)
--   lrm - [Linear
-    regression](https://en.wikipedia.org/wiki/Linear_regression) on
-    relative abundances (The paired version is a [mixed-effect
-    model](https://en.wikipedia.org/wiki/Mixed_model))
--   llm - [Linear
-    regression](https://en.wikipedia.org/wiki/Linear_regression), but
-    reads are first transformed with log(abundance + delta) then turned
-    into relative abundances
--   llm2 - [Linear
-    regression](https://en.wikipedia.org/wiki/Linear_regression), but
-    with relative abundances transformed with log(relative abundance +
-    delta)
--   rai -
-    [RAIDA](https://academic.oup.com/bioinformatics/article/31/14/2269/256302/A-robust-approach-for-identifying-differentially?searchresult=1)
--   spe - [Spearman Rank
-    Correlation](https://en.wikipedia.org/wiki/Spearman%27s_rank_correlation_coefficient)
--   pea - [Pearson
-    Correlation](https://en.wikipedia.org/wiki/Pearson_correlation_coefficient)
--   poi - [Poisson
-    GLM](https://en.wikipedia.org/wiki/Poisson_distribution) (The paired
-    version is a [mixed-effect
-    model](https://en.wikipedia.org/wiki/Mixed_model))
--   qpo - [Quasi-poisson
-    GLM](https://en.wikipedia.org/wiki/Quasi-likelihood)
--   zpo - [Zero-inflated Poisson
-    GLM](https://en.wikipedia.org/wiki/Zero-inflated_model)
--   znb - [Zero-inflated Negative Binomial
-    GLM](https://en.wikipedia.org/wiki/Zero-inflated_model)
--   fri - [Friedman Rank Sum
-    test](https://en.wikipedia.org/wiki/Friedman_test)
--   qua - [Quade test](http://rcompanion.org/handbook/F_11.html)
--   anc - [ANCOM](https://www.ncbi.nlm.nih.gov/pubmed/26028277) (by
-    default not included, as it is very slow)
--   sam - [SAMseq](http://statweb.stanford.edu/~tibs/SAM/)
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="left">Abbr. (link)</th>
+<th align="left">Response</th>
+<th align="left">Paired/Blocked</th>
+<th align="left">Covars</th>
+<th align="left">Normalization</th>
+<th align="left">Transf.</th>
+<th align="left">Model</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ALDEx2</td>
+<td align="left"><a href="http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0067019">adx</a></td>
+<td align="left">Two-class</td>
+<td align="left">No</td>
+<td align="left">No</td>
+<td align="left">ILR</td>
+<td align="left"></td>
+<td align="left">Poisson/Dirichlet</td>
+</tr>
+<tr class="even">
+<td>ANCOM</td>
+<td align="left"><a href="https://www.ncbi.nlm.nih.gov/pubmed/26028277">anc</a></td>
+<td align="left">Two-class</td>
+<td align="left">Yes</td>
+<td align="left">No</td>
+<td align="left">Log ratio</td>
+<td align="left"></td>
+<td align="left">Nonparametric</td>
+</tr>
+<tr class="odd">
+<td>ANOVA</td>
+<td align="left"><a href="https://en.wikipedia.org/wiki/Analysis_of_variance">aov</a></td>
+<td align="left">Multi-class</td>
+<td align="left">No</td>
+<td align="left">Yes</td>
+<td align="left">TSS (2)</td>
+<td align="left"></td>
+<td align="left">Gaussian</td>
+</tr>
+<tr class="even">
+<td>ANOVA log</td>
+<td align="left"><a href="https://en.wikipedia.org/wiki/Analysis_of_variance">lao</a></td>
+<td align="left">Multi-class</td>
+<td align="left">No</td>
+<td align="left">Yes</td>
+<td align="left">TSS (2)</td>
+<td align="left">Log</td>
+<td align="left">Gaussian</td>
+</tr>
+<tr class="odd">
+<td>ANOVA log2</td>
+<td align="left"><a href="https://en.wikipedia.org/wiki/Analysis_of_variance">lao2</a></td>
+<td align="left">Multi-class</td>
+<td align="left">No</td>
+<td align="left">Yes</td>
+<td align="left">TSS</td>
+<td align="left">Log (3)</td>
+<td align="left">Gaussian</td>
+</tr>
+<tr class="even">
+<td>baySeq</td>
+<td align="left"><a href="https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-11-422">bay</a></td>
+<td align="left">Two-class</td>
+<td align="left">No</td>
+<td align="left">No</td>
+<td align="left">Quantile (4)</td>
+<td align="left"></td>
+<td align="left">Negative Binomial</td>
+</tr>
+<tr class="odd">
+<td>Correlation - Pearson</td>
+<td align="left"><a href="https://en.wikipedia.org/wiki/Pearson_correlation_coefficient">pea</a></td>
+<td align="left">Quantitative</td>
+<td align="left">No</td>
+<td align="left">No</td>
+<td align="left">TSS (2)</td>
+<td align="left"></td>
+<td align="left">Bivariate Normal</td>
+</tr>
+<tr class="even">
+<td>Correlation - Spearman Rank</td>
+<td align="left"><a href="https://en.wikipedia.org/wiki/Spearman%27s_rank_correlation_coefficient">spe</a></td>
+<td align="left">Quantitative</td>
+<td align="left">No</td>
+<td align="left">No</td>
+<td align="left">TSS (2)</td>
+<td align="left"></td>
+<td align="left">Nonparametric</td>
+</tr>
+<tr class="odd">
+<td>DESeq2</td>
+<td align="left"><a href="https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0550-8">ds2</a></td>
+<td align="left">Categorical</td>
+<td align="left">Yes, as covariate</td>
+<td align="left">Yes</td>
+<td align="left">RLE</td>
+<td align="left"></td>
+<td align="left">Negative Binomial</td>
+</tr>
+<tr class="even">
+<td>EdgeR - Exact test</td>
+<td align="left"><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2796818/">ere</a></td>
+<td align="left">Two-class</td>
+<td align="left">No</td>
+<td align="left">No</td>
+<td align="left">TMM</td>
+<td align="left"></td>
+<td align="left">Negative Binomial</td>
+</tr>
+<tr class="odd">
+<td>EdgeR - Exact test2</td>
+<td align="left"><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2796818/">ere2</a></td>
+<td align="left">Two-class</td>
+<td align="left">No</td>
+<td align="left">No</td>
+<td align="left">RLE</td>
+<td align="left"></td>
+<td align="left">Negative Binomial</td>
+</tr>
+<tr class="even">
+<td>EdgeR - Quasi likelihood</td>
+<td align="left"><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2796818/">erq</a></td>
+<td align="left">All</td>
+<td align="left">Yes, as covariate</td>
+<td align="left">Yes</td>
+<td align="left">TMM</td>
+<td align="left"></td>
+<td align="left">Negative Binomial</td>
+</tr>
+<tr class="odd">
+<td>EdgeR - Quasi likelihood2</td>
+<td align="left"><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2796818/">erq2</a></td>
+<td align="left">All</td>
+<td align="left">Yes, as covariate</td>
+<td align="left">Yes</td>
+<td align="left">RLE</td>
+<td align="left"></td>
+<td align="left">Negative Binomial</td>
+</tr>
+<tr class="even">
+<td>Friedman Rank Sum test</td>
+<td align="left"><a href="https://en.wikipedia.org/wiki/Friedman_test">fri</a></td>
+<td align="left">Multi-class</td>
+<td align="left">Exclusively</td>
+<td align="left">No</td>
+<td align="left">TSS (2)</td>
+<td align="left"></td>
+<td align="left">Nonparametric</td>
+</tr>
+<tr class="odd">
+<td>GLM - Negative binomial</td>
+<td align="left"><a href="https://en.wikipedia.org/wiki/Negative_binomial_distribution">neb</a></td>
+<td align="left">All</td>
+<td align="left">Yes, as random effects</td>
+<td align="left">Yes</td>
+<td align="left">None (1)</td>
+<td align="left"></td>
+<td align="left">Negative Binomial</td>
+</tr>
+<tr class="even">
+<td>GLM - Poisson</td>
+<td align="left"><a href="https://en.wikipedia.org/wiki/Poisson_distribution">poi</a></td>
+<td align="left">All</td>
+<td align="left">Yes, as random effects</td>
+<td align="left">Yes</td>
+<td align="left">None (1)</td>
+<td align="left"></td>
+<td align="left">Poisson</td>
+</tr>
+<tr class="odd">
+<td>GLM - Quasi-poisson</td>
+<td align="left"><a href="https://en.wikipedia.org/wiki/Quasi-likelihood">qpo</a></td>
+<td align="left">All</td>
+<td align="left">No</td>
+<td align="left">Yes</td>
+<td align="left">None (1)</td>
+<td align="left"></td>
+<td align="left">Quasi-poisson</td>
+</tr>
+<tr class="even">
+<td>GLM - ZI Negative Binomial</td>
+<td align="left"><a href="https://cran.r-project.org/web/packages/pscl/index.html">znb</a></td>
+<td align="left">All</td>
+<td align="left">No</td>
+<td align="left">Yes</td>
+<td align="left">None (1)</td>
+<td align="left"></td>
+<td align="left">Zero-inflated Negative binomial</td>
+</tr>
+<tr class="odd">
+<td>GLM - ZI Poisson</td>
+<td align="left"><a href="https://cran.r-project.org/web/packages/pscl/index.html">zpo</a></td>
+<td align="left">All</td>
+<td align="left">No</td>
+<td align="left">Yes</td>
+<td align="left">None (1)</td>
+<td align="left"></td>
+<td align="left">Zero-inflated Poisson</td>
+</tr>
+<tr class="even">
+<td>Kruskal-Wallis test</td>
+<td align="left"><a href="https://en.wikipedia.org/wiki/Kruskal%E2%80%93Wallis_one-way_analysis_of_variance">kru</a></td>
+<td align="left">Multi-class</td>
+<td align="left">No</td>
+<td align="left">No</td>
+<td align="left">TSS (2)</td>
+<td align="left"></td>
+<td align="left">Nonparametric</td>
+</tr>
+<tr class="odd">
+<td>LIMMA</td>
+<td align="left"><a href="https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true">lim</a></td>
+<td align="left">All</td>
+<td align="left">Yes, as random effects</td>
+<td align="left">Yes</td>
+<td align="left">TSS (2)</td>
+<td align="left"></td>
+<td align="left">Gaussian</td>
+</tr>
+<tr class="even">
+<td>LIMMA log</td>
+<td align="left"><a href="https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true">lli</a></td>
+<td align="left">All</td>
+<td align="left">Yes, as random effects</td>
+<td align="left">Yes</td>
+<td align="left">TSS (2)</td>
+<td align="left">Log</td>
+<td align="left">Gaussian</td>
+</tr>
+<tr class="odd">
+<td>LIMMA log2</td>
+<td align="left"><a href="https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true">lli2</a></td>
+<td align="left">All</td>
+<td align="left">Yes, as random effects</td>
+<td align="left">Yes</td>
+<td align="left">TSS</td>
+<td align="left">Log (3)</td>
+<td align="left">Gaussian</td>
+</tr>
+<tr class="even">
+<td>LIMMA voom</td>
+<td align="left"><a href="https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true">vli</a></td>
+<td align="left">All</td>
+<td align="left">Yes, as random effects</td>
+<td align="left">Yes</td>
+<td align="left">TMM</td>
+<td align="left">Voom</td>
+<td align="left">Gaussian</td>
+</tr>
+<tr class="odd">
+<td>Linear regression</td>
+<td align="left"><a href="https://en.wikipedia.org/wiki/Linear_regression">lrm</a></td>
+<td align="left">All</td>
+<td align="left">Yes, as random effects</td>
+<td align="left">Yes</td>
+<td align="left">TSS (2)</td>
+<td align="left"></td>
+<td align="left">Gaussian</td>
+</tr>
+<tr class="even">
+<td>Linear regression log</td>
+<td align="left"><a href="https://en.wikipedia.org/wiki/Linear_regression">llm</a></td>
+<td align="left">All</td>
+<td align="left">Yes, as random effects</td>
+<td align="left">Yes</td>
+<td align="left">TSS (2)</td>
+<td align="left">Log</td>
+<td align="left">Gaussian</td>
+</tr>
+<tr class="odd">
+<td>Linear regression log2</td>
+<td align="left"><a href="https://en.wikipedia.org/wiki/Linear_regression">llm2</a></td>
+<td align="left">All</td>
+<td align="left">Yes, as random effects</td>
+<td align="left">Yes</td>
+<td align="left">TSS</td>
+<td align="left">Log</td>
+<td align="left">Gaussian</td>
+</tr>
+<tr class="even">
+<td>MetagenomeSeq feature model</td>
+<td align="left"><a href="https://bioconductor.org/packages/release/bioc/html/metagenomeSeq.html">msf</a></td>
+<td align="left">Two-class</td>
+<td align="left">No</td>
+<td align="left">No</td>
+<td align="left">CSS</td>
+<td align="left"></td>
+<td align="left">Zero-inflated Lognormal</td>
+</tr>
+<tr class="odd">
+<td>MetagenomeSeq ZIG</td>
+<td align="left"><a href="https://www.nature.com/nmeth/journal/v10/n12/full/nmeth.2658.html">zig</a></td>
+<td align="left">All</td>
+<td align="left">Yes, as covariate</td>
+<td align="left">Yes</td>
+<td align="left">CSS</td>
+<td align="left">Log</td>
+<td align="left">Zero-inflated Gaussian</td>
+</tr>
+<tr class="even">
+<td>Permutation test</td>
+<td align="left"><a href="https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8">per</a></td>
+<td align="left">Two-class</td>
+<td align="left">Yes</td>
+<td align="left">No</td>
+<td align="left">TSS (2)</td>
+<td align="left"></td>
+<td align="left">Nonparametric</td>
+</tr>
+<tr class="odd">
+<td>Quade test</td>
+<td align="left"><a href="http://rcompanion.org/handbook/F_11.html">qua</a></td>
+<td align="left">Multi-class</td>
+<td align="left">Exclusively</td>
+<td align="left">No</td>
+<td align="left">TSS (2)</td>
+<td align="left"></td>
+<td align="left">Nonparametric</td>
+</tr>
+<tr class="even">
+<td>RAIDA</td>
+<td align="left"><a href="https://academic.oup.com/bioinformatics/article/31/14/2269/256302/A-robust-approach-for-identifying-differentially">rai</a></td>
+<td align="left">Two-class</td>
+<td align="left">No</td>
+<td align="left">No</td>
+<td align="left">Ratio</td>
+<td align="left"></td>
+<td align="left">Zero-inflated Lognormal</td>
+</tr>
+<tr class="odd">
+<td>SAMseq</td>
+<td align="left"><a href="http://statweb.stanford.edu/~tibs/SAM/">sam</a></td>
+<td align="left">All</td>
+<td align="left">Yes</td>
+<td align="left">No</td>
+<td align="left">Resampling</td>
+<td align="left"></td>
+<td align="left">Nonparametric</td>
+</tr>
+<tr class="even">
+<td>Welch t.test</td>
+<td align="left"><a href="https://en.wikipedia.org/wiki/Welch%27s_t-test">ttt</a></td>
+<td align="left">Two-class</td>
+<td align="left">Yes</td>
+<td align="left">No</td>
+<td align="left">TSS (2)</td>
+<td align="left"></td>
+<td align="left">Gaussian</td>
+</tr>
+<tr class="odd">
+<td>Welch t.test log</td>
+<td align="left"><a href="https://en.wikipedia.org/wiki/Welch%27s_t-test">ltt</a></td>
+<td align="left">Two-class</td>
+<td align="left">Yes</td>
+<td align="left">No</td>
+<td align="left">TSS (2)</td>
+<td align="left">Log</td>
+<td align="left">Gaussian</td>
+</tr>
+<tr class="even">
+<td>Welch t.test log2</td>
+<td align="left"><a href="https://en.wikipedia.org/wiki/Welch%27s_t-test">ltt2</a></td>
+<td align="left">Two-class</td>
+<td align="left">Yes</td>
+<td align="left">No</td>
+<td align="left">TSS</td>
+<td align="left">Log (3)</td>
+<td align="left">Gaussian</td>
+</tr>
+<tr class="odd">
+<td>Wilcoxon</td>
+<td align="left"><a href="https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test">wil</a></td>
+<td align="left">Two-class</td>
+<td align="left">Yes</td>
+<td align="left">No</td>
+<td align="left">TSS (2)</td>
+<td align="left"></td>
+<td align="left">Nonparametric</td>
+</tr>
+</tbody>
+</table>
+
+-   1: Log of library sizes used as offset when `relative = TRUE`
+-   2: None when `relative = FALSE`
+-   3: Log transformation is done before normalization
+-   4: This can be be changed to TSS or TMM
+-   TSS: Total Sum Scaling
+-   TMM: Trimmed Mean by M-value
+-   RLE: Relative Log Expression
+-   CSS: Cumulative Sum Scaling
+-   ILR: Isometric Log-Ratio
 
 #### Paired permutation test
 
