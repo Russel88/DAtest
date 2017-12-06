@@ -12,10 +12,11 @@
 #' @param coeff.ref Integer. Reference level of the \code{predictor}. Will only affect the log2FC and ordering columns on the output. Default the intercept, = 1 
 #' @param allResults If TRUE will return raw results from the \code{zeroinfl} function
 #' @param ... Additional arguments for the \code{zeroinfl} function
-#' @import pscl
 #' @export
 
 DA.zpo <- function(data, predictor, covars = NULL, relative = TRUE, out.all = NULL, p.adj = "fdr", coeff = 2, coeff.ref = 1, allResults = FALSE, ...){
+ 
+ suppressMessages(library(pscl))
  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
