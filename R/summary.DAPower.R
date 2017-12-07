@@ -5,7 +5,7 @@
 #' @export
 summary.DAPower <- function(x, ...){
     
-    x <- as.data.frame(unclass(x))
+    x <- as.data.frame(unclass(x[[1]]))
     
     if(x$Method[1] == "SAMseq (sam)"){
       # Find medians

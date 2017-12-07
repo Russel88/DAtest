@@ -5,10 +5,10 @@
 \title{Estimating (empirical) statistical power}
 \usage{
 powerDA(data, predictor, paired = NULL, covars = NULL, test = NULL,
-  effectSizes = c(2, 4, 8, 16, 32), alpha = 0.1, p.adj = "fdr", R = 5,
-  relative = TRUE, k = NULL, cores = (detectCores() - 1),
-  rng.seed = 123, args = list(), out.all = NULL, core.check = TRUE,
-  verbose = TRUE)
+  effectSizes = c(2, 4, 8, 16, 32), alpha.p = 0.05, alpha.q = 0.05,
+  p.adj = "fdr", R = 5, relative = TRUE, k = NULL,
+  cores = (detectCores() - 1), rng.seed = 123, args = list(),
+  out.all = NULL, core.check = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
@@ -23,7 +23,9 @@ powerDA(data, predictor, paired = NULL, covars = NULL, test = NULL,
 
 \item{effectSizes}{Numierc. The effect sizes for the spike-ins. Default \code{c(2,4,8,16,32)}}
 
-\item{alpha}{q-value threshold for determining significance for \code{empirical power}. Default 0.1}
+\item{alpha.p}{p-value threshold for false positive rates. Default 0.05}
+
+\item{alpha.q}{q-value threshold for determining significance for \code{empirical power}. Default 0.05. This will change \code{fdr.output} for "sam" and \code{sig} for "anc".}
 
 \item{p.adj}{Character. Method for p-value adjustment. See \code{p.adjust} for details. Default "fdr"}
 
@@ -46,7 +48,7 @@ powerDA(data, predictor, paired = NULL, covars = NULL, test = NULL,
 \item{verbose}{If TRUE will print informative messages}
 }
 \value{
-An object of class \code{DA}, which contains a list of results:
+An object of class \code{DAPower}, which contains a list with 1: A data.frame with results, 2: alpha.p value, 3: alpha.q values
 }
 \description{
 Estimating (empirical) statistical power for a specific differential abundance and expression method on a specific dataset

@@ -8,11 +8,11 @@
 #' @export
 plot.DAPower <- function(x, ...){
     
-    x <- as.data.frame(unclass(x))
-    x$EffectSize <- log2(x$EffectSize)
+    z <- as.data.frame(unclass(x[[1]]))
+    z$EffectSize <- log2(z$EffectSize)
     
     # Define plots
-    p1 <- ggplot(x, aes(EffectSize, SDR)) +
+    p1 <- ggplot(z, aes(EffectSize, SDR)) +
       theme_bw() +
       coord_cartesian(ylim = c(0,1)) +
       geom_point() +
@@ -21,9 +21,9 @@ plot.DAPower <- function(x, ...){
       xlab("Log2 Effect Size") +
       theme(panel.grid.minor = element_blank())
     
-    p2 <- ggplot(x, aes(EffectSize, AUC)) +
+    p2 <- ggplot(z, aes(EffectSize, AUC)) +
       theme_bw() +
-      coord_cartesian(ylim = c(min(0.45, min(x$AUC)),1)) +
+      coord_cartesian(ylim = c(min(0.45, min(z$AUC)),1)) +
       geom_point() +
       geom_hline(yintercept = 0.5) +
       geom_smooth(method = "loess", colour = "red", alpha = 0.4) +
@@ -31,37 +31,37 @@ plot.DAPower <- function(x, ...){
       xlab("Log2 Effect Size") +
       theme(panel.grid.minor = element_blank())
     
-    p3 <- ggplot(x, aes(EffectSize, FPR)) +
+    p3 <- ggplot(z, aes(EffectSize, FPR)) +
       theme_bw() +
-      coord_cartesian(ylim = c(0,(max(x$FPR)+0.05))) +
+      coord_cartesian(ylim = c(0,(max(z$FPR)+0.05))) +
       geom_point() +
-      geom_hline(yintercept = 0.05) +
+      geom_hline(yintercept = x[[2]]) +
       geom_smooth(method = "loess", colour = "red", alpha = 0.4) +
       ylab("False Positive Rate") +
       xlab("Log2 Effect Size") +
       theme(panel.grid.minor = element_blank())
     
-    p4 <- ggplot(x, aes(EffectSize, FDR)) +
+    p4 <- ggplot(z, aes(EffectSize, FDR)) +
       theme_bw() +
-      coord_cartesian(ylim = c(0,(max(x$FDR)+0.05))) +
+      coord_cartesian(ylim = c(0,(max(z$FDR)+0.05))) +
       geom_point() +
-      geom_hline(yintercept = 0.05) +
+      geom_hline(yintercept = x[[3]]) +
       geom_smooth(method = "loess", colour = "red", alpha = 0.4) +
       ylab("False Discovery Rate") +
       xlab("Log2 Effect Size") +
       theme(panel.grid.minor = element_blank())
     
-    if(x$Method[1] %in% c("ALDEx2 t-test (adx)","ALDEx2 wilcox (adx)")){
+    if(z$Method[1] %in% c("ALDEx2 t-test (adx)","ALDEx2 wilcox (adx)")){
       p1 <- p1 + facet_grid(.~Method)
       p2 <- p2 + facet_grid(.~Method)
       p3 <- p3 + facet_grid(.~Method)
       p4 <- p4 + facet_grid(.~Method)
     }
     
-    if(all(is.na(x$SDR))) p1 <- NULL
-    if(all(is.na(x$AUC))) p2 <- NULL
-    if(all(is.na(x$FPR))) p3 <- NULL
-    if(all(is.na(x$FDR))) p4 <- NULL
+    if(all(is.na(z$SDR))) p1 <- NULL
+    if(all(is.na(z$AUC))) p2 <- NULL
+    if(all(is.na(z$FPR))) p3 <- NULL
+    if(all(is.na(z$FDR))) p4 <- NULL
     
     # Plot it
     pp <- cowplot::ggdraw(...) 

@@ -7,7 +7,8 @@
 #' @param covars Either a named list with covariates, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}
 #' @param test Character. Which test to include. See \code{testDA} for details on the implemented tests. 
 #' @param effectSizes Numierc. The effect sizes for the spike-ins. Default \code{c(2,4,8,16,32)}
-#' @param alpha q-value threshold for determining significance for \code{empirical power}. Default 0.1
+#' @param alpha.p p-value threshold for false positive rates. Default 0.05
+#' @param alpha.q q-value threshold for determining significance for \code{empirical power}. Default 0.05. This will change \code{fdr.output} for "sam" and \code{sig} for "anc". 
 #' @param p.adj Character. Method for p-value adjustment. See \code{p.adjust} for details. Default "fdr"
 #' @param R Integer. Number of times to run the tests. Default 5
 #' @param relative Logical. If TRUE (default) abundances are made relative for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea", and there is an offset of \code{log(LibrarySize)} for "neb", "poi", "qpo", "zpo" and "znb"
@@ -19,13 +20,13 @@
 #' @param core.check If TRUE will make an interactive check that the amount of cores specified are desired. Only if \code{cores>20}. This is to ensure that the function doesn't automatically overloads a server with workers.  
 #' @param verbose If TRUE will print informative messages
 #' @details Currently implemented methods: see \code{testDA}
-#' @return An object of class \code{DA}, which contains a list of results:
+#' @return An object of class \code{DAPower}, which contains a list with 1: A data.frame with results, 2: alpha.p value, 3: alpha.q values
 #' @import snow doSNOW foreach utils
 #' @importFrom parallel detectCores
 #' @importFrom pROC roc
 #' @export
 
-powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, effectSizes = c(2,4,8,16,32), alpha = 0.1, p.adj = "fdr", R = 5, relative = TRUE, k = NULL, cores = (detectCores()-1), rng.seed = 123, args = list(), out.all = NULL, core.check = TRUE, verbose = TRUE){
+powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, effectSizes = c(2,4,8,16,32), alpha.p = 0.05, alpha.q = 0.05, p.adj = "fdr", R = 5, relative = TRUE, k = NULL, cores = (detectCores()-1), rng.seed = 123, args = list(), out.all = NULL, core.check = TRUE, verbose = TRUE){
 
   stopifnot(exists("data"),exists("predictor"))
   # Check for servers
@@ -80,12 +81,12 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
   if(is.null(k)){
     k <- rep(round(nrow(count_table)*0.01),3)
   } 
-  if(sum(k) == nrow(count_table)) stop("Set to spike all features. Can't calculate FPR or AUC. Change k argument")
+  if(sum(k) == nrow(count_table)) stop("Set to spike all features. Change k argument")
   if(sum(k) > nrow(count_table)) stop("Set to spike more features than are present in the data. Change k argument")
   if(sum(k) == 0) k <- c(1,1,1)                                  
-  if(sum(k) < 15 & sum(k) >= 10 & R <= 10) message("Few features spiked. Increase 'k' or set 'R' to more than 10 to ensure proper estimation of AUC and FPR")
-  if(sum(k) < 10 & sum(k) >= 5 & R <= 20) message("Few features spiked. Increase 'k' or set 'R' to more than 20 to ensure proper estimation of AUC and FPR")                                  
-  if(sum(k) < 5 & R <= 50) message("Very few features spiked. Increase 'k' or set 'R' to more than 50 to ensure proper estimation of AUC and FPR")
+  if(sum(k) < 15 & sum(k) >= 10 & R <= 10) message("Few features spiked. Increase 'k' or set 'R' to more than 10 to ensure proper estimations")
+  if(sum(k) < 10 & sum(k) >= 5 & R <= 20) message("Few features spiked. Increase 'k' or set 'R' to more than 20 to ensure proper estimations")                                  
+  if(sum(k) < 5 & R <= 50) message("Very few features spiked. Increase 'k' or set 'R' to more than 50 to ensure proper estimations")
                                     
   # predictor
   if(verbose) if(any(is.na(predictor))) message("Warning: Predictor contains NAs!")
@@ -221,8 +222,8 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
                                znb = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],covars,relative,out.all,p.adj),znb.DAargs)),
                                fri = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,relative,p.adj),fri.DAargs)),
                                qua = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,relative,p.adj),qua.DAargs)),
-                               anc = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired),anc.DAargs)),
-                               sam = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired),sam.DAargs))),
+                               anc = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,sig = alpha.q),anc.DAargs)),
+                               sam = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,fdr.output = alpha.q),sam.DAargs))),
                         
                         error = function(e) NULL)
     
@@ -261,8 +262,8 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
     if(test == "anc"){
       suppressWarnings(min.d <- min(res.sub[res.sub$Detected == "Yes","W"]))
       if(min.d == Inf) min.d <- max(res.sub$W)+1
-      res.sub$pval <- 1/(res.sub$W+1) * 0.05/(1/(min.d+1))
-      res.sub$pval.adj <- res.sub$pval
+      res.sub$pval <- 1/(res.sub$W+1) * alpha.p/(1/(min.d+1))
+      res.sub$pval.adj <- 1/(res.sub$W+1) * alpha.q/(1/(min.d+1))
     }
     
     # Make pseudo-pval for SAMseq
@@ -273,10 +274,10 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
     }
     
     # Confusion matrix
-    totalPos <- nrow(res.sub[res.sub$pval <= 0.05,])
-    totalNeg <- nrow(res.sub[res.sub$pval > 0.05,])
-    truePos <- sum(res.sub[res.sub$pval <= 0.05,"Feature"] %in% spikeds[[which(r == tests.par)]][[2]])
-    falseNeg <- sum(res.sub[res.sub$pval > 0.05,"Feature"] %in% spikeds[[which(r == tests.par)]][[2]])
+    totalPos <- nrow(res.sub[res.sub$pval <= alpha.p,])
+    totalNeg <- nrow(res.sub[res.sub$pval > alpha.p,])
+    truePos <- sum(res.sub[res.sub$pval <= alpha.p,"Feature"] %in% spikeds[[which(r == tests.par)]][[2]])
+    falseNeg <- sum(res.sub[res.sub$pval > alpha.p,"Feature"] %in% spikeds[[which(r == tests.par)]][[2]])
     falsePos <- totalPos - truePos
     trueNeg <- totalNeg - falseNeg
     
@@ -292,8 +293,8 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
     }
 
     # Confusion matrix adjusted
-    totalPos.adj <- nrow(res.sub[res.sub$pval.adj <= alpha,])
-    truePos.adj <- sum(res.sub[res.sub$pval.adj <= alpha,"Feature"] %in% spikeds[[which(r == tests.par)]][[2]])
+    totalPos.adj <- nrow(res.sub[res.sub$pval.adj <= alpha.q,])
+    truePos.adj <- sum(res.sub[res.sub$pval.adj <= alpha.q,"Feature"] %in% spikeds[[which(r == tests.par)]][[2]])
     falsePos.adj <- totalPos.adj - truePos.adj
     
     # FDR 
@@ -330,7 +331,7 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
     return(df.combined)
     
   }
-  
-  class(final.results) <- "DAPower"
-  return(final.results)
+  final <- list(final.results,alpha.p,alpha.q)
+  class(final) <- "DAPower"
+  return(final)
 }
