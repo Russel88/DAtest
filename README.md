@@ -175,6 +175,11 @@ analysis. The higher Spike.detect.rate, the better.
     -   If several methods have very similar AUCs, the Spike.detect.rate
         can be used to differentiate among the methods
 
+*Assumption of the test:* the test assumes that only few features are
+truly differentially abundant. Therefore, if many features are different
+between the samples, and this difference can truly be explained by the
+`predictor`, the methods will appear worse than they actually are.
+
 ### Pre-process data:
 
 An optional step is to pre-process the data to reduce the number of
@@ -414,6 +419,12 @@ run (see details in `testDA` for test abbreviations):
     po.msf <- powerDA(data, predictor, test = "msf")
     plot(po.msf)
     summary(po.msf)
+
+*Assumption of the test:* as with `testDA`, `powerDA` also assumes that
+only few features are truly differentially abundant. Therefore, if many
+features are different between the samples, and this difference can
+truly be explained by the `predictor`, the methods will appear worse
+than they actually are.
 
 How to run real data
 ====================
