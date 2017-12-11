@@ -5,9 +5,10 @@
 #' @param paired Factor with paired variable
 #' @param covars Named list with covariables
 #' @param relative Include tests that work with relative abundances (TRUE) or only absolute abundances (FALSE)
+#' @param decimal Exclude tests that do not work with decimals (TRUE)
 #' @export
 
-prune.tests.DA <- function(tests, predictor, paired, covars, relative){
+prune.tests.DA <- function(tests, predictor, paired, covars, relative, decimal){
 
   # Prune test argument if packages are not installed
   if(!"baySeq" %in% rownames(installed.packages())) tests <- tests[tests != "bay"]
@@ -57,6 +58,11 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative){
   # Exclude if relative is false
   if(relative == FALSE){
     tests <- tests[!tests %in% c("sam","anc","vli","ltt2","erq","ere","ere2","erq2","msf","zig","bay","ds2","adx","lli2","lao2","llm2","rai")]
+  }
+  
+  # Exclude if decimal is TRUE
+  if(decimal){
+    tests <- tests[!tests %in% c("znb","zpo","qpo","poi","neb")]
   }
   
   # Only include if covars are present

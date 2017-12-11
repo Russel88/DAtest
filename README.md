@@ -54,6 +54,8 @@ Overview of this tutorial
         predictors](#if-your-predictor-is-categorical-with-more-than-two-levels)
     -   [Paired or blocked experimental
         design](#if-you-have-a-paired-or-blocked-experimental-design)
+    -   [External normalization or absolute
+        abundances](#if-data-is-normalized-externally-or-represent-absolute-abundances)
     -   [Covariates](#if-you-have-covariates)
     -   [Phyloseq objects](#if-you-have-a-phyloseq-object)
     -   [Power analysis](#power-analysis)
@@ -348,9 +350,15 @@ covariable in the model and are also generally flexible in the design.
 
 ANCOM use the `paired` variable in a repeated measures manner
 
-### If you have non-relative abundances, e.g. for normalized protein abundance or absolute microbiome abundance
+### If data is normalized externally or represent absolute abundances
+
+E.g. normalized protein abundance, normalized metabolite abundance, or
+absolute microbiome abundance
 
     mytest <- testDA(data, predictor, relative = FALSE)
+
+Setting `relative=FALSE` will disable internal normalizations. It is
+therefore for externally normalized abundances or absolute abundances.
 
 If `relative=FALSE` the values in `data` will NOT be normalized by the
 sum of the samples for "ttt", "ltt", "ltt2", "wil", "per", "lrm", "llm",

@@ -4,7 +4,7 @@
 \alias{prune.tests.DA}
 \title{Prune tests argument for \code{testDA}}
 \usage{
-prune.tests.DA(tests, predictor, paired, covars, relative)
+prune.tests.DA(tests, predictor, paired, covars, relative, decimal)
 }
 \arguments{
 \item{tests}{A character vector with names of tests}
@@ -16,6 +16,8 @@ prune.tests.DA(tests, predictor, paired, covars, relative)
 \item{covars}{Named list with covariables}
 
 \item{relative}{Include tests that work with relative abundances (TRUE) or only absolute abundances (FALSE)}
+
+\item{decimal}{Exclude tests that do not work with decimals (TRUE)}
 }
 \description{
 Prune tests argument for \code{testDA}

@@ -153,15 +153,17 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   count_table <- as.matrix(count_table)
   
   # Checks
-  if(relative) if(!isTRUE(all(unlist(count_table) == floor(unlist(count_table))))) stop("count_table must only contain integer values")
+  if(relative) if(!isTRUE(all(unlist(count_table) == floor(unlist(count_table))))) stop("count_table must only contain integer values when relative=TRUE")
   if(min(count_table) < 0) stop("count_table contains negative values")
   if(sum(colSums(count_table) == 0) > 0) stop("Some samples are empty")
   if(ncol(count_table) != length(predictor)) stop("Number of samples in count_table does not match length of predictor")
   if(length(unique(predictor)) < 2) stop("predictor should have at least two levels")
 
   # Prune tests argument
+  decimal <- FALSE
+  if(!isTRUE(all(unlist(count_table) == floor(unlist(count_table))))) decimal <- TRUE
   tests <- unique(tests)
-  if(!"zzz" %in% tests) tests <- prune.tests.DA(tests, predictor, paired, covars, relative)
+  if(!"zzz" %in% tests) tests <- prune.tests.DA(tests, predictor, paired, covars, relative, decimal)
   tests.par <- paste0(unlist(lapply(1:R, function(x) rep(x,length(tests)))),"_",rep(tests,R))
   if(length(tests) == 0) stop("No tests to run!")
   
