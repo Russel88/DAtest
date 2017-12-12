@@ -21,7 +21,7 @@ DA.adx <- function(data, predictor, p.adj = "fdr", ...){
   }
 
   # Run test
-  x <- aldex(data.frame(count_table), predictor, ...)
+  x <- aldex(data.frame(count_table), as.character(predictor), ...)
   x <- x[,-c(9,11)]
   x$we.ep.adj <- p.adjust(x$we.ep, method = p.adj)
   x$wi.ep.adj <- p.adjust(x$wi.ep, method = p.adj)
