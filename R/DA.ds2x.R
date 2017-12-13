@@ -1,7 +1,6 @@
-#' DESeq2 with manual geometric means
+#' DESeq2
 #'
 #' Implementation of DESeq2 for \code{DAtest}
-#' Manual geometric means calculated to avoid errors, see https://github.com/joey711/phyloseq/issues/387
 #' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation
@@ -14,7 +13,7 @@
 #' @param ... Additional arguments for the \code{DESeq} function
 #' @export
 
-DA.ds2 <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL, p.adj = "fdr", coeff = 2, coeff.ref = 1, allResults = FALSE, ...){
+DA.ds2x <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL, p.adj = "fdr", coeff = 2, coeff.ref = 1, allResults = FALSE, ...){
   
   suppressMessages(library(DESeq2))
   
@@ -64,13 +63,6 @@ DA.ds2 <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL
     }
   }
   
-  # Geometric means
-  gm_mean = function(x, na.rm=TRUE){
-    exp(sum(log(x[x > 0]), na.rm=na.rm) / length(x))
-  }
-  geoMeans = apply(counts(x), 1, gm_mean)
-  x = estimateSizeFactors(x, geoMeans = geoMeans)
-  
   # Run test
   if(out.all){
     if(is.null(paired)){
@@ -114,7 +106,7 @@ DA.ds2 <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL
   res <- res[,-(ncol(res)-1)]
   res$pval.adj <- p.adjust(res$pval, method = p.adj)
   res$Feature <- results(x)@rownames
-  res$Method <- "DESeq2 man. geoMeans (ds2)"
+  res$Method <- "DESeq2 (ds2)"
 
   if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
   

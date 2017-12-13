@@ -3,7 +3,7 @@
 #' Run many differential abundance and expression tests at a time, to easily compare their results
 #' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. If the \code{predictor} is numeric it will be treated as such in the analyses
-#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. Only for "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2", "zig" and "fri"
+#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. Only for "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "ds2x", "lrm", "llm", "llm2", "lim", "lli", "lli2", "zig" and "fri"
 #' @param covars Either a named list with covariates, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}
 #' @param tests Character. Which tests to include. Default all (Except ANCOM, see below for details)
 #' @param relative Logical. If TRUE (default) abundances are made relative for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea", and there is an offset of \code{log(LibrarySize)} for "neb", "poi", "qpo", "zpo" and "znb"
@@ -31,6 +31,7 @@
 #'  \item msf - MetagenomeSeq feature model
 #'  \item zig - MetagenomeSeq zero-inflated gaussian
 #'  \item ds2 - DESeq2
+#'  \item ds2x - DESeq2 with manual geometric means
 #'  \item lim - LIMMA. Moderated linear models based on emperical bayes
 #'  \item lli - LIMMA, but reads are first transformed with \code{log(abundance + delta1)} then turned into relative abundances
 #'  \item lli2 - LIMMA, but with relative abundances transformed with \code{log(relative abundance + delta2)}
@@ -72,11 +73,11 @@
 #'  \item ltt - Passed to \code{t.test} and \code{DA.ltt}
 #'  \item ltt2 - Passed to \code{t.test} and \code{DA.ltt2}
 #'  \item neb - Passed to \code{glm.nb}, \code{glmer.nb} and \code{DA.neb}
-#'  \item erq - Passed to \code{calcNormFactors}, \code{estimateDisp}, \code{glmQLFit}, \code{glmQLFTest} and \code{DA.erq}
-#'  \item ere - Passed to \code{calcNormFactors}, \code{estimateCommonDisp}, \code{estimateTagwiseDisp}, \code{exactTest} and \code{DA.ere}
+#'  \item erq(2) - Passed to \code{calcNormFactors}, \code{estimateDisp}, \code{glmQLFit}, \code{glmQLFTest} and \code{DA.erq}
+#'  \item ere(2) - Passed to \code{calcNormFactors}, \code{estimateCommonDisp}, \code{estimateTagwiseDisp}, \code{exactTest} and \code{DA.ere}
 #'  \item msf - Passed to \code{fitFeatureModel} and \code{DA.msf}
 #'  \item zig - Passed to \code{fitZig} and \code{DA.zig}
-#'  \item ds2 - Passed to \code{DESeq} and \code{DA.ds2}
+#'  \item ds2(x) - Passed to \code{DESeq} and \code{DA.ds2}
 #'  \item lim - Passed to \code{eBayes}, \code{lmFit} and \code{DA.lim}
 #'  \item lli - Passed to \code{eBayes}, \code{lmFit} and \code{DA.lli}
 #'  \item lli2 - Passed to \code{eBayes}, \code{lmFit} and \code{DA.lli2}
@@ -111,7 +112,7 @@
 #' 
 #' @export
 
-allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb","per","bay","adx","sam","qua","fri","znb","zpo","vli","qpo","poi","pea","spe","wil","ttt","ltt","ltt2","erq","ere","erq2","ere2","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), out.all = NULL, alpha = 0.05, core.check = TRUE){
+allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb","per","bay","adx","sam","qua","fri","znb","zpo","vli","qpo","poi","pea","spe","wil","ttt","ltt","ltt2","erq","ere","erq2","ere2","msf","zig","ds2","ds2x","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), out.all = NULL, alpha = 0.05, core.check = TRUE){
 
   stopifnot(exists("data"),exists("predictor"))
   # Check for servers
@@ -240,9 +241,10 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb"
                                msf = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor, p.adj),msf.DAargs)),
                                zig = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars, p.adj),zig.DAargs)),
                                ds2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars,out.all, p.adj),ds2.DAargs)),
+                               ds2x = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars,out.all, p.adj),ds2x.DAargs)),
                                per = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired, relative, p.adj),per.DAargs)),
                                bay = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor, p.adj),bay.DAargs)),
-                               adx = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor, p.adj),adx.DAargs)),
+                               adx = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor),adx.DAargs)),
                                lim = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars,relative,out.all, p.adj),lim.DAargs)),
                                lli = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars,relative,out.all, p.adj),lli.DAargs)),
                                lli2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars,out.all, p.adj),lli2.DAargs)),
@@ -268,7 +270,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb"
                         
                         error = function(e) NULL)
     
-    if(!is.null(res.sub) & !i %in% c("sam","anc")){
+    if(!is.null(res.sub) & !i %in% c("sam","anc","adx")){
       res.sub[is.na(res.sub$pval),"pval"] <- 1
       res.sub[is.na(res.sub$pval.adj),"pval.adj"] <- 1
     }
@@ -297,8 +299,8 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb"
     colnames(adx.w) <- colnames(adx.t)
     adx.t$pval <- as.numeric(as.data.frame(results["adx"])$adx.we.ep)
     adx.w$pval <- as.numeric(as.data.frame(results["adx"])$adx.wi.ep)
-    adx.t$pval.adj <- as.numeric(as.data.frame(results["adx"])$adx.we.ep.adj)
-    adx.w$pval.adj <- as.numeric(as.data.frame(results["adx"])$adx.wi.ep.adj)
+    adx.t$pval.adj <- as.numeric(as.data.frame(results["adx"])$adx.we.eBH)
+    adx.w$pval.adj <- as.numeric(as.data.frame(results["adx"])$adx.wi.eBH)
     adx.t$Method <- "ALDEx2 t-test (adx)"
     adx.w$Method <- "ALDEx2 wilcox (adx)"
     results["adx"] <- NULL
@@ -376,6 +378,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb"
                    msf = "logFC",
                    zig = paste0("predictor",levels(as.factor(predictor))[2]),
                    ds2 = "log2FoldChange",
+                   ds2x = "log2FoldChange",
                    rai = "log2FC")
 
   if(!is.numeric(predictor) & length(unique(predictor)) > 2){

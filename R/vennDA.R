@@ -49,7 +49,7 @@ vennDA <- function(x, tests = NULL, alpha = 0.05, split = FALSE, output = FALSE,
         featurelist.pos[[i]] <- featurelist[[i]][featurelist[[i]] %in% sub.p]
         featurelist.neg[[i]] <- featurelist[[i]][featurelist[[i]] %in% sub.n]
       }
-      if(plottests[i] %in% c("sam","znb","zpo","poi","qpo","neb","lrm","llm","llm2","lim","lli","lli2","vli","pea","spe","per","adx.t","adx.w","wil","ttt","ltt","ltt2","ere","ere2","erq","erq2","ds2","msf","zig","rai")){
+      if(plottests[i] %in% c("sam","znb","zpo","poi","qpo","neb","lrm","llm","llm2","lim","lli","lli2","vli","pea","spe","per","adx.t","adx.w","wil","ttt","ltt","ltt2","ere","ere2","erq","erq2","ds2","ds2x","msf","zig","rai")){
         if(is.null(ncol(subs))){
           featurelist.pos[[i]] <- featurelist[[i]]
           featurelist.neg[[i]] <- featurelist[[i]]
@@ -61,7 +61,7 @@ vennDA <- function(x, tests = NULL, alpha = 0.05, split = FALSE, output = FALSE,
         }
       }
       # If not estimate/logFC provided throw all significant in both positive and negative list
-      if(!plottests[i] %in% c("sam","bay","znb","zpo","poi","qpo","neb","lrm","llm","llm2","lim","lli","lli2","vli","pea","spe","per","adx.t","adx.w","wil","ttt","ltt","ltt2","ere","ere2","erq","erq2","ds2","msf","zig","rai")){
+      if(!plottests[i] %in% c("sam","bay","znb","zpo","poi","qpo","neb","lrm","llm","llm2","lim","lli","lli2","vli","pea","spe","per","adx.t","adx.w","wil","ttt","ltt","ltt2","ere","ere2","erq","erq2","ds2","ds2x","msf","zig","rai")){
         featurelist.pos[[i]] <- featurelist[[i]]
         featurelist.neg[[i]] <- featurelist[[i]]
       }
@@ -108,7 +108,7 @@ vennDA <- function(x, tests = NULL, alpha = 0.05, split = FALSE, output = FALSE,
   # Remove the duplicate ones created earlier for methods without estimates/logFC
   if(split){
     for(i in seq_along(plottests)){
-      if(!plottests[i] %in% c("sam","bay","znb","zpo","poi","qpo","neb","lrm","llm","llm2","lim","lli","lli2","vli","pea","spe","per","adx.t","adx.w","wil","ttt","ltt","ltt2","ere","ere2","erq","erq2","ds2","msf","zig","rai")){
+      if(!plottests[i] %in% c("sam","bay","znb","zpo","poi","qpo","neb","lrm","llm","llm2","lim","lli","lli2","vli","pea","spe","per","adx.t","adx.w","wil","ttt","ltt","ltt2","ere","ere2","erq","erq2","ds2","ds2x","msf","zig","rai")){
         venndf <- venndf[venndf$vennname != paste0(plottests[i],"_Negative"),]
         venndf$vennname <- as.character(venndf$vennname)
         venndf[venndf$vennname == paste0(plottests[i],"_Positive"),"vennname"] <- plottests[i]

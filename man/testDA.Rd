@@ -7,8 +7,8 @@
 testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
   tests = c("neb", "rai", "per", "bay", "adx", "sam", "qua", "fri", "zpo",
   "znb", "vli", "qpo", "poi", "pea", "wil", "ttt", "ltt", "ltt2", "erq", "erq2",
-  "ere", "ere2", "msf", "zig", "ds2", "lim", "lli", "lli2", "aov", "lao",
-  "lao2", "kru", "lrm", "llm", "llm2", "spe"), relative = TRUE,
+  "ere", "ere2", "msf", "zig", "ds2", "ds2x", "lim", "lli", "lli2", "aov",
+  "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe"), relative = TRUE,
   effectSize = 4, k = NULL, cores = (detectCores() - 1), rng.seed = 123,
   args = list(), out.all = NULL, alpha = 0.05, core.check = TRUE,
   verbose = TRUE)
@@ -18,7 +18,7 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
 
 \item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. If the \code{predictor} is numeric it will be treated as such in the analyses}
 
-\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. Only for "anc", "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"}
+\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. Only for "anc", "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "ds2x", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"}
 
 \item{covars}{Either a named list with covariates, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}}
 
@@ -38,7 +38,7 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
 
 \item{args}{List. A list with lists of arguments passed to the different methods. See details for more.}
 
-\item{out.all}{If TRUE linear models will output results and p-values from \code{anova}/\code{drop1}, ds2 will run LRT and not Wald test, erq and erq2 will produce one p-value for the predictor, and lim, lli, lli2, lim, vli will run F-tests. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise}
+\item{out.all}{If TRUE linear models will output results and p-values from \code{anova}/\code{drop1}, ds2/ds2x will run LRT and not Wald test, erq and erq2 will produce one p-value for the predictor, and lim, lli, lli2, lim, vli will run F-tests. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise}
 
 \item{alpha}{q-value threshold for determining significance for \code{Spike.detect.rate}. Default 0.05}
 
@@ -76,6 +76,7 @@ Currently implemented methods:
  \item msf - MetagenomeSeq feature model
  \item zig - MetagenomeSeq zero-inflated gaussian
  \item ds2 - DESeq2
+ \item ds2x - DESeq2 with manual geometric means
  \item lim - LIMMA. Moderated linear models based on emperical bayes
  \item lli - LIMMA, but reads are first transformed with \code{log(abundance + delta1)} then turned into relative abundances
  \item lli2 - LIMMA, but with relative abundances transformed with \code{log(relative abundance + delta2)}
@@ -120,11 +121,11 @@ Below is an overview of which functions get the arguments that are passed to a s
  \item ltt - Passed to \code{t.test} and \code{DA.ltt}
  \item ltt2 - Passed to \code{t.test} and \code{DA.ltt2}
  \item neb - Passed to \code{glm.nb}, \code{glmer.nb} and \code{DA.neb}
- \item erq - Passed to \code{calcNormFactors}, \code{estimateDisp}, \code{glmQLFit}, \code{glmQLFTest} and \code{DA.erq}
- \item ere - Passed to \code{calcNormFactors}, \code{estimateCommonDisp}, \code{estimateTagwiseDisp}, \code{exactTest} and \code{DA.ere}
+ \item erq(2) - Passed to \code{calcNormFactors}, \code{estimateDisp}, \code{glmQLFit}, \code{glmQLFTest} and \code{DA.erq}
+ \item ere(2) - Passed to \code{calcNormFactors}, \code{estimateCommonDisp}, \code{estimateTagwiseDisp}, \code{exactTest} and \code{DA.ere}
  \item msf - Passed to \code{fitFeatureModel} and \code{DA.msf}
  \item zig - Passed to \code{fitZig} and \code{DA.zig}
- \item ds2 - Passed to \code{DESeq} and \code{DA.ds2}
+ \item ds2(x) - Passed to \code{DESeq} and \code{DA.ds2}
  \item lim - Passed to \code{eBayes}, \code{lmFit} and \code{DA.lim}
  \item lli - Passed to \code{eBayes}, \code{lmFit} and \code{DA.lli}
  \item lli2 - Passed to \code{eBayes}, \code{lmFit} and \code{DA.lli2}

@@ -277,10 +277,10 @@ subsequently run post-hoc tests for all pairwise comparisons (see [extra
 features](#extra-features)).
 
 For linear models (lrm, llm, llm2), GLMs (poi, neb, qpo, zpo, znb),
-limma models (vli, lim, lli, lli2), edgeR (erq, erq2) and DESeq (ds2),
-you can use the `out.all` argument to toggle how multi-class predictors
-are treated. If `out.all = TRUE` (default for multi-class predictors)
-you get one p-value for the predictor (no matter how many
+limma models (vli, lim, lli, lli2), edgeR (erq, erq2) and DESeq (ds2,
+ds2x), you can use the `out.all` argument to toggle how multi-class
+predictors are treated. If `out.all = TRUE` (default for multi-class
+predictors) you get one p-value for the predictor (no matter how many
 levels/categories it has). If `out.all = FALSE` you get the p-value for
 the level of the predictor specificed by `coeff` tested against the
 intercept (default 2. level, as it is the one spiked in `testDA`). Use
@@ -617,8 +617,8 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">Nonparametric</td>
 </tr>
 <tr class="odd">
-<td>DESeq2</td>
-<td align="left"><a href="https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0550-8">ds2</a></td>
+<td>DESeq2 Original</td>
+<td align="left"><a href="https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0550-8">ds2x</a></td>
 <td align="left">Categorical</td>
 <td align="left">Yes, as covariate</td>
 <td align="left">Yes</td>
@@ -627,6 +627,16 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">Negative Binomial</td>
 </tr>
 <tr class="even">
+<td>DESeq2 man. geoMeans</td>
+<td align="left"><a href="https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0550-8">ds2</a></td>
+<td align="left">Categorical</td>
+<td align="left">Yes, as covariate</td>
+<td align="left">Yes</td>
+<td align="left">RLE (5)</td>
+<td align="left"></td>
+<td align="left">Negative Binomial</td>
+</tr>
+<tr class="odd">
 <td>EdgeR - Exact test</td>
 <td align="left"><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2796818/">ere</a></td>
 <td align="left">Two-class</td>
@@ -636,7 +646,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Negative Binomial</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>EdgeR - Exact test2</td>
 <td align="left"><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2796818/">ere2</a></td>
 <td align="left">Two-class</td>
@@ -646,7 +656,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Negative Binomial</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>EdgeR - Quasi likelihood</td>
 <td align="left"><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2796818/">erq</a></td>
 <td align="left">All</td>
@@ -656,7 +666,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Negative Binomial</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>EdgeR - Quasi likelihood2</td>
 <td align="left"><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2796818/">erq2</a></td>
 <td align="left">All</td>
@@ -666,7 +676,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Negative Binomial</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Friedman Rank Sum test</td>
 <td align="left"><a href="https://en.wikipedia.org/wiki/Friedman_test">fri</a></td>
 <td align="left">Multi-class</td>
@@ -676,7 +686,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Nonparametric</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>GLM - Negative binomial</td>
 <td align="left"><a href="https://en.wikipedia.org/wiki/Negative_binomial_distribution">neb</a></td>
 <td align="left">All</td>
@@ -686,7 +696,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Negative Binomial</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>GLM - Poisson</td>
 <td align="left"><a href="https://en.wikipedia.org/wiki/Poisson_distribution">poi</a></td>
 <td align="left">All</td>
@@ -696,7 +706,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Poisson</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>GLM - Quasi-poisson</td>
 <td align="left"><a href="https://en.wikipedia.org/wiki/Quasi-likelihood">qpo</a></td>
 <td align="left">All</td>
@@ -706,7 +716,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Quasi-poisson</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>GLM - ZI Negative Binomial</td>
 <td align="left"><a href="https://cran.r-project.org/web/packages/pscl/index.html">znb</a></td>
 <td align="left">All</td>
@@ -716,7 +726,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Zero-inflated Negative binomial</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>GLM - ZI Poisson</td>
 <td align="left"><a href="https://cran.r-project.org/web/packages/pscl/index.html">zpo</a></td>
 <td align="left">All</td>
@@ -726,7 +736,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Zero-inflated Poisson</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Kruskal-Wallis test</td>
 <td align="left"><a href="https://en.wikipedia.org/wiki/Kruskal%E2%80%93Wallis_one-way_analysis_of_variance">kru</a></td>
 <td align="left">Multi-class</td>
@@ -736,7 +746,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Nonparametric</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>LIMMA</td>
 <td align="left"><a href="https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true">lim</a></td>
 <td align="left">All</td>
@@ -746,7 +756,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Gaussian</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>LIMMA log</td>
 <td align="left"><a href="https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true">lli</a></td>
 <td align="left">All</td>
@@ -756,7 +766,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">Log</td>
 <td align="left">Gaussian</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>LIMMA log2</td>
 <td align="left"><a href="https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true">lli2</a></td>
 <td align="left">All</td>
@@ -766,7 +776,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">Log (3)</td>
 <td align="left">Gaussian</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>LIMMA voom</td>
 <td align="left"><a href="https://link.springer.com/chapter/10.1007%2F0-387-29362-0_23?LI=true">vli</a></td>
 <td align="left">All</td>
@@ -776,7 +786,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">Voom</td>
 <td align="left">Gaussian</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Linear regression</td>
 <td align="left"><a href="https://en.wikipedia.org/wiki/Linear_regression">lrm</a></td>
 <td align="left">All</td>
@@ -786,7 +796,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Gaussian</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Linear regression log</td>
 <td align="left"><a href="https://en.wikipedia.org/wiki/Linear_regression">llm</a></td>
 <td align="left">All</td>
@@ -796,7 +806,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">Log</td>
 <td align="left">Gaussian</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Linear regression log2</td>
 <td align="left"><a href="https://en.wikipedia.org/wiki/Linear_regression">llm2</a></td>
 <td align="left">All</td>
@@ -806,7 +816,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">Log (3)</td>
 <td align="left">Gaussian</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>MetagenomeSeq featuremodel</td>
 <td align="left"><a href="https://bioconductor.org/packages/release/bioc/html/metagenomeSeq.html">msf</a></td>
 <td align="left">Two-class</td>
@@ -816,7 +826,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Zero-inflated Lognormal</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>MetagenomeSeq ZIG</td>
 <td align="left"><a href="https://www.nature.com/nmeth/journal/v10/n12/full/nmeth.2658.html">zig</a></td>
 <td align="left">All</td>
@@ -826,7 +836,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">Log</td>
 <td align="left">Zero-inflated Gaussian</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Permutation test</td>
 <td align="left"><a href="https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8">per</a></td>
 <td align="left">Two-class</td>
@@ -836,7 +846,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Nonparametric</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Quade test</td>
 <td align="left"><a href="http://rcompanion.org/handbook/F_11.html">qua</a></td>
 <td align="left">Multi-class</td>
@@ -846,7 +856,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Nonparametric</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>RAIDA</td>
 <td align="left"><a href="https://academic.oup.com/bioinformatics/article/31/14/2269/256302/A-robust-approach-for-identifying-differentially">rai</a></td>
 <td align="left">Two-class</td>
@@ -856,7 +866,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Zero-inflated Lognormal</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>SAMseq</td>
 <td align="left"><a href="http://statweb.stanford.edu/~tibs/SAM/">sam</a></td>
 <td align="left">All</td>
@@ -866,7 +876,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Nonparametric</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Welch t.test</td>
 <td align="left"><a href="https://en.wikipedia.org/wiki/Welch%27s_t-test">ttt</a></td>
 <td align="left">Two-class</td>
@@ -876,7 +886,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Gaussian</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Welch t.test log</td>
 <td align="left"><a href="https://en.wikipedia.org/wiki/Welch%27s_t-test">ltt</a></td>
 <td align="left">Two-class</td>
@@ -886,7 +896,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">Log</td>
 <td align="left">Gaussian</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Welch t.test log2</td>
 <td align="left"><a href="https://en.wikipedia.org/wiki/Welch%27s_t-test">ltt2</a></td>
 <td align="left">Two-class</td>
@@ -896,7 +906,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">Log (3)</td>
 <td align="left">Gaussian</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Wilcoxon</td>
 <td align="left"><a href="https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test">wil</a></td>
 <td align="left">Two-class</td>
@@ -909,10 +919,15 @@ or write to me, preferably with a code snippet of the implementation
 </tbody>
 </table>
 
+##### Table descriptions:
+
 -   1: Log of library sizes used as offset when `relative = TRUE`
 -   2: None when `relative = FALSE`
 -   3: Log transformation is done before normalization
 -   4: This can be be changed to TSS or TMM
+-   5: This version of DESeq2 uses manual geometric means which handle
+    zeroes differently than the default. See more
+    [here](https://github.com/joey711/phyloseq/issues/387)
 -   TSS: Total Sum Scaling
 -   TMM: Trimmed Mean by M-value
 -   RLE: Relative Log Expression
@@ -1069,6 +1084,7 @@ passed to a specific test:
 -   msf - Passed to `fitFeatureModel` and `DA.msf`
 -   zig - Passed to `fitZig` and `DA.zig`
 -   ds2 - Passed to `DESeq` and `DA.ds2`
+-   ds2x - Passed to `DESeq` and `DA.ds2x`
 -   lim - Passed to `eBayes`, `lmFit` and `DA.lim`
 -   lli - Passed to `eBayes`, `lmFit` and `DA.lli`
 -   lli2 - Passed to `eBayes`, `lmFit` and `DA.lli2`

@@ -3,7 +3,7 @@
 #' Calculating false positive rates and AUC (Area Under the Receiver Operating Characteristic (ROC) Curve) for various differential abundance and expression methods
 #' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. If the \code{predictor} is numeric it will be treated as such in the analyses
-#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. Only for "anc", "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"
+#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. Only for "anc", "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "ds2x", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"
 #' @param covars Either a named list with covariates, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}
 #' @param R Integer. Number of times to run the tests. Default 10
 #' @param tests Character. Which tests to include. Default all (Except ANCOM, see below for details)
@@ -13,7 +13,7 @@
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.
 #' @param rng.seed Numeric. Seed for reproducibility. Default 123
 #' @param args List. A list with lists of arguments passed to the different methods. See details for more.
-#' @param out.all If TRUE linear models will output results and p-values from \code{anova}/\code{drop1}, ds2 will run LRT and not Wald test, erq and erq2 will produce one p-value for the predictor, and lim, lli, lli2, lim, vli will run F-tests. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise
+#' @param out.all If TRUE linear models will output results and p-values from \code{anova}/\code{drop1}, ds2/ds2x will run LRT and not Wald test, erq and erq2 will produce one p-value for the predictor, and lim, lli, lli2, lim, vli will run F-tests. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise
 #' @param alpha q-value threshold for determining significance for \code{Spike.detect.rate}. Default 0.05
 #' @param core.check If TRUE will make an interactive check that the amount of cores specified are desired. Only if \code{cores>20}. This is to ensure that the function doesn't automatically overloads a server with workers.  
 #' @param verbose If TRUE will print informative messages
@@ -34,6 +34,7 @@
 #'  \item msf - MetagenomeSeq feature model
 #'  \item zig - MetagenomeSeq zero-inflated gaussian
 #'  \item ds2 - DESeq2
+#'  \item ds2x - DESeq2 with manual geometric means
 #'  \item lim - LIMMA. Moderated linear models based on emperical bayes
 #'  \item lli - LIMMA, but reads are first transformed with \code{log(abundance + delta1)} then turned into relative abundances
 #'  \item lli2 - LIMMA, but with relative abundances transformed with \code{log(relative abundance + delta2)}
@@ -78,11 +79,11 @@
 #'  \item ltt - Passed to \code{t.test} and \code{DA.ltt}
 #'  \item ltt2 - Passed to \code{t.test} and \code{DA.ltt2}
 #'  \item neb - Passed to \code{glm.nb}, \code{glmer.nb} and \code{DA.neb}
-#'  \item erq - Passed to \code{calcNormFactors}, \code{estimateDisp}, \code{glmQLFit}, \code{glmQLFTest} and \code{DA.erq}
-#'  \item ere - Passed to \code{calcNormFactors}, \code{estimateCommonDisp}, \code{estimateTagwiseDisp}, \code{exactTest} and \code{DA.ere}
+#'  \item erq(2) - Passed to \code{calcNormFactors}, \code{estimateDisp}, \code{glmQLFit}, \code{glmQLFTest} and \code{DA.erq}
+#'  \item ere(2) - Passed to \code{calcNormFactors}, \code{estimateCommonDisp}, \code{estimateTagwiseDisp}, \code{exactTest} and \code{DA.ere}
 #'  \item msf - Passed to \code{fitFeatureModel} and \code{DA.msf}
 #'  \item zig - Passed to \code{fitZig} and \code{DA.zig}
-#'  \item ds2 - Passed to \code{DESeq} and \code{DA.ds2}
+#'  \item ds2(x) - Passed to \code{DESeq} and \code{DA.ds2}
 #'  \item lim - Passed to \code{eBayes}, \code{lmFit} and \code{DA.lim}
 #'  \item lli - Passed to \code{eBayes}, \code{lmFit} and \code{DA.lli}
 #'  \item lli2 - Passed to \code{eBayes}, \code{lmFit} and \code{DA.lli2}
@@ -119,7 +120,7 @@
 #' @importFrom pROC roc
 #' @export
 
-testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests = c("neb","rai","per","bay","adx","sam","qua","fri","zpo","znb","vli","qpo","poi","pea","wil","ttt","ltt","ltt2","erq","erq2","ere","ere2","msf","zig","ds2","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 4, k = NULL, cores = (detectCores()-1), rng.seed = 123, args = list(), out.all = NULL, alpha = 0.05, core.check = TRUE, verbose = TRUE){
+testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests = c("neb","rai","per","bay","adx","sam","qua","fri","zpo","znb","vli","qpo","poi","pea","wil","ttt","ltt","ltt2","erq","erq2","ere","ere2","msf","zig","ds2","ds2x","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 4, k = NULL, cores = (detectCores()-1), rng.seed = 123, args = list(), out.all = NULL, alpha = 0.05, core.check = TRUE, verbose = TRUE){
 
   stopifnot(exists("data"),exists("predictor"))
   # Check for servers
@@ -305,6 +306,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
                                msf = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),msf.DAargs)),
                                zig = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars),zig.DAargs)),
                                ds2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,out.all),ds2.DAargs)),
+                               ds2x = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,out.all),ds2x.DAargs)),
                                per = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, relative),per.DAargs)),
                                bay = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired),bay.DAargs)),
                                adx = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),adx.DAargs)),
@@ -371,8 +373,8 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
       colnames(adx.t) <- gsub(".*_adx.","",colnames(adx.t))
       colnames(adx.w) <- colnames(adx.t)
       adx.t$pval <- as.numeric(as.data.frame(res.sub[paste0(r,"_","adx")])[,8])
-      adx.w$pval <- as.numeric(as.data.frame(res.sub[paste0(r,"_","adx")])[,9])
-      adx.t$pval.adj <- as.numeric(as.data.frame(res.sub[paste0(r,"_","adx")])[,10])
+      adx.w$pval <- as.numeric(as.data.frame(res.sub[paste0(r,"_","adx")])[,10])
+      adx.t$pval.adj <- as.numeric(as.data.frame(res.sub[paste0(r,"_","adx")])[,9])
       adx.w$pval.adj <- as.numeric(as.data.frame(res.sub[paste0(r,"_","adx")])[,11])
       adx.t$Method <- "ALDEx2 t-test (adx)"
       adx.w$Method <- "ALDEx2 wilcox (adx)"

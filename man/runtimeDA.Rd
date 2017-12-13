@@ -9,8 +9,8 @@ runtimeDA(data, predictor, paired = NULL, covars = NULL,
   250), tests = c("sam", "qua", "fri", "vli", "qpo", "pea", "wil", "ttt",
   "ltt", "ltt2", "ere", "ere2", "msf", "zig", "lim", "lli", "lli2", "aov",
   "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe"), tests.slow = c("neb",
-  "bay", "per", "zpo", "znb", "rai", "adx", "ds2", "poi", "erq", "erq2"),
-  R = 10, cores = (detectCores() - 1), print.res = TRUE, ...)
+  "bay", "per", "zpo", "znb", "rai", "adx", "ds2", "ds2x", "poi", "erq",
+  "erq2"), R = 10, cores = (detectCores() - 1), print.res = TRUE, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}

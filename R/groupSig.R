@@ -48,6 +48,7 @@ groupSig <- function(results, group.df, group.cols = 1, split = TRUE, alpha = 0.
                    msf = c("ordering","log2FC"),
                    zig = c("ordering","log2FC"),
                    ds2 = c("ordering","log2FoldChange"),
+                   ds2x = c("ordering","log2FoldChange"),
                    rai = c("ordering","log2FC"))
   
   # The method
