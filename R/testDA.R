@@ -359,6 +359,15 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
     } else {
       message(paste(paste(tests[!tests %in% unique(gsub(".*_","",names(results)))],collapse = ", "),"were excluded due to failure"))
     }
+
+    # Produce informative messages
+    if(all(tests[!tests %in% unique(gsub(".*_","",names(results)))] == "sam")){
+      message("sam usually fails if some samples has too many zeroes")
+    }
+    if(all(c("sam","ere2","erq2","ds2x") %in% tests[!tests %in% unique(gsub(".*_","",names(results)))])){
+      message("These tests usually fails if all features contain at least one zero")
+    }
+      
     tests <- unique(gsub(".*_","",names(results)))
   }
   
