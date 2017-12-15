@@ -334,21 +334,8 @@ the levels of the `paired` factor.
 Paired analysis can be very slow. If you simply can't wait to see the
 results remove "neb" from the `tests` argument.
 
-**Some details on how methods use the paired argument:**
-
-t-test, wilcox test, friedman test, quade test, SAMseq and permutation
-test expect a balanced "unreplicated" design with one value for each
-combination of levels in the `paired` and `predictor` variables.
-
-Negbinom/poisson glm, linear regression and limma models use the
-`paired` variable as a random intercept (i.e. they become mixed-effect
-models) and are very flexible regarding design and work well for
-unbalanced designs.
-
-EdgeR, DESeq2 and metagenomeSeq ZIG include the `paired` variable as a
-covariable in the model and are also generally flexible in the design.
-
-ANCOM use the `paired` variable in a repeated measures manner
+See section on [implemented methods](#implemented-methods) for which
+models accept a `paired` argument.
 
 ### If data is normalized externally or represent absolute abundances
 
@@ -617,7 +604,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">Nonparametric</td>
 </tr>
 <tr class="odd">
-<td>DESeq2 Original</td>
+<td>DESeq2</td>
 <td align="left"><a href="https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0550-8">ds2x</a></td>
 <td align="left">Categorical</td>
 <td align="left">Yes, as covariate</td>
@@ -830,7 +817,7 @@ or write to me, preferably with a code snippet of the implementation
 <td>MetagenomeSeq ZIG</td>
 <td align="left"><a href="https://www.nature.com/nmeth/journal/v10/n12/full/nmeth.2658.html">zig</a></td>
 <td align="left">All</td>
-<td align="left">Yes, as covariate</td>
+<td align="left">Yes, as random effects</td>
 <td align="left">Yes</td>
 <td align="left">CSS</td>
 <td align="left">Log</td>

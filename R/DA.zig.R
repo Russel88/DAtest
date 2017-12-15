@@ -39,22 +39,18 @@ DA.zig <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
   mgsdata <- cumNorm(mgsdata, mgsp)
   
   # Define model
-  if(!is.null(paired)){
-    if(is.null(covars)){
-      mod <- model.matrix(~ predictor+paired)
-    } else {
-      mod <- model.matrix(as.formula(paste("~ predictor+paired+",paste(names(covars), collapse="+"),sep = "")))
-    }
+  if(is.null(covars)){
+    mod <- model.matrix(~ predictor)
   } else {
-    if(is.null(covars)){
-      mod <- model.matrix(~ predictor)
-    } else {
-      mod <- model.matrix(as.formula(paste("~ predictor+",paste(names(covars), collapse="+"),sep = "")))
-    }
+    mod <- model.matrix(as.formula(paste("~ predictor+",paste(names(covars), collapse="+"),sep = "")))
   }
-  
+
   # Fit model
-  mgsfit <- fitZig(obj=mgsdata,mod=mod)
+  if(is.null(paired)){
+    mgsfit <- fitZig(obj=mgsdata,mod=mod,...)
+  } else {
+    mgsfit <- fitZig(obj=mgsdata,mod=mod,...,useMixedModel=TRUE,block=paired)
+  }
   
   # Extract results
   if(is.numeric(predictor)){
