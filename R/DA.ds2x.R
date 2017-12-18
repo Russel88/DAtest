@@ -106,7 +106,7 @@ DA.ds2x <- function(data, predictor, paired = NULL, covars = NULL, out.all = NUL
   res <- res[,-(ncol(res)-1)]
   res$pval.adj <- p.adjust(res$pval, method = p.adj)
   res$Feature <- results(x)@rownames
-  res$Method <- "DESeq2 (ds2)"
+  res$Method <- "DESeq2 (ds2x)"
 
   if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
   
