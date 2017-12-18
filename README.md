@@ -560,7 +560,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">No</td>
 <td align="left">Yes</td>
 <td align="left">TSS (2)</td>
-<td align="left">Log</td>
+<td align="left">Log (3)</td>
 <td align="left">Gaussian</td>
 </tr>
 <tr class="odd">
@@ -570,7 +570,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">No</td>
 <td align="left">Yes</td>
 <td align="left">TSS</td>
-<td align="left">Log (3)</td>
+<td align="left">Log</td>
 <td align="left">Gaussian</td>
 </tr>
 <tr class="even">
@@ -750,7 +750,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">Yes, as random effects</td>
 <td align="left">Yes</td>
 <td align="left">TSS (2)</td>
-<td align="left">Log</td>
+<td align="left">Log (3)</td>
 <td align="left">Gaussian</td>
 </tr>
 <tr class="even">
@@ -760,7 +760,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">Yes, as random effects</td>
 <td align="left">Yes</td>
 <td align="left">TSS</td>
-<td align="left">Log (3)</td>
+<td align="left">Log</td>
 <td align="left">Gaussian</td>
 </tr>
 <tr class="odd">
@@ -790,7 +790,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">Yes, as random effects</td>
 <td align="left">Yes</td>
 <td align="left">TSS (2)</td>
-<td align="left">Log</td>
+<td align="left">Log (3)</td>
 <td align="left">Gaussian</td>
 </tr>
 <tr class="even">
@@ -800,7 +800,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">Yes, as random effects</td>
 <td align="left">Yes</td>
 <td align="left">TSS</td>
-<td align="left">Log (3)</td>
+<td align="left">Log</td>
 <td align="left">Gaussian</td>
 </tr>
 <tr class="odd">
@@ -880,7 +880,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">Yes</td>
 <td align="left">No</td>
 <td align="left">TSS (2)</td>
-<td align="left">Log</td>
+<td align="left">Log (3)</td>
 <td align="left">Gaussian</td>
 </tr>
 <tr class="odd">
@@ -890,7 +890,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">Yes</td>
 <td align="left">No</td>
 <td align="left">TSS</td>
-<td align="left">Log (3)</td>
+<td align="left">Log</td>
 <td align="left">Gaussian</td>
 </tr>
 <tr class="even">
