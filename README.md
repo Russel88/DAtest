@@ -35,14 +35,15 @@ in choosing a method for a specific dataset based on empirical testing.
 
 Please cite the following publication if you use the DAtest package:
 
-Russel *et al.* (2017) DAtest: A framework for choosing differential
-abundance or expression method. *Submitted*
+[Russel *et al.* (2018) DAtest: A framework for choosing differential
+abundance or expression method.
+biorXiv](https://www.biorxiv.org/content/early/2018/01/02/241802)
 
 Remember also to cite the method you end up using for your final
 analysis (See [implemented methods](#implemented-methods) for links). If
 there is no associated publication (e.g. for a t-test) you can cite as
 follows: ."we used t-test as implemented in DAtest version x.x.x (Russel
-*et al.* 2017)"
+*et al.* 2018)"
 
 Overview of this tutorial
 -------------------------
