@@ -31,6 +31,38 @@ in choosing a method for a specific dataset based on empirical testing.
     "test" is the name of the test
     -   Check out your final results.
 
+#### Main functions:
+
+-   `testDA`: It shuffles predictor, spike-in data, runs all methods and
+    compares their performance
+-   `powerDA`: It shuffles predictor, spike-in data at different effect
+    sizes, runs one method to evaluate its performance
+-   `allDA`: It runs all methods on the input data to compare their
+    final results (significance calling and effect sizes)
+-   `DA."test"`: Collection of functions that run one method (as defined
+    by "test") on the input data.
+
+#### Auxiliary functions:
+
+-   `runtimeDA`: It runs all methods on a subset of the input features
+    as a means to predict runtime on large datasets
+-   `vennDA`: With input from `allDA` it produces Venn diagrams of
+    significant features
+-   `featurePlot`: Plot association between one feature and the
+    predictor (and paired and covars if available)
+-   `preDA`: Pre-process data by grouping low abundant features in one
+    aggregate feature
+-   `groupSig`: Test if certain groups of features are overrepresented
+    among significant features with fisher's exact tests
+-   `DA.anova`: Post-hoc tests on all features for linear models (See
+    `anova`)
+-   `DA.drop1`: Post-hoc tests on all features for linear models (See
+    `drop1`)
+-   `DA.lsmeans`: Post-hoc tests on all features for linear models (See
+    `lsmeans::lsmeans`)
+-   `DA.TukeyHSD`: Post-hoc tests on all features for ANOVAs (See
+    `TukeyHSD`)
+
 ### Citation
 
 Please cite the following publication if you use the DAtest package:
