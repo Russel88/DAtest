@@ -1,0 +1,9 @@
+citHeader("To cite DAtest in a publication:")
+
+citEntry(entry="Article",
+	title = "DAtest: a framework for choosing differential abundance or expression method",
+        author = personList(as.person("J. Russel"), as.person("J. Thorsen"), as.person("A.D. Brejnrod"), as.person("H. Bisgaard"), as.person("S. Sorensen"), as.person("M. Burmolle")),
+	journal = "biorXiv",
+    	year="2018",
+	doi="https://doi.org/10.1101/241802",
+textVersion = "Russel J., Thorsen J., Brejnrod A.D., Bisgaard H., Sorensen S., and Burmolle M. (2018) DAtest: a framework for choosing differential abundance or expression method. bioRxiv. doi.org/10.1101/241802")
