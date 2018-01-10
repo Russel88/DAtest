@@ -24,9 +24,10 @@ in choosing a method for a specific dataset based on empirical testing.
 
 -   Compare methods with `testDA` function
     -   Check the results with `plot` or `summary`
-    -   Choose method that has high AUC, and FPR not higher than ~0.05
-    -   (Optional but recommended) Explore the sensitivity and false
-        discovery rate of the chosen method with `powerDA`
+    -   Choose method that has high AUC, FPR not higher than ~0.05, and
+        a Spike.detect.rate above 0
+-   Explore the sensitivity and false discovery rate of the chosen
+    method with `powerDA`
 -   Run data with the chosen test with `DA."test"` function, where
     "test" is the name of the test
     -   Check out your final results.
@@ -176,8 +177,8 @@ How to compare methods
 ======================
 
 Methods are compared with "False Positve Rate" (FPR), "Area Under the
-(Receiver Operator) Curve" (AUC), and potentially also "Spike Detection
-Rate" (Spike.detect.rate).
+(Receiver Operator) Curve" (AUC), and "Spike Detection Rate"
+(Spike.detect.rate).
 
 By shuffling the predictor variable and spiking a subset of the
 features, we know a priori which features should be siginificant (the
@@ -205,10 +206,12 @@ the proportion of features you would expect to detect in a regular
 analysis. The higher Spike.detect.rate, the better.
 
 -   The intended workflow for choosing a method is:
-    -   Omit methods with FPR significantly higher than 0.05
-    -   Of remaining methods, choose the one with highest AUC
-    -   If several methods have very similar AUCs, the Spike.detect.rate
-        can be used to differentiate among the methods
+    -   Omit methods with FPR higher than 0.05
+    -   Of remaining methods, choose the one with highest AUC if it has
+        a Spike.detect.rate above 0
+    -   If the method with highest AUC (and FPR &lt; 0.05) has a
+        Spike.detect.rate of zero, rerun analysis with pruned dataset
+        (see `preDA` below) or increase `effectSize`
 
 **Assumption of the test:** the test assumes that only few features are
 truly differentially abundant. Therefore, if many features are different
