@@ -4,7 +4,7 @@
 \alias{vennDA}
 \title{Plot Venn diagram from \code{allDA} object}
 \usage{
-vennDA(x, tests = NULL, alpha = 0.05, split = FALSE, output = FALSE,
+vennDA(x, tests = NULL, alpha = 0.1, split = FALSE, output = FALSE,
   pkg = "eulerr", ...)
 }
 \arguments{
@@ -12,7 +12,7 @@ vennDA(x, tests = NULL, alpha = 0.05, split = FALSE, output = FALSE,
 
 \item{tests}{(Required) Character vector with tests to plot (E.g. \code{c("ttt","adx.t","wil")}, see \code{names(x$results)}). Default none}
 
-\item{alpha}{Numeric. q-value threshold for significant features. Default 0.05}
+\item{alpha}{Numeric. q-value threshold for significant features. Default 0.1}
 
 \item{split}{If TRUE will split diagrams in positive and negative estimates if possible}
 

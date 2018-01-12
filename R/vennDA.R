@@ -5,14 +5,14 @@
 #' Require the eulerr package unless output is TRUE.
 #' @param x (Required) Output from the \code{allDA} function
 #' @param tests (Required) Character vector with tests to plot (E.g. \code{c("ttt","adx.t","wil")}, see \code{names(x$results)}). Default none
-#' @param alpha Numeric. q-value threshold for significant features. Default 0.05
+#' @param alpha Numeric. q-value threshold for significant features. Default 0.1
 #' @param split If TRUE will split diagrams in positive and negative estimates if possible
 #' @param output If TRUE will return a data.frame instead of a plot
 #' @param pkg Use either "eulerr" package (default) or "venneuler" for drawing diagrams.
 #' @param ... Additional arguments for plotting
 #' @return If output TRUE then a data.frame with Features detected by the different methods
 #' @export
-vennDA <- function(x, tests = NULL, alpha = 0.05, split = FALSE, output = FALSE, pkg = "eulerr", ...){
+vennDA <- function(x, tests = NULL, alpha = 0.1, split = FALSE, output = FALSE, pkg = "eulerr", ...){
 
   # Load package
   if(pkg == "eulerr") library(eulerr)

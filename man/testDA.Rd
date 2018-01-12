@@ -9,8 +9,8 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
   "znb", "vli", "qpo", "poi", "pea", "wil", "ttt", "ltt", "ltt2", "erq", "erq2",
   "ere", "ere2", "msf", "zig", "ds2", "ds2x", "lim", "lli", "lli2", "aov",
   "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe"), relative = TRUE,
-  effectSize = 4, k = NULL, cores = (detectCores() - 1), rng.seed = 123,
-  args = list(), out.all = NULL, alpha = 0.05, core.check = TRUE,
+  effectSize = 5, k = NULL, cores = (detectCores() - 1), rng.seed = 123,
+  args = list(), out.all = NULL, alpha = 0.1, core.check = TRUE,
   verbose = TRUE)
 }
 \arguments{
@@ -28,9 +28,9 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
 
 \item{relative}{Logical. If TRUE (default) abundances are made relative for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea", and there is an offset of \code{log(LibrarySize)} for "neb", "poi", "qpo", "zpo" and "znb"}
 
-\item{effectSize}{Integer. The effect size for the spike-ins. Default 4}
+\item{effectSize}{Integer. The effect size for the spike-ins. Default 5}
 
-\item{k}{Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. \code{k=c(5,10,15)}: 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default NULL, which will spike 1 percent of the total amount of features in each tertile (a total of 3 percent)}
+\item{k}{Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. \code{k=c(5,10,15)}: 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default NULL, which will spike 2 percent of the total amount of features in each tertile (a total of 6 percent)}
 
 \item{cores}{Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.}
 
@@ -40,7 +40,7 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
 
 \item{out.all}{If TRUE linear models will output results and p-values from \code{anova}/\code{drop1}, ds2/ds2x will run LRT and not Wald test, erq and erq2 will produce one p-value for the predictor, and lim, lli, lli2, lim, vli will run F-tests. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise}
 
-\item{alpha}{q-value threshold for determining significance for \code{Spike.detect.rate}. Default 0.05}
+\item{alpha}{q-value threshold for determining significance for \code{Spike.detect.rate}. Default 0.1}
 
 \item{core.check}{If TRUE will make an interactive check that the amount of cores specified are desired. Only if \code{cores>20}. This is to ensure that the function doesn't automatically overloads a server with workers.}
 

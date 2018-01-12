@@ -10,7 +10,7 @@ allDA(data, predictor, paired = NULL, covars = NULL, tests = c("neb",
   "msf", "zig", "ds2", "ds2x", "lim", "lli", "lli2", "aov", "lao", "lao2",
   "kru", "lrm", "llm", "llm2", "rai"), relative = TRUE,
   cores = (detectCores() - 1), rng.seed = 123, p.adj = "fdr",
-  args = list(), out.all = NULL, alpha = 0.05, core.check = TRUE)
+  args = list(), out.all = NULL, alpha = 0.1, core.check = TRUE)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
@@ -35,7 +35,7 @@ allDA(data, predictor, paired = NULL, covars = NULL, tests = c("neb",
 
 \item{out.all}{If TRUE models will output results and p-values from \code{anova}/\code{drop1}. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class \code{predictor} and FALSE otherwise}
 
-\item{alpha}{P-value threshold for calling significance. Default 0.05}
+\item{alpha}{q-value threshold for calling significance. Default 0.1}
 
 \item{core.check}{If TRUE (default) will make an interactive check that the amount of cores specified are desired. Only if \code{cores>20}. This is to ensure that the function doesn't automatically overloads a server with workers.}
 }

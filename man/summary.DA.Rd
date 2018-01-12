@@ -4,12 +4,12 @@
 \alias{summary.DA}
 \title{Summary of results from \code{testDA}}
 \usage{
-\method{summary}{DA}(object, sort = "AUC", ...)
+\method{summary}{DA}(object, sort = "Rank", ...)
 }
 \arguments{
 \item{object}{The output from the \code{testDA} function}
 
-\item{sort}{Sort methods by \code{c("AUC","FPR","Spike.detect.rate")}}
+\item{sort}{Sort methods by \code{c("AUC","FPR","Spike.detect.rate","Rank")}}
 
 \item{...}{Additional arguments for \code{print}}
 }

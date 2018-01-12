@@ -44,7 +44,7 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative, decimal){
     } 
   } else {
     # Excluded tests if levels in predictor is exactly 2
-    tests <- tests[!tests %in% c("aov","lao","lao2","kru","spe","pea","fri","qua")]
+    tests <- tests[!tests %in% c("aov","lao","lao2","kru","spe","pea","fri","qua","lrm","llm","llm2")]
   }
   
   # Only include specific tests if predictor is numeric
@@ -58,6 +58,9 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative, decimal){
   # Exclude if relative is false
   if(relative == FALSE){
     tests <- tests[!tests %in% c("sam","anc","vli","ltt2","erq","ere","ere2","erq2","msf","zig","bay","ds2","ds2x","adx","lli2","lao2","llm2","rai")]
+  } else {
+    # Exclude if relative is TRUE
+    tests <- tests[!tests %in% c("lrm","lim")]
   }
   
   # Exclude if decimal is TRUE

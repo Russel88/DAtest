@@ -5,7 +5,7 @@
 \title{Estimating (empirical) statistical power}
 \usage{
 powerDA(data, predictor, paired = NULL, covars = NULL, test = NULL,
-  effectSizes = c(2, 4, 8, 16, 32), alpha.p = 0.05, alpha.q = 0.05,
+  effectSizes = c(2, 4, 8, 16, 32), alpha.p = 0.05, alpha.q = 0.1,
   p.adj = "fdr", R = 5, relative = TRUE, k = NULL,
   cores = (detectCores() - 1), rng.seed = 123, args = list(),
   out.all = NULL, core.check = TRUE, verbose = TRUE)
@@ -25,7 +25,7 @@ powerDA(data, predictor, paired = NULL, covars = NULL, test = NULL,
 
 \item{alpha.p}{p-value threshold for false positive rates. Default 0.05}
 
-\item{alpha.q}{q-value threshold for determining significance for \code{empirical power}. Default 0.05. This will change \code{fdr.output} for "sam" and \code{sig} for "anc".}
+\item{alpha.q}{q-value threshold for determining significance for \code{empirical power}. Default 0.1. This will change \code{fdr.output} for "sam" and \code{sig} for "anc".}
 
 \item{p.adj}{Character. Method for p-value adjustment. See \code{p.adjust} for details. Default "fdr"}
 
@@ -48,7 +48,7 @@ powerDA(data, predictor, paired = NULL, covars = NULL, test = NULL,
 \item{verbose}{If TRUE will print informative messages}
 }
 \value{
-An object of class \code{DAPower}, which contains a list with 1: A data.frame with results, 2: alpha.p value, 3: alpha.q values
+An object of class \code{DAPower}, which contains a list with 1: A data.frame with results, 2: alpha.p value, 3: alpha.q value
 }
 \description{
 Estimating (empirical) statistical power for a specific differential abundance and expression method on a specific dataset

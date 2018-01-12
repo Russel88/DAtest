@@ -8,7 +8,7 @@
 #' @param test Character. Which test to include. See \code{testDA} for details on the implemented tests. 
 #' @param effectSizes Numierc. The effect sizes for the spike-ins. Default \code{c(2,4,8,16,32)}
 #' @param alpha.p p-value threshold for false positive rates. Default 0.05
-#' @param alpha.q q-value threshold for determining significance for \code{empirical power}. Default 0.05. This will change \code{fdr.output} for "sam" and \code{sig} for "anc". 
+#' @param alpha.q q-value threshold for determining significance for \code{empirical power}. Default 0.1. This will change \code{fdr.output} for "sam" and \code{sig} for "anc". 
 #' @param p.adj Character. Method for p-value adjustment. See \code{p.adjust} for details. Default "fdr"
 #' @param R Integer. Number of times to run the tests. Default 5
 #' @param relative Logical. If TRUE (default) abundances are made relative for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea", and there is an offset of \code{log(LibrarySize)} for "neb", "poi", "qpo", "zpo" and "znb"
@@ -20,13 +20,13 @@
 #' @param core.check If TRUE will make an interactive check that the amount of cores specified are desired. Only if \code{cores>20}. This is to ensure that the function doesn't automatically overloads a server with workers.  
 #' @param verbose If TRUE will print informative messages
 #' @details Currently implemented methods: see \code{testDA}
-#' @return An object of class \code{DAPower}, which contains a list with 1: A data.frame with results, 2: alpha.p value, 3: alpha.q values
+#' @return An object of class \code{DAPower}, which contains a list with 1: A data.frame with results, 2: alpha.p value, 3: alpha.q value
 #' @import snow doSNOW foreach utils
 #' @importFrom parallel detectCores
 #' @importFrom pROC roc
 #' @export
 
-powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, effectSizes = c(2,4,8,16,32), alpha.p = 0.05, alpha.q = 0.05, p.adj = "fdr", R = 5, relative = TRUE, k = NULL, cores = (detectCores()-1), rng.seed = 123, args = list(), out.all = NULL, core.check = TRUE, verbose = TRUE){
+powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, effectSizes = c(2,4,8,16,32), alpha.p = 0.05, alpha.q = 0.1, p.adj = "fdr", R = 5, relative = TRUE, k = NULL, cores = (detectCores()-1), rng.seed = 123, args = list(), out.all = NULL, core.check = TRUE, verbose = TRUE){
 
   stopifnot(exists("data"),exists("predictor"))
   # Check for servers

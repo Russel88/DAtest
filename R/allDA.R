@@ -12,7 +12,7 @@
 #' @param p.adj Character. Method for p-value adjustment. See \code{p.adjust} for details. Default "fdr"
 #' @param args List. A list with lists of arguments passed to the different methods. See details for more.
 #' @param out.all If TRUE models will output results and p-values from \code{anova}/\code{drop1}. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class \code{predictor} and FALSE otherwise
-#' @param alpha P-value threshold for calling significance. Default 0.05
+#' @param alpha q-value threshold for calling significance. Default 0.1
 #' @param core.check If TRUE (default) will make an interactive check that the amount of cores specified are desired. Only if \code{cores>20}. This is to ensure that the function doesn't automatically overloads a server with workers.  
 #' @details Currently implemented methods:
 #' \itemize{
@@ -112,7 +112,7 @@
 #' 
 #' @export
 
-allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb","per","bay","adx","sam","qua","fri","znb","zpo","vli","qpo","poi","pea","spe","wil","ttt","ltt","ltt2","erq","ere","erq2","ere2","msf","zig","ds2","ds2x","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), out.all = NULL, alpha = 0.05, core.check = TRUE){
+allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb","per","bay","adx","sam","qua","fri","znb","zpo","vli","qpo","poi","pea","spe","wil","ttt","ltt","ltt2","erq","ere","erq2","ere2","msf","zig","ds2","ds2x","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","rai"), relative = TRUE, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), out.all = NULL, alpha = 0.1, core.check = TRUE){
 
   stopifnot(exists("data"),exists("predictor"))
   # Check for servers
@@ -265,8 +265,8 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb"
                                znb = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,covars,relative,out.all, p.adj),znb.DAargs)),
                                fri = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,relative,p.adj),fri.DAargs)),
                                qua = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,relative,p.adj),qua.DAargs)),
-                               anc = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired),anc.DAargs)),
-                               sam = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired),sam.DAargs))),
+                               anc = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,sig = alpha),anc.DAargs)),
+                               sam = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,fdr.output = alpha),sam.DAargs))),
                         
                         error = function(e) NULL)
     

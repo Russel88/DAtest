@@ -99,21 +99,6 @@ Overview of this tutorial
 -   [Implemented methods](#implemented-methods)
 -   [Extra features](#extra-features)
 
-Examples
---------
-
-See full examples on a test dataset here:
-
--   [Two-class
-    (or Quantitative)](http://htmlpreview.github.com/?https://github.com/Russel88/DAtest/blob/master/script/script_twoclass.html)
--   [Multi-class](http://htmlpreview.github.com/?https://github.com/Russel88/DAtest/blob/master/script/script_multiclass.html)
--   [Covariates](http://htmlpreview.github.com/?https://github.com/Russel88/DAtest/blob/master/script/script_covars.html)
-
-The examples use the [phyloseq
-package](https://joey711.github.io/phyloseq/), but the workflow would be
-the similar if the input is a count table in the form of a data.frame or
-matrix.
-
 Installation of packages
 ========================
 
@@ -124,8 +109,10 @@ clean R version 3.4.1 by installing in the following order:
 The DAtest package:
 
     install.packages("devtools")
-    library(devtools)
-    install_github("Russel88/DAtest")
+    devtools::install_github("Russel88/DAtest@v2.7.5")
+
+    # Or the developmental version:
+    devtools::install_github("Russel88/DAtest")
 
 #### The following are needed for *full* functionality
 
