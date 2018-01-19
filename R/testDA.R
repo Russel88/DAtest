@@ -567,7 +567,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   df <- df[df$FPR <= 0.05,]
   if(nrow(df) > 0){
     df <- df[order(df$AUC, decreasing = TRUE),]
-    if(df[1,"Spike.detect.rate"] == 0 & verbose) message("Spike detect rate is zero for the top method! You might run to re-run the analysis with a pruned dataset (see preDA) or a higher effectSize")
+    if(df[1,"Spike.detect.rate"] == 0 & verbose) message("Spike detect rate is zero for the top method! You might want to re-run the analysis with a pruned dataset (see preDA) or a higher effectSize")
   }
   
   return(out)
