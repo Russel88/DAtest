@@ -65,32 +65,37 @@ DA.mva <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
   # Fit model
   mod <- do.call(manyglm,c(list(form, ...),manyglm.args))
   
-  pvals.unadj <- do.call(summary,c(list(mod, p.uni="unadjusted", resamp = resamp, ...),summary.manyglm.args))
-  
-  # Extract results
-  res <- as.data.frame(cbind(t(mod$coefficients),pvals.unadj$uni.p[,2]))
-  colnames(res)[ncol(res)] <- c("pval")
-  if(p.adj == "mva"){
-    pvals.adj <- do.call(summary,c(list(mod, p.uni="adjusted", resamp = resamp, ...),summary.manyglm.args))
-    res$pval.adj <- pvals.adj$uni.p[,2]
+  if(allResults){
+    return(mod)
   } else {
-    res$pval.adj <- p.adjust(res$pval, method = p.adj)
-  } 
-  
-  res$log2FC <- log2(exp(res[,coeff.ref]+res[,coeff]) / exp(res[,coeff.ref]))
-  
-  if(!is.numeric(predictor)){
-    res$ordering <- NA
-    res[!is.na(res[,coeff]) & res[,coeff] > 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff],">",levels(as.factor(predictor))[coeff.ref])
-    res[!is.na(res[,coeff]) & res[,coeff] < 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff.ref],">",levels(as.factor(predictor))[coeff])
+    pvals.unadj <- do.call(summary,c(list(mod, p.uni="unadjusted", resamp = resamp, ...),summary.manyglm.args))
+    
+    # Extract results
+    res <- as.data.frame(cbind(t(mod$coefficients),pvals.unadj$uni.p[,2]))
+    colnames(res)[ncol(res)] <- c("pval")
+    if(p.adj == "mva"){
+      pvals.adj <- do.call(summary,c(list(mod, p.uni="adjusted", resamp = resamp, ...),summary.manyglm.args))
+      res$pval.adj <- pvals.adj$uni.p[,2]
+    } else {
+      res$pval.adj <- p.adjust(res$pval, method = p.adj)
+    } 
+    
+    res$log2FC <- log2(exp(res[,coeff.ref]+res[,coeff]) / exp(res[,coeff.ref]))
+    
+    if(!is.numeric(predictor)){
+      res$ordering <- NA
+      res[!is.na(res[,coeff]) & res[,coeff] > 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff],">",levels(as.factor(predictor))[coeff.ref])
+      res[!is.na(res[,coeff]) & res[,coeff] < 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff.ref],">",levels(as.factor(predictor))[coeff])
+    }
+    
+    res$Feature <- rownames(pvals.unadj$uni.test)
+    res$Method <- "mvabund (mva)"
+    
+    if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
+    
+    return(res)
   }
   
-  res$Feature <- rownames(pvals.unadj$uni.test)
-  res$Method <- "mvabund (mva)"
-  
-  if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
-  
-  if(allResults) return(mod) else return(res)
 }
 
 
