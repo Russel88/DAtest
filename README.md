@@ -132,6 +132,7 @@ But the package will work without them
 
     install.packages("pscl") # Zero-inflated Poisson and zero-inflated Negative Binomial
     install.packages("statmod") # For limma with blocking
+    install.packages("mvabund") # mvabund method
 
 -   RAIDA and ANCOM have to be installed from external sources:
 
@@ -847,6 +848,16 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">Zero-inflated Gaussian</td>
 </tr>
 <tr class="odd">
+<td>Mvabund</td>
+<td align="left"><a href="http://onlinelibrary.wiley.com/doi/10.1111/j.2041-210X.2012.00190.x/full">mva</a></td>
+<td align="left">All</td>
+<td align="left">Yes, as covariate</td>
+<td align="left">Yes</td>
+<td align="left">None (1)</td>
+<td align="left"></td>
+<td align="left">Negative Binomial</td>
+</tr>
+<tr class="even">
 <td>Permutation test</td>
 <td align="left"><a href="https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8">per</a></td>
 <td align="left">Two-class</td>
@@ -856,7 +867,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Nonparametric</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Quade test</td>
 <td align="left"><a href="http://rcompanion.org/handbook/F_11.html">qua</a></td>
 <td align="left">Multi-class</td>
@@ -866,7 +877,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Nonparametric</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>RAIDA</td>
 <td align="left"><a href="https://academic.oup.com/bioinformatics/article/31/14/2269/256302/A-robust-approach-for-identifying-differentially">rai</a></td>
 <td align="left">Two-class</td>
@@ -876,7 +887,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Zero-inflated Lognormal</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>SAMseq</td>
 <td align="left"><a href="http://statweb.stanford.edu/~tibs/SAM/">sam</a></td>
 <td align="left">All</td>
@@ -886,7 +897,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Nonparametric</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Welch t.test</td>
 <td align="left"><a href="https://en.wikipedia.org/wiki/Welch%27s_t-test">ttt</a></td>
 <td align="left">Two-class</td>
@@ -896,7 +907,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left"></td>
 <td align="left">Gaussian</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Welch t.test log</td>
 <td align="left"><a href="https://en.wikipedia.org/wiki/Welch%27s_t-test">ltt</a></td>
 <td align="left">Two-class</td>
@@ -906,7 +917,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">Log (3)</td>
 <td align="left">Gaussian</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Welch t.test log2</td>
 <td align="left"><a href="https://en.wikipedia.org/wiki/Welch%27s_t-test">ltt2</a></td>
 <td align="left">Two-class</td>
@@ -916,7 +927,7 @@ or write to me, preferably with a code snippet of the implementation
 <td align="left">Log</td>
 <td align="left">Gaussian</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Wilcoxon</td>
 <td align="left"><a href="https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test">wil</a></td>
 <td align="left">Two-class</td>
@@ -1117,3 +1128,4 @@ passed to a specific test:
 -   qua - Passed to `quade.test` and `DA.qua`
 -   anc - Passed to `ANCOM` and `DA.anc`
 -   sam - Passed to `SAMseq` and `DA.sam`
+-   mva - Passed to `manyglm` and `summary.manyglm`

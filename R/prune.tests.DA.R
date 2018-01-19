@@ -22,6 +22,7 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative, decimal){
   if(!"pscl" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("zpo","znb")]
   if(!"ancom.R" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("anc")]
   if(!"samr" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("sam")]
+  if(!"mvabund" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("mvabund")]
   
   # Exclude tests that do not work with a paired argument
   if(!is.null(paired)){
@@ -37,7 +38,7 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative, decimal){
   
   # Only include some tests if there are more than two levels in predictor
   if(length(levels(as.factor(predictor))) > 2){
-    tests <- tests[tests %in% c("sam","anc","qua","fri","znb","zpo","vli","qpo","poi","neb","erq","erq2","ds2","ds2x","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe","pea","zig")]
+    tests <- tests[tests %in% c("mva","sam","anc","qua","fri","znb","zpo","vli","qpo","poi","neb","erq","erq2","ds2","ds2x","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe","pea","zig")]
     # Exclude if only works for two-class paired
     if(!is.null(paired)){
       tests <- tests[!tests %in% c("sam")]
@@ -49,7 +50,7 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative, decimal){
   
   # Only include specific tests if predictor is numeric
   if(is.numeric(predictor)){
-    tests <- tests[tests %in% c("sam","znb","zpo","vli","qpo","poi","neb","erq","erq2","lim","lli","lli2","lrm","llm","llm2","spe","pea")]
+    tests <- tests[tests %in% c("mva","sam","znb","zpo","vli","qpo","poi","neb","erq","erq2","lim","lli","lli2","lrm","llm","llm2","spe","pea")]
   } else {
     # Exclude if not numeric
     tests <- tests[!tests %in% c("spe","pea")]
@@ -65,12 +66,12 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative, decimal){
   
   # Exclude if decimal is TRUE
   if(decimal){
-    tests <- tests[!tests %in% c("znb","zpo","qpo","poi","neb")]
+    tests <- tests[!tests %in% c("znb","zpo","qpo","poi","neb","mva")]
   }
   
   # Only include if covars are present
   if(!is.null(covars)){
-    tests <- tests[tests %in% c("znb","zpo","vli","qpo","poi","ds2","ds2x","neb","erq","erq2","zig","lrm","llm","llm2","lim","lli","lli2","aov","lao","lao2")]
+    tests <- tests[tests %in% c("mva","znb","zpo","vli","qpo","poi","ds2","ds2x","neb","erq","erq2","zig","lrm","llm","llm2","lim","lli","lli2","aov","lao","lao2")]
   }
   
   return(tests)

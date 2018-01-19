@@ -5,7 +5,7 @@
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. If the \code{predictor} is numeric it will be treated as such in the analyses
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. Only for "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "ds2x", "lrm", "llm", "llm2", "lim", "lli", "lli2", "zig" and "fri"
 #' @param covars Either a named list with covariates, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}
-#' @param tests Character. Which tests to include. Default all (Except ANCOM, see below for details)
+#' @param tests Character. Which tests to include. Default all (Except ANCOM and mvabund, see below for details)
 #' @param relative Logical. If TRUE (default) abundances are made relative for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea", and there is an offset of \code{log(LibrarySize)} for "neb", "poi", "qpo", "zpo" and "znb"
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available
 #' @param rng.seed Numeric. Seed for reproducibility. Default 123
@@ -54,6 +54,7 @@
 #'  \item qua - Quade test
 #'  \item anc - ANCOM (by default not included, as it is very slow)
 #'  \item sam - SAMSeq
+#'  \item mva - mvabund (by default not included, as it is very slow)
 #'  \item zzz - A user-defined method (See \code{?DA.zzz})
 #' }
 #' 
@@ -100,6 +101,7 @@
 #'  \item qua - Passed to \code{quade.test} and \code{DA.qua}
 #'  \item anc - Passed to \code{ANCOM} and \code{DA.anc}
 #'  \item sam - Passed to \code{SAMseq} and \code{DA.sam}
+#'  \item mva - Passed to \code{manyglm} and \code{summary.manyglm}
 #' }
 #' @return A list of results:
 #' \itemize{
@@ -229,6 +231,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb"
     
     res.sub <- tryCatch(switch(i,
                                zzz = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars),zzz.DAargs)),
+                               mva = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars,relative, p.adj),mva.DAargs)),
                                wil = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired, relative, p.adj),wil.DAargs)),
                                ttt = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired, relative, p.adj),ttt.DAargs)),
                                ltt = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,relative, p.adj),ltt.DAargs)),
@@ -388,7 +391,8 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb"
                    zig = paste0("predictor",levels(as.factor(predictor))[2]),
                    ds2 = "log2FoldChange",
                    ds2x = "log2FoldChange",
-                   rai = "log2FC")
+                   rai = "log2FC",
+                   mva = "log2FC")
 
   if(!is.numeric(predictor) & length(unique(predictor)) > 2){
     df.est <- NULL

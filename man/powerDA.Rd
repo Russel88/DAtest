@@ -21,7 +21,7 @@ powerDA(data, predictor, paired = NULL, covars = NULL, test = NULL,
 
 \item{test}{Character. Which test to include. See \code{testDA} for details on the implemented tests.}
 
-\item{effectSizes}{Numierc. The effect sizes for the spike-ins. Default \code{c(2,4,8,16,32)}}
+\item{effectSizes}{Numeric. The effect sizes for the spike-ins. Default \code{c(2,4,8,16,32)}}
 
 \item{alpha.p}{p-value threshold for false positive rates. Default 0.05}
 
@@ -33,7 +33,7 @@ powerDA(data, predictor, paired = NULL, covars = NULL, test = NULL,
 
 \item{relative}{Logical. If TRUE (default) abundances are made relative for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea", and there is an offset of \code{log(LibrarySize)} for "neb", "poi", "qpo", "zpo" and "znb"}
 
-\item{k}{Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. \code{k=c(5,10,15)}: 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default NULL, which will spike 1 percent of the total amount of features in each tertile (a total of 3 percent)}
+\item{k}{Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. \code{k=c(5,10,15)}: 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default NULL, which will spike 2 percent of the total amount of features in each tertile (a total of 6 percent), but minimum c(5,5,5)}
 
 \item{cores}{Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.}
 

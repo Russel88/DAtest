@@ -21,7 +21,7 @@ allDA(data, predictor, paired = NULL, covars = NULL, tests = c("neb",
 
 \item{covars}{Either a named list with covariates, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}}
 
-\item{tests}{Character. Which tests to include. Default all (Except ANCOM, see below for details)}
+\item{tests}{Character. Which tests to include. Default all (Except ANCOM and mvabund, see below for details)}
 
 \item{relative}{Logical. If TRUE (default) abundances are made relative for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea", and there is an offset of \code{log(LibrarySize)} for "neb", "poi", "qpo", "zpo" and "znb"}
 
@@ -93,6 +93,7 @@ Currently implemented methods:
  \item qua - Quade test
  \item anc - ANCOM (by default not included, as it is very slow)
  \item sam - SAMSeq
+ \item mva - mvabund (by default not included, as it is very slow)
  \item zzz - A user-defined method (See \code{?DA.zzz})
 }
 
@@ -139,5 +140,6 @@ Below is an overview of which functions get the arguments that are passed to a s
  \item qua - Passed to \code{quade.test} and \code{DA.qua}
  \item anc - Passed to \code{ANCOM} and \code{DA.anc}
  \item sam - Passed to \code{SAMseq} and \code{DA.sam}
+ \item mva - Passed to \code{manyglm} and \code{summary.manyglm}
 }
 }

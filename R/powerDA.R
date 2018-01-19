@@ -6,13 +6,13 @@
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. Only for "anc", "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "ds2x", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"
 #' @param covars Either a named list with covariates, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}
 #' @param test Character. Which test to include. See \code{testDA} for details on the implemented tests. 
-#' @param effectSizes Numierc. The effect sizes for the spike-ins. Default \code{c(2,4,8,16,32)}
+#' @param effectSizes Numeric. The effect sizes for the spike-ins. Default \code{c(2,4,8,16,32)}
 #' @param alpha.p p-value threshold for false positive rates. Default 0.05
 #' @param alpha.q q-value threshold for determining significance for \code{empirical power}. Default 0.1. This will change \code{fdr.output} for "sam" and \code{sig} for "anc". 
 #' @param p.adj Character. Method for p-value adjustment. See \code{p.adjust} for details. Default "fdr"
 #' @param R Integer. Number of times to run the tests. Default 5
 #' @param relative Logical. If TRUE (default) abundances are made relative for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea", and there is an offset of \code{log(LibrarySize)} for "neb", "poi", "qpo", "zpo" and "znb"
-#' @param k Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. \code{k=c(5,10,15)}: 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default NULL, which will spike 1 percent of the total amount of features in each tertile (a total of 3 percent)
+#' @param k Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. \code{k=c(5,10,15)}: 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default NULL, which will spike 2 percent of the total amount of features in each tertile (a total of 6 percent), but minimum c(5,5,5)
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.
 #' @param rng.seed Numeric. Seed for reproducibility. Default 123
 #' @param args List. A list with lists of arguments passed to the different methods. See details for more.
@@ -76,18 +76,22 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
   # Remove Features not present in any samples
   if(sum(rowSums(count_table) == 0) != 0) message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
   count_table <- count_table[rowSums(count_table) > 0,]
+  if(nrow(count_table) <= 15) message("Warning: Dataset contains very few features") 
   
   # Spike vs no features
   if(is.null(k)){
-    k <- rep(round(nrow(count_table)*0.01),3)
+    k <- rep(round(nrow(count_table)*0.02),3)
+    if(sum(k) < 15){
+      k <- c(5,5,5)
+    } 
   } 
   if(sum(k) == nrow(count_table)) stop("Set to spike all features. Change k argument")
   if(sum(k) > nrow(count_table)) stop("Set to spike more features than are present in the data. Change k argument")
-  if(sum(k) == 0) k <- c(1,1,1)                                  
   if(sum(k) < 15 & sum(k) >= 10 & R <= 10) message("Few features spiked. Increase 'k' or set 'R' to more than 10 to ensure proper estimations")
   if(sum(k) < 10 & sum(k) >= 5 & R <= 20) message("Few features spiked. Increase 'k' or set 'R' to more than 20 to ensure proper estimations")                                  
   if(sum(k) < 5 & R <= 50) message("Very few features spiked. Increase 'k' or set 'R' to more than 50 to ensure proper estimations")
-                                    
+  if(sum(k) > nrow(count_table)/2) message("Set to spike more than half of the dataset, which might give unreliable estimates, Change k argument")
+                                   
   # predictor
   if(verbose) if(any(is.na(predictor))) message("Warning: Predictor contains NAs!")
   if(is.numeric(predictor[1])){
@@ -187,6 +191,7 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
     # Run tests
     res.sub <- tryCatch(switch(i,
                                zzz = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,covars),zzz.DAargs)),
+                               mva = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,covars,relative, p.adj),mva.DAargs)),
                                wil = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired, relative,p.adj),wil.DAargs)),
                                ttt = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired, relative,p.adj),ttt.DAargs)),
                                ltt = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,relative,p.adj),ltt.DAargs)),

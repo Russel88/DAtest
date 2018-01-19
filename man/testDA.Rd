@@ -10,8 +10,8 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
   "ere", "ere2", "msf", "zig", "ds2", "ds2x", "lim", "lli", "lli2", "aov",
   "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe"), relative = TRUE,
   effectSize = 5, k = NULL, cores = (detectCores() - 1), rng.seed = 123,
-  args = list(), out.all = NULL, alpha = 0.1, core.check = TRUE,
-  verbose = TRUE)
+  p.adj = "fdr", args = list(), out.all = NULL, alpha = 0.1,
+  core.check = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
@@ -24,17 +24,19 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
 
 \item{R}{Integer. Number of times to run the tests. Default 10}
 
-\item{tests}{Character. Which tests to include. Default all (Except ANCOM, see below for details)}
+\item{tests}{Character. Which tests to include. Default all (Except ANCOM and mvabund, see below for details)}
 
 \item{relative}{Logical. If TRUE (default) abundances are made relative for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea", and there is an offset of \code{log(LibrarySize)} for "neb", "poi", "qpo", "zpo" and "znb"}
 
-\item{effectSize}{Integer. The effect size for the spike-ins. Default 5}
+\item{effectSize}{Numeric. The effect size for the spike-ins. Default 5}
 
-\item{k}{Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. \code{k=c(5,10,15)}: 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default NULL, which will spike 2 percent of the total amount of features in each tertile (a total of 6 percent)}
+\item{k}{Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. \code{k=c(5,10,15)}: 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default NULL, which will spike 2 percent of the total amount of features in each tertile (a total of 6 percent), but minimum c(5,5,5)}
 
 \item{cores}{Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.}
 
 \item{rng.seed}{Numeric. Seed for reproducibility. Default 123}
+
+\item{p.adj}{Character. Method for p-value adjustment. See \code{p.adjust} for details. Default "fdr"}
 
 \item{args}{List. A list with lists of arguments passed to the different methods. See details for more.}
 
@@ -99,11 +101,12 @@ Currently implemented methods:
  \item qua - Quade test
  \item anc - ANCOM (by default not included, as it is very slow)
  \item sam - SAMSeq
+ \item mva - mvabund (by default not included, as it is very slow)
  \item zzz - A user-defined method (See \code{?DA.zzz})
 }
 "neb" can be slow if there is a paired argument.
 
-"anc" is somewhat slow compared to the other methods.
+"anc" and "mva" are slow compared to the other methods.
 
 Additional arguments can be passed to the internal functions with the \code{args} argument. 
 It should be structured as a list with elements named by the tests: 
@@ -148,5 +151,6 @@ Below is an overview of which functions get the arguments that are passed to a s
  \item qua - Passed to \code{quade.test} and \code{DA.qua}
  \item anc - Passed to \code{ANCOM} and \code{DA.anc}
  \item sam - Passed to \code{SAMseq} and \code{DA.sam}
+ \item mva - Passed to \code{manyglm} and \code{summary.manyglm}
 }
 }
