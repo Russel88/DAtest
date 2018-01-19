@@ -76,7 +76,7 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
   # Remove Features not present in any samples
   if(sum(rowSums(count_table) == 0) != 0) message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
   count_table <- count_table[rowSums(count_table) > 0,]
-  if(nrow(count_table) <= 15) message("Warning: Dataset contains very few features") 
+  if(nrow(count_table) <= 15) warning("Dataset contains very few features") 
   
   # Spike vs no features
   if(is.null(k)){
@@ -93,7 +93,7 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
   if(sum(k) > nrow(count_table)/2) message("Set to spike more than half of the dataset, which might give unreliable estimates, Change k argument")
                                    
   # predictor
-  if(verbose) if(any(is.na(predictor))) message("Warning: Predictor contains NAs!")
+  if(verbose) if(any(is.na(predictor))) warning("Predictor contains NAs!")
   if(is.numeric(predictor[1])){
     num.pred <- TRUE
     if(verbose) message(paste("predictor is assumed to be a quantitative variable, ranging from",min(predictor, na.rm = TRUE),"to",max(predictor, na.rm = TRUE)))
@@ -117,7 +117,7 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
   # Covars
   if(!is.null(covars)){
     for(i in 1:length(covars)){
-      if(verbose) if(any(is.na(covars[[i]]))) message("Warning:",names(covars)[i],"contains NAs!")
+      if(verbose) if(any(is.na(covars[[i]]))) warning(names(covars)[i],"contains NAs!")
       if(is.numeric(covars[[i]][1])){
         if(verbose) message(paste(names(covars)[i],"is assumed to be a quantitative variable, ranging from",min(covars[[i]], na.rm = TRUE),"to",max(covars[[i]], na.rm = TRUE)))
       } else {

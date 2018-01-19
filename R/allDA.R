@@ -155,7 +155,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb"
   count_table <- count_table[rowSums(count_table) > 0,]
   
   # predictor
-  if(any(is.na(predictor))) message("Warning: Predictor contains NAs!")
+  if(any(is.na(predictor))) warning("Predictor contains NAs!")
   if(is.numeric(predictor)){
     message(paste("predictor is assumed to be a quantitative variable, ranging from",min(predictor, na.rm = TRUE),"to",max(predictor, na.rm = TRUE)))
     if(length(levels(as.factor(predictor))) == 2){
@@ -177,7 +177,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb"
   # Covars
   if(!is.null(covars)){
     for(i in 1:length(covars)){
-      if(any(is.na(covars[[i]]))) message("Warning:",names(covars)[i],"contains NAs!")
+      if(any(is.na(covars[[i]]))) warning(names(covars)[i],"contains NAs!")
       if(is.numeric(covars[[i]][1])){
         message(paste(names(covars)[i],"is assumed to be a quantitative variable, ranging from",min(covars[[i]], na.rm = TRUE),"to",max(covars[[i]], na.rm = TRUE)))
       } else {

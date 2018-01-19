@@ -10,7 +10,7 @@ runtimeDA(data, predictor, paired = NULL, covars = NULL,
   "ltt", "ltt2", "ere", "ere2", "msf", "zig", "lim", "lli", "lli2", "aov",
   "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe"), tests.slow = c("neb",
   "bay", "per", "zpo", "znb", "rai", "adx", "ds2", "ds2x", "poi", "erq",
-  "erq2"), R = 10, cores = (detectCores() - 1), print.res = TRUE, ...)
+  "erq2"), cores = (detectCores() - 1), ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
@@ -29,20 +29,18 @@ runtimeDA(data, predictor, paired = NULL, covars = NULL,
 
 \item{tests.slow}{Slow methods to include}
 
-\item{R}{Intended number of repeats for the \code{testDA} function}
-
 \item{cores}{Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.}
-
-\item{print.res}{If TRUE will print the results, alternatively will return a data.frame with the results.}
 
 \item{...}{Additional arguments for the \code{testDA} function}
 }
 \value{
-A data.frame if \code{print.res=FALSE}
+A data.frame with estimated runtimes for 1 run
 }
 \description{
 Estimate the runtime of \code{testDA} from running on a subset of the features. Intended for datasets with at least 5000 features.
 }
 \details{
+Outputs the estimated times for running each method 1 time. With cores=1 the runtime will be the sum of them all. With more cores the actual runtime will decrease asymptotically towards the slowest test
+
 Runtime of all methods are expected to scale linearly with the number of features, except "anc" and "bay" which are modelled with a 2. order polynomial.
 }

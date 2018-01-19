@@ -2,6 +2,8 @@
 #' 
 #' Estimate the runtime of \code{testDA} from running on a subset of the features. Intended for datasets with at least 5000 features.
 #' 
+#' Outputs the estimated times for running each method 1 time. With cores=1 the runtime will be the sum of them all. With more cores the actual runtime will decrease asymptotically towards the slowest test
+#' 
 #' Runtime of all methods are expected to scale linearly with the number of features, except "anc" and "bay" which are modelled with a 2. order polynomial.
 #' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. If the \code{predictor} is numeric it will be treated as such in the analyses
@@ -11,20 +13,18 @@
 #' @param subsamples.slow Vector with numbers of features to subsample to estimate runtime for slow methods
 #' @param tests Fast methods to include
 #' @param tests.slow Slow methods to include
-#' @param R Intended number of repeats for the \code{testDA} function
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.
-#' @param print.res If TRUE will print the results, alternatively will return a data.frame with the results.
 #' @param ... Additional arguments for the \code{testDA} function
-#' @return A data.frame if \code{print.res=FALSE}
+#' @return A data.frame with estimated runtimes for 1 run
 #' @importFrom parallel detectCores
 #' @export
 runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples = c(500,1000,1500,2000), subsamples.slow = c(100,150,200,250), 
                       tests =  c("sam", "qua", "fri", "vli", "qpo", "pea", "wil", "ttt", "ltt", "ltt2","ere", "ere2", "msf", "zig", "lim", "lli", "lli2", "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe"), 
-                      tests.slow = c("neb", "bay", "per", "zpo", "znb", "rai", "adx", "ds2", "ds2x", "poi", "erq", "erq2"), R = 10, cores = (detectCores()-1), print.res = TRUE, ...){
+                      tests.slow = c("neb", "bay", "per", "zpo", "znb", "rai", "adx", "ds2", "ds2x", "poi", "erq", "erq2"), cores = (detectCores()-1), ...){
   
   stopifnot(exists("data"),exists("predictor"))
 
-  if(cores > 10){
+  if(cores > 20){
     ANSWER <- readline(paste("You are about to run runtimeDA using",cores,"cores. Enter y to proceed "))
     if(ANSWER != "y") stop("Process aborted")
   }
@@ -121,9 +121,7 @@ runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples 
   
   # Collect data
   extra <- data.frame(Test = all.tests,
-                      Minutes = NA,
-                      Minutes. = NA)
-  colnames(extra)[3] <- paste0(colnames(extra[3]),"R=",R)
+                      Minutes = NA)
   
   for(i in all.tests){
     extra.sub <- runtimes[runtimes$Test == i,]
@@ -133,20 +131,12 @@ runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples 
       fit <- lm(Minutes ~ SubSamp, data = as.data.frame(extra.sub))
     }
     extra[extra$Test == i,2] <- round(predict(fit, newdata = data.frame(SubSamp = nrow(count_table))),2)
-    extra[extra$Test == i,3] <- round(predict(fit, newdata = data.frame(SubSamp = nrow(count_table)))*R,2)
   }
-  
   extra[extra[,2] < 0,"Minutes"] <- 0
-  extra[extra[,3] < 0,"Minutes"] <- 0
-  
+
   # Order extra
   extra <- extra[order(extra$Minutes, decreasing = TRUE),]
   
-  if(print.res){
-    # Print the results
-    message("Estimated run times.\nWith cores=1 the runtime will be the sum of them all.\nWith more cores the actual runtime will decrease asymptotically towards the slowest test")
-    print(extra, row.names = FALSE)
-  } else {
-    return(extra)
-  }
+  return(extra)
+
 }
