@@ -5,7 +5,7 @@
 \title{Mvabund}
 \usage{
 DA.mva(data, predictor, paired = NULL, covars = NULL, relative = TRUE,
-  p.adj = "fdr", coeff = 2, coeff.ref = 1, resamp = "perm.resid",
+  p.adj = "fdr", coeff = 2, coeff.ref = 1, resamp = "montecarlo",
   allResults = FALSE, ...)
 }
 \arguments{
@@ -25,12 +25,12 @@ DA.mva(data, predictor, paired = NULL, covars = NULL, relative = TRUE,
 
 \item{coeff.ref}{Integer. Reference level of the \code{predictor}. Will only affect the log2FC and ordering columns on the output. Default the intercept, = 1}
 
-\item{resamp}{Resample method for estimating p-values. Passed to \code{summary.manyglm}. Default "perm.resid"}
+\item{resamp}{Resample method for estimating p-values. Passed to \code{summary.manyglm}. Default "montecarlo"}
 
 \item{allResults}{If TRUE will return raw results from the \code{mvabund} function}
 
 \item{...}{Additional arguments for the \code{manyglm} and \code{summary.manyglm} functions}
 }
 \description{
-Implementation of mvabund manyglm for \code{DAtest}
+Implementation of mvabund manyglm for \code{DAtest}. With negative binomial family and an offset of log(LibrarySize) when relative = TRUE
 }
