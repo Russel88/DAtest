@@ -255,9 +255,10 @@ A subset of methods can be run by setting the `tests` argument.
 
 The methods run in parallel, and by default the number of cores used is
 one less than available. It has been tested to work on Windows, OS X and
-Linux Debian. It can be changed with the `cores` argument. `cores = 1`
-will turn off parallel computing. If the function is terminated before
-ending you might get the following warning, which can safely be ignored:
+GNU/Linux Debian. It can be changed with the `cores` argument.
+`cores = 1` will turn off parallel computing. If the function is
+terminated before ending you might get the following warning, which can
+safely be ignored:
 
     closing unused connection X (...)
 
@@ -275,12 +276,11 @@ are simply unfeasible for datasets with several thousands of features.
 The `runtimeDA` function can estimate the runtime of the different
 methods on your dataset: It runs on small subsets of the data and then
 extrapolates the runtime from these subsets. It will not be super
-precise if you have tenths of thousands of features or more, but it
+precise if you have hundredths of thousands of features or more, but it
 should give a decent estimate. The function prints how many minutes it
-will take to run each method one time and `R` times. If you only use 1
-core the actual runtime will be the sum of all the methods. With more
-cores the runtime will decrease and approach the runtime of the slowest
-method.
+will take to run each method one time. If you only use 1 core the actual
+runtime will be the sum of all the methods. With more cores the runtime
+will decrease and approach the runtime of the slowest method.
 
     runtimeDA(data, predictor)
 
@@ -322,11 +322,11 @@ level of the `predictor`, no matter what `out.all` is set to. Use the
 Linear models (lrm, llm, llm2) and GLMs (poi, neb, qpo, zpo, znb) use
 `anova`/`drop1` if `out.all=TRUE`
 
-Limma models run moderate F-test if `out.all=TRUE` and moderated t-test
-otherwise. You can set `allResults = TRUE` and use `topTable` on the
-output to get the desired results.
+Limma models run moderated F-tests if `out.all=TRUE` and moderated
+t-tests otherwise. You can set `allResults = TRUE` and use `topTable` on
+the output to get the desired results.
 
-MetagenomeSeq Zig is set to always output p.values from the 2. level of
+MetagenomeSeq ZIG is set to always output p.values from the 2. level of
 the `predictor`. For your final analysis use the `by` argument to change
 this, or set `allResults = TRUE` and then use `MRtable` on the output to
 get the desired results.
@@ -334,7 +334,8 @@ get the desired results.
 DESeq2 is running Log Ratio Test (LRT) if `out.all=TRUE` and Wald test
 otherwise. log2FoldChange is by default the fold change between the
 second and first level of the predictor for LRT, and fold change between
-second level and overall mean for Wald test, use the `coeff` argument to
+second level and either first level or overall mean for Wald test
+(depends on the DESeq package version), use the `coeff` argument to
 change this. For your final analysis you can set `allResults = TRUE` and
 use `results` on the output, e.g. for getting pairwise comparisons or
 p-values/log2FC for covariates.
@@ -383,6 +384,8 @@ analysed as provided, except for the tests that log-transform the data:
 
 ### If you have covariates
 
+With some methods additional covariates can be included in the model.
+These covariates will be included in the model as provided, unshuffled.
 The `covars` argument should be a named list with the covariables (in
 the same order as columns in `data`):
 
@@ -399,7 +402,10 @@ the same order as columns in `data`):
 **Check the output:**
 ---------------------
 
+    # Plot results
     plot(mytest)
+
+    # Print summary statistics (medians)
     summary(mytest)
 
     # Details from the run:
