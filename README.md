@@ -1027,7 +1027,7 @@ samples are columns, rownames indicate features), a `predictor`
 list with vectors). It is OK if your function doesn't use
 `paired`/`covars`, but they have to be there in the arguments. The
 output from the user-defined function should be a data.frame that at
-least includes: The names of the features ("Feature"), p-values
+least includes: The names of the features ("Feature"), nominal p-values
 ("pval"), and name of method ("Method").
 
 See example below on how to include a simple t-test on relative
@@ -1049,13 +1049,9 @@ abundances:
       # P-values for each feature
       pvals <- apply(rel, 1, tfun)
       
-      # Adjust p-values
-      pvals.adj <- p.adjust(pvals, method = "fdr")
-      
       # Collect and return data
       df <- data.frame(Feature = rownames(count_table),
-                       pval = pvals,
-                       pval.adj = pvals.adj)
+                       pval = pvals)
       df$Method <- "My own t-test"
       return(df)
       
