@@ -4,7 +4,7 @@
 \alias{plot.DA}
 \title{Plotting results from \code{testDA}}
 \usage{
-\method{plot}{DA}(x, sort = "Rank", p = FALSE, bins = 20, ...)
+plot.DA(x, sort = "Rank", p = FALSE, bins = 20, ...)
 }
 \arguments{
 \item{x}{The output from the \code{testDA} function}

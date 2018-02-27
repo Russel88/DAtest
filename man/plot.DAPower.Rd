@@ -4,7 +4,7 @@
 \alias{plot.DAPower}
 \title{Plotting results from \code{powerDA}}
 \usage{
-\method{plot}{DAPower}(x, ...)
+plot.DAPower(x, ...)
 }
 \arguments{
 \item{x}{The output from the \code{powerDA} function}

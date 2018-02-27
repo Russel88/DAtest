@@ -86,27 +86,23 @@ DA.ds2 <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL
         x <- DESeq(x,test="LRT",reduced = as.formula(paste("~ paired +",paste(names(covars), collapse="+"),sep = "")), ...)
       }
     }
-    res <- as.data.frame(results(x, name = paste("predictor",levels(predictor)[coeff],"vs",levels(predictor)[coeff.ref],sep = "_"))@listData)
+    res <- as.data.frame(results(x, contrast = c("predictor",levels(predictor)[coeff],levels(predictor)[coeff.ref]))@listData)
     res$ordering <- NA
     res[!is.na(res$log2FoldChange) & res$log2FoldChange > 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff],">",levels(as.factor(predictor))[coeff.ref])
     res[!is.na(res$log2FoldChange) & res$log2FoldChange < 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff.ref],">",levels(as.factor(predictor))[coeff])
   }
   if(!out.all){
     x <- DESeq(x,test="Wald", ...)
-    if(paste("predictor",levels(predictor)[coeff],"vs",levels(predictor)[coeff.ref],sep = "_") %in% resultsNames(x)){
-      res <- as.data.frame(results(x, name = paste("predictor",levels(predictor)[coeff],"vs",levels(predictor)[coeff.ref],sep = "_"))@listData)
+    if(paste0("predictor",levels(predictor)[coeff]) %in% resultsNames(x)){
+      res <- as.data.frame(results(x, name = paste0("predictor",levels(predictor)[coeff]))@listData)
+      res$ordering <- NA
+      res[!is.na(res$log2FoldChange) & res$log2FoldChange > 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff],">mean")
+      res[!is.na(res$log2FoldChange) & res$log2FoldChange < 0,"ordering"] <- paste0("mean>",levels(as.factor(predictor))[coeff])
+    } else {
+      res <- as.data.frame(results(x, contrast = c("predictor",levels(predictor)[coeff],levels(predictor)[coeff.ref]))@listData)
       res$ordering <- NA
       res[!is.na(res$log2FoldChange) & res$log2FoldChange > 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff],">",levels(as.factor(predictor))[coeff.ref])
       res[!is.na(res$log2FoldChange) & res$log2FoldChange < 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff.ref],">",levels(as.factor(predictor))[coeff])
-    } else {
-      if(paste0("predictor",levels(predictor)[coeff]) %in% resultsNames(x)){
-        res <- as.data.frame(results(x, name = paste0("predictor",levels(predictor)[coeff]))@listData)
-        res$ordering <- NA
-        res[!is.na(res$log2FoldChange) & res$log2FoldChange > 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff],">mean")
-        res[!is.na(res$log2FoldChange) & res$log2FoldChange < 0,"ordering"] <- paste0("mean>",levels(as.factor(predictor))[coeff])
-      } else {
-        stop("Cannot find coefficient in DESeq2 model coefficient. Check coeff and coeff.ref")
-      }
     }
   }
   
