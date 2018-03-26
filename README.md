@@ -77,58 +77,33 @@ higher effectSize or with a pruned dataset (see `preDA`)
 
     summary(test)
 
-    ##                      Method   AUC   FPR   FDR Spike.detect.rate Score
-    ##         MgSeq Feature (msf) 1.000 0.000 0.000               1.0 1.000
-    ##                 RAIDA (rai) 1.000 0.000 0.000               1.0 1.000
-    ##            LIMMA voom (vli) 1.000 0.035 0.031               1.0 0.969
-    ##               DESeq2 (ds2x) 1.000 0.035 0.062               1.0 0.938
-    ##  DESeq2 man. geoMeans (ds2) 1.000 0.035 0.062               1.0 0.938
-    ##     EdgeR exact - TMM (ere) 1.000 0.043 0.062               1.0 0.938
-    ##    EdgeR exact - RLE (ere2) 1.000 0.049 0.118               1.0 0.882
-    ##       EdgeR qll - TMM (erq) 1.000 0.049 0.118               1.0 0.882
-    ##                SAMseq (sam) 1.000    NA 0.118               1.0 0.882
-    ##      EdgeR qll - RLE (erq2) 1.000 0.054 0.167               1.0 0.833
-    ##             MgSeq ZIG (zig) 0.980 0.127 0.434               0.9 0.457
-    ##         ALDEx2 wilcox (adx) 1.000 0.097 0.545               1.0 0.455
-    ##         ALDEx2 t-test (adx) 1.000 0.124 0.583               1.0 0.417
-    ##            Log t-test (ltt) 1.000 0.670 0.901               1.0 0.099
-    ##             Log LIMMA (lli) 1.000 0.689 0.906               1.0 0.094
-    ##          Log t-test2 (ltt2) 1.000 0.968 0.924               1.0 0.076
-    ##     Quasi-Poisson GLM (qpo) 1.000 0.970 0.924               1.0 0.076
-    ##          Log LIMMA 2 (lli2) 1.000 0.989 0.925               1.0 0.075
-    ##          Negbinom GLM (neb) 1.000 0.989 0.925               1.0 0.075
-    ##           Poisson GLM (poi) 1.000 1.000 0.925               1.0 0.075
-    ##                t-test (ttt) 0.986 0.968 0.924               1.0 0.075
-    ##                Wilcox (wil) 0.884 0.957 0.924               1.0 0.067
-    ##           Permutation (per) 0.595 0.962 0.924               1.0 0.045
-    ##         ZI-NegBin GLM (znb) 0.500 0.000 0.000               0.0 0.000
-    ##        ZI-Poisson GLM (zpo) 0.500 0.000 0.000               0.0 0.000
-    ##  Score.5% Score.95%
-    ##     1.000     1.000
-    ##     0.577     1.000
-    ##     0.536     1.000
-    ##     0.556     1.000
-    ##     0.556     1.000
-    ##     0.536     1.000
-    ##     0.536     1.000
-    ##     0.536     1.000
-    ##     0.500     0.938
-    ##     0.500     1.000
-    ##     0.000     0.652
-    ##     0.214     0.556
-    ##     0.183     0.455
-    ##     0.081     0.109
-    ##     0.081     0.101
-    ##     0.075     0.079
-    ##     0.073     0.079
-    ##     0.075     0.079
-    ##     0.075     0.079
-    ##     0.075     0.076
-    ##     0.069     0.078
-    ##     0.065     0.071
-    ##     0.042     0.047
-    ##     0.000     0.000
-    ##     0.000     0.000
+    ##                      Method   AUC   FPR   FDR Spike.detect.rate Score  Score.5% Score.95%
+    ##         MgSeq Feature (msf) 1.000 0.000 0.000               1.0 1.000     1.000     1.000
+    ##                 RAIDA (rai) 1.000 0.000 0.000               1.0 1.000     0.577     1.000
+    ##            LIMMA voom (vli) 1.000 0.035 0.031               1.0 0.969     0.536     1.000
+    ##               DESeq2 (ds2x) 1.000 0.035 0.062               1.0 0.938     0.556     1.000
+    ##  DESeq2 man. geoMeans (ds2) 1.000 0.035 0.062               1.0 0.938     0.556     1.000
+    ##     EdgeR exact - TMM (ere) 1.000 0.043 0.062               1.0 0.938     0.536     1.000
+    ##    EdgeR exact - RLE (ere2) 1.000 0.049 0.118               1.0 0.882     0.536     1.000
+    ##       EdgeR qll - TMM (erq) 1.000 0.049 0.118               1.0 0.882     0.536     1.000
+    ##                SAMseq (sam) 1.000    NA 0.118               1.0 0.882     0.500     0.938
+    ##      EdgeR qll - RLE (erq2) 1.000 0.054 0.167               1.0 0.833     0.500     1.000
+    ##             MgSeq ZIG (zig) 0.980 0.127 0.434               0.9 0.457     0.000     0.652
+    ##         ALDEx2 wilcox (adx) 1.000 0.097 0.545               1.0 0.455     0.214     0.556
+    ##         ALDEx2 t-test (adx) 1.000 0.124 0.583               1.0 0.417     0.183     0.455
+    ##            Log t-test (ltt) 1.000 0.670 0.901               1.0 0.099     0.081     0.109
+    ##             Log LIMMA (lli) 1.000 0.689 0.906               1.0 0.094     0.081     0.101
+    ##          Log t-test2 (ltt2) 1.000 0.968 0.924               1.0 0.076     0.075     0.079
+    ##     Quasi-Poisson GLM (qpo) 1.000 0.970 0.924               1.0 0.076     0.073     0.079
+    ##          Log LIMMA 2 (lli2) 1.000 0.989 0.925               1.0 0.075     0.075     0.079
+    ##          Negbinom GLM (neb) 1.000 0.989 0.925               1.0 0.075     0.075     0.079
+    ##           Poisson GLM (poi) 1.000 1.000 0.925               1.0 0.075     0.075     0.076
+    ##                t-test (ttt) 0.986 0.968 0.924               1.0 0.075     0.069     0.078
+    ##                Wilcox (wil) 0.884 0.957 0.924               1.0 0.067     0.065     0.071
+    ##           Permutation (per) 0.595 0.962 0.924               1.0 0.045     0.042     0.047
+    ##         ZI-NegBin GLM (znb) 0.500 0.000 0.000               0.0 0.000     0.000     0.000
+    ##        ZI-Poisson GLM (zpo) 0.500 0.000 0.000               0.0 0.000     0.000     0.000
+    ##
 
     # MetagenomeSeq Featue model appears to be the best
     res1 <- DA.msf(df, predictor = vec)
@@ -152,14 +127,11 @@ higher effectSize or with a pruned dataset (see `preDA`)
 
 **Things to consider:**
 
-[Do you have a paired or blocked experimental
-design](#if-you-have-a-paired-or-blocked-experimental-design) [Do you
-have covariates?](#if-you-have-covariates) [Does your predictor have
-more than two
-classes?](#if-your-predictor-is-categorical-with-more-than-two-levels)
-[Is your data normalized externally or is it absolute
-abundances?](#if-data-is-normalized-externally-or-represent-absolute-abundances)
-[Do you have a Phyloseq object?](#if-you-have-a-phyloseq-object)
+-   [Do you have a paired or blocked experimental design](#if-you-have-a-paired-or-blocked-experimental-design) 
+-   [Do you have covariates?](#if-you-have-covariates) 
+-   [Does your predictor have more than two classes?](#if-your-predictor-is-categorical-with-more-than-two-levels)
+-   [Is your data normalized externally or is it absolute abundances?](#if-data-is-normalized-externally-or-represent-absolute-abundances)
+-   [Do you have a Phyloseq object?](#if-you-have-a-phyloseq-object)
 
 #### Main functions:
 
