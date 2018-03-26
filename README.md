@@ -21,21 +21,6 @@ in choosing a method for a specific dataset based on empirical testing.
     -   whether they can find the spike-ins
     -   whether the false discovery rate is controlled
 
-#### How to choose a method
-
-A Score is calculated for each method as follows: Area Under the ROC
-Curve \* Spike Detect Rate - False Discovery Rate
-
-The higher the Score, the better the method is estimated to be.
-
-With `summary` the 90% confidence limits of the Scores are computed. If
-these overlap, it means that the methods cannot be differentiated. The
-choice then relies on the trade-off between specificity (low FDR) and
-sensitivity (high Spike.detect.rate).
-
-If the best Score is zero, you should run the test again with either a
-higher effectSize or with a pruned dataset (see `preDA`)
-
 #### The intended workflow (details can be found below):
 
 -   Compare methods with `testDA` function (input is a data.frame or a
@@ -183,6 +168,22 @@ The following are suggested, but not needed:
 
 A short tutorial on a simulated dataset
 =======================================
+
+#### How to choose a method
+
+A Score is calculated for each method as follows: Area Under the ROC
+Curve \* Spike Detect Rate - False Discovery Rate
+
+The higher the Score, the better the method is estimated to be.
+
+With `summary` the 90% confidence limits of the Scores are computed. If
+these overlap, it means that the methods cannot be differentiated. The
+choice then relies on the trade-off between specificity (low FDR) and
+sensitivity (high Spike.detect.rate).
+
+If the best Score is zero, you should run the test again with either a
+higher effectSize or with a pruned dataset (see `preDA`)
+
 
     library(DAtest)
 
