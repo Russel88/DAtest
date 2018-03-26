@@ -49,7 +49,140 @@ higher effectSize or with a pruned dataset (see `preDA`)
     "test" is the name of the test
     -   Check out your final results.
 
-#### An ultra-short tutorial on a simulated dataset:
+
+Overview of this tutorial
+-------------------------
+-   [Installation of packages](#installation-of-packages)
+-   [A short tutorial on a simulated dataset](#a-short-tutorial-on-a-simulated-dataset)
+-   [How to compare methods](#how-to-compare-methods)
+    -   [The test](#run-the-test)
+    -   [Multi-class
+        predictors](#if-your-predictor-is-categorical-with-more-than-two-levels)
+    -   [Paired or blocked experimental
+        design](#if-you-have-a-paired-or-blocked-experimental-design)
+    -   [External normalization or absolute
+        abundances](#if-data-is-normalized-externally-or-represent-absolute-abundances)
+    -   [Covariates](#if-you-have-covariates)
+    -   [Phyloseq objects](#if-you-have-a-phyloseq-object)
+    -   [Power analysis](#power-analysis)
+-   [How to run real data](#how-to-run-real-data)
+    -   [Compare results from many
+        methods](#run-all-or-several-methods-and-check-which-features-are-found-by-several-methods)
+-   [Implemented methods](#implemented-methods)
+-   [Extra features](#extra-features)
+
+
+#### Main functions:
+
+-   `testDA`: It shuffles predictor, spike-in data, runs all methods and
+    compares their performance
+-   `powerDA`: It shuffles predictor, spike-in data at different effect
+    sizes, runs one method to evaluate its performance
+-   `allDA`: It runs all methods on the input data to compare their
+    final results (significance calling and effect sizes)
+-   `DA."test"`: Collection of functions that run one method (as defined
+    by "test") on the input data.
+
+#### Auxiliary functions:
+
+-   `runtimeDA`: It runs all methods on a subset of the input features
+    as a means to predict runtime on large datasets
+-   `vennDA`: With input from `allDA` it produces Venn diagrams of
+    significant features
+-   `featurePlot`: Plot association between one feature and the
+    predictor (and paired and covars if available)
+-   `preDA`: Pre-process data by grouping low abundant features in one
+    aggregate feature
+-   `groupSig`: Test if certain groups of features are overrepresented
+    among significant features with fisher's exact tests
+-   `DA.anova`: Post-hoc tests on all features for linear models (See
+    `anova`)
+-   `DA.drop1`: Post-hoc tests on all features for linear models (See
+    `drop1`)
+-   `DA.lsmeans`: Post-hoc tests on all features for linear models (See
+    `lsmeans::lsmeans`)
+-   `DA.TukeyHSD`: Post-hoc tests on all features for ANOVAs (See
+    `TukeyHSD`)
+
+### Citation
+
+Please cite the following publication if you use the DAtest package:
+
+[Russel *et al.* (2018) DAtest: A framework for choosing differential
+abundance or expression method.
+biorXiv](https://www.biorxiv.org/content/early/2018/01/02/241802)
+
+Remember also to cite the method you end up using for your final
+analysis (See [implemented methods](#implemented-methods) for links). If
+there is no associated publication (e.g. for a t-test) you can cite as
+follows: ."we used t-test as implemented in DAtest version x.x.x (Russel
+*et al.* 2018)"
+
+Installation of packages
+========================
+
+It is advised not to have any packages loaded when installing DAtest.
+Installation of DAtest and all dependencies has been tested to work on a
+clean R version 3.4.1 by installing in the following order:
+
+The DAtest package:
+
+    install.packages("devtools")
+    devtools::install_github("Russel88/DAtest@v2.7.5")
+
+    # Or the developmental version:
+    devtools::install_github("Russel88/DAtest")
+
+#### The following are needed for *full* functionality
+
+But the package will work without them
+
+    source("https://bioconductor.org/biocLite.R")
+    biocLite("DESeq2")
+    biocLite("limma")
+    biocLite("edgeR")
+    biocLite("metagenomeSeq")
+    biocLite("baySeq")
+    biocLite("ALDEx2")
+    biocLite("qvalue")
+
+    biocLite("impute") # For SamSeq
+    install.packages("samr") # SamSeq
+
+    install.packages("pscl") # Zero-inflated Poisson and zero-inflated Negative Binomial
+    install.packages("statmod") # For limma with blocking
+    install.packages("mvabund") # mvabund method
+
+-   RAIDA and ANCOM have to be installed from external sources:
+
+<!-- -->
+
+    # Dependencies (after the bioconductor packages are installed)
+    install.packages(c("shiny","exactRankTests","openxlsx","protoclust","DT","coin","stringr"))
+
+    # RAIDA:
+    install.packages("https://cals.arizona.edu/~anling/software/RAIDA_1.0.tar.gz",repos = NULL)
+
+    # ANCOM (by default not included, as it is very slow):
+    download.file("https://www.niehs.nih.gov/research/resources/software/biostatistics/ancom/ancom_software.zip",destfile = "ANCOM.zip")
+    unzip("ANCOM.zip",exdir=getwd())
+    install.packages("ancom.R_1.1-3.tar.gz", repos = NULL)
+
+**Note:** If installation fails for any of the bioconductor or external
+packages (RAIDA, ANCOM) do not despair. `DAtest` will work seamlessly,
+but will simply exclude methods that depends on these packages.
+
+The following are suggested, but not needed:
+
+    # For drawing Venn diagrams
+    install.packages("eulerr")
+
+    # For post-hoc testing (generalized) linear models
+    install.packages("lsmeans")
+
+
+A short tutorial on a simulated dataset
+=======================================
 
     library(DAtest)
 
@@ -133,134 +266,6 @@ higher effectSize or with a pruned dataset (see `preDA`)
 -   [Is your data normalized externally or is it absolute abundances?](#if-data-is-normalized-externally-or-represent-absolute-abundances)
 -   [Do you have a Phyloseq object?](#if-you-have-a-phyloseq-object)
 
-#### Main functions:
-
--   `testDA`: It shuffles predictor, spike-in data, runs all methods and
-    compares their performance
--   `powerDA`: It shuffles predictor, spike-in data at different effect
-    sizes, runs one method to evaluate its performance
--   `allDA`: It runs all methods on the input data to compare their
-    final results (significance calling and effect sizes)
--   `DA."test"`: Collection of functions that run one method (as defined
-    by "test") on the input data.
-
-#### Auxiliary functions:
-
--   `runtimeDA`: It runs all methods on a subset of the input features
-    as a means to predict runtime on large datasets
--   `vennDA`: With input from `allDA` it produces Venn diagrams of
-    significant features
--   `featurePlot`: Plot association between one feature and the
-    predictor (and paired and covars if available)
--   `preDA`: Pre-process data by grouping low abundant features in one
-    aggregate feature
--   `groupSig`: Test if certain groups of features are overrepresented
-    among significant features with fisher's exact tests
--   `DA.anova`: Post-hoc tests on all features for linear models (See
-    `anova`)
--   `DA.drop1`: Post-hoc tests on all features for linear models (See
-    `drop1`)
--   `DA.lsmeans`: Post-hoc tests on all features for linear models (See
-    `lsmeans::lsmeans`)
--   `DA.TukeyHSD`: Post-hoc tests on all features for ANOVAs (See
-    `TukeyHSD`)
-
-### Citation
-
-Please cite the following publication if you use the DAtest package:
-
-[Russel *et al.* (2018) DAtest: A framework for choosing differential
-abundance or expression method.
-biorXiv](https://www.biorxiv.org/content/early/2018/01/02/241802)
-
-Remember also to cite the method you end up using for your final
-analysis (See [implemented methods](#implemented-methods) for links). If
-there is no associated publication (e.g. for a t-test) you can cite as
-follows: ."we used t-test as implemented in DAtest version x.x.x (Russel
-*et al.* 2018)"
-
-Overview of this tutorial
--------------------------
-
--   [Installation of packages](#installation-of-packages)
--   [How to compare methods](#how-to-compare-methods)
-    -   [The test](#run-the-test)
-    -   [Multi-class
-        predictors](#if-your-predictor-is-categorical-with-more-than-two-levels)
-    -   [Paired or blocked experimental
-        design](#if-you-have-a-paired-or-blocked-experimental-design)
-    -   [External normalization or absolute
-        abundances](#if-data-is-normalized-externally-or-represent-absolute-abundances)
-    -   [Covariates](#if-you-have-covariates)
-    -   [Phyloseq objects](#if-you-have-a-phyloseq-object)
-    -   [Power analysis](#power-analysis)
--   [How to run real data](#how-to-run-real-data)
-    -   [Compare results from many
-        methods](#run-all-or-several-methods-and-check-which-features-are-found-by-several-methods)
--   [Implemented methods](#implemented-methods)
--   [Extra features](#extra-features)
-
-Installation of packages
-========================
-
-It is advised not to have any packages loaded when installing DAtest.
-Installation of DAtest and all dependencies has been tested to work on a
-clean R version 3.4.1 by installing in the following order:
-
-The DAtest package:
-
-    install.packages("devtools")
-    devtools::install_github("Russel88/DAtest@v2.7.5")
-
-    # Or the developmental version:
-    devtools::install_github("Russel88/DAtest")
-
-#### The following are needed for *full* functionality
-
-But the package will work without them
-
-    source("https://bioconductor.org/biocLite.R")
-    biocLite("DESeq2")
-    biocLite("limma")
-    biocLite("edgeR")
-    biocLite("metagenomeSeq")
-    biocLite("baySeq")
-    biocLite("ALDEx2")
-    biocLite("qvalue")
-
-    biocLite("impute") # For SamSeq
-    install.packages("samr") # SamSeq
-
-    install.packages("pscl") # Zero-inflated Poisson and zero-inflated Negative Binomial
-    install.packages("statmod") # For limma with blocking
-    install.packages("mvabund") # mvabund method
-
--   RAIDA and ANCOM have to be installed from external sources:
-
-<!-- -->
-
-    # Dependencies (after the bioconductor packages are installed)
-    install.packages(c("shiny","exactRankTests","openxlsx","protoclust","DT","coin","stringr"))
-
-    # RAIDA:
-    install.packages("https://cals.arizona.edu/~anling/software/RAIDA_1.0.tar.gz",repos = NULL)
-
-    # ANCOM (by default not included, as it is very slow):
-    download.file("https://www.niehs.nih.gov/research/resources/software/biostatistics/ancom/ancom_software.zip",destfile = "ANCOM.zip")
-    unzip("ANCOM.zip",exdir=getwd())
-    install.packages("ancom.R_1.1-3.tar.gz", repos = NULL)
-
-**Note:** If installation fails for any of the bioconductor or external
-packages (RAIDA, ANCOM) do not despair. `DAtest` will work seamlessly,
-but will simply exclude methods that depends on these packages.
-
-The following are suggested, but not needed:
-
-    # For drawing Venn diagrams
-    install.packages("eulerr")
-
-    # For post-hoc testing (generalized) linear models
-    install.packages("lsmeans")
 
 How to compare methods
 ======================
@@ -280,7 +285,7 @@ p-values are expected to be below 0.05. We therefore want an FPR at 0.05
 or lower.
 
 FDR indicates the proportion of significant features (after multiple
-correction) that we're not spiked and therefore shouldn't be
+correction) that were not spiked and therefore shouldn't be
 significant. This should be as low as possible.
 
 AUC is estimated by ranking all features by their respective p-value,
