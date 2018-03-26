@@ -190,18 +190,22 @@ higher effectSize or with a pruned dataset (see `preDA`)
     ## DAtest version 2.7.8
 
 First we create a random dataset with 200 features and 20 samples
+
     set.seed(1)
     df <- matrix(rpois(4000, lambda = 100),200,20)
 
 We create a vector saying that the 10 first samples are "Control" the 10 next are "Treatment"
+
     vec <- c(rep("Control",10),rep("Treatment",10))
 
 Spike-in: Multiply all "Treatment" samples by 2 for first 10 features
+
     df[1:10,11:20] <- df[1:10,11:20] * 2
 
 **From this step, you would input your own data for a real analysis**
 
 Let's compare the methods
+
     test <- testDA(df, predictor = vec)
 
     ## Seed is set to 123
@@ -241,6 +245,7 @@ Let's compare the methods
     ##
 
 MetagenomeSeq Featue model appears to be the best
+
     res1 <- DA.msf(df, predictor = vec)
 
     ## Default value being used.
@@ -249,16 +254,17 @@ MetagenomeSeq Featue model appears to be the best
 
     ##  [1] "10" "9"  "3"  "4"  "7"  "8"  "1"  "6"  "2"  "5"
 
-And indeed, it finds the 10 spiked features ("1" to "10") and nothing else!
+And indeed, MgSeq Featuremodel finds the 10 spiked features ("1" to "10") and nothing else!
 
 Wilcoxon test was predicted to find all spike-ins (Spike.detect.rate = 1.0), but have a too high FDR:
+
     res2 <- DA.wil(df, predictor = vec)
     res2[res2$pval.adj < 0.05,"Feature"]
 
     ##  [1] "1"   "2"   "3"   "4"   "5"   "6"   "7"   "8"   "9"   "10"  "16" 
     ## [12] "95"  "121" "122" "125" "141" "148" "159"
 
-It finds feature "1" to "10", but also 8 other non-spiked features!
+Wilcoxon finds feature "1" to "10", but also 8 other non-spiked features!
 
 **Things to consider:**
 
