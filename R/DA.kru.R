@@ -19,6 +19,8 @@ DA.kru <- function(data, predictor, relative = TRUE, p.adj = "fdr", allResults =
   } else {
     count_table <- data
   }
+  
+  predictor <- as.factor(predictor)
 
   # Define function
   kru <- function(x){
@@ -34,16 +36,6 @@ DA.kru <- function(data, predictor, relative = TRUE, p.adj = "fdr", allResults =
   
   # Run tests
   if(allResults){
-    ## Define function for allResults 
-    if(is.null(paired)){
-      kru <- function(x){
-        tryCatch(kruskal.test(x ~ predictor, ...), error = function(e){NA}) 
-      }
-    } else {
-      kru <- function(x){
-        tryCatch(kruskal.test(x ~ predictor, paired = TRUE, ...), error = function(e){NA}) 
-      }
-    }
     return(apply(count.rel,1,kru))
   } else {
     res <- data.frame(pval = apply(count.rel,1,kru))

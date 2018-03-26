@@ -4,12 +4,12 @@
 \alias{plot.DA}
 \title{Plotting results from \code{testDA}}
 \usage{
-\method{plot}{DA}(x, sort = "Rank", p = FALSE, bins = 20, ...)
+\method{plot}{DA}(x, sort = "Score", p = FALSE, bins = 20, ...)
 }
 \arguments{
 \item{x}{The output from the \code{testDA} function}
 
-\item{sort}{Sort methods by \code{c("AUC","FPR","Spike.detect.rate","Rank")}}
+\item{sort}{Sort methods by \code{c("AUC","FDR","Spike.detect.rate","Rank")}}
 
 \item{p}{Logical. Should the p-value distribution be plotted (only p-values from non-spiked features)}
 

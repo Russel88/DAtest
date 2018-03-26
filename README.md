@@ -14,23 +14,152 @@ in choosing a method for a specific dataset based on empirical testing.
 #### The method goes as follows:
 
 -   Shuffle predictor variable (E.g. case vs. control)
--   Spike in data for some randomly chosen features (OTU/gene/protein),
-    such that they are associated with the shuffled predictor
+-   Spike in data for some randomly chosen features
+    (OTU/gene/protein/metabolite), such that they are associated with
+    the shuffled predictor
 -   Apply methods, and check:
     -   whether they can find the spike-ins
-    -   whether the false positive rate is controlled
+    -   whether the false discovery rate is controlled
+
+#### How to choose a method
+
+A Score is calculated for each method as follows: Area Under the ROC
+Curve \* Spike Detect Rate - False Discovery Rate
+
+The higher the Score, the better the method is estimated to be.
+
+With `summary` the 90% confidence limits of the Scores are computed. If
+these overlap, it means that the methods cannot be differentiated. The
+choice then relies on the trade-off between specificity (low FDR) and
+sensitivity (high Spike.detect.rate).
+
+If the best Score is zero, you should run the test again with either a
+higher effectSize or with a pruned dataset (see `preDA`)
 
 #### The intended workflow (details can be found below):
 
--   Compare methods with `testDA` function
-    -   Check the results with `plot` or `summary`
-    -   Choose method that has high AUC, FPR not higher than ~0.05, and
-        a Spike.detect.rate above 0
+-   Compare methods with `testDA` function (input is a data.frame or a
+    phyloseq object)
+    -   Check the results with `summary` (and `plot`)
+    -   Choose method that has high Score, as long as the
+        Spike.detect.rate is above 0
 -   Explore the sensitivity and false discovery rate of the chosen
     method with `powerDA`
 -   Run data with the chosen test with `DA."test"` function, where
     "test" is the name of the test
     -   Check out your final results.
+
+#### An ultra-short tutorial on a simulated dataset:
+
+    library(DAtest)
+
+    ## DAtest version 2.7.8
+
+    # First we create a random dataset with 200 features and 20 samples
+    set.seed(1)
+    df <- matrix(rpois(4000, lambda = 100),200,20)
+
+    # We create a vector saying that the 10 first samples are "Control" the 10 next are "Treatment"
+    vec <- c(rep("Control",10),rep("Treatment",10))
+
+    # Spike-in: Multiply all "Treatment" samples by 2 for first 10 features
+    df[1:10,11:20] <- df[1:10,11:20] * 2
+
+    ################# From this step, you would input your own data for a real analysis ###################
+    # Let's compare the methods
+    test <- testDA(df, predictor = vec)
+
+    ## Seed is set to 123
+
+    ## predictor is assumed to be a categorical variable with 2 levels: Control, Treatment
+
+    ## bay was excluded due to failure
+
+    summary(test)
+
+    ##                      Method   AUC   FPR   FDR Spike.detect.rate Score
+    ##         MgSeq Feature (msf) 1.000 0.000 0.000               1.0 1.000
+    ##                 RAIDA (rai) 1.000 0.000 0.000               1.0 1.000
+    ##            LIMMA voom (vli) 1.000 0.035 0.031               1.0 0.969
+    ##               DESeq2 (ds2x) 1.000 0.035 0.062               1.0 0.938
+    ##  DESeq2 man. geoMeans (ds2) 1.000 0.035 0.062               1.0 0.938
+    ##     EdgeR exact - TMM (ere) 1.000 0.043 0.062               1.0 0.938
+    ##    EdgeR exact - RLE (ere2) 1.000 0.049 0.118               1.0 0.882
+    ##       EdgeR qll - TMM (erq) 1.000 0.049 0.118               1.0 0.882
+    ##                SAMseq (sam) 1.000    NA 0.118               1.0 0.882
+    ##      EdgeR qll - RLE (erq2) 1.000 0.054 0.167               1.0 0.833
+    ##             MgSeq ZIG (zig) 0.980 0.127 0.434               0.9 0.457
+    ##         ALDEx2 wilcox (adx) 1.000 0.097 0.545               1.0 0.455
+    ##         ALDEx2 t-test (adx) 1.000 0.124 0.583               1.0 0.417
+    ##            Log t-test (ltt) 1.000 0.670 0.901               1.0 0.099
+    ##             Log LIMMA (lli) 1.000 0.689 0.906               1.0 0.094
+    ##          Log t-test2 (ltt2) 1.000 0.968 0.924               1.0 0.076
+    ##     Quasi-Poisson GLM (qpo) 1.000 0.970 0.924               1.0 0.076
+    ##          Log LIMMA 2 (lli2) 1.000 0.989 0.925               1.0 0.075
+    ##          Negbinom GLM (neb) 1.000 0.989 0.925               1.0 0.075
+    ##           Poisson GLM (poi) 1.000 1.000 0.925               1.0 0.075
+    ##                t-test (ttt) 0.986 0.968 0.924               1.0 0.075
+    ##                Wilcox (wil) 0.884 0.957 0.924               1.0 0.067
+    ##           Permutation (per) 0.595 0.962 0.924               1.0 0.045
+    ##         ZI-NegBin GLM (znb) 0.500 0.000 0.000               0.0 0.000
+    ##        ZI-Poisson GLM (zpo) 0.500 0.000 0.000               0.0 0.000
+    ##  Score.5% Score.95%
+    ##     1.000     1.000
+    ##     0.577     1.000
+    ##     0.536     1.000
+    ##     0.556     1.000
+    ##     0.556     1.000
+    ##     0.536     1.000
+    ##     0.536     1.000
+    ##     0.536     1.000
+    ##     0.500     0.938
+    ##     0.500     1.000
+    ##     0.000     0.652
+    ##     0.214     0.556
+    ##     0.183     0.455
+    ##     0.081     0.109
+    ##     0.081     0.101
+    ##     0.075     0.079
+    ##     0.073     0.079
+    ##     0.075     0.079
+    ##     0.075     0.079
+    ##     0.075     0.076
+    ##     0.069     0.078
+    ##     0.065     0.071
+    ##     0.042     0.047
+    ##     0.000     0.000
+    ##     0.000     0.000
+
+    # MetagenomeSeq Featue model appears to be the best
+    res1 <- DA.msf(df, predictor = vec)
+
+    ## Default value being used.
+
+    res1[res1$pval.adj < 0.05,"Feature"]
+
+    ##  [1] "10" "9"  "3"  "4"  "7"  "8"  "1"  "6"  "2"  "5"
+
+    # And indeed, it finds the 10 spiked features ("1" to "10") and nothing else
+
+    # Wilcoxon test was predicted to find all spike-ins (Spike.detect.rate = 1.0), but have a too high FDR:
+    res2 <- DA.wil(df, predictor = vec)
+    res2[res2$pval.adj < 0.05,"Feature"]
+
+    ##  [1] "1"   "2"   "3"   "4"   "5"   "6"   "7"   "8"   "9"   "10"  "16" 
+    ## [12] "95"  "121" "122" "125" "141" "148" "159"
+
+    # It finds feature "1" to "10", but also 8 other non-spiked features!
+
+**Things to consider:**
+
+[Do you have a paired or blocked experimental
+design](#if-you-have-a-paired-or-blocked-experimental-design) [Do you
+have covariates?](#if-you-have-covariates) [Does your predictor have
+more than two
+classes?](#if-your-predictor-is-categorical-with-more-than-two-levels)
+[Is your data normalized externally or is it absolute
+abundances?](#if-data-is-normalized-externally-or-represent-absolute-abundances)
+[Do you have a Phyloseq object?](#if-you-have-a-phyloseq-object)
 
 #### Main functions:
 
@@ -164,19 +293,23 @@ The following are suggested, but not needed:
 How to compare methods
 ======================
 
-Methods are compared with "False Positve Rate" (FPR), "Area Under the
-(Receiver Operator) Curve" (AUC), and "Spike Detection Rate"
-(Spike.detect.rate).
+Methods are compared with "False Discovery Rate" (FDR), "Area Under the
+(Receiver Operator) Curve" (AUC), "Spike Detection Rate"
+(Spike.detect.rate), and "False Positive Rate" (FPR).
 
 By shuffling the predictor variable and spiking a subset of the
 features, we know a priori which features should be siginificant (the
 spiked features) and which features shouldn't (the non-spiked features).
 
 FPR indicates the proportion of non-spiked features that were found to
-be significant (raw p-value below 0.05). With randomly generated data
-the p-value distribution should be uniform (flat) and 5% of the raw
+be significant (nominal p-value below 0.05). With randomly generated
+data the p-value distribution should be uniform (flat) and 5% of the raw
 p-values are expected to be below 0.05. We therefore want an FPR at 0.05
 or lower.
+
+FDR indicates the proportion of significant features (after multiple
+correction) that we're not spiked and therefore shouldn't be
+significant. This should be as low as possible.
 
 AUC is estimated by ranking all features by their respective p-value,
 and finding the area under the ROC curve. For a good method p-values
@@ -192,20 +325,6 @@ Spike.detect.rate is the proportion of spiked features that are
 significant after multiple correction of the p-values. It is therefore
 the proportion of features you would expect to detect in a regular
 analysis. The higher Spike.detect.rate, the better.
-
--   The intended workflow for choosing a method is:
-    -   Omit methods with FPR higher than 0.05
-    -   Of remaining methods, choose the one with highest AUC if it has
-        a Spike.detect.rate above 0
-    -   If the method with highest AUC (and FPR &lt; 0.05) has a
-        Spike.detect.rate of zero, rerun analysis with pruned dataset
-        (see `preDA` below) or increase `effectSize`
-
-**Assumption of the test:** the test assumes that only few features are
-truly differentially abundant. Therefore, if many features are different
-between the samples, and this difference can truly be explained by the
-`predictor`, AUCs of the methods will be less than they actually are,
-but FPRs can still be trusted.
 
 ### Pre-process data:
 
@@ -245,9 +364,9 @@ wilcoxon-test, and others dedicated for two-class predictors. Write
 variable. The `testDA` function will produce a message telling you how
 the `predictor` is read - Make sure this fits your expectations!
 
-`R` denotes how many times the spike-in and FPR/AUC calculation should
-be replicated. It is advised to use at least 10, but it can be set to 1
-for a fast test of the function.
+`R` denotes how many times the spike-in and FPR/FDR/AUC calculation
+should be replicated. It is advised to use at least 10, but it can be
+set to 1 for a fast test of the function.
 
 A subset of methods can be run by setting the `tests` argument.
 
@@ -414,30 +533,12 @@ the same order as columns in `data`):
     # Average run times of each method:
     mytest$run.times
 
-**Note:**
-
-As SAMseq does not output p-values, FPR for this method is the final
-false discovery rate (false positives / total positives). FPR might
-therefore vary quite a lot. If SAMSeq is one of the methods with highest
-AUC, you can run `testDA` again but with a higher `fdr.output` argument
-for "sam" (e.g.
-`testDA(...,args = list(sam = list(fdr.output = 0.25))))` to get a
-better estimate. If `fdr.output=0.25` we should expect FPR for "sam"
-from `testDA` to be 0.25 or lower.
-
-P-values for baySeq are defined as 1 - posterior likelihoods.
-
 ### Power analysis
 
 After a method has been chosen, you can run a power analysis. This can
 also be run to distinguish between methods appearing to be equally good
-in `testDA`. `powerDA` spikes the data with different effects sizes and
-along with AUC and FPR it estimates with Empircal Power (aka
-Spike.detect.rate aka sensitivity) and the False Discovery Rate (FDR).
-The Empirical Power gives you an estimate of the proportion of true
-effects at a given effect size you are likely to discover (after p-value
-adjustment). The FDR tells you what proportion of the detected features
-are likely false positives (after p-value adjustment).
+in `testDA`. It is similar `testDA` besides from spiking with different
+effects sizes.
 
 Only one test can be run at a time, here MetagenomeSeq Feature model is
 run (see details in `testDA` for test abbreviations):
@@ -445,13 +546,6 @@ run (see details in `testDA` for test abbreviations):
     po.msf <- powerDA(data, predictor, test = "msf")
     plot(po.msf)
     summary(po.msf)
-
-**Assumption of the test:** as with `testDA`, `powerDA` also assumes
-that only few features are truly differentially abundant. Therefore, if
-many features are different between the samples, and this difference can
-truly be explained by the `predictor`, AUC and Power of the methods will
-appear worse than they actually are. In contrast, FPR and FDR can still
-be trusted.
 
 How to run real data
 ====================

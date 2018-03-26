@@ -486,21 +486,31 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
       }
     })
     
+    # Confusion matrix adjusted
+    totalPos.adj <- sapply(res.sub, function(x) nrow(x[x$pval.adj <= alpha,]))
+    truePos.adj <- sapply(res.sub, function(x) sum(x[x$pval.adj <= alpha,"Feature"] %in% spikeds[[r]][[2]]))
+    falsePos.adj <- totalPos.adj - truePos.adj
+    
+    fdrs <- sapply(1:length(res.sub), function(x) {
+      if(totalPos.adj[x] != 0){
+        falsePos.adj[x] / totalPos.adj[x]
+      } else {0}})
+    
     # Combine and return
     df.combined <- data.frame(Method = sapply(res.sub, function(x) x$Method[1]),
                               AUC = aucs,
                               FPR = fprs,
+                              FDR = fdrs,
                               Spike.detect.rate = sdrs,
                               Run = r)
     rownames(df.combined) <- NULL
 
-    # SAMseq FDR
+    # SAMseq and ANCOM FPRs not possible
     if("sam" %in% newnames){
-      if(nrow(res.sub[["sam"]][res.sub[["sam"]]$pval.adj <= alpha,]) == 0){
-        df.combined[df.combined$Method == "SAMseq (sam)","FPR"] <- 0
-      } else {
-        df.combined[df.combined$Method == "SAMseq (sam)","FPR"] <- nrow(res.sub[["sam"]][res.sub[["sam"]]$pval.adj <= alpha & res.sub[["sam"]]$Spiked == "No",])/nrow(res.sub[["sam"]][res.sub[["sam"]]$pval.adj <= alpha,])
-      }
+      df.combined[df.combined$Method == "SAMseq (sam)","FPR"] <- NA
+    }
+    if("anc" %in% newnames){
+      df.combined[df.combined$Method == "ANCOM (anc)","FPR"] <- NA
     }
     
     return(list(df.combined,res.sub))
@@ -559,17 +569,6 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   
   out <- list(table = output.results, results = output.all.results, details = output.details, run.times = run.times.all)
   class(out) <- "DA"
-  
-  # Create warning message
-  output.summary.auc <- aggregate(AUC ~ Method, data = output.results, FUN = median)
-  output.summary.fpr <- aggregate(FPR ~ Method, data = output.results, FUN = median)
-  output.summary.sdr <- aggregate(Spike.detect.rate ~ Method, data = output.results, FUN = median)
-  df <- merge(merge(output.summary.auc,output.summary.fpr, by = "Method"),output.summary.sdr, by = "Method")
-  df <- df[df$FPR <= 0.05,]
-  if(nrow(df) > 0){
-    df <- df[order(df$AUC, decreasing = TRUE),]
-    if(df[1,"Spike.detect.rate"] == 0 & verbose) message("Spike detect rate is zero for the top method! You might want to re-run the analysis with a pruned dataset (see preDA) or a higher effectSize")
-  }
   
   return(out)
 }
