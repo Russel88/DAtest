@@ -44,7 +44,7 @@ featurePlot <- function(data, predictor, paired = NULL, covars = NULL, feature =
   if(!feature %in% rownames(count_table)) stop("feature not found in data")
   
   # Relative and logscale
-  if(relative) count_table <- apply(count_table, 2, function(x) x/sum(x))
+  if(relative) count_table <- apply(count_table, 2, function(x) x/sum(x)) else count_table <- unclass(count_table)
   if(logScale) count_table <- log10(count_table + delta)
   
   # Dataframe
