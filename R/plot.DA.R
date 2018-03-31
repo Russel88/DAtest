@@ -1,7 +1,7 @@
 #' Plotting results from \code{testDA}
 #'
 #' @param x The output from the \code{testDA} function
-#' @param sort Sort methods by \code{c("AUC","FDR","Spike.detect.rate","Rank")}
+#' @param sort Sort methods by median \code{c("AUC","FDR","Spike.detect.rate","Score")}
 #' @param p Logical. Should the p-value distribution be plotted (only p-values from non-spiked features)
 #' @param bins Integer. Number of bins in p-value histograms
 #' @param ... Additional arguments for \code{ggdraw}
@@ -40,7 +40,7 @@ plot.DA <- function(x, sort = "Score", p = FALSE, bins = 20, ...){
     df <- merge(merge(auc.median,fdr.median, by = "Method"),sdr.median, by = "Method")
     
     # Score
-    df$Score <- round(df$AUC * df$Spike.detect.rate - df$FDR,3)
+    df$Score <- round((df$AUC-0.5) * df$Spike.detect.rate - df$FDR,3)
     
     # Sort the reults
     if(sort == "AUC") {

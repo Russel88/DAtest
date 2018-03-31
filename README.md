@@ -26,19 +26,19 @@ in choosing a method for a specific dataset based on empirical testing.
 -   Compare methods with `testDA` function (input is a data.frame or a
     phyloseq object)
     -   Check the results with `summary` (and `plot`)
-    -   Choose method that has high Score, as long as the
-        Spike.detect.rate is above 0
+    -   Choose method that has high Score, as long as it is above 0
 -   Explore the sensitivity and false discovery rate of the chosen
     method with `powerDA`
 -   Run data with the chosen test with `DA."test"` function, where
     "test" is the name of the test
     -   Check out your final results.
 
-
 Overview of this tutorial
 -------------------------
+
 -   [Installation of packages](#installation-of-packages)
--   [A short tutorial on a simulated dataset](#a-short-tutorial-on-a-simulated-dataset)
+-   [A short tutorial on a simulated
+    dataset](#a-short-tutorial-on-a-simulated-dataset)
 -   [How to compare methods](#how-to-compare-methods)
     -   [The test](#run-the-test)
     -   [Multi-class
@@ -55,7 +55,6 @@ Overview of this tutorial
         methods](#run-all-or-several-methods-and-check-which-features-are-found-by-several-methods)
 -   [Implemented methods](#implemented-methods)
 -   [Extra features](#extra-features)
-
 
 #### Main functions:
 
@@ -165,14 +164,13 @@ The following are suggested, but not needed:
     # For post-hoc testing (generalized) linear models
     install.packages("lsmeans")
 
-
-A short tutorial on a simulated dataset
-=======================================
+A short tutorial on a simulated dataset:
+========================================
 
 #### How to choose a method
 
-A Score is calculated for each method as follows: Area Under the ROC
-Curve \* Spike Detect Rate - False Discovery Rate
+A Score is calculated for each method as follows: (Area Under the ROC
+Curve - 0.5) \* Spike Detect Rate - False Discovery Rate
 
 The higher the Score, the better the method is estimated to be.
 
@@ -181,71 +179,68 @@ these overlap, it means that the methods cannot be differentiated. The
 choice then relies on the trade-off between specificity (low FDR) and
 sensitivity (high Spike.detect.rate).
 
-If the best Score is zero, you should run the test again with either a
-higher effectSize or with a pruned dataset (see `preDA`)
-
+If the best Score is zero or below, you should run the test again with
+either a higher effectSize or with a pruned dataset (see `preDA`)
 
     library(DAtest)
 
-    ## DAtest version 2.7.8
+    ## DAtest version 2.7.9
 
-First we create a random dataset with 200 features and 20 samples
-
+    # First we create a random dataset with 200 features and 20 samples
     set.seed(1)
     df <- matrix(rpois(4000, lambda = 100),200,20)
 
-We create a vector saying that the 10 first samples are "Control" the 10 next are "Treatment"
-
+    # We create a vector saying that the 10 first samples are "Control" the 10 next are "Treatment"
     vec <- c(rep("Control",10),rep("Treatment",10))
 
-Spike-in: Multiply all "Treatment" samples by 2 for first 10 features
+    # Spike-in: Multiply all "Treatment" samples by 2 for first 10 features
+    df[1:10,11:20] <- round(df[1:10,11:20] * 2)
 
-    df[1:10,11:20] <- df[1:10,11:20] * 2
-
-**From this step, you would input your own data for a real analysis**
-
-Let's compare the methods
-
+    ################# From this step, you would input your own data for a real analysis ###################
+    # Let's compare the methods
     test <- testDA(df, predictor = vec)
 
     ## Seed is set to 123
 
     ## predictor is assumed to be a categorical variable with 2 levels: Control, Treatment
 
+    ##                                                                   
+      |=================================================================| 100%
+
     ## bay was excluded due to failure
 
     summary(test)
 
-    ##                      Method   AUC   FPR   FDR Spike.detect.rate Score  Score.5% Score.95%
-    ##         MgSeq Feature (msf) 1.000 0.000 0.000               1.0 1.000     1.000     1.000
-    ##                 RAIDA (rai) 1.000 0.000 0.000               1.0 1.000     0.577     1.000
-    ##            LIMMA voom (vli) 1.000 0.035 0.031               1.0 0.969     0.536     1.000
-    ##               DESeq2 (ds2x) 1.000 0.035 0.062               1.0 0.938     0.556     1.000
-    ##  DESeq2 man. geoMeans (ds2) 1.000 0.035 0.062               1.0 0.938     0.556     1.000
-    ##     EdgeR exact - TMM (ere) 1.000 0.043 0.062               1.0 0.938     0.536     1.000
-    ##    EdgeR exact - RLE (ere2) 1.000 0.049 0.118               1.0 0.882     0.536     1.000
-    ##       EdgeR qll - TMM (erq) 1.000 0.049 0.118               1.0 0.882     0.536     1.000
-    ##                SAMseq (sam) 1.000    NA 0.118               1.0 0.882     0.500     0.938
-    ##      EdgeR qll - RLE (erq2) 1.000 0.054 0.167               1.0 0.833     0.500     1.000
-    ##             MgSeq ZIG (zig) 0.980 0.127 0.434               0.9 0.457     0.000     0.652
-    ##         ALDEx2 wilcox (adx) 1.000 0.097 0.545               1.0 0.455     0.214     0.556
-    ##         ALDEx2 t-test (adx) 1.000 0.124 0.583               1.0 0.417     0.183     0.455
-    ##            Log t-test (ltt) 1.000 0.670 0.901               1.0 0.099     0.081     0.109
-    ##             Log LIMMA (lli) 1.000 0.689 0.906               1.0 0.094     0.081     0.101
-    ##          Log t-test2 (ltt2) 1.000 0.968 0.924               1.0 0.076     0.075     0.079
-    ##     Quasi-Poisson GLM (qpo) 1.000 0.970 0.924               1.0 0.076     0.073     0.079
-    ##          Log LIMMA 2 (lli2) 1.000 0.989 0.925               1.0 0.075     0.075     0.079
-    ##          Negbinom GLM (neb) 1.000 0.989 0.925               1.0 0.075     0.075     0.079
-    ##           Poisson GLM (poi) 1.000 1.000 0.925               1.0 0.075     0.075     0.076
-    ##                t-test (ttt) 0.986 0.968 0.924               1.0 0.075     0.069     0.078
-    ##                Wilcox (wil) 0.884 0.957 0.924               1.0 0.067     0.065     0.071
-    ##           Permutation (per) 0.595 0.962 0.924               1.0 0.045     0.042     0.047
-    ##         ZI-NegBin GLM (znb) 0.500 0.000 0.000               0.0 0.000     0.000     0.000
-    ##        ZI-Poisson GLM (zpo) 0.500 0.000 0.000               0.0 0.000     0.000     0.000
+    ##                      Method   AUC   FPR   FDR Spike.detect.rate  Score  Score.5% Score.95%
+    ##         MgSeq Feature (msf) 1.000 0.000 0.000               1.0  0.500     0.500     0.500
+    ##                 RAIDA (rai) 1.000 0.000 0.000               1.0  0.500     0.077     0.500
+    ##            LIMMA voom (vli) 1.000 0.035 0.031               1.0  0.469     0.035     0.500
+    ##               DESeq2 (ds2x) 1.000 0.035 0.062               1.0  0.438     0.056     0.500
+    ##  DESeq2 man. geoMeans (ds2) 1.000 0.035 0.062               1.0  0.438     0.056     0.500
+    ##     EdgeR exact - TMM (ere) 1.000 0.043 0.062               1.0  0.438     0.036     0.500
+    ##    EdgeR exact - RLE (ere2) 1.000 0.049 0.118               1.0  0.382     0.036     0.500
+    ##       EdgeR qll - TMM (erq) 1.000 0.049 0.118               1.0  0.382     0.036     0.500
+    ##                SAMseq (sam) 1.000    NA 0.118               1.0  0.382     0.000     0.438
+    ##      EdgeR qll - RLE (erq2) 1.000 0.054 0.167               1.0  0.333     0.000     0.500
+    ##         ZI-NegBin GLM (znb) 0.500 0.000 0.000               0.0  0.000     0.000     0.000
+    ##        ZI-Poisson GLM (zpo) 0.500 0.000 0.000               0.0  0.000     0.000     0.000
+    ##             MgSeq ZIG (zig) 0.980 0.127 0.434               0.9 -0.002    -0.364     0.219
+    ##         ALDEx2 wilcox (adx) 1.000 0.097 0.545               1.0 -0.045    -0.286     0.056
+    ##         ALDEx2 t-test (adx) 1.000 0.124 0.583               1.0 -0.083    -0.317    -0.045
+    ##            Log t-test (ltt) 1.000 0.670 0.901               1.0 -0.401    -0.419    -0.391
+    ##             Log LIMMA (lli) 1.000 0.689 0.906               1.0 -0.406    -0.419    -0.399
+    ##     Quasi-Poisson GLM (qpo) 1.000 0.970 0.924               1.0 -0.424    -0.457    -0.421
+    ##          Log t-test2 (ltt2) 1.000 0.968 0.924               1.0 -0.424    -0.431    -0.421
+    ##           Poisson GLM (poi) 1.000 1.000 0.925               1.0 -0.425    -0.425    -0.424
+    ##          Log LIMMA 2 (lli2) 1.000 0.989 0.925               1.0 -0.425    -0.425    -0.421
+    ##          Negbinom GLM (neb) 1.000 0.989 0.925               1.0 -0.425    -0.425    -0.421
+    ##                t-test (ttt) 0.986 0.968 0.924               1.0 -0.438    -0.509    -0.423
+    ##                Wilcox (wil) 0.884 0.957 0.924               1.0 -0.540    -0.584    -0.484
+    ##           Permutation (per) 0.595 0.962 0.924               1.0 -0.829    -0.863    -0.808
     ##
 
-MetagenomeSeq Featue model appears to be the best
 
+    # MetagenomeSeq Featue model appears to be the best
     res1 <- DA.msf(df, predictor = vec)
 
     ## Default value being used.
@@ -254,26 +249,27 @@ MetagenomeSeq Featue model appears to be the best
 
     ##  [1] "10" "9"  "3"  "4"  "7"  "8"  "1"  "6"  "2"  "5"
 
-And indeed, MgSeq Featuremodel finds the 10 spiked features ("1" to "10") and nothing else!
+    # And indeed, it finds the 10 spiked features ("1" to "10") and nothing else
 
-Wilcoxon test was predicted to find all spike-ins (Spike.detect.rate = 1.0), but have a too high FDR:
-
+    # Wilcoxon test was predicted to find many spike-ins (Spike.detect.rate = 1.0), but have a too high FDR:
     res2 <- DA.wil(df, predictor = vec)
     res2[res2$pval.adj < 0.05,"Feature"]
 
     ##  [1] "1"   "2"   "3"   "4"   "5"   "6"   "7"   "8"   "9"   "10"  "16" 
     ## [12] "95"  "121" "122" "125" "141" "148" "159"
 
-Wilcoxon finds feature "1" to "10", but also 8 other non-spiked features!
+    # It finds feature "1" to "10", but also 8 other non-spiked features!
 
 **Things to consider:**
 
--   [Do you have a paired or blocked experimental design](#if-you-have-a-paired-or-blocked-experimental-design) 
--   [Do you have covariates?](#if-you-have-covariates) 
--   [Does your predictor have more than two classes?](#if-your-predictor-is-categorical-with-more-than-two-levels)
--   [Is your data normalized externally or is it absolute abundances?](#if-data-is-normalized-externally-or-represent-absolute-abundances)
+-   [Do you have a paired or blocked experimental
+    design](#if-you-have-a-paired-or-blocked-experimental-design)
+-   [Do you have covariates?](#if-you-have-covariates)
+-   [Does your predictor have more than two
+    classes?](#if-your-predictor-is-categorical-with-more-than-two-levels)
+-   [Is your data normalized externally or is it absolute
+    abundances?](#if-data-is-normalized-externally-or-represent-absolute-abundances)
 -   [Do you have a Phyloseq object?](#if-you-have-a-phyloseq-object)
-
 
 How to compare methods
 ======================
@@ -293,7 +289,7 @@ p-values are expected to be below 0.05. We therefore want an FPR at 0.05
 or lower.
 
 FDR indicates the proportion of significant features (after multiple
-correction) that were not spiked and therefore shouldn't be
+correction) that we're not spiked and therefore shouldn't be
 significant. This should be as low as possible.
 
 AUC is estimated by ranking all features by their respective p-value,
