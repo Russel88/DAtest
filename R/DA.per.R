@@ -62,7 +62,7 @@ DA.per <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
     }
   }
   
-  iterations <- nrow(count_table)
+  iterations <- nrow(count.rel)
   p <- numeric(iterations)
   FC <- numeric(iterations)
   coverage <- numeric(iterations)
@@ -70,7 +70,7 @@ DA.per <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
   # For each feature
   for(i in 1:iterations){
     
-    count_row      <- as.numeric(count_table[i,])
+    count_row      <- as.numeric(count.rel[i,])
     
     real_case    <- count_row[predictor==1]
     real_control <- count_row[predictor==0]

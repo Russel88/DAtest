@@ -130,19 +130,19 @@ DA.llm2 <- function(data, predictor, paired = NULL, covars = NULL, out.all = NUL
           fit <- lme(as.formula(form), random = ~1|paired, ...), error = function(e) fit <- NULL)
       }
     }
-    return(apply(count_table,1,lmr))
+    return(apply(count.rel,1,lmr))
   } else {
     if(out.all){
       if(is.null(paired)){
-        res <- as.data.frame(do.call(rbind,apply(count_table,1,lmr)))
+        res <- as.data.frame(do.call(rbind,apply(count.rel,1,lmr)))
         colnames(res)[1:5] <- c("Df","Sum Sq","Mean Sq","F value","pval")
       } else {
-        res <- as.data.frame(do.call(rbind,apply(count_table,1,lmr)))
+        res <- as.data.frame(do.call(rbind,apply(count.rel,1,lmr)))
         colnames(res)[1:4] <- c("numDF","denDF","F-value","pval")
       }
       res <- as.data.frame(lapply(res, unlist))
     } else {
-      res <- as.data.frame(t(as.data.frame(apply(count_table,1,lmr))))
+      res <- as.data.frame(t(as.data.frame(apply(count.rel,1,lmr))))
       colnames(res)[ncol(res)] <- "pval"
       res$log2FC <- log2((res[,coeff.ref]+res[,coeff]) / res[,coeff.ref])
       res[res[,coeff.ref] < 0 & !is.na(res[,coeff.ref]), "log2FC"] <- NA

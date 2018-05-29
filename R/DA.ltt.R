@@ -55,7 +55,7 @@ DA.ltt <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
         tryCatch(t.test(x ~ predictor, paired = TRUE, ...), error = function(e){NA}) 
       }
     }
-    return(apply(count.rel,1,tt))
+    return(apply(count_table,1,tt))
   } else {
     res <- data.frame(pval = apply(count_table,1,tt))
     res$pval.adj <- p.adjust(res$pval, method = p.adj)
