@@ -47,7 +47,7 @@ preDA <- function(data, min.samples = 0, min.reads = 0, min.abundance = 0){
   # Output
   if(class(data) == "phyloseq"){
     # Fix tax_table
-    tax <- as.data.frame(tax_table(data))
+    tax <- as.data.frame(unclass(tax_table(data)))
     tax.keep <- tax[-exclude,]
     tax.new <- rbind(tax.keep,NA)
     rownames(tax.new)[nrow(tax.new)] <- "Others"

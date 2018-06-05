@@ -263,14 +263,14 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   if(cores == 1) {
     registerDoSEQ() 
   } else {
-    cl <- makeCluster(cores)
+    cl <- parallel::makeCluster(cores)
     registerDoSNOW(cl)
     on.exit(stopCluster(cl))
   }
 
   # Run the tests in parallel
-  results <- foreach(i = tests.par , .options.snow = opts) %dopar% {
-
+  results <- foreach(i = tests.par, .options.snow = opts) %dopar% {
+    
     t1.sub <- proc.time()
     
     # Extract run info

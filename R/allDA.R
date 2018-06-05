@@ -200,7 +200,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb"
   if(cores == 1) {
     registerDoSEQ() 
   } else {
-    cl <- makeCluster(cores)
+    cl <- parallel::makeCluster(cores)
     registerDoSNOW(cl)
     on.exit(stopCluster(cl))
   }
@@ -420,7 +420,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb"
   if(class(data) == "phyloseq"){
     if(!is.null(tax_table(data, errorIfNULL = FALSE))){
       newresults <- list()
-      tax <- tax_table(data)
+      tax <- unclass(tax_table(data))
       for(i in 1:length(results)){
         subres <- results[[i]] 
         subres <- merge(subres, tax, by.x = "Feature", by.y = "row.names")

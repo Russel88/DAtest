@@ -107,13 +107,13 @@ Installation of packages
 
 It is advised not to have any packages loaded when installing DAtest.
 Installation of DAtest and all dependencies has been tested to work on a
-clean R version 3.4.1 by installing in the following order:
+clean R version 3.5.0 by installing in the following order:
 
 The DAtest package:
 
     install.packages("devtools")
 
-    # Developmental version (this tutorial is written for this version):
+    # Developmental version (this tutorial is written for this version, recommended):
     devtools::install_github("Russel88/DAtest")
 
     # Version associated with bioRxiv paper:
@@ -173,6 +173,9 @@ The following are suggested, but not needed:
     # For post-hoc testing (generalized) linear models
     install.packages("lsmeans")
 
+    # Phyloseq, for organizing microbiome data
+    biocLite("phyloseq")
+
 A short tutorial on a simulated dataset:
 ========================================
 
@@ -195,7 +198,7 @@ Below we simulate a simple dataset, just to show how it works
 
     library(DAtest)
 
-    ## DAtest version 2.7.9
+    ## DAtest version 2.7.11
 
     ################# First we simulate a dataset ###################
 
@@ -218,14 +221,14 @@ Below we simulate a simple dataset, just to show how it works
 
     ## predictor is assumed to be a categorical variable with 2 levels: Control, Treatment
 
-    ##                                                                      
+    ##                                                                   
       |=================================================================| 100%
 
     ## bay was excluded due to failure
 
     summary(test)
 
-    ##                      Method   AUC   FPR   FDR Spike.detect.rate  Score  Score.5% Score.95%
+    ##                      Method   AUC   FPR   FDR Spike.detect.rate  Score	Score.5% Score.95%
     ##         MgSeq Feature (msf) 1.000 0.000 0.000               1.0  0.500     0.500     0.500
     ##                 RAIDA (rai) 1.000 0.000 0.000               1.0  0.500     0.077     0.500
     ##            LIMMA voom (vli) 1.000 0.035 0.031               1.0  0.469     0.035     0.500
@@ -239,8 +242,8 @@ Below we simulate a simple dataset, just to show how it works
     ##         ZI-NegBin GLM (znb) 0.500 0.000 0.000               0.0  0.000     0.000     0.000
     ##        ZI-Poisson GLM (zpo) 0.500 0.000 0.000               0.0  0.000     0.000     0.000
     ##             MgSeq ZIG (zig) 0.980 0.127 0.434               0.9 -0.002    -0.364     0.219
-    ##         ALDEx2 wilcox (adx) 1.000 0.097 0.545               1.0 -0.045    -0.286     0.056
-    ##         ALDEx2 t-test (adx) 1.000 0.124 0.583               1.0 -0.083    -0.317    -0.045
+    ##         ALDEx2 wilcox (adx) 1.000 0.100 0.538               1.0 -0.038    -0.279     0.036
+    ##         ALDEx2 t-test (adx) 1.000 0.124 0.598               1.0 -0.098    -0.317    -0.016
     ##            Log t-test (ltt) 1.000 0.670 0.901               1.0 -0.401    -0.419    -0.391
     ##             Log LIMMA (lli) 1.000 0.689 0.906               1.0 -0.406    -0.419    -0.399
     ##     Quasi-Poisson GLM (qpo) 1.000 0.970 0.924               1.0 -0.424    -0.457    -0.421
@@ -250,11 +253,13 @@ Below we simulate a simple dataset, just to show how it works
     ##          Negbinom GLM (neb) 1.000 0.989 0.925               1.0 -0.425    -0.425    -0.421
     ##                t-test (ttt) 0.986 0.968 0.924               1.0 -0.438    -0.509    -0.423
     ##                Wilcox (wil) 0.884 0.957 0.924               1.0 -0.540    -0.584    -0.484
-    ##           Permutation (per) 0.595 0.962 0.924               1.0 -0.829    -0.863    -0.808
+    ##           Permutation (per) 0.604 0.970 0.924               1.0 -0.820    -0.874    -0.733
 
     # From the above MetagenomeSeq Featue model appears to be the best (methods are ranked by the Score)
     # Lets run MetagenomeSeq Featue model and check which features are significant:
     res1 <- DA.msf(df, predictor = vec)
+
+    ## Default value being used.
 
     res1[res1$pval.adj < 0.05,"Feature"]
 

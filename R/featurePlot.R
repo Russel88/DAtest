@@ -116,7 +116,7 @@ featurePlot <- function(data, predictor, paired = NULL, covars = NULL, feature =
   
   # Title
   if(class(data) == "phyloseq"){
-    tax <- tax_table(data)
+    tax <- unclass(tax_table(data))
     subtax <- tax[rownames(tax) == feature,]
     p <- p + ggtitle(feature, subtitle = paste(subtax, collapse = "_"))
   } else {

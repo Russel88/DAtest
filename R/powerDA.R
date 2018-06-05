@@ -154,7 +154,7 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
   if(cores == 1) {
     registerDoSEQ() 
   } else {
-    cl <- makeCluster(cores)
+    cl <- parallel::makeCluster(cores)
     registerDoSNOW(cl)
     on.exit(stopCluster(cl))
   }
