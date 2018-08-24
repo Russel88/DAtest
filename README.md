@@ -117,7 +117,7 @@ The DAtest package:
     devtools::install_github("Russel88/DAtest")
 
     # Version associated with bioRxiv paper:
-    devtools::install_github("Russel88/DAtest@v2.7.5")
+    # devtools::install_github("Russel88/DAtest@v2.7.5")
 
 Main difference between bioRxiv version and developmental version is
 that the developmental version includes a "Score" that can be used to
@@ -191,8 +191,9 @@ these overlap, it means that the methods cannot be differentiated. The
 choice then relies on the trade-off between specificity (low FDR) and
 sensitivity (high Spike.detect.rate).
 
-If the best Score is zero or below, you should run the test again with
-either a higher effectSize or with a pruned dataset (see `preDA`)
+If the best Score is zero or below, it means that no method can reliably identify 
+significant features with the set effect size. You can then run the test again 
+with either a higher effectSize for the spike-ins or with a pruned dataset (see `preDA`).
 
 Below we simulate a simple dataset, just to show how it works
 
@@ -216,15 +217,6 @@ Below we simulate a simple dataset, just to show how it works
     ################# From this step, you would input your own data for a real analysis ###################
     # Let's compare the methods
     test <- testDA(df, predictor = vec)
-
-    ## Seed is set to 123
-
-    ## predictor is assumed to be a categorical variable with 2 levels: Control, Treatment
-
-    ##                                                                   
-      |=================================================================| 100%
-
-    ## bay was excluded due to failure
 
     summary(test)
 
@@ -255,17 +247,18 @@ Below we simulate a simple dataset, just to show how it works
     ##                Wilcox (wil) 0.884 0.957 0.924               1.0 -0.540    -0.584    -0.484
     ##           Permutation (per) 0.604 0.970 0.924               1.0 -0.820    -0.874    -0.733
 
-    # From the above MetagenomeSeq Featue model appears to be the best (methods are ranked by the Score)
-    # Lets run MetagenomeSeq Featue model and check which features are significant:
+    # From the above, MetagenomeSeq Featue model appears to be the best (methods are ranked by the Score)
+    # Lets run MetagenomeSeq Featue model on the orignal data and check which features are significant:
     res1 <- DA.msf(df, predictor = vec)
+	
+    # res1 now contains the final results
 
-    ## Default value being used.
-
+    # Which features have an adjusted p-value below 0.05:
     res1[res1$pval.adj < 0.05,"Feature"]
 
     ##  [1] "10" "9"  "3"  "4"  "7"  "8"  "1"  "6"  "2"  "5"
 
-    # And indeed, it finds the 10 spiked features ("1" to "10") and nothing else
+    # Indeed, it finds the 10 spiked features ("1" to "10") and nothing else
 
     # Wilcoxon test was predicted to find many spike-ins (Spike.detect.rate = 1.0), but have a too high FDR.
     # Lets run Wilcoxon test and check which features are significant:
