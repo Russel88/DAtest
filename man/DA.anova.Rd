@@ -14,5 +14,5 @@ DA.anova(results, p.adj = "fdr", ...)
 \item{...}{Additional arguments for \code{anova} function}
 }
 \description{
-Works on "lrm", "llm", "llm2". Non-paired "neb"
+Works on "lrm", "llm", "llm2", "lma", "lmc". Non-paired "neb"
 }

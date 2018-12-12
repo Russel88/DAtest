@@ -24,7 +24,7 @@ DA.kru <- function(data, predictor, relative = TRUE, p.adj = "fdr", allResults =
 
   # Define function
   kru <- function(x){
-    tryCatch(kruskal.test(as.numeric(x) ~ predictor, ...)$p.value, error = function(e){NA}) 
+    tryCatch(kruskal.test(as.numeric(x) ~ predictor, ...), error = function(e){NA}) 
   }
 
   # Relative abundance
@@ -35,10 +35,12 @@ DA.kru <- function(data, predictor, relative = TRUE, p.adj = "fdr", allResults =
   }
   
   # Run tests
+  tests <- apply(count.rel,1,kru)
+  
   if(allResults){
-    return(apply(count.rel,1,kru))
+    return(tests)
   } else {
-    res <- data.frame(pval = apply(count.rel,1,kru))
+    res <- data.frame(pval = sapply(tests, function(x) x$p.value))
     res$pval.adj <- p.adjust(res$pval, method = p.adj)
     res$Feature <- rownames(res)
     res$Method <- "Kruskal-Wallis (kru)" 

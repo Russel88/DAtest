@@ -1,115 +1,23 @@
-#' Comparing differential abundance/expression methods by FPR and AUC
+#' Comparing differential abundance/expression methods by Empirical power and False Discovery Rate
 #'
-#' Calculating false positive rates and AUC (Area Under the Receiver Operating Characteristic (ROC) Curve) for various differential abundance and expression methods
+#' Calculating Power, False Discovery Rates, False Positive Rates and AUC (Area Under the Receiver Operating Characteristic (ROC) Curve) for various differential abundance and expression methods
 #' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. If the \code{predictor} is numeric it will be treated as such in the analyses
-#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. Only for "anc", "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "ds2x", "lrm", "llm", "llm2", "lim", "lli", "lli2", "mva", and "zig"
+#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation.
 #' @param covars Either a named list with covariates, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}
-#' @param R Integer. Number of times to run the tests. Default 10
-#' @param tests Character. Which tests to include. Default all (Except ANCOM and mvabund, see below for details)
-#' @param relative Logical. If TRUE (default) abundances are made relative for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea", and there is an offset of \code{log(LibrarySize)} for "mva", "neb", "poi", "qpo", "zpo" and "znb"
+#' @param R Integer. Number of times to run the tests. Default 20
+#' @param tests Character. Which tests to include. Default all
+#' @param relative Logical. TRUE (default) for compositional data. FALSE for absolute abundances or pre-normalized data.
 #' @param effectSize Numeric. The effect size for the spike-ins. Default 5
 #' @param k Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. \code{k=c(5,10,15)}: 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default NULL, which will spike 2 percent of the total amount of features in each tertile (a total of 6 percent), but minimum c(5,5,5)
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.
 #' @param rng.seed Numeric. Seed for reproducibility. Default 123
 #' @param p.adj Character. Method for p-value adjustment. See \code{p.adjust} for details. Default "fdr"
 #' @param args List. A list with lists of arguments passed to the different methods. See details for more.
-#' @param out.all If TRUE linear models will output results and p-values from \code{anova}/\code{drop1}, ds2/ds2x will run LRT and not Wald test, erq and erq2 will produce one p-value for the predictor, and lim, lli, lli2, lim, vli will run F-tests. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise
-#' @param alpha q-value threshold for determining significance for \code{Spike.detect.rate}. Default 0.1
+#' @param out.all If TRUE linear models will output results and p-values from \code{anova}/\code{drop1}, ds2/ds2x will run LRT and not Wald test, erq and erq2 will produce one p-value for the predictor, and limma will run F-tests. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise
+#' @param alpha q-value threshold for determining significance for \code{Power}. Default 0.1
 #' @param core.check If TRUE will make an interactive check that the amount of cores specified are desired. Only if \code{cores>20}. This is to ensure that the function doesn't automatically overloads a server with workers.  
 #' @param verbose If TRUE will print informative messages
-#' @details Currently implemented methods:
-#' \itemize{
-#'  \item per - Permutation test with user defined test statistic
-#'  \item bay - baySeq
-#'  \item adx - ALDEx t-test and wilcoxon
-#'  \item wil - Wilcoxon Rank Sum on relative abundances
-#'  \item ttt - Welch t.test on relative abundances
-#'  \item ltt - Welch t.test, but reads are first transformed with \code{log(abundance + delta1)} then turned into relative abundances
-#'  \item ltt2 - Welch t.test, but with relative abundances transformed with \code{log(relative abundance + delta2)}
-#'  \item neb - Negative binomial GLM with log of library size as offset
-#'  \item erq - EdgeR - Quasi likelihood - TMM normalization
-#'  \item ere - EdgeR - Exact test - TMM normalization
-#'  \item erq2 - EdgeR - Quasi likelihood - RLE normalization
-#'  \item ere2 - EdgeR - Exact test - RLE normalization
-#'  \item msf - MetagenomeSeq feature model
-#'  \item zig - MetagenomeSeq zero-inflated gaussian
-#'  \item ds2 - DESeq2
-#'  \item ds2x - DESeq2 with manual geometric means
-#'  \item lim - LIMMA. Moderated linear models based on emperical bayes
-#'  \item lli - LIMMA, but reads are first transformed with \code{log(abundance + delta1)} then turned into relative abundances
-#'  \item lli2 - LIMMA, but with relative abundances transformed with \code{log(relative abundance + delta2)}
-#'  \item kru - Kruskal-Wallis on relative abundances
-#'  \item aov - ANOVA on relative abundances
-#'  \item lao - ANOVA, but reads are first transformed with \code{log(abundance + delta1)} then turned into relative abundances
-#'  \item lao2 - ANOVA, but with relative abundances transformed with \code{log(relative abundance + delta2)}
-#'  \item lrm - Linear regression on relative abundances
-#'  \item llm - Linear regression, but reads are first transformed with \code{log(abundance + delta1)} then turned into relative abundances
-#'  \item llm2 - Linear regression, but with relative abundances transformed with \code{log(relative abundance + delta2)}
-#'  \item rai - RAIDA
-#'  \item spe - Spearman correlation
-#'  \item pea - Pearson correlation
-#'  \item poi - Poisson GLM with log of library size as offset
-#'  \item qpo - Quasi-Poisson GLM with log of library size as offset
-#'  \item vli - Limma with voom
-#'  \item zpo - Zero-inflated Poisson GLM
-#'  \item znb - Zero-inflated Negative Binomial GLM
-#'  \item fri - Friedman Rank Sum test
-#'  \item qua - Quade test
-#'  \item anc - ANCOM (by default not included, as it is very slow)
-#'  \item sam - SAMSeq
-#'  \item mva - mvabund (by default not included, as it is very slow)
-#'  \item zzz - A user-defined method (See \code{?DA.zzz})
-#' }
-#' "neb" can be slow if there is a paired argument.
-#' 
-#' "anc" and "mva" are slow compared to the other methods.
-#' 
-#' Additional arguments can be passed to the internal functions with the \code{args} argument. 
-#' It should be structured as a list with elements named by the tests: 
-#' E.g. passing to the \code{DA.per} function that it should only run 1000 iterations: \code{args = list(per=list(noOfIterations=1000))}.
-#' Include that the log t.test should use a pseudocount of 0.1: \code{args = list(per=list(noOfIterations=1000), ltt=list(delta=0.1))}. 
-#' Additional arguments are simply seperated by commas.
-#' 
-#' Below is an overview of which functions get the arguments that are passed to a specific test
-#' \itemize{
-#'  \item per - Passed to \code{DA.per}
-#'  \item bay - Passed to \code{getPriors}, \code{getLikelihoods} and \code{DA.bay}
-#'  \item adx - Passed to \code{aldex} and \code{DA.adx}
-#'  \item wil - Passed to \code{wilcox.test} and \code{DA.wil}
-#'  \item ttt - Passed to \code{t.test} and \code{DA.ttt}
-#'  \item ltt - Passed to \code{t.test} and \code{DA.ltt}
-#'  \item ltt2 - Passed to \code{t.test} and \code{DA.ltt2}
-#'  \item neb - Passed to \code{glm.nb}, \code{glmer.nb} and \code{DA.neb}
-#'  \item erq(2) - Passed to \code{calcNormFactors}, \code{estimateDisp}, \code{glmQLFit}, \code{glmQLFTest} and \code{DA.erq}
-#'  \item ere(2) - Passed to \code{calcNormFactors}, \code{estimateCommonDisp}, \code{estimateTagwiseDisp}, \code{exactTest} and \code{DA.ere}
-#'  \item msf - Passed to \code{fitFeatureModel} and \code{DA.msf}
-#'  \item zig - Passed to \code{fitZig} and \code{DA.zig}
-#'  \item ds2(x) - Passed to \code{DESeq} and \code{DA.ds2}
-#'  \item lim - Passed to \code{eBayes}, \code{lmFit} and \code{DA.lim}
-#'  \item lli - Passed to \code{eBayes}, \code{lmFit} and \code{DA.lli}
-#'  \item lli2 - Passed to \code{eBayes}, \code{lmFit} and \code{DA.lli2}
-#'  \item kru - Passed to \code{kruskal.test} and \code{DA.kru}
-#'  \item aov - Passed to \code{aov} and \code{DA.aov}
-#'  \item lao - Passed to \code{aov} and \code{DA.lao}
-#'  \item lao2 - Passed to \code{aov} and \code{DA.lao2}
-#'  \item lrm - Passed to \code{lm}, \code{lme} and \code{DA.lrm}
-#'  \item llm - Passed to \code{lm}, \code{lme} and \code{DA.llm}
-#'  \item llm2 - Passed to \code{lm}, \code{lme} and \code{DA.llm2}
-#'  \item rai - Passed to \code{raida} and \code{DA.rai}
-#'  \item spe - Passed to \code{cor.test} and \code{DA.spe}
-#'  \item pea - Passed to \code{cor.test} and \code{DA.pea}
-#'  \item poi - Passed to \code{glm}, \code{glmer} and \code{DA.poi}
-#'  \item qpo - Passed to \code{glm} and \code{DA.qpo}
-#'  \item vli - Passed to \code{voom}, \code{eBayes}, \code{lmFit} and \code{DA.vli}
-#'  \item zpo - Passed to \code{zeroinfl} and \code{DA.zpo}
-#'  \item znb - Passed to \code{zeroinfl} and \code{DA.znb}
-#'  \item fri - Passed to \code{friedman.test} and \code{DA.fri}
-#'  \item qua - Passed to \code{quade.test} and \code{DA.qua}
-#'  \item anc - Passed to \code{ANCOM} and \code{DA.anc}
-#'  \item sam - Passed to \code{SAMseq} and \code{DA.sam}
-#'  \item mva - Passed to \code{manyglm} and \code{summary.manyglm}
-#' }
 #' @return An object of class \code{DA}, which contains a list of results:
 #' \itemize{
 #'  \item table - FPR, AUC and spike detection rate for each run
@@ -123,7 +31,7 @@
 #' @importFrom pROC roc
 #' @export
 
-testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests = c("neb","rai","per","bay","adx","sam","qua","fri","zpo","znb","vli","qpo","poi","pea","wil","ttt","ltt","ltt2","erq","erq2","ere","ere2","msf","zig","ds2","ds2x","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe"), relative = TRUE, effectSize = 5, k = NULL, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), out.all = NULL, alpha = 0.1, core.check = TRUE, verbose = TRUE){
+testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20, tests = c("mva","neb","rai","per","bay","adx","sam","qua","fri","zpo","znb","vli","qpo","poi","pea","wil","ttt","ltt","ltt2","erq","erq2","ere","ere2","msf","zig","ds2","ds2x","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe","tta","ttc","aoa","aoc","lma","lmc","lia","lic"), relative = TRUE, effectSize = 5, k = NULL, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), out.all = NULL, alpha = 0.1, core.check = TRUE, verbose = TRUE){
 
   stopifnot(exists("data"),exists("predictor"))
   # Check for servers
@@ -162,12 +70,18 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   if(sum(colSums(count_table) == 0) > 0) stop("Some samples are empty")
   if(ncol(count_table) != length(predictor)) stop("Number of samples in count_table does not match length of predictor")
   if(length(unique(predictor)) < 2) stop("predictor should have at least two levels")
-
+  
+  # Remove Features not present in any samples
+  if(sum(rowSums(count_table) == 0) != 0) message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
+  count_table <- count_table[rowSums(count_table) > 0,]
+  if(nrow(count_table) <= 15) warning("Dataset contains very few features") 
+  
   # Prune tests argument
-  decimal <- FALSE
+  decimal <- zeroes <- FALSE
   if(!isTRUE(all(unlist(count_table) == floor(unlist(count_table))))) decimal <- TRUE
+  if(any(count_table == 0)) zeroes <- TRUE
   tests <- unique(tests)
-  if(!"zzz" %in% tests) tests <- prune.tests.DA(tests, predictor, paired, covars, relative, decimal)
+  if(!"zzz" %in% tests) tests <- prune.tests.DA(tests, predictor, paired, covars, relative, decimal, zeroes)
   tests.par <- paste0(unlist(lapply(1:R, function(x) rep(x,length(tests)))),"_",rep(tests,R))
   if(length(tests) == 0) stop("No tests to run!")
   
@@ -175,24 +89,16 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   if(verbose){
     if("neb" %in% tests & !is.null(paired)){
       message("As 'neb' is included and a 'paired' variable is supplied, this might take a long time")
-    } else {
-      if("anc" %in% tests){
-        message("As 'anc' is included, this might take some time")
-      }
     }
   }
 
   # Set seed
   set.seed(rng.seed)
   if(verbose) message(paste("Seed is set to",rng.seed))
+  if(verbose) message(paste("Running on",cores,"cores"))
 
   # Create some random seeds for each run
-  seeds <- rpois(R, lambda = (1:R)*1e6)
-
-  # Remove Features not present in any samples
-  if(sum(rowSums(count_table) == 0) != 0) message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
-  count_table <- count_table[rowSums(count_table) > 0,]
-  if(nrow(count_table) <= 15) warning("Dataset contains very few features") 
+  seeds <- rng.seed+1:R
   
   # Spike vs no features
   if(is.null(k)){
@@ -222,6 +128,10 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
     if(length(levels(as.factor(predictor))) > length(unique(predictor))) stop("predictor has more levels than unique values!")
     if(verbose) message(paste("predictor is assumed to be a categorical variable with",length(unique(predictor)),"levels:",paste(levels(as.factor(predictor)),collapse = ", ")))
   }
+  if(!is.null(paired)){
+    if(verbose) message(paste("The paired variable has",length(unique(paired)),"levels"))
+    if(length(unique(paired)) < 5) warning("The paired variable has less than 5 levels. Mixed-effect models are excluded")
+  }
   
   # out.all
   if(is.null(out.all)){
@@ -242,6 +152,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
     }
   }
   
+  if(verbose) cat("Spiking...\n")
   # Shuffle predictor
   if(is.null(paired)){
     rands <- lapply(1:R,function(x) sample(predictor))
@@ -254,6 +165,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
   count_tables <- lapply(1:R,function(x) spikeds[[x]][[1]])
   
   ### Run tests
+  if(verbose) cat(paste("Testing", length(tests),"methods", R,"times each...\n"))
   # Progress bar
   pb <- txtProgressBar(max = length(tests.par), style = 3)
   progress <- function(n) setTxtProgressBar(pb, n)
@@ -305,6 +217,8 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
                                wil = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, relative, p.adj),wil.DAargs)),
                                ttt = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, relative, p.adj),ttt.DAargs)),
                                ltt = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative, p.adj),ltt.DAargs)),
+                               tta = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, p.adj),tta.DAargs)),
+                               ttc = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, p.adj),ttc.DAargs)),
                                ltt2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, p.adj),ltt2.DAargs)),
                                neb = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,relative,out.all, p.adj),neb.DAargs)),
                                erq = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,out.all, p.adj),erq.DAargs)),
@@ -316,17 +230,23 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
                                ds2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,out.all, p.adj),ds2.DAargs)),
                                ds2x = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,out.all, p.adj),ds2x.DAargs)),
                                per = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, relative, p.adj),per.DAargs)),
-                               bay = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, p.adj),bay.DAargs)),
+                               bay = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),bay.DAargs)),
                                adx = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]]),adx.DAargs)),
                                lim = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,relative,out.all, p.adj),lim.DAargs)),
                                lli = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,relative,out.all, p.adj),lli.DAargs)),
+                               lia = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,out.all, p.adj),lia.DAargs)),
+                               lic = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,out.all, p.adj),lic.DAargs)),
                                lli2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,out.all, p.adj),lli2.DAargs)),
                                kru = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]], relative, p.adj),kru.DAargs)),
                                aov = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],covars, relative, p.adj),aov.DAargs)),
                                lao = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],covars,relative, p.adj),lao.DAargs)),
+                               aoa = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],covars, p.adj),aoa.DAargs)),
+                               aoc = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],covars, p.adj),aoc.DAargs)),
                                lao2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],covars, p.adj),lao2.DAargs)),
                                lrm = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars, relative,out.all, p.adj),lrm.DAargs)),
                                llm = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,relative,out.all, p.adj),llm.DAargs)),
+                               lma = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,out.all, p.adj),lma.DAargs)),
+                               lmc = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,out.all, p.adj),lmc.DAargs)),
                                llm2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,out.all, p.adj),llm2.DAargs)),
                                rai = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]], p.adj),rai.DAargs)),
                                spe = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],relative, p.adj),spe.DAargs)),
@@ -338,12 +258,11 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
                                znb = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],covars,relative,out.all, p.adj),znb.DAargs)),
                                fri = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative, p.adj),fri.DAargs)),
                                qua = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative, p.adj),qua.DAargs)),
-                               anc = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,sig = alpha),anc.DAargs)),
                                sam = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,fdr.output = alpha),sam.DAargs))),
                         
                         error = function(e) NULL)
     
-    if(!is.null(res.sub) & (!i %in% c("anc","sam","adx"))){
+    if(!is.null(res.sub) & (!i %in% c("sam","adx"))){
       res.sub[is.na(res.sub$pval),"pval"] <- 1
       res.sub[is.na(res.sub$pval.adj),"pval.adj"] <- 1
     }
@@ -402,20 +321,6 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
       names(res.sub) <- c(res.names,paste0(r,"_","adx.t"),paste0(r,"_","adx.w"))
     }
 
-    # Make pseudo-pval for ANCOM
-    if("anc" %in% gsub(".*_","",names(res.sub))){
-      anc <- as.data.frame(res.sub[paste0(r,"_","anc")])
-      colnames(anc) <- gsub(".*_anc.","",colnames(anc))
-      suppressWarnings(min.d <- min(anc[anc$Detected == "Yes","W"]))
-      if(min.d == Inf) min.d <- max(anc$W)+1
-      anc$pval <- 1/(anc$W+1) * 0.05/(1/(min.d+1))
-      anc$pval.adj <- anc$pval
-      res.sub[paste0(r,"_","anc")] <- NULL
-      res.names <- names(res.sub)
-      res.sub <- c(res.sub,list(anc))
-      names(res.sub) <- c(res.names,paste0(r,"_","anc"))
-    }
-    
     # Make pseudo-pval for SAMseq
     if("sam" %in% gsub(".*_","",names(res.sub))){
       samdf <- as.data.frame(res.sub[paste0(r,"_","sam")])
@@ -501,20 +406,15 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 10, tests 
                               AUC = aucs,
                               FPR = fprs,
                               FDR = fdrs,
-                              Spike.detect.rate = sdrs,
+                              Power = sdrs,
                               Run = r)
     rownames(df.combined) <- NULL
 
-    # SAMseq and ANCOM FPRs not possible
+    # SAMseq FPRs not possible
     if("sam" %in% newnames){
       df.combined[df.combined$Method == "SAMseq (sam)","FPR"] <- NA
     }
-    if("anc" %in% newnames){
-      df.combined[df.combined$Method == "ANCOM (anc)","FPR"] <- NA
-    }
-    
-    return(list(df.combined,res.sub))
-    
+        return(list(df.combined,res.sub))
   }
   
   output.results <- do.call(rbind,lapply(final.results, function(x) x[[1]]))

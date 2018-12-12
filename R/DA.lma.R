@@ -1,20 +1,21 @@
-#' Log linear regression
-#'
-#' Apply linear regression on multiple features with one \code{predictor}, with log transformation of relative abundances.
+#' Linear regression - Multiplicative zero-correction and additive log-ratio normalization.
+#' 
+#' Apply linear regression for multiple features with one \code{predictor}.
 #' Mixed-effect model is used when a \code{paired} argument is included, with the \code{paired} variable as a random intercept.
+#' Note: Last feature in the data is used as reference for the log-ratio transformation.
 #' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation
-#' @param covars Either a named list with covariables, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in sample_data(data)
+#' @param covars Either a named list with covariables, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}
 #' @param out.all If TRUE will output results and p-values from \code{anova}. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class \code{predictor} and FALSE otherwise
 #' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
-#' @param delta Numeric. Pseudocount for the log transformation. Default 0.001
+#' @param delta Numeric. Pseudocount for zero-correction. Default 1
 #' @param allResults If TRUE will return raw results from the \code{lm}/\code{lme} function
 #' @param ... Additional arguments for the \code{lm}/\code{lme} functions
 #' @import nlme
 #' @export
 
-DA.llm2 <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL, p.adj = "fdr", delta = 0.001, allResults = FALSE, ...){
+DA.lma <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL, p.adj = "fdr", delta = 1, allResults = FALSE, ...){
  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -39,10 +40,13 @@ DA.llm2 <- function(data, predictor, paired = NULL, covars = NULL, out.all = NUL
     if(is.numeric(predictor)) out.all <- FALSE
   }
   
-  # Relative abundance and log
   count_table <- as.data.frame.matrix(count_table)
-  count.rel <- apply(count_table,2,function(x) x/sum(x))
-  count.rel <- log(count.rel + delta)
+  # Zero-correction
+  count_table <- apply(count_table, 2, function(y) sapply(y,function(x) ifelse(x==0,delta,(1-(sum(y==0)*delta)/sum(y))*x)))
+  if(any(count_table <= 0)) stop("count_table should only contain positive values")
+  
+  # ALR transformation
+  count_table <- norm_alr(count_table)
   
   # Define design
   if(is.null(covars)){
@@ -125,26 +129,27 @@ DA.llm2 <- function(data, predictor, paired = NULL, covars = NULL, out.all = NUL
           fit <- lme(as.formula(form), random = ~1|paired, ...), error = function(e) fit <- NULL)
       }
     }
-    return(apply(count.rel,1,lmr))
+    return(apply(count_table,1,lmr))
   } else {
     if(out.all){
       if(is.null(paired)){
-        res <- as.data.frame(do.call(rbind,apply(count.rel,1,lmr)))
+        res <- as.data.frame(do.call(rbind,apply(count_table,1,lmr)))
         colnames(res)[1:5] <- c("Df","Sum Sq","Mean Sq","F value","pval")
       } else {
-        res <- as.data.frame(do.call(rbind,apply(count.rel,1,lmr)))
+        res <- as.data.frame(do.call(rbind,apply(count_table,1,lmr)))
         colnames(res)[1:4] <- c("numDF","denDF","F-value","pval")
       }
       res <- as.data.frame(lapply(res, unlist))
     } else {
-      res <- as.data.frame(t(as.data.frame(apply(count.rel,1,lmr))))
+      res <- as.data.frame(t(as.data.frame(apply(count_table,1,lmr))))
       colnames(res)[ncol(res)] <- "pval"
     }
     
     res$pval.adj <- p.adjust(res$pval, method = p.adj)
     res$Feature <- rownames(res)
-    res$Method <- "Log Linear reg. 2 (llm2)"
+    res$Method <- "Linear model - ALR (lma)"
     if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
     return(res)
-  }  
+  } 
+  
 }

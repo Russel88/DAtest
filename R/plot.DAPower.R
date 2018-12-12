@@ -17,7 +17,7 @@ plot.DAPower <- function(x, ...){
       coord_cartesian(ylim = c(0,1)) +
       geom_point() +
       geom_smooth(method = "loess", colour = "red", alpha = 0.4) +
-      ylab("Spike Detect Rate") +
+      ylab("Power") +
       xlab("Log2 Effect Size") +
       theme(panel.grid.minor = element_blank())
     

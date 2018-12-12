@@ -2,31 +2,32 @@
 % Please edit documentation in R/testDA.R
 \name{testDA}
 \alias{testDA}
-\title{Comparing differential abundance/expression methods by FPR and AUC}
+\title{Comparing differential abundance/expression methods by Empirical power and False Discovery Rate}
 \usage{
-testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
-  tests = c("neb", "rai", "per", "bay", "adx", "sam", "qua", "fri", "zpo",
-  "znb", "vli", "qpo", "poi", "pea", "wil", "ttt", "ltt", "ltt2", "erq", "erq2",
-  "ere", "ere2", "msf", "zig", "ds2", "ds2x", "lim", "lli", "lli2", "aov",
-  "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe"), relative = TRUE,
-  effectSize = 5, k = NULL, cores = (detectCores() - 1), rng.seed = 123,
-  p.adj = "fdr", args = list(), out.all = NULL, alpha = 0.1,
-  core.check = TRUE, verbose = TRUE)
+testDA(data, predictor, paired = NULL, covars = NULL, R = 20,
+  tests = c("mva", "neb", "rai", "per", "bay", "adx", "sam", "qua",
+  "fri", "zpo", "znb", "vli", "qpo", "poi", "pea", "wil", "ttt", "ltt",
+  "ltt2", "erq", "erq2", "ere", "ere2", "msf", "zig", "ds2", "ds2x", "lim",
+  "lli", "lli2", "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe",
+  "tta", "ttc", "aoa", "aoc", "lma", "lmc", "lia", "lic"),
+  relative = TRUE, effectSize = 5, k = NULL, cores = (detectCores()
+  - 1), rng.seed = 123, p.adj = "fdr", args = list(),
+  out.all = NULL, alpha = 0.1, core.check = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
 
 \item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. If the \code{predictor} is numeric it will be treated as such in the analyses}
 
-\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. Only for "anc", "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "ds2x", "lrm", "llm", "llm2", "lim", "lli", "lli2", "mva", and "zig"}
+\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation.}
 
 \item{covars}{Either a named list with covariates, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}}
 
-\item{R}{Integer. Number of times to run the tests. Default 10}
+\item{R}{Integer. Number of times to run the tests. Default 20}
 
-\item{tests}{Character. Which tests to include. Default all (Except ANCOM and mvabund, see below for details)}
+\item{tests}{Character. Which tests to include. Default all}
 
-\item{relative}{Logical. If TRUE (default) abundances are made relative for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea", and there is an offset of \code{log(LibrarySize)} for "mva", "neb", "poi", "qpo", "zpo" and "znb"}
+\item{relative}{Logical. TRUE (default) for compositional data. FALSE for absolute abundances or pre-normalized data.}
 
 \item{effectSize}{Numeric. The effect size for the spike-ins. Default 5}
 
@@ -40,9 +41,9 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 10,
 
 \item{args}{List. A list with lists of arguments passed to the different methods. See details for more.}
 
-\item{out.all}{If TRUE linear models will output results and p-values from \code{anova}/\code{drop1}, ds2/ds2x will run LRT and not Wald test, erq and erq2 will produce one p-value for the predictor, and lim, lli, lli2, lim, vli will run F-tests. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise}
+\item{out.all}{If TRUE linear models will output results and p-values from \code{anova}/\code{drop1}, ds2/ds2x will run LRT and not Wald test, erq and erq2 will produce one p-value for the predictor, and limma will run F-tests. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise}
 
-\item{alpha}{q-value threshold for determining significance for \code{Spike.detect.rate}. Default 0.1}
+\item{alpha}{q-value threshold for determining significance for \code{Power}. Default 0.1}
 
 \item{core.check}{If TRUE will make an interactive check that the amount of cores specified are desired. Only if \code{cores>20}. This is to ensure that the function doesn't automatically overloads a server with workers.}
 
@@ -58,99 +59,5 @@ An object of class \code{DA}, which contains a list of results:
 }
 }
 \description{
-Calculating false positive rates and AUC (Area Under the Receiver Operating Characteristic (ROC) Curve) for various differential abundance and expression methods
-}
-\details{
-Currently implemented methods:
-\itemize{
- \item per - Permutation test with user defined test statistic
- \item bay - baySeq
- \item adx - ALDEx t-test and wilcoxon
- \item wil - Wilcoxon Rank Sum on relative abundances
- \item ttt - Welch t.test on relative abundances
- \item ltt - Welch t.test, but reads are first transformed with \code{log(abundance + delta1)} then turned into relative abundances
- \item ltt2 - Welch t.test, but with relative abundances transformed with \code{log(relative abundance + delta2)}
- \item neb - Negative binomial GLM with log of library size as offset
- \item erq - EdgeR - Quasi likelihood - TMM normalization
- \item ere - EdgeR - Exact test - TMM normalization
- \item erq2 - EdgeR - Quasi likelihood - RLE normalization
- \item ere2 - EdgeR - Exact test - RLE normalization
- \item msf - MetagenomeSeq feature model
- \item zig - MetagenomeSeq zero-inflated gaussian
- \item ds2 - DESeq2
- \item ds2x - DESeq2 with manual geometric means
- \item lim - LIMMA. Moderated linear models based on emperical bayes
- \item lli - LIMMA, but reads are first transformed with \code{log(abundance + delta1)} then turned into relative abundances
- \item lli2 - LIMMA, but with relative abundances transformed with \code{log(relative abundance + delta2)}
- \item kru - Kruskal-Wallis on relative abundances
- \item aov - ANOVA on relative abundances
- \item lao - ANOVA, but reads are first transformed with \code{log(abundance + delta1)} then turned into relative abundances
- \item lao2 - ANOVA, but with relative abundances transformed with \code{log(relative abundance + delta2)}
- \item lrm - Linear regression on relative abundances
- \item llm - Linear regression, but reads are first transformed with \code{log(abundance + delta1)} then turned into relative abundances
- \item llm2 - Linear regression, but with relative abundances transformed with \code{log(relative abundance + delta2)}
- \item rai - RAIDA
- \item spe - Spearman correlation
- \item pea - Pearson correlation
- \item poi - Poisson GLM with log of library size as offset
- \item qpo - Quasi-Poisson GLM with log of library size as offset
- \item vli - Limma with voom
- \item zpo - Zero-inflated Poisson GLM
- \item znb - Zero-inflated Negative Binomial GLM
- \item fri - Friedman Rank Sum test
- \item qua - Quade test
- \item anc - ANCOM (by default not included, as it is very slow)
- \item sam - SAMSeq
- \item mva - mvabund (by default not included, as it is very slow)
- \item zzz - A user-defined method (See \code{?DA.zzz})
-}
-"neb" can be slow if there is a paired argument.
-
-"anc" and "mva" are slow compared to the other methods.
-
-Additional arguments can be passed to the internal functions with the \code{args} argument. 
-It should be structured as a list with elements named by the tests: 
-E.g. passing to the \code{DA.per} function that it should only run 1000 iterations: \code{args = list(per=list(noOfIterations=1000))}.
-Include that the log t.test should use a pseudocount of 0.1: \code{args = list(per=list(noOfIterations=1000), ltt=list(delta=0.1))}. 
-Additional arguments are simply seperated by commas.
-
-Below is an overview of which functions get the arguments that are passed to a specific test
-\itemize{
- \item per - Passed to \code{DA.per}
- \item bay - Passed to \code{getPriors}, \code{getLikelihoods} and \code{DA.bay}
- \item adx - Passed to \code{aldex} and \code{DA.adx}
- \item wil - Passed to \code{wilcox.test} and \code{DA.wil}
- \item ttt - Passed to \code{t.test} and \code{DA.ttt}
- \item ltt - Passed to \code{t.test} and \code{DA.ltt}
- \item ltt2 - Passed to \code{t.test} and \code{DA.ltt2}
- \item neb - Passed to \code{glm.nb}, \code{glmer.nb} and \code{DA.neb}
- \item erq(2) - Passed to \code{calcNormFactors}, \code{estimateDisp}, \code{glmQLFit}, \code{glmQLFTest} and \code{DA.erq}
- \item ere(2) - Passed to \code{calcNormFactors}, \code{estimateCommonDisp}, \code{estimateTagwiseDisp}, \code{exactTest} and \code{DA.ere}
- \item msf - Passed to \code{fitFeatureModel} and \code{DA.msf}
- \item zig - Passed to \code{fitZig} and \code{DA.zig}
- \item ds2(x) - Passed to \code{DESeq} and \code{DA.ds2}
- \item lim - Passed to \code{eBayes}, \code{lmFit} and \code{DA.lim}
- \item lli - Passed to \code{eBayes}, \code{lmFit} and \code{DA.lli}
- \item lli2 - Passed to \code{eBayes}, \code{lmFit} and \code{DA.lli2}
- \item kru - Passed to \code{kruskal.test} and \code{DA.kru}
- \item aov - Passed to \code{aov} and \code{DA.aov}
- \item lao - Passed to \code{aov} and \code{DA.lao}
- \item lao2 - Passed to \code{aov} and \code{DA.lao2}
- \item lrm - Passed to \code{lm}, \code{lme} and \code{DA.lrm}
- \item llm - Passed to \code{lm}, \code{lme} and \code{DA.llm}
- \item llm2 - Passed to \code{lm}, \code{lme} and \code{DA.llm2}
- \item rai - Passed to \code{raida} and \code{DA.rai}
- \item spe - Passed to \code{cor.test} and \code{DA.spe}
- \item pea - Passed to \code{cor.test} and \code{DA.pea}
- \item poi - Passed to \code{glm}, \code{glmer} and \code{DA.poi}
- \item qpo - Passed to \code{glm} and \code{DA.qpo}
- \item vli - Passed to \code{voom}, \code{eBayes}, \code{lmFit} and \code{DA.vli}
- \item zpo - Passed to \code{zeroinfl} and \code{DA.zpo}
- \item znb - Passed to \code{zeroinfl} and \code{DA.znb}
- \item fri - Passed to \code{friedman.test} and \code{DA.fri}
- \item qua - Passed to \code{quade.test} and \code{DA.qua}
- \item anc - Passed to \code{ANCOM} and \code{DA.anc}
- \item sam - Passed to \code{SAMseq} and \code{DA.sam}
- \item mva - Passed to \code{manyglm} and \code{summary.manyglm}
-}
+Calculating Power, False Discovery Rates, False Positive Rates and AUC (Area Under the Receiver Operating Characteristic (ROC) Curve) for various differential abundance and expression methods
 }

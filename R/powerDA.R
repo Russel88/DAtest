@@ -3,20 +3,20 @@
 #' Estimating (empirical) statistical power for a specific differential abundance and expression method on a specific dataset
 #' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. If the \code{predictor} is numeric it will be treated as such in the analyses
-#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. Only for "anc", "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "ds2x", "lrm", "llm", "llm2", "lim", "lli", "lli2", "mva", and "zig"
+#' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation.
 #' @param covars Either a named list with covariates, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}
 #' @param test Character. Which test to include. See \code{testDA} for details on the implemented tests. 
 #' @param effectSizes Numeric. The effect sizes for the spike-ins. Default \code{c(2,4,8,16,32)}
 #' @param alpha.p p-value threshold for false positive rates. Default 0.05
-#' @param alpha.q q-value threshold for determining significance for \code{empirical power}. Default 0.1. This will change \code{fdr.output} for "sam" and \code{sig} for "anc". 
+#' @param alpha.q q-value threshold for determining significance for \code{empirical power}. Default 0.1. This will change \code{fdr.output} for "sam". 
 #' @param p.adj Character. Method for p-value adjustment. See \code{p.adjust} for details. Default "fdr"
 #' @param R Integer. Number of times to run the tests. Default 5
-#' @param relative Logical. If TRUE (default) abundances are made relative for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea", and there is an offset of \code{log(LibrarySize)} for "mva", "neb", "poi", "qpo", "zpo" and "znb"
+#' @param relative Logical. TRUE (default) for compositional data, FALSE for absolute abundances or pre-normalized data.
 #' @param k Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. \code{k=c(5,10,15)}: 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default NULL, which will spike 2 percent of the total amount of features in each tertile (a total of 6 percent), but minimum c(5,5,5)
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.
 #' @param rng.seed Numeric. Seed for reproducibility. Default 123
 #' @param args List. A list with lists of arguments passed to the different methods. See details for more.
-#' @param out.all If TRUE linear models will output results and p-values from \code{anova}/\code{drop1}, ds2/ds2x will run LRT and not Wald test, erq and erq2 will produce one p-value for the predictor, and lim, lli, lli2, lim, vli will run F-tests. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise
+#' @param out.all If TRUE linear models will output results and p-values from \code{anova}/\code{drop1}, ds2/ds2x will run LRT and not Wald test, erq and erq2 will produce one p-value for the predictor, and limma will run F-tests. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise
 #' @param core.check If TRUE will make an interactive check that the amount of cores specified are desired. Only if \code{cores>20}. This is to ensure that the function doesn't automatically overloads a server with workers.  
 #' @param verbose If TRUE will print informative messages
 #' @details Currently implemented methods: see \code{testDA}
@@ -69,6 +69,7 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
   # Set seed
   set.seed(rng.seed)
   if(verbose) message(paste("Seed is set to",rng.seed))
+  if(verbose) message(paste("Running on",cores,"cores"))
 
   # Create some random seeds for each run
   seeds <- rpois(R, lambda = (1:R)*1e6)
@@ -105,6 +106,9 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
     num.pred <- FALSE
     if(length(levels(as.factor(predictor))) > length(unique(predictor))) stop("predictor has more levels than unique values!")
     if(verbose) message(paste("predictor is assumed to be a categorical variable with",length(unique(predictor)),"levels:",paste(levels(as.factor(predictor)),collapse = ", ")))
+  }
+  if(!is.null(paired)){
+    if(verbose) message(paste("The paired variable has",length(unique(paired)),"levels"))
   }
   
   # out.all
@@ -195,6 +199,8 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
                                wil = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired, relative,p.adj),wil.DAargs)),
                                ttt = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired, relative,p.adj),ttt.DAargs)),
                                ltt = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,relative,p.adj),ltt.DAargs)),
+                               ttc = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,p.adj),ttc.DAargs)),
+                               tta = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,p.adj),tta.DAargs)),
                                ltt2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,p.adj),ltt2.DAargs)),
                                neb = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,covars,relative,out.all,p.adj),neb.DAargs)),
                                erq = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,covars,out.all,p.adj),erq.DAargs)),
@@ -206,16 +212,22 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
                                ds2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,covars,out.all,p.adj),ds2.DAargs)),
                                ds2x = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,covars,out.all,p.adj),ds2x.DAargs)),
                                per = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired, relative,p.adj),per.DAargs)),
-                               bay = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,p.adj),bay.DAargs)),
+                               bay = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]]),bay.DAargs)),
                                adx = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]]),adx.DAargs)),
                                lim = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,covars,relative,out.all,p.adj),lim.DAargs)),
+                               lic = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,covars,out.all,p.adj),lic.DAargs)),
+                               lia = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,covars,out.all,p.adj),lia.DAargs)),
                                lli = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,covars,relative,out.all,p.adj),lli.DAargs)),
                                lli2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,covars,out.all,p.adj),lli2.DAargs)),
                                kru = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],relative,p.adj),kru.DAargs)),
+                               aoa = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],covars,p.adj),aoa.DAargs)),
+                               aoc = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],covars,p.adj),aoc.DAargs)),
                                aov = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],covars,relative,p.adj),aov.DAargs)),
                                lao = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],covars,relative,p.adj),lao.DAargs)),
                                lao2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],covars,p.adj),lao2.DAargs)),
                                lrm = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,covars, relative,out.all,p.adj),lrm.DAargs)),
+                               lmc = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,covars,out.all,p.adj),lmc.DAargs)),
+                               lma = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,covars,out.all,p.adj),lma.DAargs)),
                                llm = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,covars,relative,out.all,p.adj),llm.DAargs)),
                                llm2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,covars,out.all,p.adj),llm2.DAargs)),
                                rai = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],p.adj),rai.DAargs)),
@@ -228,12 +240,11 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
                                znb = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],covars,relative,out.all,p.adj),znb.DAargs)),
                                fri = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,relative,p.adj),fri.DAargs)),
                                qua = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,relative,p.adj),qua.DAargs)),
-                               anc = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,sig = alpha.q),anc.DAargs)),
                                sam = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,fdr.output = alpha.q),sam.DAargs))),
                         
                         error = function(e) NULL)
     
-    if(!i %in% c("anc","sam","adx")){
+    if(!i %in% c("sam","adx")){
       res.sub[is.na(res.sub$pval),"pval"] <- 1
       res.sub[is.na(res.sub$pval.adj),"pval.adj"] <- 1
     }
@@ -263,14 +274,6 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
   final.results <- foreach(r = tests.par, .combine = rbind) %do% {
 
     res.sub <- results[names(results) == r][[1]]
-    
-    # Make pseudo-pval for ANCOM
-    if(test == "anc"){
-      suppressWarnings(min.d <- min(res.sub[res.sub$Detected == "Yes","W"]))
-      if(min.d == Inf) min.d <- max(res.sub$W)+1
-      res.sub$pval <- 1/(res.sub$W+1) * alpha.p/(1/(min.d+1))
-      res.sub$pval.adj <- 1/(res.sub$W+1) * alpha.q/(1/(min.d+1))
-    }
     
     # Make pseudo-pval for SAMseq
     if(test == "sam"){
@@ -331,7 +334,7 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
                               AUC = auc,
                               FPR = fpr,
                               FDR = fdr,
-                              SDR = sdr)
+                              Power = sdr)
     rownames(df.combined) <- NULL
 
     return(df.combined)

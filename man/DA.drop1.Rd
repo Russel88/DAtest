@@ -16,5 +16,5 @@ DA.drop1(results, test = "Chisq", p.adj = "fdr", ...)
 \item{...}{Additional arguments for \code{drop1} function}
 }
 \description{
-Works on "zpo", "znb", "qpo", "neb", "poi". Non-paired "lrm", "llm", "llm2"
+Works on "zpo", "znb", "qpo", "neb", "poi". Non-paired "lrm", "llm", "llm2", "lma", "lmc"
 }

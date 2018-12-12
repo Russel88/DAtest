@@ -4,9 +4,9 @@
 \alias{DA.llm2}
 \title{Log linear regression}
 \usage{
-DA.llm2(data, predictor, paired = NULL, covars = NULL, out.all = NULL,
-  p.adj = "fdr", delta = 0.001, coeff = 2, coeff.ref = 1,
-  allResults = FALSE, ...)
+DA.llm2(data, predictor, paired = NULL, covars = NULL,
+  out.all = NULL, p.adj = "fdr", delta = 0.001, allResults = FALSE,
+  ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -22,10 +22,6 @@ DA.llm2(data, predictor, paired = NULL, covars = NULL, out.all = NULL,
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details}
 
 \item{delta}{Numeric. Pseudocount for the log transformation. Default 0.001}
-
-\item{coeff}{Integer. The p-value and log2FoldChange will be associated with this coefficient. Default 2, i.e. the 2. level of the \code{predictor}.}
-
-\item{coeff.ref}{Integer. Reference level of the \code{predictor}. Will only affect the log2FC and ordering columns on the output. Default the intercept, = 1}
 
 \item{allResults}{If TRUE will return raw results from the \code{lm}/\code{lme} function}
 

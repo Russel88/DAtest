@@ -15,7 +15,7 @@ powerDA(data, predictor, paired = NULL, covars = NULL, test = NULL,
 
 \item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. If the \code{predictor} is numeric it will be treated as such in the analyses}
 
-\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. Only for "anc", "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "ds2x", "lrm", "llm", "llm2", "lim", "lli", "lli2", "mva", and "zig"}
+\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation.}
 
 \item{covars}{Either a named list with covariates, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}}
 
@@ -25,13 +25,13 @@ powerDA(data, predictor, paired = NULL, covars = NULL, test = NULL,
 
 \item{alpha.p}{p-value threshold for false positive rates. Default 0.05}
 
-\item{alpha.q}{q-value threshold for determining significance for \code{empirical power}. Default 0.1. This will change \code{fdr.output} for "sam" and \code{sig} for "anc".}
+\item{alpha.q}{q-value threshold for determining significance for \code{empirical power}. Default 0.1. This will change \code{fdr.output} for "sam".}
 
 \item{p.adj}{Character. Method for p-value adjustment. See \code{p.adjust} for details. Default "fdr"}
 
 \item{R}{Integer. Number of times to run the tests. Default 5}
 
-\item{relative}{Logical. If TRUE (default) abundances are made relative for "ttt", "ltt", "wil", "per", "aov", "lao", "kru", "lim", "lli", "lrm", "llm", "spe" and "pea", and there is an offset of \code{log(LibrarySize)} for "mva", "neb", "poi", "qpo", "zpo" and "znb"}
+\item{relative}{Logical. TRUE (default) for compositional data, FALSE for absolute abundances or pre-normalized data.}
 
 \item{k}{Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. \code{k=c(5,10,15)}: 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default NULL, which will spike 2 percent of the total amount of features in each tertile (a total of 6 percent), but minimum c(5,5,5)}
 
@@ -41,7 +41,7 @@ powerDA(data, predictor, paired = NULL, covars = NULL, test = NULL,
 
 \item{args}{List. A list with lists of arguments passed to the different methods. See details for more.}
 
-\item{out.all}{If TRUE linear models will output results and p-values from \code{anova}/\code{drop1}, ds2/ds2x will run LRT and not Wald test, erq and erq2 will produce one p-value for the predictor, and lim, lli, lli2, lim, vli will run F-tests. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise}
+\item{out.all}{If TRUE linear models will output results and p-values from \code{anova}/\code{drop1}, ds2/ds2x will run LRT and not Wald test, erq and erq2 will produce one p-value for the predictor, and limma will run F-tests. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise}
 
 \item{core.check}{If TRUE will make an interactive check that the amount of cores specified are desired. Only if \code{cores>20}. This is to ensure that the function doesn't automatically overloads a server with workers.}
 

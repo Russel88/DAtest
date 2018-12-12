@@ -4,13 +4,13 @@
 \alias{summary.DA}
 \title{Summary of results from \code{testDA}}
 \usage{
-\method{summary}{DA}(object, sort = "Score", boot = TRUE, prob = c(0.05,
-  0.95), N = 1000, boot.seed = 1, ...)
+\method{summary}{DA}(object, sort = "Score", boot = TRUE,
+  prob = c(0.05, 0.95), N = 1000, boot.seed = 1, decimals = 2, ...)
 }
 \arguments{
 \item{object}{The output from the \code{testDA} function}
 
-\item{sort}{Sort methods by \code{c("AUC","FPR","Spike.detect.rate","Score")}}
+\item{sort}{Sort methods by \code{c("AUC","FPR","Power","Score")}}
 
 \item{boot}{If TRUE will use bootstrap for confidence limits of the Score, else will compute the limits from the original table. Recommended to be TRUE unless \code{R >= 100} in \code{testDA}}
 
@@ -19,6 +19,8 @@
 \item{N}{Number of bootstraps. Default 1000}
 
 \item{boot.seed}{Random seed for reproducibility of bootstraps}
+
+\item{decimals}{Precision in output. Default 2}
 
 \item{...}{Additional arguments for \code{print}}
 }

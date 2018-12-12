@@ -301,7 +301,7 @@ p-values are expected to be below 0.05. We therefore want an FPR at 0.05
 or lower.
 
 FDR indicates the proportion of significant features (after multiple
-correction) that we're not spiked and therefore shouldn't be
+correction) that were not spiked and therefore shouldn't be
 significant. This should be as low as possible.
 
 AUC is estimated by ranking all features by their respective p-value,

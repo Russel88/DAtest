@@ -12,16 +12,16 @@ DA.lsmeans(results, variable = "predictor", predictor = NULL,
 
 \item{variable}{Which variable to test. Default predictor. Alternatively, the name of a covar}
 
-\item{predictor}{If results come from a paired "lrm", "llm" or "llm2" supply the original predictor variable in the form of as a vector}
+\item{predictor}{If results come from a paired "lrm", "llm", "lma", "lmc" or "llm2" supply the original predictor variable in the form of as a vector}
 
-\item{covars}{If results come from a paired "lrm", "llm" or "llm2" supply the original covars in the form of a named list}
+\item{covars}{If results come from a paired "lrm", "lma", "lmc", "llm" or "llm2" supply the original covars in the form of a named list}
 
 \item{p.adj}{P-value adjustment method. See \code{p.adjust} for details}
 
 \item{...}{Additional arguments for \code{lsmeans} function}
 }
 \description{
-Pairwise testing on predictor and covars. Works on "poi", "neb", "lrm", "llm", "llm2", "qpo", "znb", "zpo".
+Pairwise testing on predictor and covars. Works on "poi", "neb", "lrm", "lma", "lmc", "llm", "llm2", "qpo", "znb", "zpo".
 }
 \details{
 Require the \code{lsmeans} package

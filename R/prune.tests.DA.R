@@ -6,9 +6,10 @@
 #' @param covars Named list with covariables
 #' @param relative Include tests that work with relative abundances (TRUE) or only absolute abundances (FALSE)
 #' @param decimal Exclude tests that do not work with decimals (TRUE)
+#' @param zeroes If FALSE will exclude tests that include zero-inflation
 #' @export
 
-prune.tests.DA <- function(tests, predictor, paired, covars, relative, decimal){
+prune.tests.DA <- function(tests, predictor, paired, covars, relative, decimal, zeroes){
 
   # Prune test argument if packages are not installed
   if(!"baySeq" %in% rownames(installed.packages())) tests <- tests[tests != "bay"]
@@ -16,21 +17,25 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative, decimal){
   if(!"edgeR" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("ere","erq","ere2","erq2")]
   if(!"metagenomeSeq" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("msf","zig")]
   if(!"DESeq2" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("ds2","ds2x")]
-  if(!"limma" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("lim","lli","lli2","vli")]
-  if(!"statmod" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("lim","lli","lli2","vli")]
+  if(!"limma" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("lim","lli","lli2","vli","lia","lic")]
+  if(!"statmod" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("lim","lli","lli2","vli","lia","lic")]
   if(!"RAIDA" %in% rownames(installed.packages())) tests <- tests[tests != "rai"]
   if(!"pscl" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("zpo","znb")]
-  if(!"ancom.R" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("anc")]
   if(!"samr" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("sam")]
-  if(!"mvabund" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("mvabund")]
+  if(!"mvabund" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("mva")]
   
   # Exclude tests that do not work with a paired argument
   if(!is.null(paired)){
-    tests <- tests[!tests %in% c("qpo","zpo","znb","bay","adx","ere","ere2","msf","aov","lao","lao2","kru","rai","spe","pea")]
+    tests <- tests[!tests %in% c("qpo","zpo","znb","bay","adx","ere","ere2","msf","aov","lao","lao2","aoa","aoc","kru","rai","spe","pea")]
     # Exclude tests that only work with one value for each combination of predictor and paired arguments
     if(!all(table(paired,predictor) == 1)){
-      tests <- tests[!tests %in% c("ttt","ltt","ltt2","wil","per","fri","qua","sam")]
+      tests <- tests[!tests %in% c("ttt","ltt","ltt2","wil","per","fri","qua","sam","tta","ttc")]
     }
+    # Exclude if too few levels
+    if(length(unique(levels(paired))) < 5){
+      tests <- tests[!tests %in% c("lrm","llm","llm2","lim","lli","lli2","vli","neb","poi","zig","lma","lmc","lia","lic")]
+    }
+    
   } else {
     # Exclude if there is no paired
     tests <- tests[!tests %in% c("fri","qua")]
@@ -38,19 +43,19 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative, decimal){
   
   # Only include some tests if there are more than two levels in predictor
   if(length(levels(as.factor(predictor))) > 2){
-    tests <- tests[tests %in% c("mva","sam","anc","qua","fri","znb","zpo","vli","qpo","poi","neb","erq","erq2","ds2","ds2x","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe","pea","zig")]
+    tests <- tests[tests %in% c("bay","sam","qua","fri","znb","zpo","vli","qpo","poi","neb","erq","erq2","ds2","ds2x","lim","lli","lli2","aov","lao","lao2","aoa","aoc","kru","lrm","llm","llm2","spe","pea","zig","lma","lmc","lia","lic")]
     # Exclude if only works for two-class paired
     if(!is.null(paired)){
       tests <- tests[!tests %in% c("sam")]
     } 
   } else {
     # Excluded tests if levels in predictor is exactly 2
-    tests <- tests[!tests %in% c("aov","lao","lao2","kru","spe","pea","fri","qua","lrm","llm","llm2")]
+    tests <- tests[!tests %in% c("aov","lao","lao2","aoa","aoc","kru","spe","pea","fri","qua","lrm","llm","llm2","lma","lmc")]
   }
   
   # Only include specific tests if predictor is numeric
   if(is.numeric(predictor)){
-    tests <- tests[tests %in% c("mva","sam","znb","zpo","vli","qpo","poi","neb","erq","erq2","lim","lli","lli2","lrm","llm","llm2","spe","pea")]
+    tests <- tests[tests %in% c("mva","sam","znb","zpo","vli","qpo","poi","neb","erq","erq2","lim","lli","lli2","lrm","llm","llm2","spe","pea","lma","lmc","lia","lic")]
   } else {
     # Exclude if not numeric
     tests <- tests[!tests %in% c("spe","pea")]
@@ -58,7 +63,7 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative, decimal){
   
   # Exclude if relative is false
   if(relative == FALSE){
-    tests <- tests[!tests %in% c("sam","anc","vli","ltt2","erq","ere","ere2","erq2","msf","zig","bay","ds2","ds2x","adx","lli2","lao2","llm2","rai")]
+    tests <- tests[!tests %in% c("sam","vli","ltt2","erq","ere","ere2","erq2","msf","zig","bay","ds2","ds2x","adx","lli2","lao2","aoa","aoc","llm2","rai","tta","ttc","lma","lmc","lia","lic")]
   } else {
     # Exclude if relative is TRUE
     tests <- tests[!tests %in% c("lrm","lim")]
@@ -71,7 +76,12 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative, decimal){
   
   # Only include if covars are present
   if(!is.null(covars)){
-    tests <- tests[tests %in% c("mva","znb","zpo","vli","qpo","poi","ds2","ds2x","neb","erq","erq2","zig","lrm","llm","llm2","lim","lli","lli2","aov","lao","lao2")]
+    tests <- tests[tests %in% c("mva","znb","zpo","vli","qpo","poi","ds2","ds2x","neb","erq","erq2","zig","lrm","llm","llm2","lim","lli","lli2","aov","lao","lao2","aoa","aoc","lma","lmc","lia","lic")]
+  }
+  
+  # Exclude if no zeroes
+  if(!zeroes){
+    tests <- tests[!tests %in% c("znb","zpo")]
   }
   
   return(tests)

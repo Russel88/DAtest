@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{The output from the \code{testDA} function}
 
-\item{sort}{Sort methods by median \code{c("AUC","FDR","Spike.detect.rate","Score")}}
+\item{sort}{Sort methods by median \code{c("AUC","FDR","Power","Score")}}
 
 \item{p}{Logical. Should the p-value distribution be plotted (only p-values from non-spiked features)}
 

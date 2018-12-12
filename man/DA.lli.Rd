@@ -4,9 +4,9 @@
 \alias{DA.lli}
 \title{LIMMA}
 \usage{
-DA.lli(data, predictor, paired = NULL, covars = NULL, relative = TRUE,
-  out.all = NULL, p.adj = "fdr", delta = 1, coeff = 2,
-  allResults = FALSE, ...)
+DA.lli(data, predictor, paired = NULL, covars = NULL,
+  relative = TRUE, out.all = NULL, p.adj = "fdr", delta = 1,
+  coeff = 2, allResults = FALSE, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}

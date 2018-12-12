@@ -4,14 +4,12 @@
 \alias{DA.bay}
 \title{baySeq}
 \usage{
-DA.bay(data, predictor, p.adj = "fdr", allResults = FALSE, ...)
+DA.bay(data, predictor, allResults = FALSE, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
 
 \item{predictor}{The predictor of interest. Factor, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation}
-
-\item{p.adj}{Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details}
 
 \item{allResults}{If TRUE will return raw results from the \code{getLikelihoods} function}
 

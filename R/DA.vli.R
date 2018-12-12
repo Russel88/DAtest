@@ -16,7 +16,7 @@ DA.vli <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL
   
   suppressMessages(library(limma))
   if(!is.null(paired)) suppressMessages(library(statmod))
-
+  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
     DAdata <- DA.phyloseq(data, predictor, paired, covars)

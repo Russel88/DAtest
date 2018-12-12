@@ -4,8 +4,9 @@
 \alias{DA.znb}
 \title{Zero inflated Negative Binomial glm}
 \usage{
-DA.znb(data, predictor, covars = NULL, relative = TRUE, out.all = NULL,
-  p.adj = "fdr", coeff = 2, coeff.ref = 1, allResults = FALSE, ...)
+DA.znb(data, predictor, covars = NULL, relative = TRUE,
+  out.all = NULL, p.adj = "fdr", coeff = 2, coeff.ref = 1,
+  allResults = FALSE, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}

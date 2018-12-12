@@ -5,19 +5,20 @@
 \title{Estimate runtime of \code{testDA} on large datasets}
 \usage{
 runtimeDA(data, predictor, paired = NULL, covars = NULL,
-  subsamples = c(500, 1000, 1500, 2000), subsamples.slow = c(100, 150, 200,
-  250), tests = c("sam", "qua", "fri", "vli", "qpo", "pea", "wil", "ttt",
-  "ltt", "ltt2", "ere", "ere2", "msf", "zig", "lim", "lli", "lli2", "aov",
-  "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe"), tests.slow = c("neb",
-  "bay", "per", "zpo", "znb", "rai", "adx", "ds2", "ds2x", "poi", "erq",
-  "erq2"), cores = (detectCores() - 1), ...)
+  subsamples = c(500, 1000, 1500, 2000), subsamples.slow = c(100, 150,
+  200, 250), tests = c("sam", "qua", "fri", "vli", "qpo", "pea", "wil",
+  "ttt", "ltt", "ltt2", "ere", "ere2", "msf", "zig", "lim", "lli", "lli2",
+  "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe", "aoa", "aoc",
+  "aoi", "tta", "ttc", "tti", "lma", "lmc", "lmi", "lia", "lic", "lii"),
+  tests.slow = c("mva", "neb", "bay", "per", "zpo", "znb", "rai", "adx",
+  "ds2", "ds2x", "poi", "erq", "erq2"), cores = (detectCores() - 1), ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
 
 \item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. If the \code{predictor} is numeric it will be treated as such in the analyses}
 
-\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. Only for "anc", "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"}
+\item{paired}{For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. Only for "poi", "per", "ttt", "ltt", "ltt2", "neb", "wil", "erq", "ds2", "lrm", "llm", "llm2", "lim", "lli", "lli2" and "zig"}
 
 \item{covars}{Either a named list with covariates, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}}
 
@@ -37,7 +38,7 @@ runtimeDA(data, predictor, paired = NULL, covars = NULL,
 A data.frame with estimated runtimes for 1 run
 }
 \description{
-Estimate the runtime of \code{testDA} from running on a subset of the features. Intended for datasets with at least 5000 features.
+Estimate the runtime of \code{testDA} from running on a subset of the features. Intended for datasets with at least 2000 features.
 }
 \details{
 Outputs the estimated times for running each method 1 time. With cores=1 the runtime will be the sum of them all. With more cores the actual runtime will decrease asymptotically towards the slowest test

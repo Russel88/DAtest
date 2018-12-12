@@ -3,12 +3,11 @@
 #' Implementation of baySeq for \code{DAtest}
 #' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Factor, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation
-#' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
 #' @param allResults If TRUE will return raw results from the \code{getLikelihoods} function
 #' @param ... Additional arguments to the \code{getPriors.NB} and \code{getLikelihoods} functions
 #' @export
 
-DA.bay <- function(data, predictor, p.adj = "fdr", allResults = FALSE, ...){
+DA.bay <- function(data, predictor, allResults = FALSE, ...){
   
   suppressMessages(library(baySeq))
   
@@ -37,12 +36,9 @@ DA.bay <- function(data, predictor, p.adj = "fdr", allResults = FALSE, ...){
   
   # Extract results
   tc <- topCounts(CD, group = "DE", number=nrow(count_table))
-  tc <- tc[,c(1,rev(ncol(tc)-0:4))]
+  tc <- tc[,c(1,rev(ncol(tc)-0:3))]
   
-  if(is.null(tc$ordering))
-    output_df <- data.frame(Feature = as.character(tc$annotation), pval = 1 - tc$Likelihood, pval.adj = p.adjust(1 - tc$Likelihood, method = p.adj))
-  if(!is.null(tc$ordering))
-    output_df <- data.frame(Feature = as.character(tc$annotation), pval = 1 - tc$Likelihood, pval.adj = p.adjust(1 - tc$Likelihood, method = p.adj), ordering = tc$ordering)
+  output_df <- data.frame(Feature = as.character(tc$name), pval = (1 - tc$likes), pval.adj = tc$FDR.DE, ordering = tc$DE)
   
   output_df$Method <- "baySeq (bay)"
 

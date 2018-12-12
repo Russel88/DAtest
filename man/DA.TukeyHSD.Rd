@@ -16,5 +16,5 @@ DA.TukeyHSD(results, variable = "predictor", p.adj = "fdr", ...)
 \item{...}{Additional arguments for \code{TukeyHSD} function}
 }
 \description{
-Works on "aov", "lao", "lao2"
+Works on "aov", "lao", "lao2", "aoc", "aoa"
 }

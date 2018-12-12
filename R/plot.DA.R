@@ -1,7 +1,7 @@
 #' Plotting results from \code{testDA}
 #'
 #' @param x The output from the \code{testDA} function
-#' @param sort Sort methods by median \code{c("AUC","FDR","Spike.detect.rate","Score")}
+#' @param sort Sort methods by median \code{c("AUC","FDR","Power","Score")}
 #' @param p Logical. Should the p-value distribution be plotted (only p-values from non-spiked features)
 #' @param bins Integer. Number of bins in p-value histograms
 #' @param ... Additional arguments for \code{ggdraw}
@@ -34,13 +34,13 @@ plot.DA <- function(x, sort = "Score", p = FALSE, bins = 20, ...){
     ## Find medians
     auc.median <- aggregate(AUC ~ Method, data = x$table, FUN = function(x) round(median(x),3))
     fdr.median <- aggregate(FDR ~ Method, data = x$table, FUN = function(x) round(median(x),3))
-    sdr.median <- aggregate(Spike.detect.rate ~ Method, data = x$table, FUN = function(x) round(median(x),3))
+    sdr.median <- aggregate(Power ~ Method, data = x$table, FUN = function(x) round(median(x),3))
     
     ## Merge
     df <- merge(merge(auc.median,fdr.median, by = "Method"),sdr.median, by = "Method")
     
     # Score
-    df$Score <- round((df$AUC-0.5) * df$Spike.detect.rate - df$FDR,3)
+    df$Score <- round((df$AUC-0.5) * df$Power - df$FDR,3)
     
     # Sort the reults
     if(sort == "AUC") {
@@ -49,8 +49,8 @@ plot.DA <- function(x, sort = "Score", p = FALSE, bins = 20, ...){
     if(sort == "FDR") {
       x$table$Method <- factor(x$table$Method, levels = df[order(df$FDR, decreasing = FALSE),"Method"])
     }
-    if(sort == "Spike.detect.rate") {
-      x$table$Method <- factor(x$table$Method, levels = df[order(df$Spike.detect.rate, decreasing = TRUE),"Method"])
+    if(sort == "Power") {
+      x$table$Method <- factor(x$table$Method, levels = df[order(df$Power, decreasing = TRUE),"Method"])
     }
     if(sort == "Score") {
       x$table$Method <- factor(x$table$Method, levels = df[order(df$Score, decreasing = TRUE),"Method"])
@@ -79,11 +79,11 @@ plot.DA <- function(x, sort = "Score", p = FALSE, bins = 20, ...){
       xlab(NULL) +
       scale_y_continuous(labels=function(x) sprintf("%.2f", x))
     
-    p3 <- ggplot(x$table, aes(Method, Spike.detect.rate)) +
+    p3 <- ggplot(x$table, aes(Method, Power)) +
       theme_bw() +
       geom_point() +
       stat_summary(fun.y = median, fun.ymin = median, fun.ymax = median,geom = "crossbar",colour="red",width=0.75) +
-      ylab("Spike detect rate") +
+      ylab("Power") +
       theme(axis.text.x = element_blank(),
             panel.grid.minor = element_blank()) +
       xlab(NULL) +

@@ -1,6 +1,6 @@
 #' Run \code{drop1} on all features from \code{DAtest} results with \code{allResults = TRUE}
 #'
-#' Works on "zpo", "znb", "qpo", "neb", "poi". Non-paired "lrm", "llm", "llm2"
+#' Works on "zpo", "znb", "qpo", "neb", "poi". Non-paired "lrm", "llm", "llm2", "lma", "lmc"
 #' @param results Output from a \code{DA."test"} function with \code{allResults = TRUE}
 #' @param test Which test to use to calculate p-values. See \code{drop1} for details. Default "Chisq"
 #' @param p.adj P-value adjustment method. See \code{p.adjust} for details. Default "fdr"
@@ -9,7 +9,7 @@
 DA.drop1 <- function(results, test = "Chisq", p.adj = "fdr", ...){
   
   # Check input
-  if(is.data.frame(results) | !is.list(results)) stop("results should be the output from DA.zpo, DA.znb, DA.qpo, DA.neb, DA.poi, DA.lrm, DA.llm or DA.llm2 with allResults=TRUE")
+  if(is.data.frame(results) | !is.list(results)) stop("results should be the output from DA.zpo, DA.znb, DA.qpo, DA.neb, DA.poi, DA.lrm, DA.lma, DA.lmc, DA.llm or DA.llm2 with allResults=TRUE")
   
   # Class
   k <- 1
@@ -20,7 +20,7 @@ DA.drop1 <- function(results, test = "Chisq", p.adj = "fdr", ...){
   
   # Check class
   if(any("lme" %in% xclass)) stop("drop1 does not work on mixed-effect linear models. Use DA.anova")
-  if(!any(c("lm","glm","zeroinfl","negbin","glmerMod") %in% xclass)) stop("results should be the output from DA.zpo, DA.znb, DA.qpo, DA.neb, DA.poi, DA.lrm, DA.llm or DA.llm2 with allResults=TRUE")
+  if(!any(c("lm","glm","zeroinfl","negbin","glmerMod") %in% xclass)) stop("results should be the output from DA.zpo, DA.znb, DA.qpo, DA.neb, DA.poi, DA.lrm, DA.llm, DA.lma, DA.lmc, or DA.llm2 with allResults=TRUE")
   
   # Run tests
   xres <- lapply(results, function(x) tryCatch(drop1(x, test = test, ...),error = function(e) NA))
@@ -126,7 +126,7 @@ DA.drop1 <- function(results, test = "Chisq", p.adj = "fdr", ...){
 
 #' Run \code{anova} on all features from \code{DAtest} results with \code{allResults = TRUE}
 #'
-#' Works on "lrm", "llm", "llm2". Non-paired "neb"
+#' Works on "lrm", "llm", "llm2", "lma", "lmc". Non-paired "neb"
 #' @param results Output from a \code{DA."test"} function with \code{allResults = TRUE}
 #' @param p.adj P-value adjustment method. See \code{p.adjust for details}. Default "fdr"
 #' @param ... Additional arguments for \code{anova} function
@@ -134,7 +134,7 @@ DA.drop1 <- function(results, test = "Chisq", p.adj = "fdr", ...){
 DA.anova <- function(results, p.adj = "fdr", ...){
   
   # Check input
-  if(is.data.frame(results) | !is.list(results)) stop("results should be the output from DA.lrm, DA.llm, DA.llm2 or DA.neb with allResults=TRUE")
+  if(is.data.frame(results) | !is.list(results)) stop("results should be the output from DA.lrm, DA.lma, DA.lmc, DA.llm, DA.llm2 or DA.neb with allResults=TRUE")
   
   # Class
   k <- 1
@@ -145,7 +145,7 @@ DA.anova <- function(results, p.adj = "fdr", ...){
   
   # Check class
   if(any("glmerMod" %in% xclass)) stop("anova does not work on mixed-effect negative binomial models. Use DA.drop1")
-  if(!any(c("lm","nebgin","lme") %in% xclass)) stop("results should be the output from DA.lrm, DA.llm, DA.llm2 or DA.neb with allResults=TRUE")
+  if(!any(c("lm","nebgin","lme") %in% xclass)) stop("results should be the output from DA.lrm, DA.lma, DA.lmc, DA.llm, DA.llm2 or DA.neb with allResults=TRUE")
   
   # Run tests
   if(all(xclass == "lme")){
@@ -183,7 +183,7 @@ DA.anova <- function(results, p.adj = "fdr", ...){
 
 #' Run \code{TukeyHSD} on all features from \code{DAtest} results with \code{allResults = TRUE}
 #'
-#' Works on "aov", "lao", "lao2"
+#' Works on "aov", "lao", "lao2", "aoc", "aoa"
 #' @param results Output from a \code{DA."test"} function with \code{allResults = TRUE}
 #' @param variable Which variable to test. Default predictor. Alternatively, the name of a covar
 #' @param p.adj P-value adjustment method. See \code{p.adjust} for details
@@ -192,7 +192,7 @@ DA.anova <- function(results, p.adj = "fdr", ...){
 DA.TukeyHSD <- function(results, variable = "predictor", p.adj = "fdr", ...){
   
   # Check input
-  if(is.data.frame(results) | !is.list(results)) stop("results should be the output from DA.aov, DA.lao or DA.lao2 with allResults=TRUE")
+  if(is.data.frame(results) | !is.list(results)) stop("results should be the output from DA.aov, DA.aoa, DA.aoc, DA.lao or DA.lao2 with allResults=TRUE")
   
   # Class
   k <- 1
@@ -202,7 +202,7 @@ DA.TukeyHSD <- function(results, variable = "predictor", p.adj = "fdr", ...){
   xclass <- class(results[[k]])
   
   # Check class and results
-  if(xclass[1] != "aov") stop("results should be the output from DA.aov, DA.lao or DA.lao2 with allResults=TRUE")
+  if(xclass[1] != "aov") stop("results should be the output from DA.aov, DA.aoa, DA.aoc, DA.lao or DA.lao2 with allResults=TRUE")
   if(!variable %in% attr(results[[k]]$terms,"term.labels")) stop(paste(variable,"not found in the models."))
   
   # Run test
@@ -224,20 +224,20 @@ DA.TukeyHSD <- function(results, variable = "predictor", p.adj = "fdr", ...){
 
 #' Run \code{lsmeans} on all features from \code{DAtest} results with \code{allResults = TRUE}
 #'
-#' Pairwise testing on predictor and covars. Works on "poi", "neb", "lrm", "llm", "llm2", "qpo", "znb", "zpo".
+#' Pairwise testing on predictor and covars. Works on "poi", "neb", "lrm", "lma", "lmc", "llm", "llm2", "qpo", "znb", "zpo".
 #' 
 #' Require the \code{lsmeans} package
 #' @param results Output from a \code{DA."test"} function with \code{allResults = TRUE}
 #' @param variable Which variable to test. Default predictor. Alternatively, the name of a covar
-#' @param predictor If results come from a paired "lrm", "llm" or "llm2" supply the original predictor variable in the form of as a vector
-#' @param covars If results come from a paired "lrm", "llm" or "llm2" supply the original covars in the form of a named list
+#' @param predictor If results come from a paired "lrm", "llm", "lma", "lmc" or "llm2" supply the original predictor variable in the form of as a vector
+#' @param covars If results come from a paired "lrm", "lma", "lmc", "llm" or "llm2" supply the original covars in the form of a named list
 #' @param p.adj P-value adjustment method. See \code{p.adjust} for details
 #' @param ... Additional arguments for \code{lsmeans} function
 #' @export
 DA.lsmeans <- function(results, variable = "predictor", predictor = NULL, covars = NULL, p.adj = "fdr", ...){
 
   # Check input
-  if(is.data.frame(results) | !is.list(results)) stop("results should be the output from DA.poi, DA.neb, DA.lrm, DA.llm, DA.llm2, DA.qpo, DA.znb or DA.zpo with allResults=TRUE")
+  if(is.data.frame(results) | !is.list(results)) stop("results should be the output from DA.poi, DA.neb, DA.lrm, DA.lma, DA.lmc, DA.llm, DA.llm2, DA.qpo, DA.znb or DA.zpo with allResults=TRUE")
 
   library(lsmeans)
   
@@ -249,11 +249,11 @@ DA.lsmeans <- function(results, variable = "predictor", predictor = NULL, covars
   xclass <- class(results[[k]])
   
   # Check class and extract covars if necessary
-  if(!any(c("lm","lme","glm","zeroinfl","negbin","glmerMod") %in% xclass)) stop("results should be the output from DA.zpo, DA.znb, DA.qpo, DA.neb, DA.poi, DA.lrm, DA.llm or DA.llm2 with allResults=TRUE")
+  if(!any(c("lm","lme","glm","zeroinfl","negbin","glmerMod") %in% xclass)) stop("results should be the output from DA.zpo, DA.znb, DA.qpo, DA.neb, DA.poi, DA.lrm, DA.lma, DA.lmc, DA.llm or DA.llm2 with allResults=TRUE")
   
   if(class(results[[k]])[1] == "lme"){
     form <<- as.formula(paste("x ~",paste(attr(results[[1]]$terms,"term.labels"), collapse = "+")))
-    if(is.null(predictor)) stop("predictor has to be supplied for a paired lrm, llm and llm2")
+    if(is.null(predictor)) stop("predictor has to be supplied for a paired lrm, lma, lmc, llm and llm2")
     if(!is.null(covars)){
       for(i in 1:length(covars)){
         assign(names(covars)[i],covars[[i]])
