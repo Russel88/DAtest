@@ -32,7 +32,7 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative, decimal, 
       tests <- tests[!tests %in% c("ttt","ltt","ltt2","wil","per","fri","qua","sam","tta","ttc")]
     }
     # Exclude if too few levels
-    if(length(unique(levels(paired))) < 5){
+    if(length(unique(paired)) < 5){
       tests <- tests[!tests %in% c("lrm","llm","llm2","lim","lli","lli2","vli","neb","poi","zig","lma","lmc","lia","lic")]
     }
     
@@ -42,7 +42,7 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative, decimal, 
   }
   
   # Only include some tests if there are more than two levels in predictor
-  if(length(levels(as.factor(predictor))) > 2){
+  if(length(unique(predictor)) > 2){
     tests <- tests[tests %in% c("bay","sam","qua","fri","znb","zpo","vli","qpo","poi","neb","erq","erq2","ds2","ds2x","lim","lli","lli2","aov","lao","lao2","aoa","aoc","kru","lrm","llm","llm2","spe","pea","zig","lma","lmc","lia","lic")]
     # Exclude if only works for two-class paired
     if(!is.null(paired)){
