@@ -1,3 +1,13 @@
 language: r
 sudo: false
 r: release
+
+bioc_packages:
+- phyloseq
+- edgeR
+- limma
+- metagenomeSeq
+- baySeq
+- DESeq2
+- ALDEx2
+- impute
