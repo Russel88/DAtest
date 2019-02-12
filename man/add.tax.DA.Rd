@@ -6,6 +6,11 @@
 \usage{
 add.tax.DA(data, res)
 }
+\arguments{
+\item{data}{phyloseq object}
+
+\item{res}{data.frame with results}
+}
 \description{
 Internal function
 }

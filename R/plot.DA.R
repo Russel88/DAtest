@@ -8,6 +8,7 @@
 #' @import ggplot2
 #' @importFrom cowplot ggdraw
 #' @importFrom cowplot draw_plot
+#' @importFrom graphics pairs plot
 #' @export
 
 plot.DA <- function(x, sort = "Score", p = FALSE, bins = 20, ...){
@@ -21,7 +22,7 @@ plot.DA <- function(x, sort = "Score", p = FALSE, bins = 20, ...){
     df.all <- df.all[!df.all$Method %in% c("ANCOM (anc)","SAMseq (sam)"),]
     
     ## Plot
-    ggplot(df.all, aes(pval)) +
+    ggplot(df.all, aes_string(x = "pval")) +
       theme_bw() +
       geom_histogram(bins=bins) +
       facet_wrap(~Method, scales = "free_y") +
@@ -57,7 +58,7 @@ plot.DA <- function(x, sort = "Score", p = FALSE, bins = 20, ...){
     }
     
     # Define FDR and AUC plots
-    p1 <- ggplot(x$table, aes(Method, FDR)) +
+    p1 <- ggplot(x$table, aes_string(x = "Method", y = "FDR")) +
       theme_bw() +
       coord_cartesian(ylim = c(0,1)) +
       geom_point() +
@@ -67,7 +68,7 @@ plot.DA <- function(x, sort = "Score", p = FALSE, bins = 20, ...){
       xlab(NULL) +
       theme(panel.grid.minor = element_blank())
     
-    p2 <- ggplot(x$table, aes(Method, AUC)) +
+    p2 <- ggplot(x$table, aes_string(x = "Method", y = "AUC")) +
       theme_bw() +
       coord_cartesian(ylim = c(min(x$table$AUC, 0.45),1)) +
       geom_hline(yintercept = 0.5, colour = "red") +
@@ -79,7 +80,7 @@ plot.DA <- function(x, sort = "Score", p = FALSE, bins = 20, ...){
       xlab(NULL) +
       scale_y_continuous(labels=function(x) sprintf("%.2f", x))
     
-    p3 <- ggplot(x$table, aes(Method, Power)) +
+    p3 <- ggplot(x$table, aes_string(x = "Method", y = "Power")) +
       theme_bw() +
       geom_point() +
       stat_summary(fun.y = median, fun.ymin = median, fun.ymax = median,geom = "crossbar",colour="red",width=0.75) +

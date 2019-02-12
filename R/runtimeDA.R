@@ -19,8 +19,8 @@
 #' @importFrom parallel detectCores
 #' @export
 runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples = c(500,1000,1500,2000), subsamples.slow = c(100,150,200,250), 
-                      tests =  c("sam", "qua", "fri", "vli", "qpo", "pea", "wil", "ttt", "ltt", "ltt2","ere", "ere2", "msf", "zig", "lim", "lli", "lli2", "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe", "aoa", "aoc", "aoi", "tta", "ttc", "tti", "lma", "lmc", "lmi", "lia", "lic", "lii"), 
-                      tests.slow = c("mva", "neb", "bay", "per", "zpo", "znb", "rai", "adx", "ds2", "ds2x", "poi", "erq", "erq2"), cores = (detectCores()-1), ...){
+                      tests =  c("sam", "qua", "fri", "vli", "qpo", "pea", "wil", "ttt", "ltt", "ltt2","ere", "ere2", "msf", "zig", "lim", "lli", "lli2", "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe", "aoa", "aoc", "tta", "ttc", "lma", "lmc", "lia", "lic"), 
+                      tests.slow = c("mva", "neb", "bay", "per", "zpo", "znb", "adx", "ds2", "ds2x", "poi", "erq", "erq2"), cores = (detectCores()-1), ...){
   
   stopifnot(exists("data"),exists("predictor"))
 
@@ -74,16 +74,16 @@ runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples 
   }
   
   # Run subsets fast
+  count_table <- count_table[order(rowSums(count_table), decreasing = TRUE), ]
+  
   message("Running fast methods")
   test.list <- list()
   for(i in 1:length(subsamples)){
     cat(paste("\n",subsamples[i],"features"),fill = TRUE)
-    # Subset and ensure that no samples are empty
-    j <- 0
-    while(j == 0){
-      sub <- count_table[sample(rownames(count_table),subsamples[i]),]
-      if(any(colSums(sub) == 0)) j <- 0 else j <- 1
-    }
+    # Subset
+    sub <- count_table[1:subsamples[i], ]
+    if(sum(colSums(sub) == 0) != 0) warning(paste(sum(colSums(sub) == 0),"empty samples removed"))
+    sub <- sub[, colSums(sub) > 0]
     
     # Run test
     sub.test <- testDA(sub, predictor, paired, covars, R = 1, tests = tests, cores = cores, core.check = FALSE, verbose = FALSE, ...)
@@ -95,12 +95,10 @@ runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples 
   test.slow.list <- list()
   for(i in 1:length(subsamples.slow)){
     cat(paste("\n",subsamples.slow[i],"features"),fill = TRUE)
-    # Subset and ensure that no samples are empty
-    j <- 0
-    while(j == 0){
-      sub <- count_table[sample(rownames(count_table),subsamples.slow[i]),]
-      if(any(colSums(sub) == 0)) j <- 0 else j <- 1
-    }
+    # Subset
+    sub <- count_table[1:subsamples.slow[i],]
+    if(sum(colSums(sub) == 0) != 0) warning(paste(sum(colSums(sub) == 0),"empty samples removed"))
+    sub <- sub[, colSums(sub) > 0]
     
     # Run test
     sub.test <- testDA(sub, predictor, paired, covars, R = 1, tests = tests.slow, cores = cores, core.check = FALSE, verbose = FALSE)

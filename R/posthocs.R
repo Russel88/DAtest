@@ -239,44 +239,44 @@ DA.lsmeans <- function(results, variable = "predictor", predictor = NULL, covars
   # Check input
   if(is.data.frame(results) | !is.list(results)) stop("results should be the output from DA.poi, DA.neb, DA.lrm, DA.lma, DA.lmc, DA.llm, DA.llm2, DA.qpo, DA.znb or DA.zpo with allResults=TRUE")
 
-  library(lsmeans)
+  ok <- tryCatch({
+    loadNamespace("lsmeans")
+    TRUE
+  }, error=function(...) FALSE)
   
-  # Class
-  k <- 1
-  while(class(results[[k]])[1] == "NULL"){
-    k<- k+1
-  } 
-  xclass <- class(results[[k]])
-  
-  # Check class and extract covars if necessary
-  if(!any(c("lm","lme","glm","zeroinfl","negbin","glmerMod") %in% xclass)) stop("results should be the output from DA.zpo, DA.znb, DA.qpo, DA.neb, DA.poi, DA.lrm, DA.lma, DA.lmc, DA.llm or DA.llm2 with allResults=TRUE")
-  
-  if(class(results[[k]])[1] == "lme"){
-    form <<- as.formula(paste("x ~",paste(attr(results[[1]]$terms,"term.labels"), collapse = "+")))
-    if(is.null(predictor)) stop("predictor has to be supplied for a paired lrm, lma, lmc, llm and llm2")
-    if(!is.null(covars)){
-      for(i in 1:length(covars)){
-        assign(names(covars)[i],covars[[i]])
-      }
-    }
+  if (ok){
+    # Class
+    k <- 1
+    while(class(results[[k]])[1] == "NULL"){
+      k <- k+1
+    } 
+    xclass <- class(results[[k]])
+    
+    # Check class and extract covars if necessary
+    if(!any(c("lm","lme","glm","zeroinfl","negbin","glmerMod") %in% xclass)) stop("results should be the output from DA.zpo, DA.znb, DA.qpo, DA.neb, DA.poi, DA.lrm, DA.lma, DA.lmc, DA.llm or DA.llm2 with allResults=TRUE")
+    
+    # Run test and extract p-values and estimates
+    mc <- lapply(results, function(x) 
+      tryCatch(summary(pairs(lsmeans::lsmeans(x, variable))),
+               error = function(e) NA))
+    pv <- lapply(mc, function(x) as.data.frame(x)$p.value)
+    est <- lapply(mc, function(x) as.data.frame(x)$estimate)
+    
+    # Combine results
+    pvs <- do.call(rbind,pv[lapply(pv, length) > 1])
+    est <- do.call(rbind,est[lapply(est, length) > 1])
+    colnames(pvs) <- summary(pairs(lsmeans::lsmeans(results[[k]], variable)))$contrast
+    pva <- apply(pvs, 2, function(x) p.adjust(x, method=p.adj))
+    
+    colnames(est) <- paste0("estimate_",colnames(pvs))
+    colnames(pvs) <- paste0("pval_",colnames(pvs))
+    colnames(pva) <- paste0("pval.adj_",colnames(pva))
+    
+    res <- as.data.frame(cbind(est,pvs,pva))
+    return(res)
+    
+  } else {
+    stop("lsmeans package required")
   }
 
-  # Run test and extract p-values and estimates
-  mc <- lapply(results, function(x) tryCatch(summary(pairs(lsmeans(x, variable))),error = function(e) NA))
-  pv <- lapply(mc, function(x) as.data.frame(x)$p.value)
-  est <- lapply(mc, function(x) as.data.frame(x)$estimate)
-  
-  # Combine results
-  pvs <- do.call(rbind,pv[lapply(pv, length) > 1])
-  est <- do.call(rbind,est[lapply(est, length) > 1])
-  colnames(pvs) <- summary(pairs(lsmeans(results[[k]], variable)))$contrast
-  pva <- apply(pvs, 2, function(x) p.adjust(x, method=p.adj))
-  
-  colnames(est) <- paste0("estimate_",colnames(pvs))
-  colnames(pvs) <- paste0("pval_",colnames(pvs))
-  colnames(pva) <- paste0("pval.adj_",colnames(pva))
-  
-  res <- as.data.frame(cbind(est,pvs,pva))
-  if(class(results[[k]])[1] == "lme") rm(form, envir = .GlobalEnv)
-  return(res)
 }

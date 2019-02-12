@@ -10,44 +10,54 @@
 #' @export
 
 DA.msf <- function(data, predictor, p.adj = "fdr", allResults = FALSE, ...){
-
-  suppressMessages(library(metagenomeSeq))
   
-  # Extract from phyloseq
-  if(class(data) == "phyloseq"){
-    DAdata <- DA.phyloseq(data, predictor)
-    count_table <- DAdata$count_table
-    predictor <- DAdata$predictor
+  ok <- tryCatch({
+    loadNamespace("metagenomeSeq")
+    TRUE
+  }, error=function(...) FALSE)
+  
+  if (ok){
+    # Extract from phyloseq
+    if(class(data) == "phyloseq"){
+      DAdata <- DA.phyloseq(data, predictor)
+      count_table <- DAdata$count_table
+      predictor <- DAdata$predictor
+    } else {
+      count_table <- data
+    }
+    
+    # Collect data
+    count_table <- as.data.frame.matrix(count_table)
+    mgsdata <- metagenomeSeq::newMRexperiment(counts = count_table)
+    
+    # Normalize
+    mgsp <- metagenomeSeq::cumNormStat(mgsdata)
+    mgsdata <- metagenomeSeq::cumNorm(mgsdata, mgsp)
+    
+    # The design
+    mod <- model.matrix(~predictor)
+    
+    # Fit model
+    mgsfit <- metagenomeSeq::fitFeatureModel(obj=mgsdata,mod=mod,...)
+    
+    # Extract results
+    temp_table <- metagenomeSeq::MRtable(mgsfit, number=nrow(count_table))
+    temp_table <- temp_table[!is.na(row.names(temp_table)),]
+    temp_table$Feature <- rownames(temp_table)
+    colnames(temp_table)[7] <- "pval"
+    temp_table$pval.adj <- p.adjust(temp_table$pval, method = p.adj)
+    temp_table$ordering <- NA
+    temp_table[!is.na(temp_table$logFC) & temp_table$logFC > 0,"ordering"] <- paste0(levels(as.factor(predictor))[2],">",levels(as.factor(predictor))[1])
+    temp_table[!is.na(temp_table$logFC) & temp_table$logFC < 0,"ordering"] <- paste0(levels(as.factor(predictor))[1],">",levels(as.factor(predictor))[2])
+    temp_table$Method <- "MgSeq Feature (msf)"  
+    
+    if(class(data) == "phyloseq") temp_table <- add.tax.DA(data, temp_table)
+    
+    if(allResults) return(mgsfit) else return(temp_table)
+    
   } else {
-    count_table <- data
+    stop("metagenomeSeq package required")
   }
-
-  # Collect data
-  count_table <- as.data.frame.matrix(count_table)
-  mgsdata <- newMRexperiment(counts = count_table)
   
-  # Normalize
-  mgsp <- cumNormStat(mgsdata)
-  mgsdata <- cumNorm(mgsdata, mgsp)
   
-  # The design
-  mod <- model.matrix(~predictor)
-  
-  # Fit model
-  mgsfit <- fitFeatureModel(obj=mgsdata,mod=mod,...)
-  
-  # Extract results
-  temp_table <- MRtable(mgsfit, number=nrow(count_table))
-  temp_table <- temp_table[!is.na(row.names(temp_table)),]
-  temp_table$Feature <- rownames(temp_table)
-  colnames(temp_table)[7] <- "pval"
-  temp_table$pval.adj <- p.adjust(temp_table$pval, method = p.adj)
-  temp_table$ordering <- NA
-  temp_table[!is.na(temp_table$logFC) & temp_table$logFC > 0,"ordering"] <- paste0(levels(as.factor(predictor))[2],">",levels(as.factor(predictor))[1])
-  temp_table[!is.na(temp_table$logFC) & temp_table$logFC < 0,"ordering"] <- paste0(levels(as.factor(predictor))[1],">",levels(as.factor(predictor))[2])
-  temp_table$Method <- "MgSeq Feature (msf)"  
-
-  if(class(data) == "phyloseq") temp_table <- add.tax.DA(data, temp_table)
-  
-  if(allResults) return(mgsfit) else return(temp_table)
 }

@@ -14,90 +14,99 @@
 
 DA.erq <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL, p.adj = "fdr", coeff = 2, allResults = FALSE, ...){
   
-  suppressMessages(library(edgeR))
+  ok <- tryCatch({
+    loadNamespace("edgeR")
+    TRUE
+  }, error=function(...) FALSE)
   
-  # Extract from phyloseq
-  if(class(data) == "phyloseq"){
-    DAdata <- DA.phyloseq(data, predictor, paired, covars)
-    count_table <- DAdata$count_table
-    predictor <- DAdata$predictor
-    paired <- DAdata$paired
-    covars <- DAdata$covars
-  } else {
-    count_table <- data
-  }
-  if(!is.null(covars)){
-    for(i in 1:length(covars)){
-      assign(names(covars)[i], covars[[i]])
-    }
-  }
-  
-  # out.all
-  if(is.null(out.all)){
-    if(length(unique(predictor)) == 2) out.all <- FALSE
-    if(length(unique(predictor)) > 2) out.all <- TRUE
-    if(is.numeric(predictor)) out.all <- FALSE
-  }
-  
-  # Extract further arguments
-  DA.erq.args <- list(...)
-  calcNormFactors.args <- DA.erq.args[names(DA.erq.args) %in% names(formals(calcNormFactors))]
-  estimateDisp.args <- DA.erq.args[names(DA.erq.args) %in% names(formals(estimateDisp))]
-  glmQLFit.args <- DA.erq.args[names(DA.erq.args) %in% names(formals(glmQLFit))]
-  glmQLFTest.args <- DA.erq.args[names(DA.erq.args) %in% names(formals(glmQLFTest))]
-  
-  count_table <- as.data.frame(count_table)
-  y <- DGEList(counts=count_table,genes = data.frame(Feature = row.names(count_table)))
-  
-  # Normalize
-  y <- do.call(edgeR::calcNormFactors, c(list(y, method = "TMM"),calcNormFactors.args))
-  
-  # Define design matrix
-  if(!is.null(paired)){
-    if(is.null(covars)){
-      design <- model.matrix(~ predictor+paired)
+  if (ok){
+    # Extract from phyloseq
+    if(class(data) == "phyloseq"){
+      DAdata <- DA.phyloseq(data, predictor, paired, covars)
+      count_table <- DAdata$count_table
+      predictor <- DAdata$predictor
+      paired <- DAdata$paired
+      covars <- DAdata$covars
     } else {
-      design <- model.matrix(as.formula(paste("~ predictor+paired+",paste(names(covars), collapse="+"),sep = "")))
+      count_table <- data
     }
-  } else {
-    if(is.null(covars)){
-      design <- model.matrix(~ predictor)
-    } else {
-      design <- model.matrix(as.formula(paste("~ predictor+",paste(names(covars), collapse="+"),sep = "")))
+    if(!is.null(covars)){
+      for(i in 1:length(covars)){
+        assign(names(covars)[i], covars[[i]])
+      }
     }
-  }
-  
-  # Dispersion and fit
-  y <- do.call(estimateDisp,c(list(y,design),estimateDisp.args))
-  fit <- do.call(glmQLFit,c(list(y,design),glmQLFit.args))
-  
-  # Test results
-  if(is.numeric(predictor[1])){
-    qlf <- do.call(glmQLFTest,c(list(fit,coef=2),glmQLFTest.args))
-    ta <- qlf$table
-    colnames(ta)[4] <- "pval"
-  } else {
-    if(out.all){
-      qlf <- do.call(glmQLFTest,c(list(fit,coef=2:length(levels(as.factor(predictor)))),glmQLFTest.args))
-      ta <- qlf$table
-      colnames(ta)[(2+length(levels(as.factor(predictor))))] <- "pval"
+    
+    # out.all
+    if(is.null(out.all)){
+      if(length(unique(predictor)) == 2) out.all <- FALSE
+      if(length(unique(predictor)) > 2) out.all <- TRUE
+      if(is.numeric(predictor)) out.all <- FALSE
+    }
+    
+    # Extract further arguments
+    DA.erq.args <- list(...)
+    calcNormFactors.args <- DA.erq.args[names(DA.erq.args) %in% names(formals(edgeR::calcNormFactors))]
+    estimateDisp.args <- DA.erq.args[names(DA.erq.args) %in% names(formals(edgeR::estimateDisp))]
+    glmQLFit.args <- DA.erq.args[names(DA.erq.args) %in% names(formals(edgeR::glmQLFit))]
+    glmQLFTest.args <- DA.erq.args[names(DA.erq.args) %in% names(formals(edgeR::glmQLFTest))]
+    
+    count_table <- as.data.frame(count_table)
+    y <- edgeR::DGEList(counts=count_table,genes = data.frame(Feature = row.names(count_table)))
+    
+    # Normalize
+    y <- do.call(edgeR::calcNormFactors, c(list(y, method = "TMM"),calcNormFactors.args))
+    
+    # Define design matrix
+    if(!is.null(paired)){
+      if(is.null(covars)){
+        design <- model.matrix(~ predictor+paired)
+      } else {
+        design <- model.matrix(as.formula(paste("~ predictor+paired+",paste(names(covars), collapse="+"),sep = "")))
+      }
     } else {
-      qlf <- do.call(glmQLFTest,c(list(fit,coef=coeff),glmQLFTest.args))
+      if(is.null(covars)){
+        design <- model.matrix(~ predictor)
+      } else {
+        design <- model.matrix(as.formula(paste("~ predictor+",paste(names(covars), collapse="+"),sep = "")))
+      }
+    }
+    
+    # Dispersion and fit
+    y <- do.call(edgeR::estimateDisp,c(list(y,design),estimateDisp.args))
+    fit <- do.call(edgeR::glmQLFit,c(list(y,design),glmQLFit.args))
+    
+    # Test results
+    if(is.numeric(predictor[1])){
+      qlf <- do.call(edgeR::glmQLFTest,c(list(fit,coef=2),glmQLFTest.args))
       ta <- qlf$table
       colnames(ta)[4] <- "pval"
-      ta$ordering <- NA
-      ta[!is.na(ta$logFC) & ta$logFC > 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff],">",levels(as.factor(predictor))[1])
-      ta[!is.na(ta$logFC) & ta$logFC < 0,"ordering"] <- paste0(levels(as.factor(predictor))[1],">",levels(as.factor(predictor))[coeff])
+    } else {
+      if(out.all){
+        qlf <- do.call(edgeR::glmQLFTest,c(list(fit,coef=2:length(levels(as.factor(predictor)))),glmQLFTest.args))
+        ta <- qlf$table
+        colnames(ta)[(2+length(levels(as.factor(predictor))))] <- "pval"
+      } else {
+        qlf <- do.call(edgeR::glmQLFTest,c(list(fit,coef=coeff),glmQLFTest.args))
+        ta <- qlf$table
+        colnames(ta)[4] <- "pval"
+        ta$ordering <- NA
+        ta[!is.na(ta$logFC) & ta$logFC > 0,"ordering"] <- paste0(levels(as.factor(predictor))[coeff],">",levels(as.factor(predictor))[1])
+        ta[!is.na(ta$logFC) & ta$logFC < 0,"ordering"] <- paste0(levels(as.factor(predictor))[1],">",levels(as.factor(predictor))[coeff])
+      }
     }
+    
+    ta$pval.adj <- p.adjust(ta$pval, method = p.adj)
+    ta$Feature <- rownames(ta)
+    ta$Method <- "EdgeR qll - TMM (erq)"
+    
+    if(class(data) == "phyloseq") ta <- add.tax.DA(data, ta)
+    
+    if(allResults) return(qlf) else return(ta)
+    
+  } else {
+    stop("edgeR package required")
   }
-
-  ta$pval.adj <- p.adjust(ta$pval, method = p.adj)
-  ta$Feature <- rownames(ta)
-  ta$Method <- "EdgeR qll - TMM (erq)"
   
-  if(class(data) == "phyloseq") ta <- add.tax.DA(data, ta)
-  
-  if(allResults) return(qlf) else return(ta)
   
 }
 

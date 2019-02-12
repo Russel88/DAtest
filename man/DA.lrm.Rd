@@ -5,7 +5,7 @@
 \title{Linear regression}
 \usage{
 DA.lrm(data, predictor, paired = NULL, covars = NULL,
-  relative = TRUE, out.all = NULL, p.adj = "fdr",
+  relative = TRUE, out.all = NULL, p.adj = "fdr", coeff = 2,
   allResults = FALSE, ...)
 }
 \arguments{
@@ -22,6 +22,8 @@ DA.lrm(data, predictor, paired = NULL, covars = NULL,
 \item{out.all}{If TRUE will output results and p-values from \code{anova}. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class \code{predictor} and FALSE otherwise}
 
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details}
+
+\item{coeff}{Integer. The p-value and log2FoldChange will be associated with this coefficient. Default 2, i.e. the 2. level of the \code{predictor}.}
 
 \item{allResults}{If TRUE will return raw results from the \code{lm}/\code{lme} function}
 

@@ -9,12 +9,13 @@
 #' @param out.all If TRUE will output results and p-values from \code{anova}. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class \code{predictor} and FALSE otherwise
 #' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
 #' @param delta Numeric. Pseudocount for zero-correction. Default 1
+#' @param coeff Integer. The p-value and log2FoldChange will be associated with this coefficient. Default 2, i.e. the 2. level of the \code{predictor}.
 #' @param allResults If TRUE will return raw results from the \code{lm}/\code{lme} function
 #' @param ... Additional arguments for the \code{lm}/\code{lme} functions
 #' @import nlme
 #' @export
 
-DA.lmc <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL, p.adj = "fdr", delta = 1, allResults = FALSE, ...){
+DA.lmc <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL, p.adj = "fdr", delta = 1, coeff = 2, allResults = FALSE, ...){
  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
@@ -42,7 +43,7 @@ DA.lmc <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL
   count_table <- as.data.frame.matrix(count_table)
   # Zero-correction
   count_table <- apply(count_table, 2, function(y) sapply(y,function(x) ifelse(x==0,delta,(1-(sum(y==0)*delta)/sum(y))*x)))
-  if(any(count_table <= 0)) stop("count_table should only contain positive values")
+  if(any(count_table <= 0)) stop("Zero-correction failed. Dataset likely contains too many zeroes")
   
   # ALR transformation
   count_table <- norm_clr(count_table)

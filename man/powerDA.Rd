@@ -39,7 +39,7 @@ powerDA(data, predictor, paired = NULL, covars = NULL, test = NULL,
 
 \item{rng.seed}{Numeric. Seed for reproducibility. Default 123}
 
-\item{args}{List. A list with lists of arguments passed to the different methods. See details for more.}
+\item{args}{List. A list with arguments passed to method.}
 
 \item{out.all}{If TRUE linear models will output results and p-values from \code{anova}/\code{drop1}, ds2/ds2x will run LRT and not Wald test, erq and erq2 will produce one p-value for the predictor, and limma will run F-tests. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise}
 

@@ -4,10 +4,10 @@
 \alias{summary.DAPower}
 \title{Summary of results from \code{powerDA}}
 \usage{
-\method{summary}{DAPower}(x, ...)
+\method{summary}{DAPower}(object, ...)
 }
 \arguments{
-\item{x}{The output from the \code{powerDA} function}
+\item{object}{The output from the \code{powerDA} function}
 
 \item{...}{Additional arguments for \code{print}}
 }

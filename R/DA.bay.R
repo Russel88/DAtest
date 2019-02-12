@@ -9,41 +9,50 @@
 
 DA.bay <- function(data, predictor, allResults = FALSE, ...){
   
-  suppressMessages(library(baySeq))
+  ok <- tryCatch({
+    loadNamespace("baySeq")
+    TRUE
+  }, error=function(...) FALSE)
   
-  # Extract from phyloseq
-  if(class(data) == "phyloseq"){
-    DAdata <- DA.phyloseq(data, predictor)
-    count_table <- DAdata$count_table
-    predictor <- DAdata$predictor
+  if (ok){
+    
+    # Extract from phyloseq
+    if(class(data) == "phyloseq"){
+      DAdata <- DA.phyloseq(data, predictor)
+      count_table <- DAdata$count_table
+      predictor <- DAdata$predictor
+    } else {
+      count_table <- data
+    }
+    
+    # Collect data
+    CD <- new("countData", data=as.matrix(count_table), replicates = ifelse(as.logical(as.numeric(as.factor(predictor))-1), "simA", "simB"), groups = list(NDE = rep(1,length(predictor)),DE=predictor)) # simA = cases
+    baySeq::libsizes(CD) <- baySeq::getLibsizes(CD)
+    CD@annotation <- data.frame(name=rownames(count_table))
+    
+    # Arguments
+    DA.bay.args <- list(...)
+    getPriors.NB.args <- DA.bay.args[names(DA.bay.args) %in% names(formals(baySeq::getPriors.NB))]
+    getLikelihoods.args <- DA.bay.args[names(DA.bay.args) %in% names(formals(baySeq::getLikelihoods))]
+    
+    # Run test
+    CD <- do.call(baySeq::getPriors.NB, c(list(cD=CD, cl=NULL), getPriors.NB.args))
+    CD <- do.call(baySeq::getLikelihoods, c(list(cD=CD, cl=NULL), getLikelihoods.args))
+    
+    # Extract results
+    tc <- baySeq::topCounts(CD, group = "DE", number=nrow(count_table))
+    tc <- tc[,c(1,rev(ncol(tc)-0:3))]
+    
+    output_df <- data.frame(Feature = as.character(tc$name), pval = (1 - tc$likes), pval.adj = tc$FDR.DE, ordering = tc$DE)
+    
+    output_df$Method <- "baySeq (bay)"
+    
+    if(class(data) == "phyloseq") output_df <- add.tax.DA(data, output_df)
+    
+    if(allResults) return(CD) else return(output_df)
   } else {
-    count_table <- data
+    stop("baySeq package required")
   }
   
-  # Collect data
-  CD <- new("countData", data=as.matrix(count_table), replicates = ifelse(as.logical(as.numeric(as.factor(predictor))-1), "simA", "simB"), groups = list(NDE = rep(1,length(predictor)),DE=predictor)) # simA = cases
-  libsizes(CD) <- getLibsizes(CD)
-  CD@annotation <- data.frame(name=rownames(count_table))
-  
-  # Arguments
-  DA.bay.args <- list(...)
-  getPriors.NB.args <- DA.bay.args[names(DA.bay.args) %in% names(formals(getPriors.NB))]
-  getLikelihoods.args <- DA.bay.args[names(DA.bay.args) %in% names(formals(getLikelihoods))]
-  
-  # Run test
-  CD <- do.call(getPriors.NB, c(list(cD=CD, cl=NULL), getPriors.NB.args))
-  CD <- do.call(getLikelihoods, c(list(cD=CD, cl=NULL), getLikelihoods.args))
-  
-  # Extract results
-  tc <- topCounts(CD, group = "DE", number=nrow(count_table))
-  tc <- tc[,c(1,rev(ncol(tc)-0:3))]
-  
-  output_df <- data.frame(Feature = as.character(tc$name), pval = (1 - tc$likes), pval.adj = tc$FDR.DE, ordering = tc$DE)
-  
-  output_df$Method <- "baySeq (bay)"
-
-  if(class(data) == "phyloseq") output_df <- add.tax.DA(data, output_df)
-  
-  if(allResults) return(CD) else return(output_df)
 }
 

@@ -1,12 +1,41 @@
 Package: DAtest
-Title: Comparing Differential Abundance methods
-Version: 2.7.12
-Authors@R: person("Jakob", "Russel", email = "russel2620@gmail.com", role = c("aut", "cre"))
-Description: What the title says.
+Title: Comparing Differential Abundance/Expression Methods
+Version: 2.7.13
+Authors@R: person("Jakob", "Russel",
+    email = "russel2620@gmail.com", 
+    role = c("aut", "cre"))
+Description: Runs multiple differential abundance/expressions methods,
+    with the same standardized input and output, 
+    to compare their results and test which are better at finding spiked features. 
 Depends: R (>= 3.2.5)
-Imports: foreach, doParallel, snow, doSNOW, MASS, pROC, ggplot2, cowplot, lme4, nlme, stats, methods, utils, minqa, nloptr
-Suggests: lsmeans, eulerr, pscl, samr, statmod
-License: GPL (>= 3)
+Imports: foreach,
+    doParallel,
+    snow,
+    doSNOW,
+    MASS,
+    pROC,
+    ggplot2,
+    cowplot,
+    lme4,
+    nlme,
+    stats,
+    methods,
+    utils
+Suggests: lsmeans, 
+    eulerr,
+    venneuler,
+    pscl,
+    samr, 
+    statmod,
+    ALDEx2 (>= 1.14),
+    baySeq (>= 2.16),
+    limma (>= 3.38),
+    edgeR (>= 3.24),
+    mvabund (>= 4.0),
+    phyloseq (>= 1.26),
+    DESeq2 (>= 1.22),
+    metagenomeSeq (>= 1.24)
+License: GPL (>= 3) | file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1

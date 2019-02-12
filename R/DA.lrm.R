@@ -9,12 +9,13 @@
 #' @param relative Logical. Should \code{data} be normalized to relative abundances. Default TRUE
 #' @param out.all If TRUE will output results and p-values from \code{anova}. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class \code{predictor} and FALSE otherwise
 #' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
+#' @param coeff Integer. The p-value and log2FoldChange will be associated with this coefficient. Default 2, i.e. the 2. level of the \code{predictor}.
 #' @param allResults If TRUE will return raw results from the \code{lm}/\code{lme} function
 #' @param ... Additional arguments for the \code{lm}/\code{lme} functions
 #' @import nlme
 #' @export
 
-DA.lrm <- function(data, predictor, paired = NULL, covars = NULL, relative = TRUE, out.all = NULL, p.adj = "fdr", allResults = FALSE, ...){
+DA.lrm <- function(data, predictor, paired = NULL, covars = NULL, relative = TRUE, out.all = NULL, p.adj = "fdr", coeff = 2, allResults = FALSE, ...){
  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){

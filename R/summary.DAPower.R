@@ -1,11 +1,11 @@
 #' Summary of results from \code{powerDA}
 #'
-#' @param x The output from the \code{powerDA} function
+#' @param object The output from the \code{powerDA} function
 #' @param ... Additional arguments for \code{print}
 #' @export
-summary.DAPower <- function(x, ...){
+summary.DAPower <- function(object, ...){
     
-    x <- as.data.frame(unclass(x[[1]]))
+    x <- as.data.frame(unclass(object[[1]]))
     
     if(x$Method[1] == "SAMseq (sam)"){
       # Find medians

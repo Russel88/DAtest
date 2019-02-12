@@ -21,8 +21,6 @@ featurePlot <- function(data, predictor, paired = NULL, covars = NULL, feature =
 
   stopifnot(exists("data"),exists("predictor"))
 
-  library(ggplot2)
-  
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
     DAdata <- DA.phyloseq(data, predictor, paired, covars)
@@ -48,6 +46,7 @@ featurePlot <- function(data, predictor, paired = NULL, covars = NULL, feature =
   if(logScale) count_table <- log10(count_table + delta)
   
   # Dataframe
+  Predictor <- Abundance <- Paired <- NULL
   df <- data.frame(Abundance = count_table[rownames(count_table) == feature,],
                    Predictor = predictor)
   if(!is.null(paired)){
@@ -116,7 +115,8 @@ featurePlot <- function(data, predictor, paired = NULL, covars = NULL, feature =
   
   # Title
   if(class(data) == "phyloseq"){
-    tax <- unclass(tax_table(data))
+    loadNamespace("phyloseq")
+    tax <- unclass(phyloseq::tax_table(data))
     subtax <- tax[rownames(tax) == feature,]
     p <- p + ggtitle(feature, subtitle = paste(subtax, collapse = "_"))
   } else {

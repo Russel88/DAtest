@@ -12,8 +12,9 @@ preDA <- function(data, min.samples = 0, min.reads = 0, min.abundance = 0){
   
   # Extract from phyloseq
   if(class(data) == "phyloseq"){
-    count_table <- otu_table(data)
-    if(!taxa_are_rows(data)) count_table <- t(count_table)
+    loadNamespace("phyloseq")
+    count_table <- phyloseq::otu_table(data)
+    if(!phyloseq::taxa_are_rows(data)) count_table <- t(count_table)
   } else {
     count_table <- data
   }
@@ -47,12 +48,20 @@ preDA <- function(data, min.samples = 0, min.reads = 0, min.abundance = 0){
   # Output
   if(class(data) == "phyloseq"){
     # Fix tax_table
-    tax <- as.data.frame(unclass(tax_table(data)))
+    tax <- as.data.frame(unclass(phyloseq::tax_table(data)))
     tax.keep <- tax[-exclude,]
     tax.new <- rbind(tax.keep,NA)
     rownames(tax.new)[nrow(tax.new)] <- "Others"
-    if(taxa_are_rows(data)) data.new <- phyloseq(otu_table(count.new, taxa_are_rows = TRUE),sample_data(data),tax_table(as.matrix(tax.new)))
-    if(!taxa_are_rows(data)) data.new <- phyloseq(otu_table(t(count.new), taxa_are_rows = FALSE),sample_data(data),tax_table(as.matrix(tax.new)))
+    if(phyloseq::taxa_are_rows(data)){
+      data.new <- phyloseq::phyloseq(phyloseq::otu_table(count.new, taxa_are_rows = TRUE),
+                                     phyloseq::sample_data(data),
+                                     phyloseq::tax_table(as.matrix(tax.new)))
+    } 
+    if(!phyloseq::taxa_are_rows(data)){
+      data.new <- phyloseq::phyloseq(phyloseq::otu_table(t(count.new), taxa_are_rows = FALSE),
+                                     phyloseq::sample_data(data),
+                                     phyloseq::tax_table(as.matrix(tax.new)))
+    } 
     return(data.new)
   } else {
     return(count.new)

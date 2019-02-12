@@ -5,14 +5,14 @@
 \title{Comparing differential abundance/expression methods by Empirical power and False Discovery Rate}
 \usage{
 testDA(data, predictor, paired = NULL, covars = NULL, R = 20,
-  tests = c("mva", "neb", "rai", "per", "bay", "adx", "sam", "qua",
-  "fri", "zpo", "znb", "vli", "qpo", "poi", "pea", "wil", "ttt", "ltt",
-  "ltt2", "erq", "erq2", "ere", "ere2", "msf", "zig", "ds2", "ds2x", "lim",
-  "lli", "lli2", "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe",
-  "tta", "ttc", "aoa", "aoc", "lma", "lmc", "lia", "lic"),
-  relative = TRUE, effectSize = 5, k = NULL, cores = (detectCores()
-  - 1), rng.seed = 123, p.adj = "fdr", args = list(),
-  out.all = NULL, alpha = 0.1, core.check = TRUE, verbose = TRUE)
+  tests = c("neb", "per", "adx", "sam", "qua", "fri", "zpo", "znb",
+  "vli", "qpo", "poi", "pea", "wil", "ttt", "ltt", "ltt2", "erq", "erq2",
+  "ere", "ere2", "msf", "zig", "ds2", "ds2x", "lim", "lli", "lli2", "aov",
+  "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe", "tta", "ttc", "aoa",
+  "aoc", "lma", "lmc", "lia", "lic"), relative = TRUE, effectSize = 5,
+  k = NULL, cores = (detectCores() - 1), rng.seed = 123,
+  p.adj = "fdr", args = list(), out.all = NULL, alpha = 0.1,
+  core.check = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
@@ -60,4 +60,7 @@ An object of class \code{DA}, which contains a list of results:
 }
 \description{
 Calculating Power, False Discovery Rates, False Positive Rates and AUC (Area Under the Receiver Operating Characteristic (ROC) Curve) for various differential abundance and expression methods
+}
+\details{
+mva and bay are excluded by default, as they often are slow.
 }

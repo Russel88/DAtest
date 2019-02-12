@@ -14,7 +14,7 @@ prune.tests.DA <- function(tests, predictor, paired, covars, relative, decimal, 
   # Prune test argument if packages are not installed
   if(!"baySeq" %in% rownames(installed.packages())) tests <- tests[tests != "bay"]
   if(!"ALDEx2" %in% rownames(installed.packages())) tests <- tests[tests != "adx"] 
-  if(!"edgeR" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("ere","erq","ere2","erq2")]
+  if(!"edgeR" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("ere","erq","ere2","erq2","vli")]
   if(!"metagenomeSeq" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("msf","zig")]
   if(!"DESeq2" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("ds2","ds2x")]
   if(!"limma" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("lim","lli","lli2","vli","lia","lic")]

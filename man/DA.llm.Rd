@@ -6,7 +6,7 @@
 \usage{
 DA.llm(data, predictor, paired = NULL, covars = NULL,
   relative = TRUE, out.all = NULL, p.adj = "fdr", delta = 1,
-  allResults = FALSE, ...)
+  coeff = 2, allResults = FALSE, ...)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}
@@ -24,6 +24,8 @@ DA.llm(data, predictor, paired = NULL, covars = NULL,
 \item{p.adj}{Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details}
 
 \item{delta}{Numeric. Pseudocount for the log transformation. Default 1}
+
+\item{coeff}{Integer. The p-value and log2FoldChange will be associated with this coefficient. Default 2, i.e. the 2. level of the \code{predictor}.}
 
 \item{allResults}{If TRUE will return raw results from the \code{lm}/\code{lme} function}
 

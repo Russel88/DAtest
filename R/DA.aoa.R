@@ -43,7 +43,7 @@ DA.aoa <- function(data, predictor, covars = NULL, p.adj = "fdr", delta = 1, all
   
   # Zero-correction
   count_table <- apply(count_table, 2, function(y) sapply(y,function(x) ifelse(x==0,delta,(1-(sum(y==0)*delta)/sum(y))*x)))
-  if(any(count_table <= 0)) stop("count_table should only contain positive values")
+  if(any(count_table <= 0)) stop("Zero-correction failed. Dataset likely contains too many zeroes")
   
   # ALR transformation
   count_table <- norm_alr(count_table)
