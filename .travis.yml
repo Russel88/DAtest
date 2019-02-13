@@ -11,3 +11,6 @@ bioc_packages:
 - DESeq2
 - ALDEx2
 - impute
+
+before_install:
+- sudo apt-get install libgsl-dev
