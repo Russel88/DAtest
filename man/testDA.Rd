@@ -5,17 +5,17 @@
 \title{Comparing differential abundance/expression methods by Empirical power and False Discovery Rate}
 \usage{
 testDA(data, predictor, paired = NULL, covars = NULL, R = 20,
-  tests = c("neb", "per", "adx", "sam", "qua", "fri", "zpo", "znb",
-  "vli", "qpo", "poi", "pea", "wil", "ttt", "ltt", "ltt2", "erq", "erq2",
-  "ere", "ere2", "msf", "zig", "ds2", "ds2x", "lim", "lli", "lli2", "aov",
-  "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe", "tta", "ttc", "aoa",
-  "aoc", "lma", "lmc", "lia", "lic"), relative = TRUE, effectSize = 5,
-  k = NULL, cores = (detectCores() - 1), rng.seed = 123,
-  p.adj = "fdr", args = list(), out.all = NULL, alpha = 0.1,
-  core.check = TRUE, verbose = TRUE)
+  tests = c("bay", "ds2", "ds2x", "per", "adx", "znb", "zpo", "msf",
+  "zig", "erq", "erq2", "neb", "qpo", "poi", "sam", "lrm", "llm", "llm2",
+  "lma", "lmc", "ere", "ere2", "pea", "spe", "wil", "kru", "qua", "fri",
+  "ttt", "ltt", "ltt2", "tta", "ttc", "aov", "lao", "lao2", "aoa", "aoc",
+  "vli", "lim", "lli", "lli2", "lia", "lic"), relative = TRUE,
+  effectSize = 5, k = NULL, cores = (detectCores() - 1),
+  rng.seed = 123, p.adj = "fdr", args = list(), out.all = NULL,
+  alpha = 0.1, core.check = TRUE, verbose = TRUE)
 }
 \arguments{
-\item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
+\item{data}{Either a data.frame with counts/abundances, OR a \code{phyloseq} object. If a data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
 
 \item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. If the \code{predictor} is numeric it will be treated as such in the analyses}
 
@@ -62,5 +62,5 @@ An object of class \code{DA}, which contains a list of results:
 Calculating Power, False Discovery Rates, False Positive Rates and AUC (Area Under the Receiver Operating Characteristic (ROC) Curve) for various differential abundance and expression methods
 }
 \details{
-mva and bay are excluded by default, as they often are slow.
+mva is excluded by default, as it is slow.
 }

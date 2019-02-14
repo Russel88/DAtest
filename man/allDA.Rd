@@ -4,17 +4,17 @@
 \alias{allDA}
 \title{Run many differential abundance/expression methods}
 \usage{
-allDA(data, predictor, paired = NULL, covars = NULL, tests = c("neb",
-  "per", "adx", "sam", "qua", "fri", "znb", "zpo", "vli", "qpo", "poi",
-  "pea", "spe", "wil", "ttt", "ltt", "ltt2", "erq", "ere", "erq2", "ere2",
-  "msf", "zig", "ds2", "ds2x", "lim", "lli", "lli2", "aov", "lao", "lao2",
-  "kru", "lrm", "llm", "llm2", "tta", "ttc", "aoa", "aoc", "lma", "lmc",
-  "lia", "lic"), relative = TRUE, cores = (detectCores() - 1),
+allDA(data, predictor, paired = NULL, covars = NULL, tests = c("bay",
+  "ds2", "ds2x", "per", "adx", "znb", "zpo", "msf", "zig", "erq", "erq2",
+  "neb", "qpo", "poi", "sam", "lrm", "llm", "llm2", "lma", "lmc", "ere",
+  "ere2", "pea", "spe", "wil", "kru", "qua", "fri", "ttt", "ltt", "ltt2",
+  "tta", "ttc", "aov", "lao", "lao2", "aoa", "aoc", "vli", "lim", "lli",
+  "lli2", "lia", "lic"), relative = TRUE, cores = (detectCores() - 1),
   rng.seed = 123, p.adj = "fdr", args = list(), out.all = NULL,
-  alpha = 0.1, core.check = TRUE)
+  alpha = 0.1, core.check = TRUE, verbose = TRUE)
 }
 \arguments{
-\item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
+\item{data}{Either a data.frame with counts/abundances, OR a \code{phyloseq} object. If a data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
 
 \item{predictor}{The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. If the \code{predictor} is numeric it will be treated as such in the analyses}
 
@@ -39,6 +39,8 @@ allDA(data, predictor, paired = NULL, covars = NULL, tests = c("neb",
 \item{alpha}{q-value threshold for calling significance. Default 0.1}
 
 \item{core.check}{If TRUE (default) will make an interactive check that the amount of cores specified are desired. Only if \code{cores>20}. This is to ensure that the function doesn't automatically overloads a server with workers.}
+
+\item{verbose}{If TRUE will print informative messages}
 }
 \value{
 A list of results:
@@ -54,5 +56,5 @@ A list of results:
 Run many differential abundance and expression tests at a time, to easily compare their results
 }
 \details{
-mva and bay are excluded by default, as they often are slow.
+mva is excluded by default, as it is slow.
 }
