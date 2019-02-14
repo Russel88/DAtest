@@ -2,8 +2,8 @@
 #'
 #' Calculating Power, False Discovery Rates, False Positive Rates and AUC (Area Under the Receiver Operating Characteristic (ROC) Curve) for various differential abundance and expression methods
 #' 
-#' mva and bay are excluded by default, as they often are slow.
-#' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames
+#' mva is excluded by default, as it is slow.
+#' @param data Either a data.frame with counts/abundances, OR a \code{phyloseq} object. If a data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. If the \code{predictor} is numeric it will be treated as such in the analyses
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation.
 #' @param covars Either a named list with covariates, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}
@@ -33,7 +33,17 @@
 #' @importFrom pROC roc
 #' @export
 
-testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20, tests = c("neb","per","adx","sam","qua","fri","zpo","znb","vli","qpo","poi","pea","wil","ttt","ltt","ltt2","erq","erq2","ere","ere2","msf","zig","ds2","ds2x","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","spe","tta","ttc","aoa","aoc","lma","lmc","lia","lic"), relative = TRUE, effectSize = 5, k = NULL, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), out.all = NULL, alpha = 0.1, core.check = TRUE, verbose = TRUE){
+testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
+                   tests = c("bay","ds2","ds2x","per","adx","znb","zpo","msf","zig",
+                             "erq","erq2","neb","qpo","poi","sam",
+                             "lrm","llm","llm2","lma","lmc",
+                             "ere","ere2","pea","spe",
+                             "wil","kru","qua","fri",
+                             "ttt","ltt","ltt2","tta","ttc",
+                             "aov","lao","lao2","aoa","aoc",
+                             "vli","lim","lli","lli2","lia","lic"),
+                   relative = TRUE, effectSize = 5, k = NULL, cores = (detectCores()-1) ,rng.seed = 123,
+                   p.adj = "fdr", args = list(), out.all = NULL, alpha = 0.1, core.check = TRUE, verbose = TRUE){
 
   stopifnot(exists("data"),exists("predictor"))
   # Check for servers
@@ -74,7 +84,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20, tests 
   if(length(unique(predictor)) < 2) stop("predictor should have at least two levels")
   
   # Remove Features not present in any samples
-  if(sum(rowSums(count_table) == 0) != 0) message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
+  if(sum(rowSums(count_table) == 0) != 0 && verbose) message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
   count_table <- count_table[rowSums(count_table) > 0,]
   if(nrow(count_table) <= 15) warning("Dataset contains very few features") 
   
@@ -111,13 +121,13 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20, tests 
   } 
   if(sum(k) == nrow(count_table)) stop("Set to spike all features. Can't calculate FPR or AUC. Change k argument")
   if(sum(k) > nrow(count_table)) stop("Set to spike more features than are present in the data. Change k argument")
-  if(sum(k) < 15 & sum(k) >= 10 & R <= 10) message("Few features spiked. Increase 'k' or set 'R' to more than 10 to ensure proper estimation of AUC and FPR")
-  if(sum(k) < 10 & sum(k) >= 5 & R <= 20) message("Few features spiked. Increase 'k' or set 'R' to more than 20 to ensure proper estimation of AUC and FPR")                                  
-  if(sum(k) < 5 & R <= 50) message("Very few features spiked. Increase 'k' or set 'R' to more than 50 to ensure proper estimation of AUC and FPR")
-  if(sum(k) > nrow(count_table)/2) message("Set to spike more than half of the dataset, which might give unreliable estimates, Change k argument")   
+  if(sum(k) < 15 & sum(k) >= 10 & R <= 10) warning("Few features spiked. Increase 'k' or set 'R' to more than 10 to ensure proper estimation of AUC and FPR")
+  if(sum(k) < 10 & sum(k) >= 5 & R <= 20) warning("Few features spiked. Increase 'k' or set 'R' to more than 20 to ensure proper estimation of AUC and FPR")
+  if(sum(k) < 5 & R <= 50) warning("Very few features spiked. Increase 'k' or set 'R' to more than 50 to ensure proper estimation of AUC and FPR")
+  if(sum(k) > nrow(count_table)/2) warning("Set to spike more than half of the dataset, which might give unreliable estimates, Change k argument")
                                  
   # predictor
-  if(verbose) if(any(is.na(predictor))) warning("Predictor contains NAs!")
+  if(any(is.na(predictor))) warning("Predictor contains NAs!")
   if(is.numeric(predictor[1])){
     num.pred <- TRUE
     if(verbose) message(paste("predictor is assumed to be a quantitative variable, ranging from",min(predictor, na.rm = TRUE),"to",max(predictor, na.rm = TRUE)))
@@ -279,9 +289,9 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20, tests 
   cat("\n")
   if(length(unique(gsub(".*_","",names(results)))) != length(tests)){
     if(length(tests) - length(unique(gsub(".*_","",names(results)))) == 1){
-      message(paste(paste(tests[!tests %in% unique(gsub(".*_","",names(results)))],collapse = ", "),"was excluded due to failure"))
+      if(verbose) message(paste(paste(tests[!tests %in% unique(gsub(".*_","",names(results)))],collapse = ", "),"was excluded due to failure"))
     } else {
-      message(paste(paste(tests[!tests %in% unique(gsub(".*_","",names(results)))],collapse = ", "),"were excluded due to failure"))
+      if(verbose) message(paste(paste(tests[!tests %in% unique(gsub(".*_","",names(results)))],collapse = ", "),"were excluded due to failure"))
     }
 
     # Produce informative messages
@@ -289,7 +299,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20, tests 
       if(verbose) message("sam usually fails if some samples has too many zeroes")
     }
     if(all(c("sam","ere2","erq2","ds2x") %in% tests[!tests %in% unique(gsub(".*_","",names(results)))])){
-      if(verbose) message("These tests usually fails if all features contain at least one zero")
+      if(verbose) message("sam, ere2, erq2 and ds2x usually fails if all features contain at least one zero")
     }
       
     tests <- unique(gsub(".*_","",names(results)))

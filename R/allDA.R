@@ -2,8 +2,8 @@
 #'
 #' Run many differential abundance and expression tests at a time, to easily compare their results
 #' 
-#' mva and bay are excluded by default, as they often are slow.
-#' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames
+#' mva is excluded by default, as it is slow.
+#' @param data Either a data.frame with counts/abundances, OR a \code{phyloseq} object. If a data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames
 #' @param predictor The predictor of interest. Either a Factor or Numeric, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation. If the \code{predictor} is numeric it will be treated as such in the analyses
 #' @param paired For paired/blocked experimental designs. Either a Factor with Subject/Block ID for running paired/blocked analysis, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation.
 #' @param covars Either a named list with covariates, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}
@@ -16,6 +16,7 @@
 #' @param out.all If TRUE models will output results and p-values from \code{anova}/\code{drop1}. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class \code{predictor} and FALSE otherwise
 #' @param alpha q-value threshold for calling significance. Default 0.1
 #' @param core.check If TRUE (default) will make an interactive check that the amount of cores specified are desired. Only if \code{cores>20}. This is to ensure that the function doesn't automatically overloads a server with workers.  
+#' @param verbose If TRUE will print informative messages
 #' @return A list of results:
 #' \itemize{
 #'  \item raw - A data.frame with raw p-values from all methods
@@ -27,7 +28,17 @@
 #' 
 #' @export
 
-allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb","per","adx","sam","qua","fri","znb","zpo","vli","qpo","poi","pea","spe","wil","ttt","ltt","ltt2","erq","ere","erq2","ere2","msf","zig","ds2","ds2x","lim","lli","lli2","aov","lao","lao2","kru","lrm","llm","llm2","tta","ttc","aoa","aoc","lma","lmc","lia","lic"), relative = TRUE, cores = (detectCores()-1), rng.seed = 123, p.adj = "fdr", args = list(), out.all = NULL, alpha = 0.1, core.check = TRUE){
+allDA <- function(data, predictor, paired = NULL, covars = NULL,
+                  tests = c("bay","ds2","ds2x","per","adx","znb","zpo","msf","zig",
+                            "erq","erq2","neb","qpo","poi","sam",
+                            "lrm","llm","llm2","lma","lmc",
+                            "ere","ere2","pea","spe",
+                            "wil","kru","qua","fri",
+                            "ttt","ltt","ltt2","tta","ttc",
+                            "aov","lao","lao2","aoa","aoc",
+                            "vli","lim","lli","lli2","lia","lic"),
+                  relative = TRUE, cores = (detectCores()-1), rng.seed = 123,
+                  p.adj = "fdr", args = list(), out.all = NULL, alpha = 0.1, core.check = TRUE, verbose = TRUE){
 
   stopifnot(exists("data"),exists("predictor"))
   # Check for servers
@@ -49,6 +60,10 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb"
     count_table <- data
   }
 
+  # Coerce data
+  if(!is.null(paired)) paired <- as.factor(paired)
+  count_table <- as.data.frame(count_table)
+
   # Checks
   if(relative) if(!isTRUE(all(unlist(count_table) == floor(unlist(count_table))))) stop("Count_table must only contain integer values when relative=TRUE")
   if(min(count_table) < 0) stop("Count_table contains negative values!")
@@ -57,7 +72,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb"
   if(length(unique(predictor)) < 2) stop("predictor should have at least two levels")
   
   # Remove Features not present in any samples
-  if(sum(rowSums(count_table) == 0) != 0) message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
+  if(sum(rowSums(count_table) == 0) != 0 && verbose) message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
   count_table <- count_table[rowSums(count_table) > 0,]
   
   # Prune tests argument
@@ -69,24 +84,24 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb"
   if(length(tests) == 0) stop("No tests to run!")
   
   # Set seed
-  message(paste("Seed is set to",rng.seed))
+  if(verbose) message(paste("Seed is set to",rng.seed))
   set.seed(rng.seed)
-  message(paste("Running on",cores,"cores"))
+  if(verbose) message(paste("Running on",cores,"cores"))
   
   # predictor
   if(any(is.na(predictor))) warning("Predictor contains NAs!")
   if(is.numeric(predictor)){
-    message(paste("predictor is assumed to be a quantitative variable, ranging from",min(predictor, na.rm = TRUE),"to",max(predictor, na.rm = TRUE)))
+    if(verbose)  message(paste("predictor is assumed to be a quantitative variable, ranging from",min(predictor, na.rm = TRUE),"to",max(predictor, na.rm = TRUE)))
     if(length(levels(as.factor(predictor))) == 2){
       ANSWER <- readline("The predictor is quantitative, but only contains 2 unique values. Are you sure this is correct? Enter y to proceed ")
       if(ANSWER != "y") stop("Wrap the predictor with as.factor(predictor) to treat it is a categorical variable")
     }
   } else {
     if(length(levels(as.factor(predictor))) > length(unique(predictor))) stop("predictor has more levels than unique values!")
-    message(paste("predictor is assumed to be a categorical variable with",length(unique(predictor)),"levels:",paste(levels(as.factor(predictor)),collapse = ", ")))
+    if(verbose) message(paste("predictor is assumed to be a categorical variable with",length(unique(predictor)),"levels:",paste(levels(as.factor(predictor)),collapse = ", ")))
   }
   if(!is.null(paired)){
-    message(paste("The paired variable has",length(unique(paired)),"levels"))
+    if(verbose) message(paste("The paired variable has",length(unique(paired)),"levels"))
     if(length(unique(paired)) < 5) warning("The paired variable has less than 5 levels. Mixed-effect models are excluded")
   }
 
@@ -102,9 +117,9 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb"
     for(i in 1:length(covars)){
       if(any(is.na(covars[[i]]))) warning(names(covars)[i],"contains NAs!")
       if(is.numeric(covars[[i]][1])){
-        message(paste(names(covars)[i],"is assumed to be a quantitative variable, ranging from",min(covars[[i]], na.rm = TRUE),"to",max(covars[[i]], na.rm = TRUE)))
+        if(verbose) message(paste(names(covars)[i],"is assumed to be a quantitative variable, ranging from",min(covars[[i]], na.rm = TRUE),"to",max(covars[[i]], na.rm = TRUE)))
       } else {
-        message(paste(names(covars)[i],"is assumed to be a categorical variable with",length(unique(covars[[i]])),"levels:",paste(levels(as.factor(covars[[i]])),collapse = ", ")))
+        if(verbose) message(paste(names(covars)[i],"is assumed to be a categorical variable with",length(unique(covars[[i]])),"levels:",paste(levels(as.factor(covars[[i]])),collapse = ", ")))
       }
     }
   }
@@ -117,7 +132,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb"
   }
   
   # Run tests
-  cat(paste("Running",length(tests),"methods...\n"))
+  if(verbose) cat(paste("Running",length(tests),"methods...\n"))
   # Progress bar
   pb <- txtProgressBar(max = length(tests), style = 3)
   progress <- function(n) setTxtProgressBar(pb, n)
@@ -207,17 +222,17 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL, tests = c("neb"
   results <- results[!sapply(results,is.null)]
   if(length(names(results)) != length(tests)){
     if(length(tests) - length(names(results)) == 1){
-      message(paste(paste(tests[!tests %in% names(results)],collapse = ", "),"was excluded due to failure"))
+      if(verbose) message(paste(paste(tests[!tests %in% names(results)],collapse = ", "),"was excluded due to failure"))
     } else {
-      message(paste(paste(tests[!tests %in% names(results)],collapse = ", "),"were excluded due to failure"))
+      if(verbose) message(paste(paste(tests[!tests %in% names(results)],collapse = ", "),"were excluded due to failure"))
     }
     
     # Produce informative messages
     if(all(tests[!tests %in% unique(gsub(".*_","",names(results)))] == "sam")){
-      message("sam usually fails if some samples has too many zeroes")
+      if(verbose) message("sam usually fails if some samples has too many zeroes")
     }
     if(all(c("sam","ere2","erq2","ds2x") %in% tests[!tests %in% unique(gsub(".*_","",names(results)))])){
-      message("sam, ere2, erq2 and ds2x usually fails if all features contain at least one zero")
+      if(verbose) message("sam, ere2, erq2 and ds2x usually fails if all features contain at least one zero")
     }
     
     tests <- names(results)
