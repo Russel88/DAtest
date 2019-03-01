@@ -10,6 +10,7 @@
 #' @param coeff Integer. The p-value and logFC will be associated with this coefficient when \code{out.all = FALSE}. Default 2, i.e. the 2. level of the \code{predictor}.
 #' @param allResults If TRUE will return raw results from the \code{glmQLFTest} function
 #' @param ... Additional arguments for the \code{calcNormFactors}, \code{estimateDisp}, \code{glmQLFit} and \code{glmQLFTest} functions
+#' @return A data.frame with with results.
 #' @export
 
 DA.erq <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL, p.adj = "fdr", coeff = 2, allResults = FALSE, ...){
@@ -31,7 +32,7 @@ DA.erq <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL
       count_table <- data
     }
     if(!is.null(covars)){
-      for(i in 1:length(covars)){
+      for(i in seq_along(covars)){
         assign(names(covars)[i], covars[[i]])
       }
     }

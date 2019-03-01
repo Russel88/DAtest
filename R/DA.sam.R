@@ -7,6 +7,7 @@
 #' @param fdr.output Passed to \code{SAMseq}. (Approximate) False Discovery Rate cutoff for output in significant genes table
 #' @param allResults If TRUE will return raw results from the \code{SAMseq} function
 #' @param ... Additional arguments for the \code{SAMseq} function
+#' @return A data.frame with with results.
 #' @export
 DA.sam <- function(data, predictor, paired = NULL, fdr.output = 0.05, allResults = FALSE, ...){
 

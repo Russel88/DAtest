@@ -10,7 +10,6 @@
 #' @param tests Character. Which tests to include. Default all
 #' @param relative Logical. TRUE (default) for compositional data. FALSE for absoloute abundances or pre-normalized data.
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available
-#' @param rng.seed Numeric. Seed for reproducibility. Default 123
 #' @param p.adj Character. Method for p-value adjustment. See \code{p.adjust} for details. Default "fdr"
 #' @param args List. A list with lists of arguments passed to the different methods. See details for more.
 #' @param out.all If TRUE models will output results and p-values from \code{anova}/\code{drop1}. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class \code{predictor} and FALSE otherwise
@@ -37,7 +36,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
                             "ttt","ltt","ltt2","tta","ttc",
                             "aov","lao","lao2","aoa","aoc",
                             "vli","lim","lli","lli2","lia","lic"),
-                  relative = TRUE, cores = (detectCores()-1), rng.seed = 123,
+                  relative = TRUE, cores = (detectCores()-1),
                   p.adj = "fdr", args = list(), out.all = NULL, alpha = 0.1, core.check = TRUE, verbose = TRUE){
 
   stopifnot(exists("data"),exists("predictor"))
@@ -82,10 +81,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
   tests <- unique(tests)
   if(!"zzz" %in% tests) tests <- prune.tests.DA(tests, predictor, paired, covars, relative, decimal, zeroes)
   if(length(tests) == 0) stop("No tests to run!")
-  
-  # Set seed
-  if(verbose) message(paste("Seed is set to",rng.seed))
-  set.seed(rng.seed)
+
   if(verbose) message(paste("Running on",cores,"cores"))
   
   # predictor
@@ -114,7 +110,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
   
   # Covars
   if(!is.null(covars)){
-    for(i in 1:length(covars)){
+    for(i in seq_along(covars)){
       if(any(is.na(covars[[i]]))) warning(names(covars)[i],"contains NAs!")
       if(is.numeric(covars[[i]][1])){
         if(verbose) message(paste(names(covars)[i],"is assumed to be a quantitative variable, ranging from",min(covars[[i]], na.rm = TRUE),"to",max(covars[[i]], na.rm = TRUE)))
@@ -150,9 +146,6 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
   # Run tests in parallel
   results <- foreach(i = tests, .options.snow = opts) %dopar% {
 
-    # Set seed
-    set.seed(rng.seed)
-    
     if(!is.na(pmatch("zzz",i))){
       j <- i
       i <- "zzz"
@@ -205,7 +198,6 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
                                fri = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,relative,p.adj), argsL[[i]])),
                                qua = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,relative,p.adj), argsL[[i]])),
                                sam = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,fdr.output = alpha), argsL[[i]]))),
-                        
                         error = function(e) NULL)
     
     if(!is.null(res.sub) & !i %in% c("sam","adx")){
@@ -219,7 +211,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
   names(results) <- tests
   
   # Handle failed tests
-  results <- results[!sapply(results,is.null)]
+  results <- results[!vapply(results,is.null)]
   if(length(names(results)) != length(tests)){
     if(length(tests) - length(names(results)) == 1){
       if(verbose) message(paste(paste(tests[!tests %in% names(results)],collapse = ", "),"was excluded due to failure"))
@@ -258,7 +250,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
   
   # Raw p-values
   Pval.raw <- lapply(results,function(x) tryCatch(as.data.frame(x[,c("Feature","pval")]), error = function(e) NULL))
-  Pval.raw <- Pval.raw[!sapply(Pval.raw,is.null)]
+  Pval.raw <- Pval.raw[!vapply(Pval.raw,is.null)]
   if(length(Pval.raw) > 0){
     df.raw <- suppressWarnings(Reduce(function(x,y) merge(x, y, by= "Feature", all.x = TRUE, all.y = TRUE), Pval.raw))
     colnames(df.raw)[2:ncol(df.raw)] <- names(Pval.raw)
@@ -269,7 +261,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
 
   # Adjusted p-values
   Pval.adj <- lapply(results,function(x) tryCatch(as.data.frame(x[,c("Feature","pval.adj")]), error = function(e) NULL))
-  Pval.adj <- Pval.adj[!sapply(Pval.adj,is.null)]
+  Pval.adj <- Pval.adj[!vapply(Pval.adj,is.null)]
   if(length(Pval.adj) > 0){
     df.adj <- suppressWarnings(Reduce(function(x,y) merge(x, y, by= "Feature", all.x = TRUE, all.y = TRUE), Pval.adj))
     colnames(df.adj)[2:ncol(df.adj)] <- names(Pval.adj)
@@ -339,7 +331,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
         } else return(NULL)
       } else return(NULL)
     }
-    list.est <- list.est[!sapply(list.est, is.null)]
+    list.est <- list.est[!vapply(list.est, is.null)]
     if(length(list.est) > 0){
       df.est <- Reduce(function(x,y) merge(x, y, by= "Feature", all.x = TRUE, all.y = TRUE), list.est)
       if(class(data) == "phyloseq") df.est <- add.tax.DA(data, df.est)
@@ -354,7 +346,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
     if(!is.null(phyloseq::tax_table(data, errorIfNULL = FALSE))){
       newresults <- list()
       tax <- unclass(phyloseq::tax_table(data))
-      for(i in 1:length(results)){
+      for(i in seq_along(results)){
         subres <- results[[i]] 
         subres <- merge(subres, tax, by.x = "Feature", by.y = "row.names")
         newresults[[i]] <- subres
@@ -370,7 +362,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
   # Details
   if(is.numeric(predictor)){
     pred.det <- "Quantitative"
-    pred.ord <- paste(min(predictor,na.rm=T),"to",max(predictor,na.rm=T))
+    pred.ord <- paste(min(predictor,na.rm=TRUE),"to",max(predictor,na.rm=TRUE))
   } else {
     if(length(levels(as.factor(predictor))) == 2){
       pred.det <- "Two-class"

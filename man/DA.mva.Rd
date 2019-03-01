@@ -31,6 +31,9 @@ DA.mva(data, predictor, paired = NULL, covars = NULL,
 
 \item{...}{Additional arguments for the \code{manyglm} and \code{summary.manyglm} functions}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Implementation of mvabund manyglm for \code{DAtest}. With negative binomial family and an offset of log(LibrarySize) when relative = TRUE
 }

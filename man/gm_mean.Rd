@@ -9,6 +9,9 @@ gm_mean(x)
 \arguments{
 \item{x}{numeric vector}
 }
+\value{
+The geometric mean
+}
 \description{
 Geometric means
 }

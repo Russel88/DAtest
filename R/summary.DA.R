@@ -5,15 +5,15 @@
 #' @param boot If TRUE will use bootstrap for confidence limits of the Score, else will compute the limits from the original table. Recommended to be TRUE unless \code{R >= 100} in \code{testDA}
 #' @param prob Confidence limits for Score. Default \code{90\%} = \code{c(0.05,0.095)}
 #' @param N Number of bootstraps. Default 1000
-#' @param boot.seed Random seed for reproducibility of bootstraps
 #' @param decimals Precision in output. Default 2
 #' @param ... Additional arguments for \code{print}
+#' @return Prints summary from the DAtest function. '*' next to method, means that it's median score is overlapping with the 90% confidence limits of the best method
 #' @import stats
 #' @import methods
 #' @import utils
 #' @export
 
-summary.DA <- function(object, sort = "Score", boot = TRUE, prob = c(0.05,0.95), N = 1000, boot.seed = 1, decimals = 2, ...){
+summary.DA <- function(object, sort = "Score", boot = TRUE, prob = c(0.05,0.95), N = 1000, decimals = 2, ...){
   
   # Find medians
   output.summary.auc <- aggregate(AUC ~ Method, data = object$table, FUN = median)
@@ -31,7 +31,6 @@ summary.DA <- function(object, sort = "Score", boot = TRUE, prob = c(0.05,0.95),
   object$table$Score <- (object$table$AUC-0.5) * object$table$Power - object$table$FDR
   
   if(boot){
-    set.seed(boot.seed)
     boots <- lapply(unique(object$table$Method), function(x) object$table[object$table$Method == x,][
       sample(rownames(object$table[object$table$Method == x,]),N,replace = TRUE),
       ])
@@ -48,8 +47,8 @@ summary.DA <- function(object, sort = "Score", boot = TRUE, prob = c(0.05,0.95),
   df <- cbind(data.frame(Method = df[,1]),apply(df[,2:ncol(df)],2,function(x) round(as.numeric(x), decimals)))
   
   mat <- c(FALSE)
-  for(i in 1:nrow(df)){
-    mat[i] <- df[i,8] >= df[1,7]
+  for(i in seq_len(nrow(df))){
+    mat[i] <- df[i,6] >= df[1,7]
   }
   df$` ` <- " "
   df[mat,]$` ` <- "*" 

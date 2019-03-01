@@ -15,6 +15,9 @@ DA.ere2(data, predictor, p.adj = "fdr", ...)
 
 \item{...}{Additional arguments for the \code{calcNormFactors}, \code{estimateCommonDisp}, \code{estimateTagwiseDisp} and \code{exactTest} functions}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Implementation of edgeR exact test for \code{DAtest}
 }

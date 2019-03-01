@@ -20,6 +20,9 @@ DA.lsmeans(results, variable = "predictor", predictor = NULL,
 
 \item{...}{Additional arguments for \code{lsmeans} function}
 }
+\value{
+A data.frame with output from lsmeans::pairs and adjusted p.values for each predictor and feature
+}
 \description{
 Pairwise testing on predictor and covars. Works on "poi", "neb", "lrm", "lma", "lmc", "llm", "llm2", "qpo", "znb", "zpo".
 }

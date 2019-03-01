@@ -7,7 +7,10 @@
 norm_clr(x)
 }
 \arguments{
-\item{x}{numeric matrix}
+\item{x}{numeric matrix. Samples are columns}
+}
+\value{
+A CLR normalized count_table
 }
 \description{
 Centered log-ratio normalization

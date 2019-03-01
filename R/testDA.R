@@ -13,7 +13,6 @@
 #' @param effectSize Numeric. The effect size for the spike-ins. Default 5
 #' @param k Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. \code{k=c(5,10,15)}: 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default NULL, which will spike 2 percent of the total amount of features in each tertile (a total of 6 percent), but minimum c(5,5,5)
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.
-#' @param rng.seed Numeric. Seed for reproducibility. Default 123
 #' @param p.adj Character. Method for p-value adjustment. See \code{p.adjust} for details. Default "fdr"
 #' @param args List. A list with lists of arguments passed to the different methods. See details for more.
 #' @param out.all If TRUE linear models will output results and p-values from \code{anova}/\code{drop1}, ds2/ds2x will run LRT and not Wald test, erq and erq2 will produce one p-value for the predictor, and limma will run F-tests. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise
@@ -28,7 +27,7 @@
 #'  \item run.times - A dataframe with average run times of the different methods
 #' }
 #' 
-#' @import stats snow doSNOW foreach utils
+#' @import stats snow doSNOW foreach utils doParallel
 #' @importFrom parallel detectCores
 #' @importFrom pROC roc
 #' @export
@@ -42,7 +41,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
                              "ttt","ltt","ltt2","tta","ttc",
                              "aov","lao","lao2","aoa","aoc",
                              "vli","lim","lli","lli2","lia","lic"),
-                   relative = TRUE, effectSize = 5, k = NULL, cores = (detectCores()-1) ,rng.seed = 123,
+                   relative = TRUE, effectSize = 5, k = NULL, cores = (detectCores()-1),
                    p.adj = "fdr", args = list(), out.all = NULL, alpha = 0.1, core.check = TRUE, verbose = TRUE){
 
   stopifnot(exists("data"),exists("predictor"))
@@ -67,7 +66,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
     count_table <- data
   }
   if(!is.null(covars)){
-    for(i in 1:length(covars)){
+    for(i in seq_along(covars)){
       assign(names(covars)[i], covars[[i]])
     }
   }
@@ -94,7 +93,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
   if(any(count_table == 0)) zeroes <- TRUE
   tests <- unique(tests)
   if(!"zzz" %in% tests) tests <- prune.tests.DA(tests, predictor, paired, covars, relative, decimal, zeroes)
-  tests.par <- paste0(unlist(lapply(1:R, function(x) rep(x,length(tests)))),"_",rep(tests,R))
+  tests.par <- paste0(unlist(lapply(seq_len(R), function(x) rep(x,length(tests)))),"_",rep(tests,R))
   if(length(tests) == 0) stop("No tests to run!")
   
   # Run time warnings
@@ -104,14 +103,8 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
     }
   }
 
-  # Set seed
-  set.seed(rng.seed)
-  if(verbose) message(paste("Seed is set to",rng.seed))
   if(verbose) message(paste("Running on",cores,"cores"))
 
-  # Create some random seeds for each run
-  seeds <- rng.seed+1:R
-  
   # Spike vs no features
   if(is.null(k)){
     k <- rep(round(nrow(count_table)*0.02),3)
@@ -154,7 +147,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
   
   # Covars
   if(!is.null(covars)){
-    for(i in 1:length(covars)){
+    for(i in seq_along(covars)){
       if(verbose) if(any(is.na(covars[[i]]))) warning(names(covars)[i],"contains NAs!")
       if(is.numeric(covars[[i]][1])){
         if(verbose) message(paste(names(covars)[i],"is assumed to be a quantitative variable, ranging from",min(covars[[i]], na.rm = TRUE),"to",max(covars[[i]], na.rm = TRUE)))
@@ -167,14 +160,14 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
   if(verbose) cat("Spikeing...\n")
   # Shuffle predictor
   if(is.null(paired)){
-    rands <- lapply(1:R,function(x) sample(predictor))
+    rands <- lapply(seq_len(R),function(x) sample(predictor))
   } else {
-    rands <- lapply(1:R,function(x) unsplit(lapply(split(predictor,paired), sample), paired))
+    rands <- lapply(seq_len(R),function(x) unsplit(lapply(split(predictor,paired), sample), paired))
   }
   
   # Spikeins
-  spikeds <- lapply(1:R,function(x) spikein(count_table, rands[[x]], effectSize,  k, num.pred, relative))
-  count_tables <- lapply(1:R,function(x) spikeds[[x]][[1]])
+  spikeds <- lapply(seq_len(R),function(x) spikein(count_table, rands[[x]], effectSize,  k, num.pred, relative))
+  count_tables <- lapply(seq_len(R),function(x) spikeds[[x]][[1]])
   
   # Extract test arguments
   if(!all(names(args) %in% tests)) stop("One or more names in list with additional arguments does not match names of tests")
@@ -208,9 +201,6 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
     run.no <- as.numeric(gsub("_.*","",i))
     i <- gsub(".*_","",i)
 
-    # Set subseed
-    set.seed(seeds[run.no])
-    
     # zzz tests
     if(!is.na(pmatch("zzz",i))){
       j <- i
@@ -265,7 +255,6 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
                                fri = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative, p.adj), argsL[[i]])),
                                qua = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,relative, p.adj), argsL[[i]])),
                                sam = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,fdr.output = alpha), argsL[[i]]))),
-                        
                         error = function(e) NULL)
     
     if(!is.null(res.sub) & (!i %in% c("sam","adx"))){
@@ -284,7 +273,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
   names(run.times) <- tests.par
 
   # Handle failed tests
-  results <- results[!sapply(results,is.null)]
+  results <- results[!vapply(results,is.null)]
   
   cat("\n")
   if(length(unique(gsub(".*_","",names(results)))) != length(tests)){
@@ -306,7 +295,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
   }
   
   r <- NULL
-  final.results <- foreach(r = 1:R) %do% {
+  final.results <- foreach(r = seq_len(R)) %do% {
 
     res.sub <- results[names(results)[gsub("_.*","",names(results)) == r]]
     
@@ -346,7 +335,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
     # Insert spiked column
     newnames <- gsub(".*_","",names(res.sub))
     rsp <- NULL
-    res.sub <- foreach(rsp = 1:length(res.sub)) %do% {
+    res.sub <- foreach(rsp = seq_along(res.sub)) %do% {
       temp <- res.sub[[rsp]]
       temp$Spiked <- "No"
       temp[temp$Feature %in% spikeds[[r]][[2]],"Spiked"] <- "Yes"
@@ -355,20 +344,20 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
     names(res.sub) <- newnames
     
     # Confusion matrix
-    totalPos <- sapply(res.sub,function(x) nrow(x[x$pval <= 0.05,]))
-    totalNeg <- sapply(res.sub,function(x) nrow(x[x$pval > 0.05,])) 
+    totalPos <- vapply(res.sub,function(x) nrow(x[x$pval <= 0.05,]))
+    totalNeg <- vapply(res.sub,function(x) nrow(x[x$pval > 0.05,])) 
     trueNeg <- totalNeg  #if effectSize == 1
     truePos <- 0  #if effectSize == 1
     falseNeg <- 0 #if effectSize == 1
     if(effectSize != 1){
-      truePos <- sapply(res.sub, function(x) sum(x[x$pval <= 0.05,"Feature"] %in% spikeds[[r]][[2]]))
-      falseNeg <- sapply(res.sub, function(x) sum(x[x$pval > 0.05,"Feature"] %in% spikeds[[r]][[2]]))
+      truePos <- vapply(res.sub, function(x) sum(x[x$pval <= 0.05,"Feature"] %in% spikeds[[r]][[2]]))
+      falseNeg <- vapply(res.sub, function(x) sum(x[x$pval > 0.05,"Feature"] %in% spikeds[[r]][[2]]))
     }
     falsePos <- totalPos - truePos
     trueNeg <- totalNeg - falseNeg
     
     # FPR 
-    fprs <- sapply(1:length(res.sub), function(x) {
+    fprs <- vapply(seq_along(res.sub), function(x) {
       if((falsePos[x] + trueNeg[x]) != 0){
         falsePos[x] / (falsePos[x] + trueNeg[x])
       } else {0}})
@@ -378,12 +367,12 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
     # True positive for adjusted p-values
     truePos.adj <- 0  #if effectSize == 1
     if(effectSize != 1){
-      truePos.adj <- sapply(res.sub, function(x) sum(x[x$pval.adj <= alpha,"Feature"] %in% spikeds[[r]][[2]]))
+      truePos.adj <- vapply(res.sub, function(x) sum(x[x$pval.adj <= alpha,"Feature"] %in% spikeds[[r]][[2]]))
     }
-    sdrs <- sapply(1:length(res.sub), function(x) truePos.adj[x] / sum(k))
+    sdrs <- vapply(seq_along(res.sub), function(x) truePos.adj[x] / sum(k))
     
     # AUC
-    aucs <- sapply(1:length(res.sub), function(x) {
+    aucs <- vapply(seq_along(res.sub), function(x) {
       if(effectSize != 1){
         test_roc <- NULL
         tryCatch(
@@ -400,17 +389,17 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
     })
     
     # Confusion matrix adjusted
-    totalPos.adj <- sapply(res.sub, function(x) nrow(x[x$pval.adj <= alpha,]))
-    truePos.adj <- sapply(res.sub, function(x) sum(x[x$pval.adj <= alpha,"Feature"] %in% spikeds[[r]][[2]]))
+    totalPos.adj <- vapply(res.sub, function(x) nrow(x[x$pval.adj <= alpha,]))
+    truePos.adj <- vapply(res.sub, function(x) sum(x[x$pval.adj <= alpha,"Feature"] %in% spikeds[[r]][[2]]))
     falsePos.adj <- totalPos.adj - truePos.adj
     
-    fdrs <- sapply(1:length(res.sub), function(x) {
+    fdrs <- vapply(seq_along(res.sub), function(x) {
       if(totalPos.adj[x] != 0){
         falsePos.adj[x] / totalPos.adj[x]
       } else {0}})
     
     # Combine and return
-    df.combined <- data.frame(Method = sapply(res.sub, function(x) x$Method[1]),
+    df.combined <- data.frame(Method = vapply(res.sub, function(x) x$Method[1]),
                               AUC = aucs,
                               FPR = fprs,
                               FDR = fdrs,
@@ -430,7 +419,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
   
   if(num.pred){
     pred.det <- "Quantitative"
-    pred.ord <- paste(min(predictor,na.rm=T),"to",max(predictor,na.rm=T))
+    pred.ord <- paste(min(predictor,na.rm=TRUE),"to",max(predictor,na.rm=TRUE))
   } else {
     if(length(levels(as.factor(predictor))) == 2){
       pred.det <- "Two-class"
@@ -461,7 +450,6 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
                                Relative = relative,
                                EffectSize = effectSize,
                                Spiked = paste(paste0(c("Low:","Mid:","High:"),k), collapse = ", "),
-                               RandomSeed = rng.seed,
                                OutAll = out.all)
   rownames(output.details) <- ""
   output.details <- as.data.frame(t(output.details))

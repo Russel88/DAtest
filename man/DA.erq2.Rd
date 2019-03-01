@@ -27,6 +27,9 @@ DA.erq2(data, predictor, paired = NULL, covars = NULL,
 
 \item{...}{Additional arguments for the \code{calcNormFactors}, \code{estimateDisp}, \code{glmQLFit} and \code{glmQLFTest} functions}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Implementation of edgeR quasi-likelihood test for \code{DAtest}
 }

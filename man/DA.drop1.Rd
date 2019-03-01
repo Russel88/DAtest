@@ -15,6 +15,9 @@ DA.drop1(results, test = "Chisq", p.adj = "fdr", ...)
 
 \item{...}{Additional arguments for \code{drop1} function}
 }
+\value{
+A data.frame with output from drop1 and adjusted p.values for each predictor and feature
+}
 \description{
 Works on "zpo", "znb", "qpo", "neb", "poi". Non-paired "lrm", "llm", "llm2", "lma", "lmc"
 }

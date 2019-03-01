@@ -13,6 +13,7 @@
 #' @param coeff Integer. The p-value and log2FoldChange will be associated with this coefficient. Default 2, i.e. the 2. level of the \code{predictor}.
 #' @param allResults If TRUE will return raw results from the \code{lm}/\code{lme} function
 #' @param ... Additional arguments for the \code{lm}/\code{lme} functions
+#' @return A data.frame with with results.
 #' @import nlme
 #' @export
 
@@ -29,7 +30,7 @@ DA.llm <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
     count_table <- data
   }
   if(!is.null(covars)){
-    for(i in 1:length(covars)){
+    for(i in seq_along(covars)){
       assign(names(covars)[i], covars[[i]])
     }
   }

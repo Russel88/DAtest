@@ -29,6 +29,9 @@ DA.zpo(data, predictor, covars = NULL, relative = TRUE,
 
 \item{...}{Additional arguments for the \code{zeroinfl} function}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Apply zero-inflated poisson generalized linear model for multiple features, with one \code{predictor} as independent variable.
 With \code{log(librarySize)} as offset when \code{relative=TRUE}.

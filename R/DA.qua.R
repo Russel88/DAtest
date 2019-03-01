@@ -8,6 +8,7 @@
 #' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
 #' @param allResults If TRUE will return raw results from the \code{quade.test} function
 #' @param ... Additional arguments for the \code{quade.test} function
+#' @return A data.frame with with results.
 #' @export
 
 DA.qua <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr", allResults = FALSE, ...){
@@ -43,10 +44,10 @@ DA.qua <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
   if(allResults){
     return(reslist)
   } else {
-    res <- data.frame(statistic = sapply(reslist, function(x) x$statistic),
-                      num.df = sapply(reslist, function(x) x$parameter[1]),
-                      denom.df = sapply(reslist, function(x) x$parameter[2]),
-                      pval = sapply(reslist, function(x) x$p.value))
+    res <- data.frame(statistic = vapply(reslist, function(x) x$statistic),
+                      num.df = vapply(reslist, function(x) x$parameter[1]),
+                      denom.df = vapply(reslist, function(x) x$parameter[2]),
+                      pval = vapply(reslist, function(x) x$p.value))
     res[is.nan(res$statistic),"pval"] <- 1
     res$pval.adj <- p.adjust(res$pval, method = p.adj)
     

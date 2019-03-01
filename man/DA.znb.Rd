@@ -29,6 +29,9 @@ DA.znb(data, predictor, covars = NULL, relative = TRUE,
 
 \item{...}{Additional arguments for the \code{zeroinfl} function}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Apply zero-inflated negative binomial generalized linear model to multiple features, with one independent variable
 With \code{log(librarySize)} as offset.

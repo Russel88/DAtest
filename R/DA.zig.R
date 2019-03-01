@@ -10,6 +10,7 @@
 #' @param eff Filter features to have at least a \code{eff} quantile or number of effective samples, passed to \code{MRtable}
 #' @param allResults If TRUE will return raw results from the \code{fitZig} function
 #' @param ... Additional arguments for the \code{fitZig} function
+#' @return A data.frame with with results.
 #' @export
 
 DA.zig <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", by = 2, eff = 0.5, allResults = FALSE, ...){
@@ -31,7 +32,7 @@ DA.zig <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
       count_table <- data
     }
     if(!is.null(covars)){
-      for(i in 1:length(covars)){
+      for(i in seq_along(covars)){
         assign(names(covars)[i], covars[[i]])
       }
     }
@@ -62,7 +63,7 @@ DA.zig <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
       colnames(temp_table)[6] <- "logFC"
       temp_table <- temp_table[,-ncol(temp_table)]
     } else {
-      temp_table <- metagenomeSeq::MRtable(mgsfit, number=nrow(count_table), by = by, coef = c(1:length(levels(as.factor(predictor)))), eff = eff)
+      temp_table <- metagenomeSeq::MRtable(mgsfit, number=nrow(count_table), by = by, coef = c(seq_along(levels(as.factor(predictor)))), eff = eff)
       temp_table <- temp_table[,-ncol(temp_table)]
       if(length(levels(as.factor(predictor))) == 2){
         colnames(temp_table)[6] <- "logFC"

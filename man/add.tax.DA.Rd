@@ -11,6 +11,9 @@ add.tax.DA(data, res)
 
 \item{res}{data.frame with results}
 }
+\value{
+A \code{res} merged with the tax.table from the phyloseq object
+}
 \description{
 Internal function
 }

@@ -29,6 +29,9 @@ DA.qpo(data, predictor, covars = NULL, relative = TRUE,
 
 \item{...}{Additional arguments for the \code{glm} functions}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Apply quasi-poisson generalized linear model for multiple features with one \code{predictor}
 With \code{log(librarySize)} as offset if \code{relative=TRUE}.

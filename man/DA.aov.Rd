@@ -22,6 +22,9 @@ DA.aov(data, predictor, covars = NULL, relative = TRUE,
 
 \item{...}{Additional arguments for the \code{aov} function}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Run ANOVA on multiple features with \code{predictor} as independent variable
 }

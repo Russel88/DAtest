@@ -4,12 +4,17 @@
 \alias{summary.DAPower}
 \title{Summary of results from \code{powerDA}}
 \usage{
-\method{summary}{DAPower}(object, ...)
+\method{summary}{DAPower}(object, decimals = 2, ...)
 }
 \arguments{
 \item{object}{The output from the \code{powerDA} function}
 
+\item{decimals}{Precision in output. Default 2}
+
 \item{...}{Additional arguments for \code{print}}
+}
+\value{
+Prints summary results from the powerDA function
 }
 \description{
 Summary of results from \code{powerDA}

@@ -11,6 +11,7 @@
 #' @param k Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). k=c(5,10,15): 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default c(5,5,5)
 #' @param num.pred Logical. Is the \code{predictor} numeric? Default FALSE
 #' @param relative Logical. Are abundances relative? Default TRUE
+#' @return Returns a list where the first element is the count_table with the spiked features, and the second element contains rownames of the spiked features.
 #' @export
 
 spikein <- function(count_table, predictor, effectSize = 2, k, num.pred = FALSE, relative = TRUE){
@@ -18,7 +19,7 @@ spikein <- function(count_table, predictor, effectSize = 2, k, num.pred = FALSE,
   if(effectSize < 0) stop("Effect size should be positive")
   if(effectSize == 1) spikeMethod <- "none" else spikeMethod <- "mult"
 
-  if(is.null(rownames(count_table))) rownames(count_table) <- 1:nrow(count_table)
+  if(is.null(rownames(count_table))) rownames(count_table) <- seq_len(nrow(count_table))
   
   count_table <- as.data.frame(count_table)
   if(!num.pred) predictor <- as.numeric(as.factor(predictor))-1

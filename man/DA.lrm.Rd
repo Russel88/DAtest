@@ -29,6 +29,9 @@ DA.lrm(data, predictor, paired = NULL, covars = NULL,
 
 \item{...}{Additional arguments for the \code{lm}/\code{lme} functions}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Apply linear regression to mulitple features with one \code{predictor}
 Mixed-effect model is used when a \code{paired} argument is present, with the \code{paired} variable as random intercept

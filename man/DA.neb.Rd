@@ -31,6 +31,9 @@ DA.neb(data, predictor, paired = NULL, covars = NULL,
 
 \item{...}{Additional arguments for the \code{glm.nb}/\code{glmer.nb} functions}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Apply negative binomial generalized linear model for multiple features with one \code{predictor}
 With \code{log(librarySize)} as offset if \code{relative=TRUE}.

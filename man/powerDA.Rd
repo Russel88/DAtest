@@ -7,8 +7,8 @@
 powerDA(data, predictor, paired = NULL, covars = NULL, test = NULL,
   effectSizes = c(2, 4, 8, 16, 32), alpha.p = 0.05, alpha.q = 0.1,
   p.adj = "fdr", R = 5, relative = TRUE, k = NULL,
-  cores = (detectCores() - 1), rng.seed = 123, args = list(),
-  out.all = NULL, core.check = TRUE, verbose = TRUE)
+  cores = (detectCores() - 1), args = list(), out.all = NULL,
+  core.check = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{data}{Either a data.frame with counts/abundances, OR a \code{phyloseq} object. If a data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
@@ -36,8 +36,6 @@ powerDA(data, predictor, paired = NULL, covars = NULL, test = NULL,
 \item{k}{Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. \code{k=c(5,10,15)}: 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default NULL, which will spike 2 percent of the total amount of features in each tertile (a total of 6 percent), but minimum c(5,5,5)}
 
 \item{cores}{Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.}
-
-\item{rng.seed}{Numeric. Seed for reproducibility. Default 123}
 
 \item{args}{List. A list with arguments passed to method.}
 

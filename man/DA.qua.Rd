@@ -22,6 +22,9 @@ DA.qua(data, predictor, paired = NULL, relative = TRUE,
 
 \item{...}{Additional arguments for the \code{quade.test} function}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Apply \code{quade.test} to multiple features with one \code{predictor}
 }

@@ -5,6 +5,7 @@
 #' @param test Which test to use to calculate p-values. See \code{drop1} for details. Default "Chisq"
 #' @param p.adj P-value adjustment method. See \code{p.adjust} for details. Default "fdr"
 #' @param ... Additional arguments for \code{drop1} function
+#' @return A data.frame with output from drop1 and adjusted p.values for each predictor and feature
 #' @export
 DA.drop1 <- function(results, test = "Chisq", p.adj = "fdr", ...){
   
@@ -130,6 +131,7 @@ DA.drop1 <- function(results, test = "Chisq", p.adj = "fdr", ...){
 #' @param results Output from a \code{DA."test"} function with \code{allResults = TRUE}
 #' @param p.adj P-value adjustment method. See \code{p.adjust for details}. Default "fdr"
 #' @param ... Additional arguments for \code{anova} function
+#' @return A data.frame with output from anova and adjusted p.values for each predictor and feature
 #' @export
 DA.anova <- function(results, p.adj = "fdr", ...){
   
@@ -188,6 +190,7 @@ DA.anova <- function(results, p.adj = "fdr", ...){
 #' @param variable Which variable to test. Default predictor. Alternatively, the name of a covar
 #' @param p.adj P-value adjustment method. See \code{p.adjust} for details
 #' @param ... Additional arguments for \code{TukeyHSD} function
+#' @return A data.frame with output from TukeyHSD and adjusted p.values for each predictor and feature
 #' @export
 DA.TukeyHSD <- function(results, variable = "predictor", p.adj = "fdr", ...){
   
@@ -233,6 +236,7 @@ DA.TukeyHSD <- function(results, variable = "predictor", p.adj = "fdr", ...){
 #' @param covars If results come from a paired "lrm", "lma", "lmc", "llm" or "llm2" supply the original covars in the form of a named list
 #' @param p.adj P-value adjustment method. See \code{p.adjust} for details
 #' @param ... Additional arguments for \code{lsmeans} function
+#' @return A data.frame with output from lsmeans::pairs and adjusted p.values for each predictor and feature
 #' @export
 DA.lsmeans <- function(results, variable = "predictor", predictor = NULL, covars = NULL, p.adj = "fdr", ...){
 

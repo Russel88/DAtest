@@ -7,9 +7,12 @@
 norm_alr(x, ref = nrow(x))
 }
 \arguments{
-\item{x}{numeric matrix}
+\item{x}{numeric matrix. Samples are columns}
 
 \item{ref}{reference feature}
+}
+\value{
+An ALR normalized count_table
 }
 \description{
 Additive log-ratio normalization

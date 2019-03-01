@@ -1,14 +1,24 @@
 Package: DAtest
 Title: Comparing Differential Abundance/Expression Methods
-Version: 2.7.13
+Version: 2.8.0
 Authors@R: person("Jakob", "Russel",
     email = "russel2620@gmail.com", 
     role = c("aut", "cre"))
 Description: Runs multiple differential abundance/expressions methods,
     with the same standardized input and output, 
     to compare their results and test which are better at finding spiked features. 
-Depends: R (>= 3.2.5)
+Depends: R (>= 3.5)
+biocViews: Sequencing,
+    RNASeq,
+    Microbiome,
+    GeneExpression,
+    Normalization,
+    DifferentialExpression,
+    StatisticalMethod,
+    Regression,
+    Metagenomics
 Imports: foreach,
+    parallel,
     doParallel,
     snow,
     doSNOW,
@@ -20,7 +30,8 @@ Imports: foreach,
     nlme,
     stats,
     methods,
-    utils
+    utils,
+    graphics
 Suggests: lsmeans, 
     eulerr,
     venneuler,

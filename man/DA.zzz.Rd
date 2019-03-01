@@ -20,6 +20,9 @@ DA.zzz(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
 
 \item{FUN}{Function to apply to data. Should take input in the following order: \code{count_table} (data.frame, samples are columns), \code{predictor} (vector), \code{paired} (factor), \code{covars} (named list with vector). Output should be a dataframe with at least the following columns: \code{Feature}, \code{pval} and \code{Method}.}
 }
+\value{
+A data.frame with results from the user-defined method
+}
 \description{
 Apply a user-defined function to all features of a count table. For implemetation in \code{testDA} and \code{allDA}
 }

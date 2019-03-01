@@ -29,6 +29,9 @@ DA.wil(data, predictor, paired = NULL, relative = TRUE,
 
 \item{...}{Additional arguments for the \code{wilcox.test} function}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Apply wilcoxon test for multiple features with one \code{predictor}
 }

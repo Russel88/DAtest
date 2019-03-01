@@ -10,6 +10,7 @@
 #' @param testStat.pair Function. Function for calculating fold change. Should take two vectors as arguments. Default is a simple difference: \code{mean(case abundances-control abundances)}
 #' @param allResults If TRUE will return raw results from the \code{t.test} function
 #' @param ... Additional arguments for the \code{t.test} function
+#' @return A data.frame with with results.
 #' @export
 
 DA.ttc <- function(data, predictor, paired = NULL, p.adj = "fdr", delta = 1, testStat = function(case,control){mean(case)-mean(control)}, testStat.pair = function(case,control){mean(case-control)}, allResults = FALSE, ...){
@@ -40,7 +41,7 @@ DA.ttc <- function(data, predictor, paired = NULL, p.adj = "fdr", delta = 1, tes
   }
   
   # Zero-correction
-  count_table <- apply(count_table, 2, function(y) sapply(y,function(x) ifelse(x==0,delta,(1-(sum(y==0)*delta)/sum(y))*x)))
+  count_table <- apply(count_table, 2, function(y) vapply(y,function(x) ifelse(x==0,delta,(1-(sum(y==0)*delta)/sum(y))*x)))
   if(any(count_table <= 0)) stop("Zero-correction failed. Dataset likely contains too many zeroes")
   
   # CLR transformation

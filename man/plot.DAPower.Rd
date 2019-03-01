@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments for \code{ggdraw}}
 }
+\value{
+Plots the output from powerDA
+}
 \description{
 Plotting results from \code{powerDA}
 }

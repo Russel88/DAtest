@@ -17,6 +17,7 @@
 #' @param testStat.pair Function. Function for test statistic for paired analysis. Should take two vectors as arguments. Default is a log fold change: \code{log2(mean((case abundances+1)/(control abundances+1)))}
 #' @param noOfIterations Integer. Iterations for permutations. Default 10000
 #' @param margin Numeric. Margin for when to stop iterations if p-value is high and unlikely to become low
+#' @return A data.frame with with results.
 #' @export
 
 DA.per <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr", testStat = function(case,control){log2((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){log2(mean((case+1)/(control+1)))}, noOfIterations = 10000, margin = 50){
@@ -53,12 +54,12 @@ DA.per <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
   # Create shuffled predictors
   shuffledpredictorsList <- list()
   if(is.null(paired)){
-    for (k in 1:noOfIterations){
+    for (k in seq_len(noOfIterations)){
       shuffledpredictorsList[[k]] <- sample(predictor)
     }
   } else {
-    for (k in 1:noOfIterations){
-      shuffledpredictorsList[[k]] <- unlist(lapply(1:(length(predictor)/2),function(x) sample(c(0,1))))
+    for (k in seq_len(noOfIterations)){
+      shuffledpredictorsList[[k]] <- unlist(lapply(seq_len(length(predictor)/2),function(x) sample(c(0,1))))
     }
   }
   
@@ -68,7 +69,7 @@ DA.per <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
   coverage <- numeric(iterations)
   
   # For each feature
-  for(i in 1:iterations){
+  for(i in seq_len(iterations)){
     
     count_row      <- as.numeric(count.rel[i,])
     
@@ -79,17 +80,17 @@ DA.per <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
     Wnull <- numeric(noOfIterations)
     
     # For each iteration
-    for(j in 1:noOfIterations){
+    for(j in seq_len(noOfIterations)){
       case     <- count_row[shuffledpredictorsList[[j]]==1]
       control  <- count_row[shuffledpredictorsList[[j]]==0]
       Wnull[j] <- testStat(case,control)
       
       # Break if p-value is high (as defined by margin)
       if(j %in% 10^(1:100)){
-        nullStatTemp <- Wnull[1:j]
+        nullStatTemp <- Wnull[seq_len(j)]
         ptemp <- sum(abs(nullStatTemp) >= abs(realStat))/(noOfIterations+1)
         if(ptemp > (margin*(1/j))){
-          nullStat <- Wnull[1:j]
+          nullStat <- Wnull[seq_len(j)]
           coverage[i] <- j
           break
         }

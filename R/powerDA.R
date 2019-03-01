@@ -14,7 +14,6 @@
 #' @param relative Logical. TRUE (default) for compositional data, FALSE for absolute abundances or pre-normalized data.
 #' @param k Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. \code{k=c(5,10,15)}: 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default NULL, which will spike 2 percent of the total amount of features in each tertile (a total of 6 percent), but minimum c(5,5,5)
 #' @param cores Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.
-#' @param rng.seed Numeric. Seed for reproducibility. Default 123
 #' @param args List. A list with arguments passed to method.
 #' @param out.all If TRUE linear models will output results and p-values from \code{anova}/\code{drop1}, ds2/ds2x will run LRT and not Wald test, erq and erq2 will produce one p-value for the predictor, and limma will run F-tests. If FALSE will output results for 2. level of the \code{predictor}. If NULL (default) set as TRUE for multi-class predictors and FALSE otherwise
 #' @param core.check If TRUE will make an interactive check that the amount of cores specified are desired. Only if \code{cores>20}. This is to ensure that the function doesn't automatically overloads a server with workers.  
@@ -26,7 +25,7 @@
 #' @importFrom pROC roc
 #' @export
 
-powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, effectSizes = c(2,4,8,16,32), alpha.p = 0.05, alpha.q = 0.1, p.adj = "fdr", R = 5, relative = TRUE, k = NULL, cores = (detectCores()-1), rng.seed = 123, args = list(), out.all = NULL, core.check = TRUE, verbose = TRUE){
+powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, effectSizes = c(2,4,8,16,32), alpha.p = 0.05, alpha.q = 0.1, p.adj = "fdr", R = 5, relative = TRUE, k = NULL, cores = (detectCores()-1), args = list(), out.all = NULL, core.check = TRUE, verbose = TRUE){
 
   stopifnot(exists("data"),exists("predictor"))
   # Check for servers
@@ -48,7 +47,7 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
     count_table <- data
   }
   if(!is.null(covars)){
-    for(i in 1:length(covars)){
+    for(i in seq_along(covars)){
       assign(names(covars)[i], covars[[i]])
     }
   }
@@ -66,13 +65,7 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
   if(length(unique(predictor)) < 2) stop("predictor should have at least two levels")
   if(length(test) != 1) stop("'test' has to have length 1")
   
-  # Set seed
-  set.seed(rng.seed)
-  if(verbose) message(paste("Seed is set to",rng.seed))
   if(verbose) message(paste("Running on",cores,"cores"))
-
-  # Create some random seeds for each run
-  seeds <- rpois(R, lambda = (1:R)*1e6)
 
   # Remove Features not present in any samples
   if(sum(rowSums(count_table) == 0) != 0) message(paste(sum(rowSums(count_table) == 0),"empty features removed"))
@@ -120,7 +113,7 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
   
   # Covars
   if(!is.null(covars)){
-    for(i in 1:length(covars)){
+    for(i in seq_along(covars)){
       if(verbose) if(any(is.na(covars[[i]]))) warning(names(covars)[i],"contains NAs!")
       if(is.numeric(covars[[i]][1])){
         if(verbose) message(paste(names(covars)[i],"is assumed to be a quantitative variable, ranging from",min(covars[[i]], na.rm = TRUE),"to",max(covars[[i]], na.rm = TRUE)))
@@ -133,21 +126,21 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
   if(verbose) cat("Spikeing...\n")
   # Shuffle predictor
   if(is.null(paired)){
-    rands <- lapply(1:R,function(x) sample(predictor))
+    rands <- lapply(seq_len(R),function(x) sample(predictor))
   } else {
-    rands <- lapply(1:R,function(x) unsplit(lapply(split(predictor,paired), sample), paired))
+    rands <- lapply(seq_len(R),function(x) unsplit(lapply(split(predictor,paired), sample), paired))
   }
   
   # Spikeins
   spikeds.l <- list()
   for(eff in seq_along(effectSizes)){
-    spikeds.l[[eff]] <- lapply(1:R,function(x) spikein(count_table, rands[[x]], effectSizes[eff],  k, num.pred, relative))
+    spikeds.l[[eff]] <- lapply(seq_len(R),function(x) spikein(count_table, rands[[x]], effectSizes[eff],  k, num.pred, relative))
   }
   spikeds <- do.call(c, spikeds.l)
-  count_tables <- lapply(1:(R*length(effectSizes)),function(x) spikeds[[x]][[1]])
+  count_tables <- lapply(seq_len(R*length(effectSizes)),function(x) spikeds[[x]][[1]])
   
   # Test list
-  tests.par <- paste0(unlist(lapply(effectSizes,function(x) rep(x,R))),"-",rep(paste0(1:R,"_",rep(test,R)),R))
+  tests.par <- paste0(unlist(lapply(effectSizes,function(x) rep(x,R))),"-",rep(paste0(seq_len(R),"_",rep(test,R)),R))
 
   ### Run tests
   # Progress bar
@@ -172,9 +165,6 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
     run.no <- as.numeric(gsub(".*-","",gsub("_.*","",i)))
     i <- gsub(".*_","",i)
 
-    # Set subseed
-    set.seed(seeds[run.no])
-    
     if(!is.na(pmatch("zzz",i))){
       i <- "zzz"
     } 
@@ -227,7 +217,6 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
                                fri = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,relative,p.adj), args)),
                                qua = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,relative,p.adj), args)),
                                sam = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[what.run]],rands[[run.no]],paired,fdr.output = alpha.q), args))),
-                        
                         error = function(e) NULL)
     
     if(!i %in% c("sam","adx")){

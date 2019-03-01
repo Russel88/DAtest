@@ -88,7 +88,7 @@ vennDA <- function(x, tests = NULL, alpha = 0.1, split = FALSE, output = FALSE, 
       if(length(vennfeat) == 0) stop("No significant features")
       naming.pos <- list()
       naming.neg <- list()
-      for(i in 1:length(featurelist)){
+      for(i in seq_along(featurelist)){
         if(plottests[i] == "bay"){
           naming.pos[[i]] <- rep(paste0(plottests[i],"_",levels(x$results$bay$ordering)[1]),length(featurelist.pos[[i]]))
           naming.neg[[i]] <- rep(paste0(plottests[i],"_",levels(x$results$bay$ordering)[2]),length(featurelist.neg[[i]]))
@@ -106,7 +106,7 @@ vennDA <- function(x, tests = NULL, alpha = 0.1, split = FALSE, output = FALSE, 
       vennfeat <- do.call(c, featurelist)
       if(length(vennfeat) == 0) stop("No significant features")
       naming <- list()
-      for(i in 1:length(featurelist)){
+      for(i in seq_along(featurelist)){
         naming[[i]] <- rep(plottests[i],length(featurelist[[i]]))
       }
       vennname <- do.call(c, naming)

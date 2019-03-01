@@ -10,6 +10,7 @@
 #' @param coeff Integer. The p-value and log2FoldChange will be associated with this coefficient. Default 2, i.e. the 2. level of the \code{predictor}.
 #' @param allResults If TRUE will return raw results from the \code{eBayes} function
 #' @param ... Additional arguments for the \code{eBayes} and \code{lmFit} functions
+#' @return A data.frame with with results.
 #' @export
 
 DA.lim <- function(data, predictor, paired = NULL, covars = NULL, relative = TRUE, out.all = NULL, p.adj = "fdr", coeff = 2, allResults = FALSE, ...){
@@ -31,7 +32,7 @@ DA.lim <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
       count_table <- data
     }
     if(!is.null(covars)){
-      for(i in 1:length(covars)){
+      for(i in seq_along(covars)){
         assign(names(covars)[i], covars[[i]])
       }
     }

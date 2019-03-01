@@ -4,6 +4,7 @@
 #' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
 #' @param predictor The predictor of interest. Factor, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation
 #' @param ... Additional arguments for the \code{aldex} function
+#' @return A data.frame with with results.
 #' @export
 
 DA.adx <- function(data, predictor, ...){

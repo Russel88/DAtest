@@ -28,6 +28,9 @@ DA.lmc(data, predictor, paired = NULL, covars = NULL, out.all = NULL,
 
 \item{...}{Additional arguments for the \code{lm}/\code{lme} functions}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Apply linear regression for multiple features with one \code{predictor}.
 Mixed-effect model is used when a \code{paired} argument is included, with the \code{paired} variable as a random intercept.

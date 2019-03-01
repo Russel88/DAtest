@@ -2,6 +2,7 @@
 #'
 #' @param x The output from the \code{powerDA} function
 #' @param ... Additional arguments for \code{ggdraw}
+#' @return Plots the output from powerDA
 #' @import ggplot2
 #' @importFrom cowplot ggdraw
 #' @importFrom cowplot draw_plot

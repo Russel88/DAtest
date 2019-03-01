@@ -5,6 +5,7 @@
 #' @param predictor The predictor of interest. Factor, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation
 #' @param allResults If TRUE will return raw results from the \code{getLikelihoods} function
 #' @param ... Additional arguments to the \code{getPriors.NB} and \code{getLikelihoods} functions
+#' @return A data.frame with with results.
 #' @export
 
 DA.bay <- function(data, predictor, allResults = FALSE, ...){

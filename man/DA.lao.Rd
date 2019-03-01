@@ -24,6 +24,9 @@ DA.lao(data, predictor, covars = NULL, relative = TRUE,
 
 \item{...}{Additional arguments for the \code{aov} functions}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Apply ANOVA on multiple features with one \code{predictor}, with log transformation of counts before normalization.
 }

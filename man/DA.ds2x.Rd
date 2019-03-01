@@ -29,6 +29,9 @@ DA.ds2x(data, predictor, paired = NULL, covars = NULL,
 
 \item{...}{Additional arguments for the \code{DESeq} function}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Implementation of DESeq2 for \code{DAtest}
 }

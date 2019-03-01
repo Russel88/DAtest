@@ -32,7 +32,7 @@ featurePlot <- function(data, predictor, paired = NULL, covars = NULL, feature =
     count_table <- data
   }
   if(!is.null(covars)){
-    for(i in 1:length(covars)){
+    for(i in seq_along(covars)){
       assign(names(covars)[i], covars[[i]])
     }
   }

@@ -6,6 +6,7 @@
 #' @param relative Logical. Should \code{data} be normalized to relative abundances. Default TRUE
 #' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
 #' @param ... Additional arguments for the \code{cor.test} function
+#' @return A data.frame with with results.
 #' @export
 
 DA.pea <- function(data, predictor, relative = TRUE, p.adj = "fdr", ...){
@@ -35,11 +36,11 @@ DA.pea <- function(data, predictor, relative = TRUE, p.adj = "fdr", ...){
   peas <- apply(count.rel, 1, pea)
   
   # Collect results
-  res <- data.frame(pval = sapply(peas, function(x) x$p.value))
+  res <- data.frame(pval = vapply(peas, function(x) x$p.value))
   res$pval.adj <- p.adjust(res$pval, method = p.adj)
-  res$cor <- sapply(peas, function(x) x$estimate)
-  res$`cor_2.5%` <- sapply(peas, function(x) x$conf.int[1])
-  res$`cor_97.5%` <- sapply(peas, function(x) x$conf.int[2])
+  res$cor <- vapply(peas, function(x) x$estimate)
+  res$`cor_2.5%` <- vapply(peas, function(x) x$conf.int[1])
+  res$`cor_97.5%` <- vapply(peas, function(x) x$conf.int[2])
   res$Feature <- rownames(res)
   res$Method <- "Pearson (pea)"
 

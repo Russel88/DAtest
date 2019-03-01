@@ -31,6 +31,9 @@ DA.poi(data, predictor, paired = NULL, covars = NULL,
 
 \item{...}{Additional arguments for the \code{glm}/\code{glmer} functions}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Apply poisson generalized linear models on multiple features with one \code{predictor}
 With \code{log(librarySize)} as offset.

@@ -20,6 +20,9 @@ DA.sam(data, predictor, paired = NULL, fdr.output = 0.05,
 
 \item{...}{Additional arguments for the \code{SAMseq} function}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 SAMSeq implementation for \code{DAtest}
 }

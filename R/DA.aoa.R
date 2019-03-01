@@ -10,6 +10,7 @@
 #' @param delta Numeric. Pseudocount for zero-correction. Default 1
 #' @param allResults If TRUE will return raw results from the \code{aov} function
 #' @param ... Additional arguments for the \code{aov} functions
+#' @return A data.frame with with results.
 #' @export
 
 DA.aoa <- function(data, predictor, covars = NULL, p.adj = "fdr", delta = 1, allResults = FALSE, ...){
@@ -24,7 +25,7 @@ DA.aoa <- function(data, predictor, covars = NULL, p.adj = "fdr", delta = 1, all
     count_table <- data
   }
   if(!is.null(covars)){
-    for(i in 1:length(covars)){
+    for(i in seq_along(covars)){
       assign(names(covars)[i], covars[[i]])
     }
   }
@@ -42,7 +43,7 @@ DA.aoa <- function(data, predictor, covars = NULL, p.adj = "fdr", delta = 1, all
   }
   
   # Zero-correction
-  count_table <- apply(count_table, 2, function(y) sapply(y,function(x) ifelse(x==0,delta,(1-(sum(y==0)*delta)/sum(y))*x)))
+  count_table <- apply(count_table, 2, function(y) vapply(y,function(x) ifelse(x==0,delta,(1-(sum(y==0)*delta)/sum(y))*x)))
   if(any(count_table <= 0)) stop("Zero-correction failed. Dataset likely contains too many zeroes")
   
   # ALR transformation

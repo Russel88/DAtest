@@ -6,6 +6,7 @@
 #' @param relative Logical. Should \code{data} be normalized to relative abundances. Default TRUE
 #' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
 #' @param ... Additional arguments for the \code{cor.test} function
+#' @return A data.frame with with results.
 #' @export
 
 DA.spe <- function(data, predictor, relative = TRUE, p.adj = "fdr", ...){
@@ -35,9 +36,9 @@ DA.spe <- function(data, predictor, relative = TRUE, p.adj = "fdr", ...){
   spes <- apply(count.rel, 1, spe)
   
   # Collect results
-  res <- data.frame(pval = sapply(spes, function(x) x$p.value))
+  res <- data.frame(pval = vapply(spes, function(x) x$p.value))
   res$pval.adj <- p.adjust(res$pval, method = p.adj)
-  res$rho <- sapply(spes, function(x) x$estimate)
+  res$rho <- vapply(spes, function(x) x$estimate)
   res$Feature <- rownames(res)
   res$Method <- "Spearman (spe)"
   

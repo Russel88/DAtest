@@ -11,8 +11,8 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 20,
   "ttt", "ltt", "ltt2", "tta", "ttc", "aov", "lao", "lao2", "aoa", "aoc",
   "vli", "lim", "lli", "lli2", "lia", "lic"), relative = TRUE,
   effectSize = 5, k = NULL, cores = (detectCores() - 1),
-  rng.seed = 123, p.adj = "fdr", args = list(), out.all = NULL,
-  alpha = 0.1, core.check = TRUE, verbose = TRUE)
+  p.adj = "fdr", args = list(), out.all = NULL, alpha = 0.1,
+  core.check = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{data}{Either a data.frame with counts/abundances, OR a \code{phyloseq} object. If a data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
@@ -34,8 +34,6 @@ testDA(data, predictor, paired = NULL, covars = NULL, R = 20,
 \item{k}{Vector of length 3. Number of Features to spike in each tertile (lower, mid, upper). E.g. \code{k=c(5,10,15)}: 5 features spiked in low abundance tertile, 10 features spiked in mid abundance tertile and 15 features spiked in high abundance tertile. Default NULL, which will spike 2 percent of the total amount of features in each tertile (a total of 6 percent), but minimum c(5,5,5)}
 
 \item{cores}{Integer. Number of cores to use for parallel computing. Default one less than available. Set to 1 for sequential computing.}
-
-\item{rng.seed}{Numeric. Seed for reproducibility. Default 123}
 
 \item{p.adj}{Character. Method for p-value adjustment. See \code{p.adjust} for details. Default "fdr"}
 

@@ -22,6 +22,9 @@ DA.fri(data, predictor, paired = NULL, relative = TRUE,
 
 \item{...}{Additional arguments for the \code{friedman.test} function}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Apply friedman test to multiple features with one \code{predictor}
 }

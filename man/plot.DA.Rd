@@ -17,6 +17,9 @@
 
 \item{...}{Additional arguments for \code{ggdraw}}
 }
+\value{
+Plots the output from testDA
+}
 \description{
 Plotting results from \code{testDA}
 }

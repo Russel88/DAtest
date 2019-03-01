@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments for \code{print}}
 }
+\value{
+Prints results from testDA
+}
 \description{
 Print results from \code{testDA}
 }

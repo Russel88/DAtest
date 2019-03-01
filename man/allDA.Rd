@@ -10,8 +10,8 @@ allDA(data, predictor, paired = NULL, covars = NULL, tests = c("bay",
   "ere2", "pea", "spe", "wil", "kru", "qua", "fri", "ttt", "ltt", "ltt2",
   "tta", "ttc", "aov", "lao", "lao2", "aoa", "aoc", "vli", "lim", "lli",
   "lli2", "lia", "lic"), relative = TRUE, cores = (detectCores() - 1),
-  rng.seed = 123, p.adj = "fdr", args = list(), out.all = NULL,
-  alpha = 0.1, core.check = TRUE, verbose = TRUE)
+  p.adj = "fdr", args = list(), out.all = NULL, alpha = 0.1,
+  core.check = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{data}{Either a data.frame with counts/abundances, OR a \code{phyloseq} object. If a data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}
@@ -27,8 +27,6 @@ allDA(data, predictor, paired = NULL, covars = NULL, tests = c("bay",
 \item{relative}{Logical. TRUE (default) for compositional data. FALSE for absoloute abundances or pre-normalized data.}
 
 \item{cores}{Integer. Number of cores to use for parallel computing. Default one less than available}
-
-\item{rng.seed}{Numeric. Seed for reproducibility. Default 123}
 
 \item{p.adj}{Character. Method for p-value adjustment. See \code{p.adjust} for details. Default "fdr"}
 

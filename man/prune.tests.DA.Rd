@@ -21,6 +21,9 @@ prune.tests.DA(tests, predictor, paired, covars, relative, decimal, zeroes)
 
 \item{zeroes}{If FALSE will exclude tests that include zero-inflation}
 }
+\value{
+A character with the tests argument pruned according to the parameters
+}
 \description{
 Prune tests argument for \code{testDA}
 }

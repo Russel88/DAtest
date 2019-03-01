@@ -26,6 +26,9 @@ DA.zig(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
 
 \item{...}{Additional arguments for the \code{fitZig} function}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Implementation of Metagenome zero-inflated gaussian model for \code{DAtest}
 }

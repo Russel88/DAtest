@@ -15,6 +15,9 @@ DA.TukeyHSD(results, variable = "predictor", p.adj = "fdr", ...)
 
 \item{...}{Additional arguments for \code{TukeyHSD} function}
 }
+\value{
+A data.frame with output from TukeyHSD and adjusted p.values for each predictor and feature
+}
 \description{
 Works on "aov", "lao", "lao2", "aoc", "aoa"
 }

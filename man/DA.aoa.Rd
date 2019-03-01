@@ -22,6 +22,9 @@ DA.aoa(data, predictor, covars = NULL, p.adj = "fdr", delta = 1,
 
 \item{...}{Additional arguments for the \code{aov} functions}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Apply ANOVA on multiple features with one \code{predictor}.
 }

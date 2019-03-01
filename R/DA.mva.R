@@ -12,6 +12,7 @@
 #' @param resamp Resample method for estimating p-values. Passed to \code{summary.manyglm}. Default "montecarlo"
 #' @param allResults If TRUE will return raw results from the \code{mvabund} function
 #' @param ... Additional arguments for the \code{manyglm} and \code{summary.manyglm} functions
+#' @return A data.frame with with results.
 #' @export
 
 DA.mva <- function(data, predictor, paired = NULL, covars = NULL, relative = TRUE, p.adj = "fdr", coeff = 2, coeff.ref = 1, resamp = "montecarlo", allResults = FALSE, ...){
@@ -33,7 +34,7 @@ DA.mva <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
       count_table <- data
     }
     if(!is.null(covars)){
-      for(i in 1:length(covars)){
+      for(i in seq_along(covars)){
         assign(names(covars)[i], covars[[i]])
       }
     }

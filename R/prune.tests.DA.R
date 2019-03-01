@@ -7,6 +7,7 @@
 #' @param relative Include tests that work with relative abundances (TRUE) or only absolute abundances (FALSE)
 #' @param decimal Exclude tests that do not work with decimals (TRUE)
 #' @param zeroes If FALSE will exclude tests that include zero-inflation
+#' @return A character with the tests argument pruned according to the parameters
 #' @export
 
 prune.tests.DA <- function(tests, predictor, paired, covars, relative, decimal, zeroes){

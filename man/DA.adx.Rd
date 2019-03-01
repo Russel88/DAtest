@@ -13,6 +13,9 @@ DA.adx(data, predictor, ...)
 
 \item{...}{Additional arguments for the \code{aldex} function}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Implementation of \code{aldex} for \code{DAtest}
 }

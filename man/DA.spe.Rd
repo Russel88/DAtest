@@ -17,6 +17,9 @@ DA.spe(data, predictor, relative = TRUE, p.adj = "fdr", ...)
 
 \item{...}{Additional arguments for the \code{cor.test} function}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Apply Spearman correlation to multiple features with one \code{predictor}
 }

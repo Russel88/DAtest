@@ -28,6 +28,9 @@ DA.lic(data, predictor, paired = NULL, covars = NULL, out.all = NULL,
 
 \item{...}{Additional arguments for the \code{eBayes} and \code{lmFit} functions}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Note: Last feature in the data is used as reference for the log-ratio transformation.
 }

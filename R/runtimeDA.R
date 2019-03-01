@@ -40,7 +40,7 @@ runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples 
     count_table <- data
   }
   if(!is.null(covars)){
-    for(i in 1:length(covars)){
+    for(i in seq_along(covars)){
       assign(names(covars)[i], covars[[i]])
     }
   }
@@ -64,7 +64,7 @@ runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples 
   
   # Covars
   if(!is.null(covars)){
-    for(i in 1:length(covars)){
+    for(i in seq_along(covars)){
       if(is.numeric(covars[[i]][1])){
         message(paste(names(covars)[i],"is assumed to be a quantitative variable"))
       } else {
@@ -78,10 +78,10 @@ runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples 
   
   message("Running fast methods")
   test.list <- list()
-  for(i in 1:length(subsamples)){
+  for(i in seq_along(subsamples)){
     cat(paste("\n",subsamples[i],"features"),fill = TRUE)
     # Subset
-    sub <- count_table[1:subsamples[i], ]
+    sub <- count_table[seq_len(subsamples[i]), ]
     if(sum(colSums(sub) == 0) != 0) warning(paste(sum(colSums(sub) == 0),"empty samples removed"))
     sub <- sub[, colSums(sub) > 0]
     
@@ -93,10 +93,10 @@ runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples 
   # Run subsets slow
   message("Running slow methods")
   test.slow.list <- list()
-  for(i in 1:length(subsamples.slow)){
+  for(i in seq_along(subsamples.slow)){
     cat(paste("\n",subsamples.slow[i],"features"),fill = TRUE)
     # Subset
-    sub <- count_table[1:subsamples.slow[i],]
+    sub <- count_table[seq_len(subsamples.slow[i]),]
     if(sum(colSums(sub) == 0) != 0) warning(paste(sum(colSums(sub) == 0),"empty samples removed"))
     sub <- sub[, colSums(sub) > 0]
     
@@ -110,7 +110,7 @@ runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples 
   
   # Extrapolate
   runtimes <- lapply(tests.list, function(x) x$run.times)
-  runtimes <- lapply(1:length(runtimes), function(x) cbind(runtimes[[x]],subsamps[[x]],rownames(runtimes[[x]])))
+  runtimes <- lapply(seq_along(runtimes), function(x) cbind(runtimes[[x]],subsamps[[x]],rownames(runtimes[[x]])))
   runtimes <- do.call(rbind,runtimes)
   colnames(runtimes) <- c("Minutes","SubSamp","Test")
   

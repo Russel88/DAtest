@@ -1,3 +1,3 @@
 .onAttach <- function(libname, pkgname){
-  packageStartupMessage("DAtest version 2.7.13")
+  packageStartupMessage("DAtest version 2.8.0")
 }

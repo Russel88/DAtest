@@ -5,6 +5,7 @@
 #' @param predictor The predictor of interest. Factor, OR if \code{data} is a \code{phyloseq} object the name of the variable in \code{sample_data(data)} in quotation
 #' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
 #' @param ... Additional arguments for the \code{calcNormFactors}, \code{estimateCommonDisp}, \code{estimateTagwiseDisp} and \code{exactTest} functions
+#' @return A data.frame with with results.
 #' @export
 
 DA.ere2 <- function(data, predictor, p.adj = "fdr", ...){

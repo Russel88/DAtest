@@ -13,6 +13,9 @@ DA.anova(results, p.adj = "fdr", ...)
 
 \item{...}{Additional arguments for \code{anova} function}
 }
+\value{
+A data.frame with output from anova and adjusted p.values for each predictor and feature
+}
 \description{
 Works on "lrm", "llm", "llm2", "lma", "lmc". Non-paired "neb"
 }

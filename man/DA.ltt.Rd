@@ -31,6 +31,9 @@ DA.ltt(data, predictor, paired = NULL, relative = TRUE,
 
 \item{...}{Additional arguments for the \code{t.test} function}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Apply welch t-test to multiple features with one \code{predictor}, with log transformaiton of counts before normalization
 }

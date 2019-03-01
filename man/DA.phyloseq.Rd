@@ -15,6 +15,9 @@ DA.phyloseq(data, predictor, paired = NULL, covars = NULL)
 
 \item{covars}{A character vector with names of the variables in \code{sample_data(data)}}
 }
+\value{
+A list with data extracted from the \code{phyloseq} object
+}
 \description{
 Extract data from a \code{phyloseq} object to be used in \code{DAtest}
 }

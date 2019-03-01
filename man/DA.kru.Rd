@@ -20,6 +20,9 @@ DA.kru(data, predictor, relative = TRUE, p.adj = "fdr",
 
 \item{...}{Additional arguments for the \code{kruskal.test} function}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Apply kruskal-wallis test on multiple features with one \code{predictor}
 }

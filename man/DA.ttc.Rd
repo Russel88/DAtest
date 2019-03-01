@@ -28,6 +28,9 @@ DA.ttc(data, predictor, paired = NULL, p.adj = "fdr", delta = 1,
 
 \item{...}{Additional arguments for the \code{t.test} function}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Apply welch t-test to multiple features with one \code{predictor}
 }

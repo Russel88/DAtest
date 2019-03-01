@@ -8,6 +8,7 @@
 #' @param delta Numeric. Pseudocount for the log transformation. Default 0.001
 #' @param allResults If TRUE will return raw results from the \code{aov} function
 #' @param ... Additional arguments for the \code{aov} functions
+#' @return A data.frame with with results.
 #' @export
 
 DA.lao2 <- function(data, predictor, covars = NULL, p.adj = "fdr", delta = 0.001, allResults = FALSE, ...){
@@ -22,7 +23,7 @@ DA.lao2 <- function(data, predictor, covars = NULL, p.adj = "fdr", delta = 0.001
     count_table <- data
   }
   if(!is.null(covars)){
-    for(i in 1:length(covars)){
+    for(i in seq_along(covars)){
       assign(names(covars)[i], covars[[i]])
     }
   }

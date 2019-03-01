@@ -11,6 +11,7 @@
 #' @param coeff.ref Integer. Reference level of the \code{predictor}. Default the intercept, = 1 
 #' @param allResults If TRUE will return raw results from the \code{DESeq} function
 #' @param ... Additional arguments for the \code{DESeq} function
+#' @return A data.frame with with results.
 #' @export
 
 DA.ds2x <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL, p.adj = "fdr", coeff = 2, coeff.ref = 1, allResults = FALSE, ...){
@@ -34,7 +35,7 @@ DA.ds2x <- function(data, predictor, paired = NULL, covars = NULL, out.all = NUL
     predictor <- as.factor(predictor)
     
     if(coeff == coeff.ref) stop("coeff and coeff.ref cannot be the same")
-    if(!coeff %in% 1:length(unique(predictor)) | !coeff.ref %in% 1:length(unique(predictor))) stop(paste("coeff and coeff.ref should be integers between 1 and",length(unique(predictor))))
+    if(!coeff %in% seq_along(unique(predictor)) | !coeff.ref %in% seq_along(unique(predictor))) stop(paste("coeff and coeff.ref should be integers between 1 and",length(unique(predictor))))
     
     # out.all
     if(is.null(out.all)){

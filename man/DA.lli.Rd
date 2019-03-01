@@ -31,6 +31,9 @@ DA.lli(data, predictor, paired = NULL, covars = NULL,
 
 \item{...}{Additional arguments for the \code{eBayes} and \code{lmFit} functions}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Limma with log transformation for counts before normalization.
 }

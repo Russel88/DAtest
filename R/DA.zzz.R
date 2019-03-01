@@ -7,6 +7,7 @@
 #' @param covars Either a named list with covariables, OR if \code{data} is a \code{phyloseq} object a character vector with names of the variables in \code{sample_data(data)}
 #' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
 #' @param FUN Function to apply to data. Should take input in the following order: \code{count_table} (data.frame, samples are columns), \code{predictor} (vector), \code{paired} (factor), \code{covars} (named list with vector). Output should be a dataframe with at least the following columns: \code{Feature}, \code{pval} and \code{Method}.
+#' @return A data.frame with results from the user-defined method
 #' @export
 DA.zzz <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", FUN = NULL){
   
@@ -23,7 +24,7 @@ DA.zzz <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
     count_table <- data
   }
   if(!is.null(covars)){
-    for(i in 1:length(covars)){
+    for(i in seq_along(covars)){
       assign(names(covars)[i], covars[[i]])
     }
   }

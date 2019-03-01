@@ -26,6 +26,9 @@ DA.vli(data, predictor, paired = NULL, covars = NULL, out.all = NULL,
 
 \item{...}{Additional arguments for the \code{voom}, \code{eBayes} and \code{lmFit} functions}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Limma is run after variance stabilization with \code{voom} using \code{edgeR} normalized library sizes
 }

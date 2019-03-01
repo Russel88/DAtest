@@ -8,6 +8,7 @@
 #' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
 #' @param allResults If TRUE will return raw results from the \code{friedman.test} function
 #' @param ... Additional arguments for the \code{friedman.test} function
+#' @return A data.frame with with results.
 #' @export
 
 DA.fri <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr", allResults = FALSE, ...){
@@ -43,9 +44,9 @@ DA.fri <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
   if(allResults){
     return(reslist)
   } else {
-    res <- data.frame(statistic = sapply(reslist, function(x) x$statistic),
-                      parameter = sapply(reslist, function(x) x$parameter),
-                      pval = sapply(reslist, function(x) x$p.value))
+    res <- data.frame(statistic = vapply(reslist, function(x) x$statistic),
+                      parameter = vapply(reslist, function(x) x$parameter),
+                      pval = vapply(reslist, function(x) x$p.value))
     res$pval.adj <- p.adjust(res$pval, method = p.adj)
     
     res$Feature <- gsub(".Friedman.*","",rownames(res))

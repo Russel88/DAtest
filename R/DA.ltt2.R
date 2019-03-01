@@ -10,6 +10,7 @@
 #' @param testStat.pair Function. Function for calculating fold change. Should take two vectors as arguments. Default is a log fold change: \code{log2(mean(exp(case abundances) / exp(control abundances)))}
 #' @param allResults If TRUE will return raw results from the \code{t.test} function
 #' @param ... Additional arguments for the \code{t.test} function
+#' @return A data.frame with with results.
 #' @export
 
 DA.ltt2 <- function(data, predictor, paired = NULL, p.adj = "fdr", delta = 0.001, testStat = function(case,control){log2((mean(exp(case)))/(mean(exp(control))))}, testStat.pair = function(case,control){log2(mean((exp(case))/(exp(control))))},allResults = FALSE, ...){

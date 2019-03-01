@@ -17,6 +17,9 @@ DA.pea(data, predictor, relative = TRUE, p.adj = "fdr", ...)
 
 \item{...}{Additional arguments for the \code{cor.test} function}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Apply pearson correlation between multiple features and one \code{predictor}
 }

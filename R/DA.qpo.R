@@ -12,6 +12,7 @@
 #' @param coeff.ref Integer. Reference level of the \code{predictor}. Will only affect the log2FC and ordering columns on the output. Default the intercept, = 1 
 #' @param allResults If TRUE will return raw results from the \code{glm} function
 #' @param ... Additional arguments for the \code{glm} functions
+#' @return A data.frame with with results.
 #' @export
 
 DA.qpo <- function(data, predictor, covars = NULL, relative = TRUE, out.all = NULL, p.adj = "fdr", coeff = 2, coeff.ref = 1, allResults = FALSE, ...){
@@ -26,13 +27,13 @@ DA.qpo <- function(data, predictor, covars = NULL, relative = TRUE, out.all = NU
     count_table <- data
   }
   if(!is.null(covars)){
-    for(i in 1:length(covars)){
+    for(i in seq_along(covars)){
       assign(names(covars)[i], covars[[i]])
     }
   }
   
   if(coeff == coeff.ref) stop("coeff and coeff.ref cannot be the same")
-  if(!coeff %in% 1:length(unique(predictor)) | !coeff.ref %in% 1:length(unique(predictor))) stop(paste("coeff and coeff.ref should be integers between 1 and",length(unique(predictor))))
+  if(!coeff %in% seq_along(unique(predictor)) | !coeff.ref %in% seq_along(unique(predictor))) stop(paste("coeff and coeff.ref should be integers between 1 and",length(unique(predictor))))
   
   # out.all
   if(is.null(out.all)){

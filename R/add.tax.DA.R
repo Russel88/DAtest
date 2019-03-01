@@ -3,6 +3,7 @@
 #' Internal function
 #' @param data phyloseq object
 #' @param res data.frame with results
+#' @return A \code{res} merged with the tax.table from the phyloseq object
 #' @export
 
 add.tax.DA <- function(data, res){

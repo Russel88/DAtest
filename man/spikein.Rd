@@ -20,6 +20,9 @@ spikein(count_table, predictor, effectSize = 2, k, num.pred = FALSE,
 
 \item{relative}{Logical. Are abundances relative? Default TRUE}
 }
+\value{
+Returns a list where the first element is the count_table with the spiked features, and the second element contains rownames of the spiked features.
+}
 \description{
 Internal function for the \code{testDA} function.
 }

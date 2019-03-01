@@ -7,6 +7,7 @@
 #' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
 #' @param allResults If TRUE will return raw results from the \code{fitFeatureModel} function
 #' @param ... Additional arguments for the \code{fitFeatureModel} function
+#' @return A data.frame with with results.
 #' @export
 
 DA.msf <- function(data, predictor, p.adj = "fdr", allResults = FALSE, ...){

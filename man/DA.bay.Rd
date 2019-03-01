@@ -15,6 +15,9 @@ DA.bay(data, predictor, allResults = FALSE, ...)
 
 \item{...}{Additional arguments to the \code{getPriors.NB} and \code{getLikelihoods} functions}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Implementation of baySeq for \code{DAtest}
 }

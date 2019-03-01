@@ -29,6 +29,9 @@ DA.per(data, predictor, paired = NULL, relative = TRUE,
 
 \item{margin}{Numeric. Margin for when to stop iterations if p-value is high and unlikely to become low}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Test significance of multiple features with a binary \code{predictor} with a permutation scheme.
 }

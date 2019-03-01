@@ -4,6 +4,7 @@
 #' @param predictor The \code{predictor} of interest
 #' @param paired Factor for paired/blocked experimental designs.
 #' @param covars A character vector with names of the variables in \code{sample_data(data)}
+#' @return A list with data extracted from the \code{phyloseq} object
 #' @export
 
 DA.phyloseq <- function(data, predictor, paired = NULL, covars = NULL){

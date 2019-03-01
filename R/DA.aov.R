@@ -8,6 +8,7 @@
 #' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
 #' @param allResults If TRUE will return raw results from the \code{aov} function
 #' @param ... Additional arguments for the \code{aov} function
+#' @return A data.frame with with results.
 #' @export
 
 DA.aov <- function(data, predictor, covars = NULL, relative = TRUE, p.adj = "fdr", allResults = FALSE, ...){
@@ -22,7 +23,7 @@ DA.aov <- function(data, predictor, covars = NULL, relative = TRUE, p.adj = "fdr
     count_table <- data
   }
   if(!is.null(covars)){
-    for(i in 1:length(covars)){
+    for(i in seq_along(covars)){
       assign(names(covars)[i], covars[[i]])
     }
   }

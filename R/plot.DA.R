@@ -5,6 +5,7 @@
 #' @param p Logical. Should the p-value distribution be plotted (only p-values from non-spiked features)
 #' @param bins Integer. Number of bins in p-value histograms
 #' @param ... Additional arguments for \code{ggdraw}
+#' @return Plots the output from testDA
 #' @import ggplot2
 #' @importFrom cowplot ggdraw
 #' @importFrom cowplot draw_plot

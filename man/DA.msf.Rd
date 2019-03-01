@@ -17,6 +17,9 @@ DA.msf(data, predictor, p.adj = "fdr", allResults = FALSE, ...)
 
 \item{...}{Additional arguments for the \code{fitFeatureModel} function}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Implemented as in:
 https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-016-0208-8

@@ -28,6 +28,9 @@ DA.ds2(data, predictor, paired = NULL, covars = NULL, out.all = NULL,
 
 \item{...}{Additional arguments for the \code{DESeq} function}
 }
+\value{
+A data.frame with with results.
+}
 \description{
 Implementation of DESeq2 for \code{DAtest}
 Manual geometric means calculated to avoid errors, see https://github.com/joey711/phyloseq/issues/387
