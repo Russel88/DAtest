@@ -21,3 +21,13 @@ A data.frame with with results.
 \description{
 Implementation of baySeq for \code{DAtest}
 }
+\examples{
+# Creating random count_table and predictor
+set.seed(4)
+mat <- matrix(rnbinom(100, size = 0.1, mu = 500), nrow = 50, ncol = 10)
+rownames(mat) <- 1:50
+pred <- c(rep("Control", 5), rep("Treatment", 5))
+
+# Running baySeq
+res <- DA.bay(data = mat, predictor = pred)
+}

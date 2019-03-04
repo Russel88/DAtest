@@ -29,3 +29,14 @@ Pairwise testing on predictor and covars. Works on "poi", "neb", "lrm", "lma", "
 \details{
 Require the \code{lsmeans} package
 }
+\examples{
+# Creating random count_table and predictor
+set.seed(5)
+mat <- matrix(rnbinom(1500, size = 0.5, mu = 500), nrow = 100, ncol = 15)
+rownames(mat) <- 1:100
+pred <- c(rep("A", 5), rep("B", 5), rep("C", 5))
+
+# Running linear model and then pairwise comparisons on each feature
+res <- DA.lmc(mat, pred, allResults = TRUE)
+res.lsm <- DA.lsmeans(res) 
+}

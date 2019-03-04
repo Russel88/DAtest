@@ -15,6 +15,15 @@
 #' @param allResults If TRUE will return raw results from the \code{glm.nb}/\code{glmer.nb} function
 #' @param ... Additional arguments for the \code{glm.nb}/\code{glmer.nb} functions
 #' @return A data.frame with with results.
+#' @examples 
+#' # Creating random count_table and predictor
+#' set.seed(4)
+#' mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 100, ncol = 10)
+#' rownames(mat) <- 1:100
+#' pred <- c(rep("Control", 5), rep("Treatment", 5))
+#' 
+#' # Running Negative Binomial regression on each feature
+#' res <- DA.neb(data = mat, predictor = pred)
 #' @import MASS
 #' @importFrom lme4 glmer.nb glmer
 #' @export
@@ -198,7 +207,7 @@ DA.neb <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
       rownames(res) <- rownames(count_table)                                                                                                           
     } 
     res$pval.adj <- p.adjust(res$pval, method = p.adj)
-    res$Feature <- rownames(res)
+    res$Feature <- rownames(count_table)
     res$Method <- "Negbinom GLM (neb)"
     
     if(nrow(res) > 1){

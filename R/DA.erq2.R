@@ -11,6 +11,15 @@
 #' @param allResults If TRUE will return raw results from the \code{glmQLFTest} function
 #' @param ... Additional arguments for the \code{calcNormFactors}, \code{estimateDisp}, \code{glmQLFit} and \code{glmQLFTest} functions
 #' @return A data.frame with with results.
+#' @examples 
+#' # Creating random count_table and predictor
+#' set.seed(5)
+#' mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 100, ncol = 10)
+#' rownames(mat) <- 1:100
+#' pred <- c(rep("Control", 5), rep("Treatment", 5))
+#' 
+#' # Running edgeR
+#' res <- DA.erq2(data = mat, predictor = pred)
 #' @export
 
 DA.erq2 <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL, p.adj = "fdr", coeff = 2, allResults = FALSE, ...){

@@ -36,3 +36,13 @@ A data.frame with with results.
 Apply zero-inflated poisson generalized linear model for multiple features, with one \code{predictor} as independent variable.
 With \code{log(librarySize)} as offset when \code{relative=TRUE}.
 }
+\examples{
+# Creating random count_table and predictor
+set.seed(4)
+mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 100, ncol = 10)
+rownames(mat) <- 1:100
+pred <- c(rep("Control", 5), rep("Treatment", 5))
+ 
+# Running Zero-inflated Poisson regression on each feature
+res <- DA.zpo(data = mat, predictor = pred)
+}

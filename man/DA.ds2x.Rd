@@ -35,3 +35,13 @@ A data.frame with with results.
 \description{
 Implementation of DESeq2 for \code{DAtest}
 }
+\examples{
+# Creating random count_table and predictor
+set.seed(6)
+mat <- matrix(rnbinom(200, size = 0.2, mu = 500), nrow = 20, ncol = 10)
+rownames(mat) <- 1:20
+pred <- c(rep("Control", 5), rep("Treatment", 5))
+
+# Running DESeq2
+res <- DA.ds2x(data = mat, predictor = pred)
+}

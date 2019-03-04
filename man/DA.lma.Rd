@@ -36,3 +36,13 @@ Apply linear regression for multiple features with one \code{predictor}.
 Mixed-effect model is used when a \code{paired} argument is included, with the \code{paired} variable as a random intercept.
 Note: Last feature in the data is used as reference for the log-ratio transformation.
 }
+\examples{
+# Creating random count_table and predictor
+set.seed(4)
+mat <- matrix(rnbinom(1500, size = 0.1, mu = 500), nrow = 100, ncol = 15)
+rownames(mat) <- 1:100
+pred <- c(rep("A", 5), rep("B", 5), rep("C", 5))
+
+# Running linear model on each feature
+res <- DA.lma(data = mat, predictor = pred)
+}

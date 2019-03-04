@@ -42,3 +42,13 @@ P-values are now two-sided, and test statistic is a simple log fold change
 
 A paired permutation test is implemented specifically for this package. The test is similar to the original, but with a different test statistic and permutation scheme. The permutations are constrained in the paired version such that the predictor is only permuted within each level of the paired argument (e.g. subjects). The test statistic first finds the log-ratio between the two predictor levels (e.g. case and control) for each level of the paired argument and the final statistic is the mean of these log-ratios.
 }
+\examples{
+# Creating random count_table and predictor
+set.seed(4)
+mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 100, ncol = 10)
+rownames(mat) <- 1:100
+pred <- c(rep("Control", 5), rep("Treatment", 5))
+
+# Running permutation test on each feature
+res <- DA.per(data = mat, predictor = pred)
+}

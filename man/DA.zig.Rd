@@ -2,7 +2,7 @@
 % Please edit documentation in R/DA.zig.R
 \name{DA.zig}
 \alias{DA.zig}
-\title{MetageonomeSeq ZIG}
+\title{MetagenomeSeq ZIG}
 \usage{
 DA.zig(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
   by = 2, eff = 0.5, allResults = FALSE, ...)
@@ -31,4 +31,14 @@ A data.frame with with results.
 }
 \description{
 Implementation of Metagenome zero-inflated gaussian model for \code{DAtest}
+}
+\examples{
+# Creating random count_table and predictor
+set.seed(4)
+mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 100, ncol = 10)
+rownames(mat) <- 1:100
+pred <- c(rep("Control", 5), rep("Treatment", 5))
+
+# Running MetagenomeSeq Zero-inflated Gaussian
+res <- DA.zig(data = mat, predictor = pred)
 }

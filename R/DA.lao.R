@@ -10,6 +10,15 @@
 #' @param allResults If TRUE will return raw results from the \code{aov} function
 #' @param ... Additional arguments for the \code{aov} functions
 #' @return A data.frame with with results.
+#' @examples
+#' # Creating random count_table and predictor
+#' set.seed(4)
+#' mat <- matrix(rnbinom(1500, size = 0.1, mu = 500), nrow = 100, ncol = 15)
+#' rownames(mat) <- 1:100
+#' pred <- c(rep("A", 5), rep("B", 5), rep("C", 5))
+#' 
+#' # Running ANOVA on each feature
+#' res <- DA.lao(data = mat, predictor = pred)
 #' @export
 
 DA.lao <- function(data, predictor, covars = NULL, relative = TRUE, p.adj = "fdr", delta = 1, allResults = FALSE, ...){

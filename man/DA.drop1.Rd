@@ -21,3 +21,15 @@ A data.frame with output from drop1 and adjusted p.values for each predictor and
 \description{
 Works on "zpo", "znb", "qpo", "neb", "poi". Non-paired "lrm", "llm", "llm2", "lma", "lmc"
 }
+\examples{
+# Creating random count_table, predictor, and covariate
+set.seed(5)
+mat <- matrix(rnbinom(1500, size = 0.5, mu = 500), nrow = 100, ncol = 15)
+rownames(mat) <- 1:100
+pred <- c(rep("A", 5), rep("B", 5), rep("C", 5))
+covar <- rnorm(15)
+
+# Running linear model and then drop1 on each feature
+res <- DA.lmc(mat, pred, covars = list(Something = covar), allResults = TRUE)
+res.drop <- DA.drop1(res) 
+}

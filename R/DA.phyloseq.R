@@ -1,5 +1,7 @@
 #' Extract data from a \code{phyloseq} object to be used in \code{DAtest}
 #' 
+#' Internal function
+#' 
 #' @param data A \code{phyloseq} object
 #' @param predictor The \code{predictor} of interest
 #' @param paired Factor for paired/blocked experimental designs.

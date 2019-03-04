@@ -11,6 +11,15 @@
 #' @param allResults If TRUE will return raw results from the \code{eBayes} function
 #' @param ... Additional arguments for the \code{eBayes} and \code{lmFit} functions
 #' @return A data.frame with with results.
+#' @examples 
+#' # Creating random count_table and predictor
+#' set.seed(4)
+#' mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 100, ncol = 10)
+#' rownames(mat) <- 1:100
+#' pred <- c(rep("Control", 5), rep("Treatment", 5))
+#' 
+#' # Running limma
+#' res <- DA.lim(data = mat, predictor = pred)
 #' @export
 
 DA.lim <- function(data, predictor, paired = NULL, covars = NULL, relative = TRUE, out.all = NULL, p.adj = "fdr", coeff = 2, allResults = FALSE, ...){

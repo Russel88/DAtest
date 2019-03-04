@@ -6,6 +6,17 @@
 #' @param p.adj P-value adjustment method. See \code{p.adjust} for details. Default "fdr"
 #' @param ... Additional arguments for \code{drop1} function
 #' @return A data.frame with output from drop1 and adjusted p.values for each predictor and feature
+#' @examples 
+#' # Creating random count_table, predictor, and covariate
+#' set.seed(5)
+#' mat <- matrix(rnbinom(1500, size = 0.5, mu = 500), nrow = 100, ncol = 15)
+#' rownames(mat) <- 1:100
+#' pred <- c(rep("A", 5), rep("B", 5), rep("C", 5))
+#' covar <- rnorm(15)
+#' 
+#' # Running linear model and then drop1 on each feature
+#' res <- DA.lmc(mat, pred, covars = list(Something = covar), allResults = TRUE)
+#' res.drop <- DA.drop1(res) 
 #' @export
 DA.drop1 <- function(results, test = "Chisq", p.adj = "fdr", ...){
   
@@ -132,6 +143,17 @@ DA.drop1 <- function(results, test = "Chisq", p.adj = "fdr", ...){
 #' @param p.adj P-value adjustment method. See \code{p.adjust for details}. Default "fdr"
 #' @param ... Additional arguments for \code{anova} function
 #' @return A data.frame with output from anova and adjusted p.values for each predictor and feature
+#' @examples 
+#' # Creating random count_table, predictor, and covariate
+#' set.seed(5)
+#' mat <- matrix(rnbinom(1500, size = 0.5, mu = 500), nrow = 100, ncol = 15)
+#' rownames(mat) <- 1:100
+#' pred <- c(rep("A", 5), rep("B", 5), rep("C", 5))
+#' covar <- rnorm(15)
+#' 
+#' # Running linear model and then anova on each feature
+#' res <- DA.lmc(mat, pred, covars = list(Something = covar), allResults = TRUE)
+#' res.ano <- DA.anova(res)
 #' @export
 DA.anova <- function(results, p.adj = "fdr", ...){
   
@@ -191,6 +213,16 @@ DA.anova <- function(results, p.adj = "fdr", ...){
 #' @param p.adj P-value adjustment method. See \code{p.adjust} for details
 #' @param ... Additional arguments for \code{TukeyHSD} function
 #' @return A data.frame with output from TukeyHSD and adjusted p.values for each predictor and feature
+#' @examples 
+#' # Creating random count_table and predictor
+#' set.seed(5)
+#' mat <- matrix(rnbinom(3000, size = 0.1, mu = 500), nrow = 100, ncol = 30)
+#' rownames(mat) <- 1:100
+#' pred <- c(rep("A", 10), rep("B", 10), rep("C", 10))
+#' 
+#' # Run anova and then TukeyHSD on each predictor
+#' res <- DA.aov(data = mat, predictor = pred, allResults = TRUE)
+#' res.tuk <- DA.TukeyHSD(res)
 #' @export
 DA.TukeyHSD <- function(results, variable = "predictor", p.adj = "fdr", ...){
   
@@ -237,6 +269,16 @@ DA.TukeyHSD <- function(results, variable = "predictor", p.adj = "fdr", ...){
 #' @param p.adj P-value adjustment method. See \code{p.adjust} for details
 #' @param ... Additional arguments for \code{lsmeans} function
 #' @return A data.frame with output from lsmeans::pairs and adjusted p.values for each predictor and feature
+#' @examples 
+#' # Creating random count_table and predictor
+#' set.seed(5)
+#' mat <- matrix(rnbinom(1500, size = 0.5, mu = 500), nrow = 100, ncol = 15)
+#' rownames(mat) <- 1:100
+#' pred <- c(rep("A", 5), rep("B", 5), rep("C", 5))
+#' 
+#' # Running linear model and then pairwise comparisons on each feature
+#' res <- DA.lmc(mat, pred, allResults = TRUE)
+#' res.lsm <- DA.lsmeans(res) 
 #' @export
 DA.lsmeans <- function(results, variable = "predictor", predictor = NULL, covars = NULL, p.adj = "fdr", ...){
 

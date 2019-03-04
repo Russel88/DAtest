@@ -8,6 +8,15 @@
 #' @param allResults If TRUE will return raw results from the \code{fitFeatureModel} function
 #' @param ... Additional arguments for the \code{fitFeatureModel} function
 #' @return A data.frame with with results.
+#' @examples 
+#' # Creating random count_table and predictor
+#' set.seed(4)
+#' mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 100, ncol = 10)
+#' rownames(mat) <- 1:100
+#' pred <- c(rep("Control", 5), rep("Treatment", 5))
+#' 
+#' # Running MetagenomeSeq feature model
+#' res <- DA.msf(data = mat, predictor = pred)
 #' @export
 
 DA.msf <- function(data, predictor, p.adj = "fdr", allResults = FALSE, ...){

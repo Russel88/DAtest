@@ -23,6 +23,33 @@
 #' @import snow doSNOW foreach utils
 #' @importFrom parallel detectCores
 #' @importFrom pROC roc
+#' @examples 
+#' # Creating random count_table and predictor
+#' set.seed(5)
+#' mat <- matrix(rnbinom(1000, size = 0.5, mu = 500), nrow = 50, ncol = 20)
+#' rownames(mat) <- 1:50
+#' pred <- c(rep("Control", 10), rep("Treatment", 10))
+#' 
+#' # Running powerDA on Wilcoxon test to test it with different effect sizes
+#' # This example uses 1 core (cores = 1). 
+#' # Remove the cores argument to get it as high (and thereby fast) as possible.
+#' res <- powerDA(data = mat, predictor = pred, test = "wil", cores = 1)
+#' summary(res)
+#' 
+#' \donttest{
+#' # Include a paired variable for dependent/blocked samples
+#' subject <- rep(1:10, 2)
+#' res <- powerDA(data = mat, predictor = pred, paired = subject, test = "ttt")
+#' 
+#' # Include covariates
+#' covar1 <- rnorm(20)
+#' covar2 <- rep(c("A","B"), 10)
+#' res <- powerDA(data = mat, predictor = pred, 
+#'                covars = list(FirstCovar = covar1, CallItWhatYouWant = covar2), test = "lrm")
+#' 
+#' # Data is absolute abundance
+#' res <- powerDA(data = mat, predictor = pred, relative = FALSE, test = "ttt")
+#' }
 #' @export
 
 powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, effectSizes = c(2,4,8,16,32), alpha.p = 0.05, alpha.q = 0.1, p.adj = "fdr", R = 5, relative = TRUE, k = NULL, cores = (detectCores()-1), args = list(), out.all = NULL, core.check = TRUE, verbose = TRUE){

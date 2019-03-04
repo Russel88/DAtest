@@ -6,6 +6,15 @@
 #' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
 #' @param ... Additional arguments for the \code{calcNormFactors}, \code{estimateCommonDisp}, \code{estimateTagwiseDisp} and \code{exactTest} functions
 #' @return A data.frame with with results.
+#' @examples
+#' # Creating random count_table and predictor
+#' set.seed(4)
+#' mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 100, ncol = 10)
+#' rownames(mat) <- 1:100
+#' pred <- c(rep("Control", 5), rep("Treatment", 5))
+#' 
+#' # Running edgeR
+#' res <- DA.ere(data = mat, predictor = pred)
 #' @export
 
 DA.ere <- function(data, predictor, p.adj = "fdr", ...){

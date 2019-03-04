@@ -45,3 +45,16 @@ Outputs the estimated times for running each method 1 time. With cores=1 the run
 
 Runtime of all methods are expected to scale linearly with the number of features, except "anc" and "bay" which are modelled with a 2. order polynomial.
 }
+\examples{
+# Creating large random count_table and predictor
+set.seed(5)
+mat <- matrix(rnbinom(150000, size = 0.5, mu = 500), nrow = 10000, ncol = 10)
+rownames(mat) <- 1:10000
+pred <- c(rep("A", 5), rep("B", 5))
+
+# Use runtimeDA to predict total runtime for all features
+# This example uses 1 core (cores = 1). 
+# Remove the cores argument to get it as high (and thereby fast) as possible.
+# Also, in this example only a subset of tests are run.
+runtimeDA(mat, pred, cores = 1, tests = c("ttt","wil"), tests.slow = c("neb"))
+}

@@ -39,3 +39,13 @@ Apply poisson generalized linear models on multiple features with one \code{pred
 With \code{log(librarySize)} as offset.
 Mixed-effect model is used when a \code{paired} argument is included, with the \code{paired} variable as a random intercept.
 }
+\examples{
+# Creating random count_table and predictor
+set.seed(4)
+mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 100, ncol = 10)
+rownames(mat) <- 1:100
+pred <- c(rep("Control", 5), rep("Treatment", 5))
+
+# Running Poisson regression on each feature
+res <- DA.poi(data = mat, predictor = pred)
+}

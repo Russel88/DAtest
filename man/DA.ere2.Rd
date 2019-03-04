@@ -21,3 +21,13 @@ A data.frame with with results.
 \description{
 Implementation of edgeR exact test for \code{DAtest}
 }
+\examples{
+# Creating random count_table and predictor
+set.seed(5)
+mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 100, ncol = 10)
+rownames(mat) <- 1:100
+pred <- c(rep("Control", 5), rep("Treatment", 5))
+
+# Running edgeR
+res <- DA.ere2(data = mat, predictor = pred)
+}

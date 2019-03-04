@@ -62,3 +62,34 @@ Calculating Power, False Discovery Rates, False Positive Rates and AUC (Area Und
 \details{
 mva is excluded by default, as it is slow.
 }
+\examples{
+# Creating random count_table and predictor
+set.seed(5)
+mat <- matrix(rnbinom(1000, size = 0.5, mu = 500), nrow = 50, ncol = 20)
+rownames(mat) <- 1:50
+pred <- c(rep("Control", 10), rep("Treatment", 10))
+
+# Running testDA to find the best method
+# This example only repeats the test 1 time (R = 1). 
+# R should be increased to at least 20 for real test.
+# It also uses 1 core (cores = 1). 
+# Remove this argument to get it as high (and thereby fast) as possible.
+res <- testDA(data = mat, predictor = pred, cores = 1, R = 1)
+summary(res)
+
+\donttest{
+# Include a paired variable for dependent/blocked samples
+subject <- rep(1:10, 2)
+res <- testDA(data = mat, predictor = pred, paired = subject)
+
+# Include covariates
+covar1 <- rnorm(20)
+covar2 <- rep(c("A","B"), 10)
+res <- testDA(data = mat, predictor = pred, 
+              covars = list(FirstCovar = covar1, CallItWhatYouWant = covar2))
+
+# Data is absolute abundance
+res <- testDA(data = mat, predictor = pred, relative = FALSE)
+}
+
+}

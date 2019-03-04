@@ -15,3 +15,6 @@ A CLR normalized count_table
 \description{
 Centered log-ratio normalization
 }
+\examples{
+norm_clr(matrix(1:100, nrow = 10, ncol = 10))
+}

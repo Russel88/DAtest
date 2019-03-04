@@ -7,6 +7,15 @@
 #' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
 #' @param ... Additional arguments for the \code{cor.test} function
 #' @return A data.frame with with results.
+#' @examples 
+#' # Creating random count_table and predictor
+#' set.seed(4)
+#' mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 50, ncol = 20)
+#' rownames(mat) <- 1:50
+#' pred <- rnorm(20)
+#' 
+#' # Running Spearman correlation on each feature
+#' res <- DA.spe(data = mat, predictor = pred)
 #' @export
 
 DA.spe <- function(data, predictor, relative = TRUE, p.adj = "fdr", ...){
@@ -36,9 +45,9 @@ DA.spe <- function(data, predictor, relative = TRUE, p.adj = "fdr", ...){
   spes <- apply(count.rel, 1, spe)
   
   # Collect results
-  res <- data.frame(pval = vapply(spes, function(x) x$p.value))
+  res <- data.frame(pval = sapply(spes, function(x) x$p.value))
   res$pval.adj <- p.adjust(res$pval, method = p.adj)
-  res$rho <- vapply(spes, function(x) x$estimate)
+  res$rho <- sapply(spes, function(x) x$estimate)
   res$Feature <- rownames(res)
   res$Method <- "Spearman (spe)"
   

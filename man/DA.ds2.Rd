@@ -35,3 +35,13 @@ A data.frame with with results.
 Implementation of DESeq2 for \code{DAtest}
 Manual geometric means calculated to avoid errors, see https://github.com/joey711/phyloseq/issues/387
 }
+\examples{
+# Creating random count_table and predictor
+set.seed(4)
+mat <- matrix(rnbinom(200, size = 0.1, mu = 500), nrow = 20, ncol = 10)
+rownames(mat) <- 1:20
+pred <- c(rep("Control", 5), rep("Treatment", 5))
+
+# Running DESeq2
+res <- DA.ds2(data = mat, predictor = pred)
+}

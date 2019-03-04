@@ -8,6 +8,39 @@
 #' @param p.adj Character. P-value adjustment. Default "fdr". See \code{p.adjust} for details
 #' @param FUN Function to apply to data. Should take input in the following order: \code{count_table} (data.frame, samples are columns), \code{predictor} (vector), \code{paired} (factor), \code{covars} (named list with vector). Output should be a dataframe with at least the following columns: \code{Feature}, \code{pval} and \code{Method}.
 #' @return A data.frame with results from the user-defined method
+#' @examples
+#' # Creating random count_table and predictor
+#' set.seed(4)
+#' mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 100, ncol = 10)
+#' rownames(mat) <- 1:100
+#' pred <- c(rep("Control", 5), rep("Treatment", 5))
+#' 
+#' # Define function for t-test
+#' myfun <- function(count_table, predictor, paired, covars){ 
+#'  
+#' # Relative abundance
+#' rel <- apply(count_table, 2, function(x) x/sum(x))
+#' 
+#' # t-test function
+#' # Wrapping this function in tryCatch(..., error = function(e){NA}) 
+#' # ensures that our main function won't fail if t.test fails on some features
+#' tfun <- function(x){
+#'     tryCatch(t.test(x ~ predictor)$p.value, error = function(e){NA}) 
+#' }
+#' 
+#' # P-values for each feature
+#' pvals <- apply(rel, 1, tfun)
+#' 
+#' # Collect and return data
+#' df <- data.frame(Feature = rownames(count_table),
+#'                  pval = pvals)
+#' df$pval.adj <- p.adjust(df$pval, method = "fdr")
+#' df$Method <- "My own t-test"
+#' return(df)
+#' }
+#' 
+#' # Running the test
+#' res <- DA.zzz(data = mat, predictor = pred, FUN = myfun)
 #' @export
 DA.zzz <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", FUN = NULL){
   

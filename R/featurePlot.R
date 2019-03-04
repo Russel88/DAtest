@@ -15,8 +15,15 @@
 #' @param delta Pseudocount for log10 normalization
 #' @param covar.quant Quantiles for cutting quantitative \code{covars}
 #' @return A ggplot
+#' @examples 
+#' # Create random count_table and predictor
+#' set.seed(5)
+#' mat <- matrix(rnbinom(500, size = 0.1, mu = 500), nrow = 50, ncol = 10)
+#' pred <- c(rep("Control", 5), rep("Treatment", 5))
+#' rownames(mat) <- 1:50
+#' 
+#' featurePlot(mat, pred, feature = "5")
 #' @export
-
 featurePlot <- function(data, predictor, paired = NULL, covars = NULL, feature = NULL, relative = TRUE, logScale = FALSE, delta = 0.001, covar.quant = c(0,1/3,2/3,1)){
 
   stopifnot(exists("data"),exists("predictor"))

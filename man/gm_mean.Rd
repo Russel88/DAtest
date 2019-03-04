@@ -15,3 +15,6 @@ The geometric mean
 \description{
 Geometric means
 }
+\examples{
+gm_mean(1:10)
+}

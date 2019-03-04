@@ -11,6 +11,15 @@
 #' @param allResults If TRUE will return raw results from the \code{t.test} function
 #' @param ... Additional arguments for the \code{t.test} function
 #' @return A data.frame with with results.
+#' @examples 
+#' # Creating random count_table and predictor
+#' set.seed(4)
+#' mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 100, ncol = 10)
+#' rownames(mat) <- 1:100
+#' pred <- c(rep("Control", 5), rep("Treatment", 5))
+#' 
+#' # Running t-test on each feature
+#' res <- DA.ttc(data = mat, predictor = pred)
 #' @export
 
 DA.ttc <- function(data, predictor, paired = NULL, p.adj = "fdr", delta = 1, testStat = function(case,control){mean(case)-mean(control)}, testStat.pair = function(case,control){mean(case-control)}, allResults = FALSE, ...){
@@ -41,7 +50,7 @@ DA.ttc <- function(data, predictor, paired = NULL, p.adj = "fdr", delta = 1, tes
   }
   
   # Zero-correction
-  count_table <- apply(count_table, 2, function(y) vapply(y,function(x) ifelse(x==0,delta,(1-(sum(y==0)*delta)/sum(y))*x)))
+  count_table <- apply(count_table, 2, function(y) sapply(y,function(x) ifelse(x==0,delta,(1-(sum(y==0)*delta)/sum(y))*x)))
   if(any(count_table <= 0)) stop("Zero-correction failed. Dataset likely contains too many zeroes")
   
   # CLR transformation

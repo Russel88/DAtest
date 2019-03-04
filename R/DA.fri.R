@@ -9,6 +9,16 @@
 #' @param allResults If TRUE will return raw results from the \code{friedman.test} function
 #' @param ... Additional arguments for the \code{friedman.test} function
 #' @return A data.frame with with results.
+#' @examples 
+#' # Creating random count_table, predictor, and paired variable
+#' set.seed(4)
+#' mat <- matrix(rnbinom(1500, size = 0.1, mu = 500), nrow = 100, ncol = 15)
+#' rownames(mat) <- 1:100
+#' pred <- c(rep("A", 5), rep("B", 5), rep("C", 5))
+#' subject <- rep(1:5, 3)
+#' 
+#' # Running Friedman test on each feature
+#' res <- DA.fri(data = mat, predictor = pred, paired = subject)
 #' @export
 
 DA.fri <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr", allResults = FALSE, ...){
@@ -44,9 +54,9 @@ DA.fri <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
   if(allResults){
     return(reslist)
   } else {
-    res <- data.frame(statistic = vapply(reslist, function(x) x$statistic),
-                      parameter = vapply(reslist, function(x) x$parameter),
-                      pval = vapply(reslist, function(x) x$p.value))
+    res <- data.frame(statistic = sapply(reslist, function(x) x$statistic),
+                      parameter = sapply(reslist, function(x) x$parameter),
+                      pval = sapply(reslist, function(x) x$p.value))
     res$pval.adj <- p.adjust(res$pval, method = p.adj)
     
     res$Feature <- gsub(".Friedman.*","",rownames(res))

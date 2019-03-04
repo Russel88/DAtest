@@ -26,3 +26,13 @@ A data.frame with with results.
 \description{
 Apply kruskal-wallis test on multiple features with one \code{predictor}
 }
+\examples{
+# Creating random count_table and predictor
+set.seed(4)
+mat <- matrix(rnbinom(1500, size = 0.1, mu = 500), nrow = 100, ncol = 15)
+rownames(mat) <- 1:100
+pred <- c(rep("A", 5), rep("B", 5), rep("C", 5))
+
+# Running Kruskal-Wallis on each feature
+res <- DA.kru(data = mat, predictor = pred)
+}

@@ -12,6 +12,15 @@
 #' @param allResults If TRUE will return raw results from the \code{eBayes} function
 #' @param ... Additional arguments for the \code{eBayes} and \code{lmFit} functions
 #' @return A data.frame with with results.
+#' @examples 
+#' # Creating random count_table and predictor
+#' set.seed(4)
+#' mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 100, ncol = 10)
+#' rownames(mat) <- 1:100
+#' pred <- c(rep("Control", 5), rep("Treatment", 5))
+#' 
+#' # Running limma
+#' res <- DA.lic(data = mat, predictor = pred)
 #' @export
 
 DA.lic <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL, p.adj = "fdr", delta = 1, coeff = 2, allResults = FALSE,  ...){
@@ -46,7 +55,7 @@ DA.lic <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL
     }
     
     # Zero-correction
-    count_table <- apply(count_table, 2, function(y) vapply(y,function(x) ifelse(x==0,delta,(1-(sum(y==0)*delta)/sum(y))*x)))
+    count_table <- apply(count_table, 2, function(y) sapply(y,function(x) ifelse(x==0,delta,(1-(sum(y==0)*delta)/sum(y))*x)))
     if(any(count_table <= 0)) stop("Zero-correction failed. Dataset likely contains too many zeroes")
     
     # ALR transformation

@@ -24,7 +24,37 @@
 #'  \item details - A dataframe with details from the run
 #'  \item results - A complete list of output from all the methods. Example: Get wilcoxon results from 2. run as such: \code{$results[[2]]["wil"]}
 #' }
+#' @examples 
+#' # Creating random count_table and predictor
+#' set.seed(5)
+#' mat <- matrix(rnbinom(500, size = 0.1, mu = 500), nrow = 50, ncol = 10)
+#' pred <- c(rep("Control", 5), rep("Treatment", 5))
 #' 
+#' # Running allDA to compare methods
+#' # This example uses 1 core (cores = 1). 
+#' # Remove the cores argument to get it as high (and thereby fast) as possible.
+#' res <- allDA(data = mat, predictor = pred, cores = 1)
+#' 
+#' # View adjusted p-values from all methods
+#' print(res$adj)
+#' 
+#' # View estimates from all methods
+#' print(res$est)
+#' 
+#' \donttest{
+#' # Include a paired variable for dependent/blocked samples
+#' subject <- rep(1:5, 2)
+#' res <- allDA(data = mat, predictor = pred, paired = subject)
+#' 
+#' # Include covariates
+#' covar1 <- rnorm(10)
+#' covar2 <- rep(c("A","B"), 5)
+#' res <- allDA(data = mat, predictor = pred, 
+#'              covars = list(FirstCovar = covar1, CallItWhatYouWant = covar2))
+#' 
+#' # Data is absolute abundance
+#' res <- allDA(data = mat, predictor = pred, relative = FALSE)
+#' }
 #' @export
 
 allDA <- function(data, predictor, paired = NULL, covars = NULL,
@@ -79,7 +109,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
   if(!isTRUE(all(unlist(count_table) == floor(unlist(count_table))))) decimal <- TRUE
   if(any(count_table == 0)) zeroes <- TRUE
   tests <- unique(tests)
-  if(!"zzz" %in% tests) tests <- prune.tests.DA(tests, predictor, paired, covars, relative, decimal, zeroes)
+  if(!"zzz" %in% tests) tests <- pruneTests(tests, predictor, paired, covars, relative, decimal, zeroes)
   if(length(tests) == 0) stop("No tests to run!")
 
   if(verbose) message(paste("Running on",cores,"cores"))
@@ -211,7 +241,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
   names(results) <- tests
   
   # Handle failed tests
-  results <- results[!vapply(results,is.null)]
+  results <- results[!sapply(results,is.null)]
   if(length(names(results)) != length(tests)){
     if(length(tests) - length(names(results)) == 1){
       if(verbose) message(paste(paste(tests[!tests %in% names(results)],collapse = ", "),"was excluded due to failure"))
@@ -250,7 +280,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
   
   # Raw p-values
   Pval.raw <- lapply(results,function(x) tryCatch(as.data.frame(x[,c("Feature","pval")]), error = function(e) NULL))
-  Pval.raw <- Pval.raw[!vapply(Pval.raw,is.null)]
+  Pval.raw <- Pval.raw[!sapply(Pval.raw,is.null)]
   if(length(Pval.raw) > 0){
     df.raw <- suppressWarnings(Reduce(function(x,y) merge(x, y, by= "Feature", all.x = TRUE, all.y = TRUE), Pval.raw))
     colnames(df.raw)[2:ncol(df.raw)] <- names(Pval.raw)
@@ -261,7 +291,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
 
   # Adjusted p-values
   Pval.adj <- lapply(results,function(x) tryCatch(as.data.frame(x[,c("Feature","pval.adj")]), error = function(e) NULL))
-  Pval.adj <- Pval.adj[!vapply(Pval.adj,is.null)]
+  Pval.adj <- Pval.adj[!sapply(Pval.adj,is.null)]
   if(length(Pval.adj) > 0){
     df.adj <- suppressWarnings(Reduce(function(x,y) merge(x, y, by= "Feature", all.x = TRUE, all.y = TRUE), Pval.adj))
     colnames(df.adj)[2:ncol(df.adj)] <- names(Pval.adj)
@@ -331,7 +361,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
         } else return(NULL)
       } else return(NULL)
     }
-    list.est <- list.est[!vapply(list.est, is.null)]
+    list.est <- list.est[!sapply(list.est, is.null)]
     if(length(list.est) > 0){
       df.est <- Reduce(function(x,y) merge(x, y, by= "Feature", all.x = TRUE, all.y = TRUE), list.est)
       if(class(data) == "phyloseq") df.est <- add.tax.DA(data, df.est)

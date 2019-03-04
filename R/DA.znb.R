@@ -13,6 +13,15 @@
 #' @param allResults If TRUE will return raw results from the \code{zeroinfl} function
 #' @param ... Additional arguments for the \code{zeroinfl} function
 #' @return A data.frame with with results.
+#' @examples 
+#' # Creating random count_table and predictor
+#' set.seed(4)
+#' mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 100, ncol = 10)
+#' rownames(mat) <- 1:100
+#' pred <- c(rep("Control", 5), rep("Treatment", 5))
+#' 
+#' # Running Zero-inflated Negative Binomial regression on each feature
+#' res <- DA.znb(data = mat, predictor = pred)
 #' @export
 
 DA.znb <- function(data, predictor, covars = NULL, relative = TRUE, out.all = NULL, p.adj = "fdr", coeff = 2, coeff.ref = 1, allResults = FALSE, ...){
@@ -154,7 +163,7 @@ DA.znb <- function(data, predictor, covars = NULL, relative = TRUE, out.all = NU
       } 
       
       res$pval.adj <- p.adjust(res$pval, method = p.adj)
-      res$Feature <- rownames(res)
+      res$Feature <- rownames(count_table)
       res$Method <- "ZI-NegBin GLM (znb)"
       
       if(nrow(res) > 1){

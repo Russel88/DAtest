@@ -13,6 +13,15 @@
 #' @param allResults If TRUE will return raw results from the \code{zeroinfl} function
 #' @param ... Additional arguments for the \code{zeroinfl} function
 #' @return A data.frame with with results.
+#' @examples 
+#' # Creating random count_table and predictor
+#' set.seed(4)
+#' mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 100, ncol = 10)
+#' rownames(mat) <- 1:100
+#' pred <- c(rep("Control", 5), rep("Treatment", 5))
+#'  
+#' # Running Zero-inflated Poisson regression on each feature
+#' res <- DA.zpo(data = mat, predictor = pred)
 #' @export
 
 DA.zpo <- function(data, predictor, covars = NULL, relative = TRUE, out.all = NULL, p.adj = "fdr", coeff = 2, coeff.ref = 1, allResults = FALSE, ...){
@@ -153,7 +162,7 @@ DA.zpo <- function(data, predictor, covars = NULL, relative = TRUE, out.all = NU
         rownames(res) <- rownames(count_table) 
       } 
       res$pval.adj <- p.adjust(res$pval, method = p.adj)
-      res$Feature <- rownames(res)
+      res$Feature <- rownames(count_table)
       res$Method <- "ZI-Poisson GLM (zpo)"
       
       if(nrow(res) > 1){

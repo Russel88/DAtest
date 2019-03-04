@@ -23,3 +23,13 @@ A data.frame with with results.
 \description{
 Apply pearson correlation between multiple features and one \code{predictor}
 }
+\examples{
+# Creating random count_table and predictor
+set.seed(4)
+mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 50, ncol = 20)
+rownames(mat) <- 1:50
+pred <- rnorm(20)
+
+# Running Pearson correlation on each feature
+res <- DA.pea(data = mat, predictor = pred)
+}

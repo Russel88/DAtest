@@ -14,6 +14,15 @@
 #' @param allResults If TRUE will return raw results from the \code{lm}/\code{lme} function
 #' @param ... Additional arguments for the \code{lm}/\code{lme} functions
 #' @return A data.frame with with results.
+#' @examples 
+#' # Creating random count_table and predictor
+#' set.seed(4)
+#' mat <- matrix(rnbinom(1500, size = 0.1, mu = 500), nrow = 100, ncol = 15)
+#' rownames(mat) <- 1:100
+#' pred <- c(rep("A", 5), rep("B", 5), rep("C", 5))
+#' 
+#' # Running linear model on each feature
+#' res <- DA.lma(data = mat, predictor = pred)
 #' @import nlme
 #' @export
 
@@ -44,7 +53,7 @@ DA.lma <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL
   
   count_table <- as.data.frame.matrix(count_table)
   # Zero-correction
-  count_table <- apply(count_table, 2, function(y) vapply(y,function(x) ifelse(x==0,delta,(1-(sum(y==0)*delta)/sum(y))*x)))
+  count_table <- apply(count_table, 2, function(y) sapply(y,function(x) ifelse(x==0,delta,(1-(sum(y==0)*delta)/sum(y))*x)))
   if(any(count_table <= 0)) stop("Zero-correction failed. Dataset likely contains too many zeroes")
   
   # ALR transformation

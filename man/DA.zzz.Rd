@@ -26,3 +26,37 @@ A data.frame with results from the user-defined method
 \description{
 Apply a user-defined function to all features of a count table. For implemetation in \code{testDA} and \code{allDA}
 }
+\examples{
+# Creating random count_table and predictor
+set.seed(4)
+mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 100, ncol = 10)
+rownames(mat) <- 1:100
+pred <- c(rep("Control", 5), rep("Treatment", 5))
+
+# Define function for t-test
+myfun <- function(count_table, predictor, paired, covars){ 
+ 
+# Relative abundance
+rel <- apply(count_table, 2, function(x) x/sum(x))
+
+# t-test function
+# Wrapping this function in tryCatch(..., error = function(e){NA}) 
+# ensures that our main function won't fail if t.test fails on some features
+tfun <- function(x){
+    tryCatch(t.test(x ~ predictor)$p.value, error = function(e){NA}) 
+}
+
+# P-values for each feature
+pvals <- apply(rel, 1, tfun)
+
+# Collect and return data
+df <- data.frame(Feature = rownames(count_table),
+                 pval = pvals)
+df$pval.adj <- p.adjust(df$pval, method = "fdr")
+df$Method <- "My own t-test"
+return(df)
+}
+
+# Running the test
+res <- DA.zzz(data = mat, predictor = pred, FUN = myfun)
+}

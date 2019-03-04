@@ -26,6 +26,35 @@
 #'  \item details - A dataframe with details from the run
 #'  \item run.times - A dataframe with average run times of the different methods
 #' }
+#' @examples 
+#' # Creating random count_table and predictor
+#' set.seed(5)
+#' mat <- matrix(rnbinom(1000, size = 0.5, mu = 500), nrow = 50, ncol = 20)
+#' rownames(mat) <- 1:50
+#' pred <- c(rep("Control", 10), rep("Treatment", 10))
+#' 
+#' # Running testDA to find the best method
+#' # This example only repeats the test 1 time (R = 1). 
+#' # R should be increased to at least 20 for real test.
+#' # It also uses 1 core (cores = 1). 
+#' # Remove this argument to get it as high (and thereby fast) as possible.
+#' res <- testDA(data = mat, predictor = pred, cores = 1, R = 1)
+#' summary(res)
+#' 
+#' \donttest{
+#' # Include a paired variable for dependent/blocked samples
+#' subject <- rep(1:10, 2)
+#' res <- testDA(data = mat, predictor = pred, paired = subject)
+#' 
+#' # Include covariates
+#' covar1 <- rnorm(20)
+#' covar2 <- rep(c("A","B"), 10)
+#' res <- testDA(data = mat, predictor = pred, 
+#'               covars = list(FirstCovar = covar1, CallItWhatYouWant = covar2))
+#' 
+#' # Data is absolute abundance
+#' res <- testDA(data = mat, predictor = pred, relative = FALSE)
+#' }
 #' 
 #' @import stats snow doSNOW foreach utils doParallel
 #' @importFrom parallel detectCores
@@ -92,7 +121,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
   if(!isTRUE(all(unlist(count_table) == floor(unlist(count_table))))) decimal <- TRUE
   if(any(count_table == 0)) zeroes <- TRUE
   tests <- unique(tests)
-  if(!"zzz" %in% tests) tests <- prune.tests.DA(tests, predictor, paired, covars, relative, decimal, zeroes)
+  if(!"zzz" %in% tests) tests <- pruneTests(tests, predictor, paired, covars, relative, decimal, zeroes)
   tests.par <- paste0(unlist(lapply(seq_len(R), function(x) rep(x,length(tests)))),"_",rep(tests,R))
   if(length(tests) == 0) stop("No tests to run!")
   
@@ -273,7 +302,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
   names(run.times) <- tests.par
 
   # Handle failed tests
-  results <- results[!vapply(results,is.null)]
+  results <- results[!sapply(results,is.null)]
   
   cat("\n")
   if(length(unique(gsub(".*_","",names(results)))) != length(tests)){
@@ -344,20 +373,20 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
     names(res.sub) <- newnames
     
     # Confusion matrix
-    totalPos <- vapply(res.sub,function(x) nrow(x[x$pval <= 0.05,]))
-    totalNeg <- vapply(res.sub,function(x) nrow(x[x$pval > 0.05,])) 
+    totalPos <- sapply(res.sub,function(x) nrow(x[x$pval <= 0.05,]))
+    totalNeg <- sapply(res.sub,function(x) nrow(x[x$pval > 0.05,])) 
     trueNeg <- totalNeg  #if effectSize == 1
     truePos <- 0  #if effectSize == 1
     falseNeg <- 0 #if effectSize == 1
     if(effectSize != 1){
-      truePos <- vapply(res.sub, function(x) sum(x[x$pval <= 0.05,"Feature"] %in% spikeds[[r]][[2]]))
-      falseNeg <- vapply(res.sub, function(x) sum(x[x$pval > 0.05,"Feature"] %in% spikeds[[r]][[2]]))
+      truePos <- sapply(res.sub, function(x) sum(x[x$pval <= 0.05,"Feature"] %in% spikeds[[r]][[2]]))
+      falseNeg <- sapply(res.sub, function(x) sum(x[x$pval > 0.05,"Feature"] %in% spikeds[[r]][[2]]))
     }
     falsePos <- totalPos - truePos
     trueNeg <- totalNeg - falseNeg
     
     # FPR 
-    fprs <- vapply(seq_along(res.sub), function(x) {
+    fprs <- sapply(seq_along(res.sub), function(x) {
       if((falsePos[x] + trueNeg[x]) != 0){
         falsePos[x] / (falsePos[x] + trueNeg[x])
       } else {0}})
@@ -367,12 +396,12 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
     # True positive for adjusted p-values
     truePos.adj <- 0  #if effectSize == 1
     if(effectSize != 1){
-      truePos.adj <- vapply(res.sub, function(x) sum(x[x$pval.adj <= alpha,"Feature"] %in% spikeds[[r]][[2]]))
+      truePos.adj <- sapply(res.sub, function(x) sum(x[x$pval.adj <= alpha,"Feature"] %in% spikeds[[r]][[2]]))
     }
-    sdrs <- vapply(seq_along(res.sub), function(x) truePos.adj[x] / sum(k))
+    sdrs <- sapply(seq_along(res.sub), function(x) truePos.adj[x] / sum(k))
     
     # AUC
-    aucs <- vapply(seq_along(res.sub), function(x) {
+    aucs <- sapply(seq_along(res.sub), function(x) {
       if(effectSize != 1){
         test_roc <- NULL
         tryCatch(
@@ -389,17 +418,17 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
     })
     
     # Confusion matrix adjusted
-    totalPos.adj <- vapply(res.sub, function(x) nrow(x[x$pval.adj <= alpha,]))
-    truePos.adj <- vapply(res.sub, function(x) sum(x[x$pval.adj <= alpha,"Feature"] %in% spikeds[[r]][[2]]))
+    totalPos.adj <- sapply(res.sub, function(x) nrow(x[x$pval.adj <= alpha,]))
+    truePos.adj <- sapply(res.sub, function(x) sum(x[x$pval.adj <= alpha,"Feature"] %in% spikeds[[r]][[2]]))
     falsePos.adj <- totalPos.adj - truePos.adj
     
-    fdrs <- vapply(seq_along(res.sub), function(x) {
+    fdrs <- sapply(seq_along(res.sub), function(x) {
       if(totalPos.adj[x] != 0){
         falsePos.adj[x] / totalPos.adj[x]
       } else {0}})
     
     # Combine and return
-    df.combined <- data.frame(Method = vapply(res.sub, function(x) x$Method[1]),
+    df.combined <- data.frame(Method = sapply(res.sub, function(x) x$Method[1]),
                               AUC = aucs,
                               FPR = fprs,
                               FDR = fdrs,

@@ -19,5 +19,5 @@ DA.phyloseq(data, predictor, paired = NULL, covars = NULL)
 A list with data extracted from the \code{phyloseq} object
 }
 \description{
-Extract data from a \code{phyloseq} object to be used in \code{DAtest}
+Internal function
 }

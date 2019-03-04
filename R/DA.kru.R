@@ -8,6 +8,15 @@
 #' @param allResults If TRUE will return raw results from the \code{kruskal.test} function
 #' @param ... Additional arguments for the \code{kruskal.test} function
 #' @return A data.frame with with results.
+#' @examples 
+#' # Creating random count_table and predictor
+#' set.seed(4)
+#' mat <- matrix(rnbinom(1500, size = 0.1, mu = 500), nrow = 100, ncol = 15)
+#' rownames(mat) <- 1:100
+#' pred <- c(rep("A", 5), rep("B", 5), rep("C", 5))
+#' 
+#' # Running Kruskal-Wallis on each feature
+#' res <- DA.kru(data = mat, predictor = pred)
 #' @export
 
 DA.kru <- function(data, predictor, relative = TRUE, p.adj = "fdr", allResults = FALSE, ...){
@@ -41,7 +50,7 @@ DA.kru <- function(data, predictor, relative = TRUE, p.adj = "fdr", allResults =
   if(allResults){
     return(tests)
   } else {
-    res <- data.frame(pval = vapply(tests, function(x) x$p.value))
+    res <- data.frame(pval = sapply(tests, function(x) x$p.value))
     res$pval.adj <- p.adjust(res$pval, method = p.adj)
     res$Feature <- rownames(res)
     res$Method <- "Kruskal-Wallis (kru)" 

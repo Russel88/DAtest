@@ -1,4 +1,4 @@
-#' MetageonomeSeq ZIG
+#' MetagenomeSeq ZIG
 #'
 #' Implementation of Metagenome zero-inflated gaussian model for \code{DAtest}
 #' @param data Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples
@@ -11,6 +11,15 @@
 #' @param allResults If TRUE will return raw results from the \code{fitZig} function
 #' @param ... Additional arguments for the \code{fitZig} function
 #' @return A data.frame with with results.
+#' @examples 
+#' # Creating random count_table and predictor
+#' set.seed(4)
+#' mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 100, ncol = 10)
+#' rownames(mat) <- 1:100
+#' pred <- c(rep("Control", 5), rep("Treatment", 5))
+#' 
+#' # Running MetagenomeSeq Zero-inflated Gaussian
+#' res <- DA.zig(data = mat, predictor = pred)
 #' @export
 
 DA.zig <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr", by = 2, eff = 0.5, allResults = FALSE, ...){

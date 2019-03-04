@@ -17,6 +17,18 @@
 #' @param ... Additional arguments for the \code{testDA} function
 #' @return A data.frame with estimated runtimes for 1 run
 #' @importFrom parallel detectCores
+#' @examples 
+#' # Creating large random count_table and predictor
+#' set.seed(5)
+#' mat <- matrix(rnbinom(150000, size = 0.5, mu = 500), nrow = 10000, ncol = 10)
+#' rownames(mat) <- 1:10000
+#' pred <- c(rep("A", 5), rep("B", 5))
+#' 
+#' # Use runtimeDA to predict total runtime for all features
+#' # This example uses 1 core (cores = 1). 
+#' # Remove the cores argument to get it as high (and thereby fast) as possible.
+#' # Also, in this example only a subset of tests are run.
+#' runtimeDA(mat, pred, cores = 1, tests = c("ttt","wil"), tests.slow = c("neb"))
 #' @export
 runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples = c(500,1000,1500,2000), subsamples.slow = c(100,150,200,250), 
                       tests =  c("sam", "qua", "fri", "vli", "qpo", "pea", "wil", "ttt", "ltt", "ltt2","ere", "ere2", "msf", "zig", "lim", "lli", "lli2", "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe", "aoa", "aoc", "tta", "ttc", "lma", "lmc", "lia", "lic"), 

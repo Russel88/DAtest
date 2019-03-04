@@ -12,6 +12,15 @@
 #' @param allResults If TRUE will return raw results from the \code{t.test} function
 #' @param ... Additional arguments for the \code{t.test} function
 #' @return A data.frame with with results.
+#' @examples 
+#' # Creating random count_table and predictor
+#' set.seed(4)
+#' mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 100, ncol = 10)
+#' rownames(mat) <- 1:100
+#' pred <- c(rep("Control", 5), rep("Treatment", 5))
+#' 
+#' # Running t-test on each feature
+#' res <- DA.ltt(data = mat, predictor = pred)
 #' @export
 
 DA.ltt <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr", delta = 1, testStat = function(case,control){log2((mean(case)+0.001)/(mean(control)+0.001))}, testStat.pair = function(case,control){log2(mean((case+0.001)/(control+0.001)))},allResults = FALSE, ...){

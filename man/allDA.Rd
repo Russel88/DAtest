@@ -56,3 +56,35 @@ Run many differential abundance and expression tests at a time, to easily compar
 \details{
 mva is excluded by default, as it is slow.
 }
+\examples{
+# Creating random count_table and predictor
+set.seed(5)
+mat <- matrix(rnbinom(500, size = 0.1, mu = 500), nrow = 50, ncol = 10)
+pred <- c(rep("Control", 5), rep("Treatment", 5))
+
+# Running allDA to compare methods
+# This example uses 1 core (cores = 1). 
+# Remove the cores argument to get it as high (and thereby fast) as possible.
+res <- allDA(data = mat, predictor = pred, cores = 1)
+
+# View adjusted p-values from all methods
+print(res$adj)
+
+# View estimates from all methods
+print(res$est)
+
+\donttest{
+# Include a paired variable for dependent/blocked samples
+subject <- rep(1:5, 2)
+res <- allDA(data = mat, predictor = pred, paired = subject)
+
+# Include covariates
+covar1 <- rnorm(10)
+covar2 <- rep(c("A","B"), 5)
+res <- allDA(data = mat, predictor = pred, 
+             covars = list(FirstCovar = covar1, CallItWhatYouWant = covar2))
+
+# Data is absolute abundance
+res <- allDA(data = mat, predictor = pred, relative = FALSE)
+}
+}

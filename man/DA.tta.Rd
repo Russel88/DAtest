@@ -37,3 +37,13 @@ Apply welch t-test to multiple features with one \code{predictor}
 \details{
 Note: Last feature in the data is used as reference for the log-ratio transformation.
 }
+\examples{
+# Creating random count_table and predictor
+set.seed(4)
+mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 100, ncol = 10)
+rownames(mat) <- 1:100
+pred <- c(rep("Control", 5), rep("Treatment", 5))
+
+# Running t-test on each feature
+res <- DA.tta(data = mat, predictor = pred)
+}

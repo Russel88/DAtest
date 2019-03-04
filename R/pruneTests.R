@@ -10,7 +10,7 @@
 #' @return A character with the tests argument pruned according to the parameters
 #' @export
 
-prune.tests.DA <- function(tests, predictor, paired, covars, relative, decimal, zeroes){
+pruneTests <- function(tests, predictor, paired, covars, relative, decimal, zeroes){
 
   # Prune test argument if packages are not installed
   if(!"baySeq" %in% rownames(installed.packages())) tests <- tests[tests != "bay"]

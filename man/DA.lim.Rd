@@ -35,3 +35,13 @@ A data.frame with with results.
 \description{
 LIMMA
 }
+\examples{
+# Creating random count_table and predictor
+set.seed(4)
+mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 100, ncol = 10)
+rownames(mat) <- 1:100
+pred <- c(rep("Control", 5), rep("Treatment", 5))
+
+# Running limma
+res <- DA.lim(data = mat, predictor = pred)
+}

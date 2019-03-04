@@ -17,3 +17,6 @@ An ALR normalized count_table
 \description{
 Additive log-ratio normalization
 }
+\examples{
+norm_alr(matrix(1:100, nrow = 10, ncol = 10))
+}

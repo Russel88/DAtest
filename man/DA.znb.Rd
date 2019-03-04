@@ -36,3 +36,13 @@ A data.frame with with results.
 Apply zero-inflated negative binomial generalized linear model to multiple features, with one independent variable
 With \code{log(librarySize)} as offset.
 }
+\examples{
+# Creating random count_table and predictor
+set.seed(4)
+mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 100, ncol = 10)
+rownames(mat) <- 1:100
+pred <- c(rep("Control", 5), rep("Treatment", 5))
+
+# Running Zero-inflated Negative Binomial regression on each feature
+res <- DA.znb(data = mat, predictor = pred)
+}

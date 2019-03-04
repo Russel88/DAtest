@@ -38,3 +38,12 @@ Boxplot for categorical variables, points and smooth line for quantitative varia
 If a \code{paired} variable is supplied, it is always plotted as points with lines grouped by the \code{paired} variable
 If \code{covars} are supplied data is split in facets. Quantitative covars are cut in intervals according to the quantiles given in \code{covar.quant}
 }
+\examples{
+# Create random count_table and predictor
+set.seed(5)
+mat <- matrix(rnbinom(500, size = 0.1, mu = 500), nrow = 50, ncol = 10)
+pred <- c(rep("Control", 5), rep("Treatment", 5))
+rownames(mat) <- 1:50
+
+featurePlot(mat, pred, feature = "5")
+}

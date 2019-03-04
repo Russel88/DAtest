@@ -23,3 +23,13 @@ A data.frame with with results.
 \description{
 Apply Spearman correlation to multiple features with one \code{predictor}
 }
+\examples{
+# Creating random count_table and predictor
+set.seed(4)
+mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 50, ncol = 20)
+rownames(mat) <- 1:50
+pred <- rnorm(20)
+
+# Running Spearman correlation on each feature
+res <- DA.spe(data = mat, predictor = pred)
+}

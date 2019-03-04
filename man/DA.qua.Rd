@@ -28,3 +28,14 @@ A data.frame with with results.
 \description{
 Apply \code{quade.test} to multiple features with one \code{predictor}
 }
+\examples{
+# Creating random count_table, predictor, and paired variable
+set.seed(4)
+mat <- matrix(rnbinom(1500, size = 0.1, mu = 500), nrow = 100, ncol = 15)
+rownames(mat) <- 1:100
+pred <- c(rep("A", 5), rep("B", 5), rep("C", 5))
+subject <- rep(1:5, 3)
+
+# Running Quade test on each feature
+res <- DA.qua(data = mat, predictor = pred, paired = subject)
+}

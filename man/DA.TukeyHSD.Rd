@@ -21,3 +21,14 @@ A data.frame with output from TukeyHSD and adjusted p.values for each predictor 
 \description{
 Works on "aov", "lao", "lao2", "aoc", "aoa"
 }
+\examples{
+# Creating random count_table and predictor
+set.seed(5)
+mat <- matrix(rnbinom(3000, size = 0.1, mu = 500), nrow = 100, ncol = 30)
+rownames(mat) <- 1:100
+pred <- c(rep("A", 10), rep("B", 10), rep("C", 10))
+
+# Run anova and then TukeyHSD on each predictor
+res <- DA.aov(data = mat, predictor = pred, allResults = TRUE)
+res.tuk <- DA.TukeyHSD(res)
+}

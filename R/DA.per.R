@@ -18,6 +18,15 @@
 #' @param noOfIterations Integer. Iterations for permutations. Default 10000
 #' @param margin Numeric. Margin for when to stop iterations if p-value is high and unlikely to become low
 #' @return A data.frame with with results.
+#' @examples 
+#' # Creating random count_table and predictor
+#' set.seed(4)
+#' mat <- matrix(rnbinom(1000, size = 0.1, mu = 500), nrow = 100, ncol = 10)
+#' rownames(mat) <- 1:100
+#' pred <- c(rep("Control", 5), rep("Treatment", 5))
+#' 
+#' # Running permutation test on each feature
+#' res <- DA.per(data = mat, predictor = pred)
 #' @export
 
 DA.per <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr", testStat = function(case,control){log2((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){log2(mean((case+1)/(control+1)))}, noOfIterations = 10000, margin = 50){

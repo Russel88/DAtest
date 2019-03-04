@@ -37,3 +37,13 @@ A data.frame with with results.
 \description{
 Implementation of mvabund manyglm for \code{DAtest}. With negative binomial family and an offset of log(LibrarySize) when relative = TRUE
 }
+\examples{
+# Creating random count_table and predictor
+set.seed(4)
+mat <- matrix(rnbinom(100, size = 0.1, mu = 500), nrow = 10, ncol = 10)
+rownames(mat) <- 1:10
+pred <- c(rep("Control", 5), rep("Treatment", 5))
+
+# Running mvabund manyglm
+res <- DA.mva(data = mat, predictor = pred)
+}

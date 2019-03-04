@@ -6,6 +6,15 @@
 #' @param allResults If TRUE will return raw results from the \code{getLikelihoods} function
 #' @param ... Additional arguments to the \code{getPriors.NB} and \code{getLikelihoods} functions
 #' @return A data.frame with with results.
+#' @examples
+#' # Creating random count_table and predictor
+#' set.seed(4)
+#' mat <- matrix(rnbinom(100, size = 0.1, mu = 500), nrow = 50, ncol = 10)
+#' rownames(mat) <- 1:50
+#' pred <- c(rep("Control", 5), rep("Treatment", 5))
+#' 
+#' # Running baySeq
+#' res <- DA.bay(data = mat, predictor = pred)
 #' @export
 
 DA.bay <- function(data, predictor, allResults = FALSE, ...){

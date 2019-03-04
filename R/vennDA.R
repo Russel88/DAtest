@@ -11,6 +11,21 @@
 #' @param pkg Use either "eulerr" package (default) or "venneuler" for drawing diagrams.
 #' @param ... Additional arguments for plotting
 #' @return If output TRUE then a data.frame with Features detected by the different methods
+#' @examples 
+#' # Creating random count_table and predictor
+#' set.seed(5)
+#' mat <- matrix(rnbinom(500, size = 0.1, mu = 500), nrow = 50, ncol = 10)
+#' pred <- c(rep("Control", 5), rep("Treatment", 5))
+#' 
+#' # Running allDA to compare methods
+#' # This example uses 1 core (cores = 1). 
+#' # Remove the cores argument to get it as high (and thereby fast) as possible.
+#' res <- allDA(data = mat, predictor = pred, cores = 1)
+#' 
+#' # Plot venn diagram comparing significant features from znb and zpo
+#' # znb and zpo only have significant features due to high false positive rates in this example
+#' # split = TRUE splits the significant features in positive and negative estimates
+#' vennDA(res, tests = c("znb","zpo"), split = TRUE)
 #' @export
 vennDA <- function(x, tests = NULL, alpha = 0.1, split = FALSE, output = FALSE, pkg = "eulerr", ...){
 

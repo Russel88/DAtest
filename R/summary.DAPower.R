@@ -21,10 +21,10 @@ summary.DAPower <- function(object, decimals = 2, ...){
     } else {
       if(x$Method[1] %in% c("ALDEx2 t-test (adx)","ALDEx2 wilcox (adx)")){
         # Find medians
-        output.summary.sdr <- aggregate(Power ~ Method + EffectSize, data = x, FUN = function(y) median)
-        output.summary.auc <- aggregate(AUC ~ Method + EffectSize, data = x, FUN = function(y) median)
-        output.summary.fpr <- aggregate(FPR ~ Method + EffectSize, data = x, FUN = function(y) median)
-        output.summary.fdr <- aggregate(FDR ~ Method + EffectSize, data = x, FUN = function(y) median)
+        output.summary.sdr <- aggregate(Power ~ Method + EffectSize, data = x, FUN = median)
+        output.summary.auc <- aggregate(AUC ~ Method + EffectSize, data = x, FUN = median)
+        output.summary.fpr <- aggregate(FPR ~ Method + EffectSize, data = x, FUN = median)
+        output.summary.fdr <- aggregate(FDR ~ Method + EffectSize, data = x, FUN = median)
         
         # Merge
         df <- cbind(output.summary.sdr,output.summary.auc[,3],output.summary.fpr[,3],output.summary.fdr[,3])
@@ -32,10 +32,10 @@ summary.DAPower <- function(object, decimals = 2, ...){
         colnames(df) <- c("Method","EffectSize","Power","AUC","FPR","FDR")
       } else {
         # Find medians
-        output.summary.sdr <- aggregate(Power ~ EffectSize, data = x, FUN = function(y) median)
-        output.summary.auc <- aggregate(AUC ~ EffectSize, data = x, FUN = function(y) median)
-        output.summary.fpr <- aggregate(FPR ~ EffectSize, data = x, FUN = function(y) median)
-        output.summary.fdr <- aggregate(FDR ~ EffectSize, data = x, FUN = function(y) median)
+        output.summary.sdr <- aggregate(Power ~ EffectSize, data = x, FUN = median)
+        output.summary.auc <- aggregate(AUC ~ EffectSize, data = x, FUN = median)
+        output.summary.fpr <- aggregate(FPR ~ EffectSize, data = x, FUN = median)
+        output.summary.fdr <- aggregate(FDR ~ EffectSize, data = x, FUN = median)
         
         # Merge
         df <- merge(merge(merge(output.summary.sdr,output.summary.auc, by = "EffectSize"),
