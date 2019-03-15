@@ -69,7 +69,7 @@ DA.aoa <- function(data, predictor, covars = NULL, p.adj = "fdr", delta = 1, all
     res$pval.adj <- p.adjust(res$pval, method = p.adj)
     res$Feature <- rownames(res)
     res$Method <- "ANOVA - ALR (aoa)"
-    if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
+    if(class(data) == "phyloseq") res <- addTax(data, res)
     return(res)
   }
 }

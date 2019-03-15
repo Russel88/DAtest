@@ -166,7 +166,7 @@ DA.zpo <- function(data, predictor, covars = NULL, relative = TRUE, out.all = NU
       res$Method <- "ZI-Poisson GLM (zpo)"
       
       if(nrow(res) > 1){
-        if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
+        if(class(data) == "phyloseq") res <- addTax(data, res)
       }
       return(res)
     }

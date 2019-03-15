@@ -94,7 +94,7 @@ DA.zig <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
     temp_table$Feature <- rownames(temp_table)
     temp_table$Method <- "MgSeq ZIG (zig)"
     
-    if(class(data) == "phyloseq") temp_table <- add.tax.DA(data, temp_table)
+    if(class(data) == "phyloseq") temp_table <- addTax(data, temp_table)
     
     if(allResults) return(mgsfit) else return(temp_table)
     

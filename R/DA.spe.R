@@ -51,7 +51,7 @@ DA.spe <- function(data, predictor, relative = TRUE, p.adj = "fdr", ...){
   res$Feature <- rownames(res)
   res$Method <- "Spearman (spe)"
   
-  if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
+  if(class(data) == "phyloseq") res <- addTax(data, res)
 
   return(res)  
 }

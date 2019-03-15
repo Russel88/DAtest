@@ -125,7 +125,7 @@ DA.per <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
   output_df$pval.adj <- p.adjust(output_df$pval, method = p.adj)
   output_df$Method <- "Permutation (per)"
   
-  if(class(data) == "phyloseq") output_df <- add.tax.DA(data, output_df)
+  if(class(data) == "phyloseq") output_df <- addTax(data, output_df)
   
   return(output_df)
 }

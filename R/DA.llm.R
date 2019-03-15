@@ -156,7 +156,7 @@ DA.llm <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
     res$pval.adj <- p.adjust(res$pval, method = p.adj)
     res$Feature <- rownames(res)
     res$Method <- "Log Linear reg. (llm)"
-    if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
+    if(class(data) == "phyloseq") res <- addTax(data, res)
     return(res)
   } 
   

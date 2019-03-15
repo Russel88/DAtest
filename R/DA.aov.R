@@ -67,7 +67,7 @@ DA.aov <- function(data, predictor, covars = NULL, relative = TRUE, p.adj = "fdr
     res$pval.adj <- p.adjust(res$pval, method = p.adj)
     res$Feature <- rownames(res)
     res$Method <- "ANOVA (aov)"
-    if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
+    if(class(data) == "phyloseq") res <- addTax(data, res)
     return(res)
   }
 }

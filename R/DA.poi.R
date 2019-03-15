@@ -245,7 +245,7 @@ DA.poi <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
     res$Method <- "Poisson GLM (poi)"
     
     if(nrow(res) > 1){
-      if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
+      if(class(data) == "phyloseq") res <- addTax(data, res)
     }
     return(res)
   }

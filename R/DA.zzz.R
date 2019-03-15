@@ -69,7 +69,7 @@ DA.zzz <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
   if(!all(c("pval","Feature","Method") %in% colnames(res))) stop("The following columns has to be present in output: pval, Feature and Method")
   res$pval.adj <- p.adjust(res$pval, method = p.adj)
     
-  if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
+  if(class(data) == "phyloseq") res <- addTax(data, res)
   
   return(res)
 }

@@ -211,7 +211,7 @@ DA.neb <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
     res$Method <- "Negbinom GLM (neb)"
     
     if(nrow(res) > 1){
-      if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
+      if(class(data) == "phyloseq") res <- addTax(data, res)
     }
     return(res)
   } else {

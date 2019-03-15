@@ -118,7 +118,7 @@ DA.ds2x <- function(data, predictor, paired = NULL, covars = NULL, out.all = NUL
     res$Feature <- DESeq2::results(x)@rownames
     res$Method <- "DESeq2 (ds2x)"
     
-    if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
+    if(class(data) == "phyloseq") res <- addTax(data, res)
     
     if(allResults) return(x) else return(res)  
   } else {

@@ -167,7 +167,7 @@ DA.znb <- function(data, predictor, covars = NULL, relative = TRUE, out.all = NU
       res$Method <- "ZI-NegBin GLM (znb)"
       
       if(nrow(res) > 1){
-        if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
+        if(class(data) == "phyloseq") res <- addTax(data, res)
       }
       return(res)
     }

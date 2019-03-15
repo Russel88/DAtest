@@ -1,9 +1,3 @@
-#' Geometric means
-#'
-#' @param x numeric vector
-#' @return The geometric mean
-#' @examples gm_mean(1:10)
-#' @export
 gm_mean = function(x){
   if(any(x < 0, na.rm = TRUE)){
     stop("Negative values not allowed")

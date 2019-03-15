@@ -59,7 +59,7 @@ DA.ere <- function(data, predictor, p.adj = "fdr", ...){
     ta$Feature <- rownames(ta)
     ta$Method <- "EdgeR exact - TMM (ere)"
     
-    if(class(data) == "phyloseq") ta <- add.tax.DA(data, ta)
+    if(class(data) == "phyloseq") ta <- addTax(data, ta)
     
     return(ta) 
     

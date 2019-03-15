@@ -57,7 +57,7 @@ DA.bay <- function(data, predictor, allResults = FALSE, ...){
     
     output_df$Method <- "baySeq (bay)"
     
-    if(class(data) == "phyloseq") output_df <- add.tax.DA(data, output_df)
+    if(class(data) == "phyloseq") output_df <- addTax(data, output_df)
     
     if(allResults) return(CD) else return(output_df)
   } else {

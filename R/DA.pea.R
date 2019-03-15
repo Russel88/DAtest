@@ -54,7 +54,7 @@ DA.pea <- function(data, predictor, relative = TRUE, p.adj = "fdr", ...){
   res$Method <- "Pearson (pea)"
 
   # Add tax table if available
-  if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
+  if(class(data) == "phyloseq") res <- addTax(data, res)
 
   return(res)  
 }

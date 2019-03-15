@@ -159,7 +159,7 @@ DA.lma <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL
     res$pval.adj <- p.adjust(res$pval, method = p.adj)
     res$Feature <- rownames(res)
     res$Method <- "Linear model - ALR (lma)"
-    if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
+    if(class(data) == "phyloseq") res <- addTax(data, res)
     return(res)
   } 
   

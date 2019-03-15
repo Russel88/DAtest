@@ -64,7 +64,7 @@ DA.qua <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
     res$Feature <- gsub(".Quade.*","",rownames(res))
     res$Method <- "Quade (qua)" 
     
-    if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
+    if(class(data) == "phyloseq") res <- addTax(data, res)
     return(res)
   }
   

@@ -103,7 +103,7 @@ DA.lli2 <- function(data, predictor, paired = NULL, covars = NULL, out.all = NUL
     res$Feature <- rownames(res)
     res$Method <- "Log LIMMA 2 (lli2)"
     
-    if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
+    if(class(data) == "phyloseq") res <- addTax(data, res)
     
     if(allResults) return(fit.eb) else return(res) 
     

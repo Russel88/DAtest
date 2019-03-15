@@ -104,7 +104,7 @@ DA.lic <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL
     res$Feature <- rownames(res)
     res$Method <- "LIMMA - CLR (lic)"
     
-    if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
+    if(class(data) == "phyloseq") res <- addTax(data, res)
     
     if(allResults) return(fit.eb) else return(res) 
     

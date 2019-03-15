@@ -64,7 +64,7 @@ DA.lao2 <- function(data, predictor, covars = NULL, p.adj = "fdr", delta = 0.001
     res$pval.adj <- p.adjust(res$pval, method = p.adj)
     res$Feature <- rownames(res)
     res$Method <- "Log ANOVA 2 (lao2)"
-    if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
+    if(class(data) == "phyloseq") res <- addTax(data, res)
     return(res)
   }
 }

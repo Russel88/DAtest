@@ -1,15 +1,3 @@
-#' Prune tests argument for \code{testDA}
-#'
-#' @param tests A character vector with names of tests
-#' @param predictor Vector with predictor variable
-#' @param paired Factor with paired variable
-#' @param covars Named list with covariables
-#' @param relative Include tests that work with relative abundances (TRUE) or only absolute abundances (FALSE)
-#' @param decimal Exclude tests that do not work with decimals (TRUE)
-#' @param zeroes If FALSE will exclude tests that include zero-inflation
-#' @return A character with the tests argument pruned according to the parameters
-#' @export
-
 pruneTests <- function(tests, predictor, paired, covars, relative, decimal, zeroes){
 
   # Prune test argument if packages are not installed
@@ -19,8 +7,7 @@ pruneTests <- function(tests, predictor, paired, covars, relative, decimal, zero
   if(!"metagenomeSeq" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("msf","zig")]
   if(!"DESeq2" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("ds2","ds2x")]
   if(!"limma" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("lim","lli","lli2","vli","lia","lic")]
-  if(!"statmod" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("lim","lli","lli2","vli","lia","lic")]
-  if(!"RAIDA" %in% rownames(installed.packages())) tests <- tests[tests != "rai"]
+  if(!"statmod" %in% rownames(installed.packages()) && is.null(paired)) tests <- tests[!tests %in% c("lim","lli","lli2","vli","lia","lic")]
   if(!"pscl" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("zpo","znb")]
   if(!"samr" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("sam")]
   if(!"mvabund" %in% rownames(installed.packages())) tests <- tests[!tests %in% c("mva")]

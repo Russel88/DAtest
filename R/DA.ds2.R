@@ -126,7 +126,7 @@ DA.ds2 <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL
     res$Feature <- DESeq2::results(x)@rownames
     res$Method <- "DESeq2 man. geoMeans (ds2)"
     
-    if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
+    if(class(data) == "phyloseq") res <- addTax(data, res)
     
     if(allResults) return(x) else return(res)
   } else {

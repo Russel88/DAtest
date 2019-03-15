@@ -84,7 +84,7 @@ DA.wil <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
     res[!is.na(res$log2FC) & res$log2FC < 0,"ordering"] <- paste0(levels(as.factor(predictor))[1],">",levels(as.factor(predictor))[2])
     res$Feature <- rownames(res)
     res$Method <- "Wilcox (wil)" 
-    if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
+    if(class(data) == "phyloseq") res <- addTax(data, res)
     return(res)
   }
  

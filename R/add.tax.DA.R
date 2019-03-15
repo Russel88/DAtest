@@ -1,11 +1,4 @@
-#' Add tax_table from phyloseq object
-#'
-#' Internal function
-#' @param data phyloseq object
-#' @param res data.frame with results
-#' @return \code{res} merged with the tax.table from the phyloseq object
-#' @export
-add.tax.DA <- function(data, res){
+addTax <- function(data, res){
   
   loadNamespace("phyloseq")
   

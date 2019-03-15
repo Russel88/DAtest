@@ -105,7 +105,7 @@ DA.mva <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
       res$Feature <- rownames(pvals.unadj$uni.test)
       res$Method <- "mvabund (mva)"
       
-      if(class(data) == "phyloseq") res <- add.tax.DA(data, res)
+      if(class(data) == "phyloseq") res <- addTax(data, res)
       
       return(res)
     }
