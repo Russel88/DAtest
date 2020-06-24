@@ -4,14 +4,21 @@
 \alias{runtimeDA}
 \title{Estimate runtime of \code{testDA} on large datasets}
 \usage{
-runtimeDA(data, predictor, paired = NULL, covars = NULL,
-  subsamples = c(500, 1000, 1500, 2000), subsamples.slow = c(100, 150,
-  200, 250), tests = c("sam", "qua", "fri", "vli", "qpo", "pea", "wil",
-  "ttt", "ltt", "ltt2", "ere", "ere2", "msf", "zig", "lim", "lli", "lli2",
-  "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe", "aoa", "aoc",
-  "tta", "ttc", "lma", "lmc", "lia", "lic"), tests.slow = c("mva", "neb",
-  "bay", "per", "ds2", "ds2x", "zpo", "znb", "adx", "poi", "erq", "erq2"),
-  cores = (detectCores() - 1), ...)
+runtimeDA(
+  data,
+  predictor,
+  paired = NULL,
+  covars = NULL,
+  subsamples = c(500, 1000, 1500, 2000),
+  subsamples.slow = c(100, 150, 200, 250),
+  tests = c("sam", "qua", "fri", "vli", "qpo", "pea", "wil", "ttt", "ltt", "ltt2",
+    "ere", "ere2", "msf", "zig", "lim", "lli", "lli2", "aov", "lao", "lao2", "kru",
+    "lrm", "llm", "llm2", "spe", "aoa", "aoc", "tta", "ttc", "lma", "lmc", "lia", "lic"),
+  tests.slow = c("mva", "neb", "bay", "per", "ds2", "ds2x", "zpo", "znb", "adx", "poi",
+    "erq", "erq2"),
+  cores = (detectCores() - 1),
+  ...
+)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}

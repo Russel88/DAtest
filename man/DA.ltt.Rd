@@ -4,11 +4,20 @@
 \alias{DA.ltt}
 \title{Welch t-test}
 \usage{
-DA.ltt(data, predictor, paired = NULL, relative = TRUE,
-  p.adj = "fdr", delta = 1, testStat = function(case, control) {    
-  log2((mean(case) + 0.001)/(mean(control) + 0.001)) },
-  testStat.pair = function(case, control) {     log2(mean((case +
-  0.001)/(control + 0.001))) }, allResults = FALSE, ...)
+DA.ltt(
+  data,
+  predictor,
+  paired = NULL,
+  relative = TRUE,
+  p.adj = "fdr",
+  delta = 1,
+  testStat = function(case, control) {     log2((mean(case) + 0.001)/(mean(control) +
+    0.001)) },
+  testStat.pair = function(case, control) {     log2(mean((case + 0.001)/(control +
+    0.001))) },
+  allResults = FALSE,
+  ...
+)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}

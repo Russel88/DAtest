@@ -4,8 +4,15 @@
 \alias{summary.DA}
 \title{Summary of results from \code{testDA}}
 \usage{
-\method{summary}{DA}(object, sort = "Score", boot = TRUE,
-  prob = c(0.05, 0.95), N = 1000, decimals = 2, ...)
+\method{summary}{DA}(
+  object,
+  sort = "Score",
+  boot = TRUE,
+  prob = c(0.05, 0.95),
+  N = 1000,
+  decimals = 2,
+  ...
+)
 }
 \arguments{
 \item{object}{The output from the \code{testDA} function}

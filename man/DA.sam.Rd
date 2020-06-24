@@ -4,8 +4,14 @@
 \alias{DA.sam}
 \title{SAMSeq}
 \usage{
-DA.sam(data, predictor, paired = NULL, fdr.output = 0.05,
-  allResults = FALSE, ...)
+DA.sam(
+  data,
+  predictor,
+  paired = NULL,
+  fdr.output = 0.05,
+  allResults = FALSE,
+  ...
+)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}

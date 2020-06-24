@@ -4,8 +4,17 @@
 \alias{DA.zig}
 \title{MetagenomeSeq ZIG}
 \usage{
-DA.zig(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
-  by = 2, eff = 0.5, allResults = FALSE, ...)
+DA.zig(
+  data,
+  predictor,
+  paired = NULL,
+  covars = NULL,
+  p.adj = "fdr",
+  by = 2,
+  eff = 0.5,
+  allResults = FALSE,
+  ...
+)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}

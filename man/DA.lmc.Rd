@@ -4,8 +4,18 @@
 \alias{DA.lmc}
 \title{Linear regression - Multiplicative zero-correction and center log-ratio normalization.}
 \usage{
-DA.lmc(data, predictor, paired = NULL, covars = NULL, out.all = NULL,
-  p.adj = "fdr", delta = 1, coeff = 2, allResults = FALSE, ...)
+DA.lmc(
+  data,
+  predictor,
+  paired = NULL,
+  covars = NULL,
+  out.all = NULL,
+  p.adj = "fdr",
+  delta = 1,
+  coeff = 2,
+  allResults = FALSE,
+  ...
+)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}

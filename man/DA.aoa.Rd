@@ -4,8 +4,15 @@
 \alias{DA.aoa}
 \title{ANOVA - Multiplicative zero-correction and additive log-ratio normalization.}
 \usage{
-DA.aoa(data, predictor, covars = NULL, p.adj = "fdr", delta = 1,
-  allResults = FALSE, ...)
+DA.aoa(
+  data,
+  predictor,
+  covars = NULL,
+  p.adj = "fdr",
+  delta = 1,
+  allResults = FALSE,
+  ...
+)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}

@@ -4,8 +4,14 @@
 \alias{DA.lsmeans}
 \title{Run \code{lsmeans} on all features from \code{DAtest} results with \code{allResults = TRUE}}
 \usage{
-DA.lsmeans(results, variable = "predictor", predictor = NULL,
-  covars = NULL, p.adj = "fdr", ...)
+DA.lsmeans(
+  results,
+  variable = "predictor",
+  predictor = NULL,
+  covars = NULL,
+  p.adj = "fdr",
+  ...
+)
 }
 \arguments{
 \item{results}{Output from a \code{DA."test"} function with \code{allResults = TRUE}}

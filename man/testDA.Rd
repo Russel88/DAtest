@@ -4,15 +4,27 @@
 \alias{testDA}
 \title{Comparing differential abundance/expression methods by Empirical power and False Discovery Rate}
 \usage{
-testDA(data, predictor, paired = NULL, covars = NULL, R = 20,
-  tests = c("bay", "ds2", "ds2x", "per", "adx", "znb", "zpo", "msf",
-  "zig", "erq", "erq2", "neb", "qpo", "poi", "sam", "lrm", "llm", "llm2",
-  "lma", "lmc", "ere", "ere2", "pea", "spe", "wil", "kru", "qua", "fri",
-  "ttt", "ltt", "ltt2", "tta", "ttc", "aov", "lao", "lao2", "aoa", "aoc",
-  "vli", "lim", "lli", "lli2", "lia", "lic"), relative = TRUE,
-  effectSize = 5, k = NULL, cores = (detectCores() - 1),
-  p.adj = "fdr", args = list(), out.all = NULL, alpha = 0.1,
-  core.check = TRUE, verbose = TRUE)
+testDA(
+  data,
+  predictor,
+  paired = NULL,
+  covars = NULL,
+  R = 20,
+  tests = c("bay", "ds2", "ds2x", "per", "adx", "znb", "zpo", "msf", "zig", "erq",
+    "erq2", "neb", "qpo", "poi", "sam", "lrm", "llm", "llm2", "lma", "lmc", "ere",
+    "ere2", "pea", "spe", "wil", "kru", "qua", "fri", "ttt", "ltt", "ltt2", "tta", "ttc",
+    "aov", "lao", "lao2", "aoa", "aoc", "vli", "lim", "lli", "lli2", "lia", "lic"),
+  relative = TRUE,
+  effectSize = 5,
+  k = NULL,
+  cores = (detectCores() - 1),
+  p.adj = "fdr",
+  args = list(),
+  out.all = NULL,
+  alpha = 0.1,
+  core.check = TRUE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{data}{Either a data.frame with counts/abundances, OR a \code{phyloseq} object. If a data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}

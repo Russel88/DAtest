@@ -4,11 +4,17 @@
 \alias{DA.per}
 \title{Permutation test of user-defined test statistic}
 \usage{
-DA.per(data, predictor, paired = NULL, relative = TRUE,
-  p.adj = "fdr", testStat = function(case, control) {    
-  log2((mean(case) + 1)/(mean(control) + 1)) },
-  testStat.pair = function(case, control) {     log2(mean((case +
-  1)/(control + 1))) }, noOfIterations = 10000, margin = 50)
+DA.per(
+  data,
+  predictor,
+  paired = NULL,
+  relative = TRUE,
+  p.adj = "fdr",
+  testStat = function(case, control) {     log2((mean(case) + 1)/(mean(control) + 1)) },
+  testStat.pair = function(case, control) {     log2(mean((case + 1)/(control + 1))) },
+  noOfIterations = 10000,
+  margin = 50
+)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}

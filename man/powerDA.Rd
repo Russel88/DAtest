@@ -4,11 +4,25 @@
 \alias{powerDA}
 \title{Estimating (empirical) statistical power}
 \usage{
-powerDA(data, predictor, paired = NULL, covars = NULL, test = NULL,
-  effectSizes = c(2, 4, 8, 16, 32), alpha.p = 0.05, alpha.q = 0.1,
-  p.adj = "fdr", R = 5, relative = TRUE, k = NULL,
-  cores = (detectCores() - 1), args = list(), out.all = NULL,
-  core.check = TRUE, verbose = TRUE)
+powerDA(
+  data,
+  predictor,
+  paired = NULL,
+  covars = NULL,
+  test = NULL,
+  effectSizes = c(2, 4, 8, 16, 32),
+  alpha.p = 0.05,
+  alpha.q = 0.1,
+  p.adj = "fdr",
+  R = 5,
+  relative = TRUE,
+  k = NULL,
+  cores = (detectCores() - 1),
+  args = list(),
+  out.all = NULL,
+  core.check = TRUE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{data}{Either a data.frame with counts/abundances, OR a \code{phyloseq} object. If a data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}

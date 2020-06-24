@@ -4,9 +4,18 @@
 \alias{DA.llm2}
 \title{Log linear regression}
 \usage{
-DA.llm2(data, predictor, paired = NULL, covars = NULL,
-  out.all = NULL, p.adj = "fdr", delta = 0.001, coeff = 2,
-  allResults = FALSE, ...)
+DA.llm2(
+  data,
+  predictor,
+  paired = NULL,
+  covars = NULL,
+  out.all = NULL,
+  p.adj = "fdr",
+  delta = 0.001,
+  coeff = 2,
+  allResults = FALSE,
+  ...
+)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}

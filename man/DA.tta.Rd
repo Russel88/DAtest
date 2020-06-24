@@ -4,10 +4,17 @@
 \alias{DA.tta}
 \title{Welch t-test - Multiplicative zero-correction and additive log-ratio normalization.}
 \usage{
-DA.tta(data, predictor, paired = NULL, p.adj = "fdr", delta = 1,
+DA.tta(
+  data,
+  predictor,
+  paired = NULL,
+  p.adj = "fdr",
+  delta = 1,
   testStat = function(case, control) {     mean(case) - mean(control) },
   testStat.pair = function(case, control) {     mean(case - control) },
-  allResults = FALSE, ...)
+  allResults = FALSE,
+  ...
+)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}

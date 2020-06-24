@@ -4,14 +4,24 @@
 \alias{allDA}
 \title{Run many differential abundance/expression methods}
 \usage{
-allDA(data, predictor, paired = NULL, covars = NULL, tests = c("bay",
-  "ds2", "ds2x", "per", "adx", "znb", "zpo", "msf", "zig", "erq", "erq2",
-  "neb", "qpo", "poi", "sam", "lrm", "llm", "llm2", "lma", "lmc", "ere",
-  "ere2", "pea", "spe", "wil", "kru", "qua", "fri", "ttt", "ltt", "ltt2",
-  "tta", "ttc", "aov", "lao", "lao2", "aoa", "aoc", "vli", "lim", "lli",
-  "lli2", "lia", "lic"), relative = TRUE, cores = (detectCores() - 1),
-  p.adj = "fdr", args = list(), out.all = NULL, alpha = 0.1,
-  core.check = TRUE, verbose = TRUE)
+allDA(
+  data,
+  predictor,
+  paired = NULL,
+  covars = NULL,
+  tests = c("bay", "ds2", "ds2x", "per", "adx", "znb", "zpo", "msf", "zig", "erq",
+    "erq2", "neb", "qpo", "poi", "sam", "lrm", "llm", "llm2", "lma", "lmc", "ere",
+    "ere2", "pea", "spe", "wil", "kru", "qua", "fri", "ttt", "ltt", "ltt2", "tta", "ttc",
+    "aov", "lao", "lao2", "aoa", "aoc", "vli", "lim", "lli", "lli2", "lia", "lic"),
+  relative = TRUE,
+  cores = (detectCores() - 1),
+  p.adj = "fdr",
+  args = list(),
+  out.all = NULL,
+  alpha = 0.1,
+  core.check = TRUE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{data}{Either a data.frame with counts/abundances, OR a \code{phyloseq} object. If a data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}

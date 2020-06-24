@@ -4,8 +4,14 @@
 \alias{DA.zzz}
 \title{User-defined function}
 \usage{
-DA.zzz(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
-  FUN = NULL)
+DA.zzz(
+  data,
+  predictor,
+  paired = NULL,
+  covars = NULL,
+  p.adj = "fdr",
+  FUN = NULL
+)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}

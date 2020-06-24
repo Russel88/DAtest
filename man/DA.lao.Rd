@@ -4,8 +4,16 @@
 \alias{DA.lao}
 \title{ANOVA}
 \usage{
-DA.lao(data, predictor, covars = NULL, relative = TRUE,
-  p.adj = "fdr", delta = 1, allResults = FALSE, ...)
+DA.lao(
+  data,
+  predictor,
+  covars = NULL,
+  relative = TRUE,
+  p.adj = "fdr",
+  delta = 1,
+  allResults = FALSE,
+  ...
+)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples}

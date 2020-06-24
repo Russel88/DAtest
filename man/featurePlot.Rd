@@ -4,9 +4,17 @@
 \alias{featurePlot}
 \title{Plot association between abundance of a feature and predictor}
 \usage{
-featurePlot(data, predictor, paired = NULL, covars = NULL,
-  feature = NULL, relative = TRUE, logScale = FALSE, delta = 0.001,
-  covar.quant = c(0, 1/3, 2/3, 1))
+featurePlot(
+  data,
+  predictor,
+  paired = NULL,
+  covars = NULL,
+  feature = NULL,
+  relative = TRUE,
+  logScale = FALSE,
+  delta = 0.001,
+  covar.quant = c(0, 1/3, 2/3, 1)
+)
 }
 \arguments{
 \item{data}{Either a matrix with counts/abundances, OR a \code{phyloseq} object. If a matrix/data.frame is provided rows should be taxa/genes/proteins and columns samples, and there should be rownames}

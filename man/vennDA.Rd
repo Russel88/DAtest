@@ -4,8 +4,15 @@
 \alias{vennDA}
 \title{Plot Venn diagram from \code{allDA} object}
 \usage{
-vennDA(x, tests = NULL, alpha = 0.1, split = FALSE, output = FALSE,
-  pkg = "eulerr", ...)
+vennDA(
+  x,
+  tests = NULL,
+  alpha = 0.1,
+  split = FALSE,
+  output = FALSE,
+  pkg = "eulerr",
+  ...
+)
 }
 \arguments{
 \item{x}{(Required) Output from the \code{allDA} function}
