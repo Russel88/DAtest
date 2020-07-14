@@ -322,7 +322,7 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
     # AUC
     test_roc <- NULL
      tryCatch(
-       test_roc <- pROC::roc(as.numeric(res.sub$Feature %in% spikeds[[which(r == tests.par)]][[2]]) ~ res.sub$pval, auc=TRUE, direction = ">"),
+       test_roc <- pROC::roc(as.numeric(res.sub$Feature %in% spikeds[[which(r == tests.par)]][[2]]) ~ res.sub$pval, auc=TRUE, direction = ">", quiet=TRUE),
        error = function(e) NULL)
      if(!is.null(test_roc)){
        auc <- as.numeric(test_roc$auc) 

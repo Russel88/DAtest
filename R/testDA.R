@@ -405,7 +405,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
       if(effectSize != 1){
         test_roc <- NULL
         tryCatch(
-          test_roc <- pROC::roc(as.numeric(res.sub[[x]]$Feature %in% spikeds[[r]][[2]]) ~ res.sub[[x]]$pval, auc=TRUE, direction = ">"),
+          test_roc <- pROC::roc(as.numeric(res.sub[[x]]$Feature %in% spikeds[[r]][[2]]) ~ res.sub[[x]]$pval, auc=TRUE, direction = ">", quiet=TRUE),
           error = function(e) NULL)
         if(!is.null(test_roc)){
           as.numeric(test_roc$auc) 
