@@ -14,3 +14,7 @@ bioc_packages:
 
 before_install:
 - sudo apt-get install libgsl-dev
+
+env:
+  global:
+    - _R_CHECK_DONTTEST_EXAMPLES_=FALSE
