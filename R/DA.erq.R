@@ -31,7 +31,7 @@ DA.erq <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL
   
   if (ok){
     # Extract from phyloseq
-    if(class(data) == "phyloseq"){
+    if(is(data, "phyloseq")){
       DAdata <- DA.phyloseq(data, predictor, paired, covars)
       count_table <- DAdata$count_table
       predictor <- DAdata$predictor
@@ -109,7 +109,7 @@ DA.erq <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL
     ta$Feature <- rownames(ta)
     ta$Method <- "EdgeR qll - TMM (erq)"
     
-    if(class(data) == "phyloseq") ta <- addTax(data, ta)
+    if(is(data, "phyloseq")) ta <- addTax(data, ta)
     
     if(allResults) return(qlf) else return(ta)
     

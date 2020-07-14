@@ -29,7 +29,7 @@ featurePlot <- function(data, predictor, paired = NULL, covars = NULL, feature =
   stopifnot(exists("data"),exists("predictor"))
 
   # Extract from phyloseq
-  if(class(data) == "phyloseq"){
+  if(is(data, "phyloseq")){
     DAdata <- DA.phyloseq(data, predictor, paired, covars)
     count_table <- DAdata$count_table
     predictor <- DAdata$predictor
@@ -121,7 +121,7 @@ featurePlot <- function(data, predictor, paired = NULL, covars = NULL, feature =
   }
   
   # Title
-  if(class(data) == "phyloseq"){
+  if(is(data, "phyloseq")){
     loadNamespace("phyloseq")
     tax <- unclass(phyloseq::tax_table(data))
     subtax <- tax[rownames(tax) == feature,]

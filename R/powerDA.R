@@ -64,7 +64,7 @@ powerDA <- function(data, predictor, paired = NULL, covars = NULL, test = NULL, 
   }
 
   # Extract from phyloseq
-  if(class(data) == "phyloseq"){
+  if(is(data, "phyloseq")){
     DAdata <- DA.phyloseq(data, predictor, paired, covars)
     count_table <- DAdata$count_table
     predictor <- DAdata$predictor

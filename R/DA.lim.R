@@ -31,7 +31,7 @@ DA.lim <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
   
   if (ok){
     # Extract from phyloseq
-    if(class(data) == "phyloseq"){
+    if(is(data, "phyloseq")){
       DAdata <- DA.phyloseq(data, predictor, paired, covars)
       count_table <- DAdata$count_table
       predictor <- DAdata$predictor
@@ -105,7 +105,7 @@ DA.lim <- function(data, predictor, paired = NULL, covars = NULL, relative = TRU
     res$Feature <- rownames(res)
     res$Method <- "LIMMA (lim)"
     
-    if(class(data) == "phyloseq") res <- addTax(data, res)
+    if(is(data, "phyloseq")) res <- addTax(data, res)
     
     if(allResults) return(fit.eb) else return(res)
     

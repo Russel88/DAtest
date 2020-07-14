@@ -25,7 +25,7 @@
 DA.ttt <- function(data, predictor,paired = NULL, relative = TRUE, p.adj = "fdr", testStat = function(case,control){log2((mean(case)+0.001)/(mean(control)+0.001))}, testStat.pair = function(case,control){log2(mean((case+0.001)/(control+0.001)))},allResults = FALSE, ...){
   
   # Extract from phyloseq
-  if(class(data) == "phyloseq"){
+  if(is(data, "phyloseq")){
     DAdata <- DA.phyloseq(data, predictor, paired)
     count_table <- DAdata$count_table
     predictor <- DAdata$predictor
@@ -84,7 +84,7 @@ DA.ttt <- function(data, predictor,paired = NULL, relative = TRUE, p.adj = "fdr"
     res[!is.na(res$log2FC) & res$log2FC < 0,"ordering"] <- paste0(levels(as.factor(predictor))[1],">",levels(as.factor(predictor))[2])
     res$Feature <- rownames(res)
     res$Method <- "t-test (ttt)"
-    if(class(data) == "phyloseq") res <- addTax(data, res)
+    if(is(data, "phyloseq")) res <- addTax(data, res)
     return(res)
   }
 }

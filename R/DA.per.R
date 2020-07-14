@@ -32,7 +32,7 @@
 DA.per <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr", testStat = function(case,control){log2((mean(case)+1)/(mean(control)+1))}, testStat.pair = function(case,control){log2(mean((case+1)/(control+1)))}, noOfIterations = 10000, margin = 50){
 
   # Extract from phyloseq
-  if(class(data) == "phyloseq"){
+  if(is(data, "phyloseq")){
     DAdata <- DA.phyloseq(data, predictor, paired)
     count_table <- DAdata$count_table
     predictor <- DAdata$predictor
@@ -125,7 +125,7 @@ DA.per <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
   output_df$pval.adj <- p.adjust(output_df$pval, method = p.adj)
   output_df$Method <- "Permutation (per)"
   
-  if(class(data) == "phyloseq") output_df <- addTax(data, output_df)
+  if(is(data, "phyloseq")) output_df <- addTax(data, output_df)
   
   return(output_df)
 }

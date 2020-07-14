@@ -47,7 +47,7 @@ DA.zzz <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
   if(is.null(FUN)) stop("FUN has to be defined")
   
   # Extract from phyloseq
-  if(class(data) == "phyloseq"){
+  if(is(data, "phyloseq")){
     DAdata <- DA.phyloseq(data, predictor, paired, covars)
     count_table <- DAdata$count_table
     predictor <- DAdata$predictor
@@ -69,7 +69,7 @@ DA.zzz <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
   if(!all(c("pval","Feature","Method") %in% colnames(res))) stop("The following columns has to be present in output: pval, Feature and Method")
   res$pval.adj <- p.adjust(res$pval, method = p.adj)
     
-  if(class(data) == "phyloseq") res <- addTax(data, res)
+  if(is(data, "phyloseq")) res <- addTax(data, res)
   
   return(res)
 }

@@ -27,7 +27,7 @@ DA.bay <- function(data, predictor, allResults = FALSE, ...){
   if (ok){
     
     # Extract from phyloseq
-    if(class(data) == "phyloseq"){
+    if(is(data, "phyloseq")){
       DAdata <- DA.phyloseq(data, predictor)
       count_table <- DAdata$count_table
       predictor <- DAdata$predictor
@@ -57,7 +57,7 @@ DA.bay <- function(data, predictor, allResults = FALSE, ...){
     
     output_df$Method <- "baySeq (bay)"
     
-    if(class(data) == "phyloseq") output_df <- addTax(data, output_df)
+    if(is(data, "phyloseq")) output_df <- addTax(data, output_df)
     
     if(allResults) return(CD) else return(output_df)
   } else {

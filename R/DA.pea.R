@@ -21,7 +21,7 @@
 DA.pea <- function(data, predictor, relative = TRUE, p.adj = "fdr", ...){
   
   # Extract from phyloseq
-  if(class(data) == "phyloseq"){
+  if(is(data, "phyloseq")){
     DAdata <- DA.phyloseq(data, predictor)
     count_table <- DAdata$count_table
     predictor <- DAdata$predictor
@@ -54,7 +54,7 @@ DA.pea <- function(data, predictor, relative = TRUE, p.adj = "fdr", ...){
   res$Method <- "Pearson (pea)"
 
   # Add tax table if available
-  if(class(data) == "phyloseq") res <- addTax(data, res)
+  if(is(data, "phyloseq")) res <- addTax(data, res)
 
   return(res)  
 }

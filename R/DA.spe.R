@@ -21,7 +21,7 @@
 DA.spe <- function(data, predictor, relative = TRUE, p.adj = "fdr", ...){
   
   # Extract from phyloseq
-  if(class(data) == "phyloseq"){
+  if(is(data, "phyloseq")){
     DAdata <- DA.phyloseq(data, predictor)
     count_table <- DAdata$count_table
     predictor <- DAdata$predictor
@@ -51,7 +51,7 @@ DA.spe <- function(data, predictor, relative = TRUE, p.adj = "fdr", ...){
   res$Feature <- rownames(res)
   res$Method <- "Spearman (spe)"
   
-  if(class(data) == "phyloseq") res <- addTax(data, res)
+  if(is(data, "phyloseq")) res <- addTax(data, res)
 
   return(res)  
 }

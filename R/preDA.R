@@ -21,7 +21,7 @@
 preDA <- function(data, min.samples = 0, min.reads = 0, min.abundance = 0){
   
   # Extract from phyloseq
-  if(class(data) == "phyloseq"){
+  if(is(data, "phyloseq")){
     loadNamespace("phyloseq")
     count_table <- phyloseq::otu_table(data)
     if(!phyloseq::taxa_are_rows(data)) count_table <- t(count_table)
@@ -56,7 +56,7 @@ preDA <- function(data, min.samples = 0, min.reads = 0, min.abundance = 0){
   rownames(count.new)[nrow(count.new)] <- "Others"
   
   # Output
-  if(class(data) == "phyloseq"){
+  if(is(data, "phyloseq")){
     # Fix tax_table
     tax <- as.data.frame(unclass(phyloseq::tax_table(data)))
     tax.keep <- tax[-exclude,]

@@ -27,7 +27,7 @@ DA.ere <- function(data, predictor, p.adj = "fdr", ...){
   if (ok){
     
     # Extract from phyloseq
-    if(class(data) == "phyloseq"){
+    if(is(data, "phyloseq")){
       DAdata <- DA.phyloseq(data, predictor)
       count_table <- DAdata$count_table
       predictor <- DAdata$predictor
@@ -59,7 +59,7 @@ DA.ere <- function(data, predictor, p.adj = "fdr", ...){
     ta$Feature <- rownames(ta)
     ta$Method <- "EdgeR exact - TMM (ere)"
     
-    if(class(data) == "phyloseq") ta <- addTax(data, ta)
+    if(is(data, "phyloseq")) ta <- addTax(data, ta)
     
     return(ta) 
     

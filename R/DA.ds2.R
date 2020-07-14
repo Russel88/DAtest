@@ -33,7 +33,7 @@ DA.ds2 <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL
   
   if (ok){
     # Extract from phyloseq
-    if(class(data) == "phyloseq"){
+    if(is(data, "phyloseq")){
       DAdata <- DA.phyloseq(data, predictor, paired, covars)
       count_table <- DAdata$count_table
       predictor <- DAdata$predictor
@@ -126,7 +126,7 @@ DA.ds2 <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL
     res$Feature <- DESeq2::results(x)@rownames
     res$Method <- "DESeq2 man. geoMeans (ds2)"
     
-    if(class(data) == "phyloseq") res <- addTax(data, res)
+    if(is(data, "phyloseq")) res <- addTax(data, res)
     
     if(allResults) return(x) else return(res)
   } else {

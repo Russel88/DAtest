@@ -23,7 +23,7 @@
 DA.lao2 <- function(data, predictor, covars = NULL, p.adj = "fdr", delta = 0.001, allResults = FALSE, ...){
   
   # Extract from phyloseq
-  if(class(data) == "phyloseq"){
+  if(is(data, "phyloseq")){
     DAdata <- DA.phyloseq(data, predictor, paired = NULL, covars)
     count_table <- DAdata$count_table
     predictor <- DAdata$predictor
@@ -64,7 +64,7 @@ DA.lao2 <- function(data, predictor, covars = NULL, p.adj = "fdr", delta = 0.001
     res$pval.adj <- p.adjust(res$pval, method = p.adj)
     res$Feature <- rownames(res)
     res$Method <- "Log ANOVA 2 (lao2)"
-    if(class(data) == "phyloseq") res <- addTax(data, res)
+    if(is(data, "phyloseq")) res <- addTax(data, res)
     return(res)
   }
 }

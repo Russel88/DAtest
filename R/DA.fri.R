@@ -26,7 +26,7 @@ DA.fri <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
   if(is.null(paired)) stop("Friedman test needs a paired argument")
   
   # Extract from phyloseq
-  if(class(data) == "phyloseq"){
+  if(is(data, "phyloseq")){
     DAdata <- DA.phyloseq(data, predictor, paired)
     count_table <- DAdata$count_table
     predictor <- DAdata$predictor
@@ -62,7 +62,7 @@ DA.fri <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
     res$Feature <- gsub(".Friedman.*","",rownames(res))
     res$Method <- "Friedman (fri)" 
     
-    if(class(data) == "phyloseq") res <- addTax(data, res)
+    if(is(data, "phyloseq")) res <- addTax(data, res)
     
     return(res)
   }

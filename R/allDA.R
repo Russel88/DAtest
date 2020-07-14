@@ -79,7 +79,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
   }
   
   # Extract from phyloseq
-  if(class(data) == "phyloseq"){
+  if(is(data, "phyloseq")){
     data <- DA.phyloseq(data, predictor, paired, covars)
     count_table <- data$count_table
     predictor <- data$predictor
@@ -284,7 +284,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
   if(length(Pval.raw) > 0){
     df.raw <- suppressWarnings(Reduce(function(x,y) merge(x, y, by= "Feature", all.x = TRUE, all.y = TRUE), Pval.raw))
     colnames(df.raw)[2:ncol(df.raw)] <- names(Pval.raw)
-    if(class(data) == "phyloseq") df.raw <- addTax(data, df.raw)
+    if(is(data, "phyloseq")) df.raw <- addTax(data, df.raw)
   } else {
     df.raw <- NULL
   }
@@ -307,7 +307,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
       }
       colnames(df.adj)[ncol(df.adj)] <- "sam"
     }
-    if(class(data) == "phyloseq") df.adj <- addTax(data, df.adj)
+    if(is(data, "phyloseq")) df.adj <- addTax(data, df.adj)
   } else {
     df.adj <- NULL
   }
@@ -364,14 +364,14 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
     list.est <- list.est[!sapply(list.est, is.null)]
     if(length(list.est) > 0){
       df.est <- Reduce(function(x,y) merge(x, y, by= "Feature", all.x = TRUE, all.y = TRUE), list.est)
-      if(class(data) == "phyloseq") df.est <- addTax(data, df.est)
+      if(is(data, "phyloseq")) df.est <- addTax(data, df.est)
     } else {
       df.est <- NULL
     } 
   }
 
   # Add tax table to results
-  if(class(data) == "phyloseq"){
+  if(is(data, "phyloseq")){
     loadNamespace("phyloseq")
     if(!is.null(phyloseq::tax_table(data, errorIfNULL = FALSE))){
       newresults <- list()

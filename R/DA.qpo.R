@@ -27,7 +27,7 @@
 DA.qpo <- function(data, predictor, covars = NULL, relative = TRUE, out.all = NULL, p.adj = "fdr", coeff = 2, coeff.ref = 1, allResults = FALSE, ...){
  
   # Extract from phyloseq
-  if(class(data) == "phyloseq"){
+  if(is(data, "phyloseq")){
     DAdata <- DA.phyloseq(data, predictor, paired = NULL, covars)
     count_table <- DAdata$count_table
     predictor <- DAdata$predictor
@@ -158,7 +158,7 @@ DA.qpo <- function(data, predictor, covars = NULL, relative = TRUE, out.all = NU
     res$Method <- "Quasi-Poisson GLM (qpo)"
     
     if(nrow(res) > 1){
-      if(class(data) == "phyloseq") res <- addTax(data, res)
+      if(is(data, "phyloseq")) res <- addTax(data, res)
     }
     return(res)
   }

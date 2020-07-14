@@ -28,7 +28,7 @@
 DA.lmc <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL, p.adj = "fdr", delta = 1, coeff = 2, allResults = FALSE, ...){
  
   # Extract from phyloseq
-  if(class(data) == "phyloseq"){
+  if(is(data, "phyloseq")){
     DAdata <- DA.phyloseq(data, predictor, paired, covars)
     count_table <- DAdata$count_table
     predictor <- DAdata$predictor
@@ -158,7 +158,7 @@ DA.lmc <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL
     res$pval.adj <- p.adjust(res$pval, method = p.adj)
     res$Feature <- rownames(res)
     res$Method <- "Linear model - CLR (lmc)"
-    if(class(data) == "phyloseq") res <- addTax(data, res)
+    if(is(data, "phyloseq")) res <- addTax(data, res)
     return(res)
   } 
   

@@ -26,7 +26,7 @@ DA.adx <- function(data, predictor, ...){
   if (ok) {
 
     # Extract from phyloseq
-    if(class(data) == "phyloseq"){
+    if(is(data, "phyloseq")){
       DAdata <- DA.phyloseq(data, predictor)
       count_table <- DAdata$count_table
       predictor <- DAdata$predictor
@@ -41,7 +41,7 @@ DA.adx <- function(data, predictor, ...){
     x[!is.na(x$effect) & x$effect < 0,"ordering"] <- paste0(levels(as.factor(predictor))[1],">",levels(as.factor(predictor))[2])
     x$Feature <- rownames(x)
     
-    if(class(data) == "phyloseq") x <- addTax(data, x)
+    if(is(data, "phyloseq")) x <- addTax(data, x)
     
     return(x)
   } else {

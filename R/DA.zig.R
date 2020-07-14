@@ -31,7 +31,7 @@ DA.zig <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
   
   if (ok){
     # Extract from phyloseq
-    if(class(data) == "phyloseq"){
+    if(is(data, "phyloseq")){
       DAdata <- DA.phyloseq(data, predictor, paired, covars)
       count_table <- DAdata$count_table
       predictor <- DAdata$predictor
@@ -94,7 +94,7 @@ DA.zig <- function(data, predictor, paired = NULL, covars = NULL, p.adj = "fdr",
     temp_table$Feature <- rownames(temp_table)
     temp_table$Method <- "MgSeq ZIG (zig)"
     
-    if(class(data) == "phyloseq") temp_table <- addTax(data, temp_table)
+    if(is(data, "phyloseq")) temp_table <- addTax(data, temp_table)
     
     if(allResults) return(mgsfit) else return(temp_table)
     

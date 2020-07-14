@@ -26,7 +26,7 @@ DA.qua <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
   if(is.null(paired)) stop("Quade test needs a paired argument")
   
   # Extract from phyloseq
-  if(class(data) == "phyloseq"){
+  if(is(data, "phyloseq")){
     DAdata <- DA.phyloseq(data, predictor, paired)
     count_table <- DAdata$count_table
     predictor <- DAdata$predictor
@@ -64,7 +64,7 @@ DA.qua <- function(data, predictor, paired = NULL, relative = TRUE, p.adj = "fdr
     res$Feature <- gsub(".Quade.*","",rownames(res))
     res$Method <- "Quade (qua)" 
     
-    if(class(data) == "phyloseq") res <- addTax(data, res)
+    if(is(data, "phyloseq")) res <- addTax(data, res)
     return(res)
   }
   

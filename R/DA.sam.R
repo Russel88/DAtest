@@ -28,7 +28,7 @@ DA.sam <- function(data, predictor, paired = NULL, fdr.output = 0.05, allResults
   if (ok){
     
     # Extract from phyloseq
-    if(class(data) == "phyloseq"){
+    if(is(data, "phyloseq")){
       DAdata <- DA.phyloseq(data, predictor, paired)
       count_table <- DAdata$count_table
       predictor <- DAdata$predictor
@@ -99,7 +99,7 @@ DA.sam <- function(data, predictor, paired = NULL, fdr.output = 0.05, allResults
     
     df$Method <- "SAMseq (sam)"
     
-    if(class(data) == "phyloseq") df <- addTax(data, df)
+    if(is(data, "phyloseq")) df <- addTax(data, df)
     
     if(allResults){
       return(res)

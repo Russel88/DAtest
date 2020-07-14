@@ -31,7 +31,7 @@ DA.vli <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL
   
   if (ok){
     # Extract from phyloseq
-    if(class(data) == "phyloseq"){
+    if(is(data, "phyloseq")){
       DAdata <- DA.phyloseq(data, predictor, paired, covars)
       count_table <- DAdata$count_table
       predictor <- DAdata$predictor
@@ -65,7 +65,7 @@ DA.vli <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL
     if(is.null(covars)){
       form <- paste("~ predictor")
     } else {
-      if(class(data) == "phyloseq"){
+      if(is(data, "phyloseq")){
         form <- paste("~ predictor+",paste(covars, collapse="+"),sep = "")
       } else {
         form <- paste("~ predictor+",paste(names(covars), collapse="+"),sep = "")
@@ -108,7 +108,7 @@ DA.vli <- function(data, predictor, paired = NULL, covars = NULL, out.all = NULL
     res$Feature <- rownames(res)
     res$Method <- "LIMMA voom (vli)"
     
-    if(class(data) == "phyloseq") res <- addTax(data, res)
+    if(is(data, "phyloseq")) res <- addTax(data, res)
     
     if(allResults) return(fit.eb) else return(res)  
     

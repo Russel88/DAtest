@@ -28,7 +28,7 @@ DA.msf <- function(data, predictor, p.adj = "fdr", allResults = FALSE, ...){
   
   if (ok){
     # Extract from phyloseq
-    if(class(data) == "phyloseq"){
+    if(is(data, "phyloseq")){
       DAdata <- DA.phyloseq(data, predictor)
       count_table <- DAdata$count_table
       predictor <- DAdata$predictor
@@ -61,7 +61,7 @@ DA.msf <- function(data, predictor, p.adj = "fdr", allResults = FALSE, ...){
     temp_table[!is.na(temp_table$logFC) & temp_table$logFC < 0,"ordering"] <- paste0(levels(as.factor(predictor))[1],">",levels(as.factor(predictor))[2])
     temp_table$Method <- "MgSeq Feature (msf)"  
     
-    if(class(data) == "phyloseq") temp_table <- addTax(data, temp_table)
+    if(is(data, "phyloseq")) temp_table <- addTax(data, temp_table)
     
     if(allResults) return(mgsfit) else return(temp_table)
     
