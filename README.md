@@ -1,4 +1,4 @@
-[![Travis Build Status](https://travis-ci.org/Russel88/DAtest.svg?branch=master)](https://travis-ci.org/Russel88/DAtest)
+[![Travis Build Status](https://travis-ci.org/Russel88/DAtest.svg)](https://travis-ci.org/Russel88/DAtest)
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 [![Package-License](http://img.shields.io/badge/license-GPL--3-brightgreen.svg?style=flat)](http://www.gnu.org/licenses/gpl-3.0.html)
 
