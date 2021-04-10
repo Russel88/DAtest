@@ -75,7 +75,7 @@ vennDA <- function(x, tests = NULL, alpha = 0.1, split = FALSE, output = FALSE, 
           featurelist.pos[[i]] <- featurelist[[i]][featurelist[[i]] %in% sub.p]
           featurelist.neg[[i]] <- featurelist[[i]][featurelist[[i]] %in% sub.n]
         }
-        if(plottests[i] %in% c("mva","sam","znb","zpo","poi","qpo","neb","lim","lli","lli2","vli","lia","lic","pea","spe","per","adx.t","adx.w","wil","ttt","ltt","ltt2","tta","ttc","ere","ere2","erq","erq2","ds2","ds2x","msf","zig","rai")){
+        if(plottests[i] %in% c("mva","sam","znb","zpo","poi","qpo","neb","lim","lli","lli2","vli","lia","lic","pea","spe","per","adx.t","adx.w","wil","ttt","ttr","ltt","ltt2","tta","ttc","ere","ere2","erq","erq2","ds2","ds2x","msf","zig","rai")){
           if(is.null(ncol(subs))){
             featurelist.pos[[i]] <- featurelist[[i]]
             featurelist.neg[[i]] <- featurelist[[i]]
@@ -87,7 +87,7 @@ vennDA <- function(x, tests = NULL, alpha = 0.1, split = FALSE, output = FALSE, 
           }
         }
         # If no estimate/logFC provided throw all significant in both positive and negative list
-        if(!plottests[i] %in% c("mva","sam","bay","znb","zpo","poi","qpo","neb","lim","lli","lli2","vli","lia","lic","pea","spe","per","adx.t","adx.w","wil","ttt","ltt","ltt2","tta","ttc","ere","ere2","erq","erq2","ds2","ds2x","msf","zig","rai")){
+        if(!plottests[i] %in% c("mva","sam","bay","znb","zpo","poi","qpo","neb","lim","lli","lli2","vli","lia","lic","pea","spe","per","adx.t","adx.w","wil","ttt","ttr","ltt","ltt2","tta","ttc","ere","ere2","erq","erq2","ds2","ds2x","msf","zig","rai")){
           featurelist.pos[[i]] <- featurelist[[i]]
           featurelist.neg[[i]] <- featurelist[[i]]
         }

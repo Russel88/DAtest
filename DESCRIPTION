@@ -1,6 +1,6 @@
 Package: DAtest
 Title: Comparing Differential Abundance/Expression Methods
-Version: 2.7.17
+Version: 2.7.18
 Authors@R: person("Jakob", "Russel",
     email = "russel2620@gmail.com", 
     role = c("aut", "cre"))

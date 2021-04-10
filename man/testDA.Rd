@@ -13,7 +13,7 @@ testDA(
   tests = c("bay", "ds2", "ds2x", "per", "adx", "znb", "zpo", "msf", "zig", "erq",
     "erq2", "neb", "qpo", "poi", "sam", "lrm", "llm", "llm2", "lma", "lmc", "ere",
     "ere2", "pea", "spe", "wil", "kru", "qua", "fri", "ttt", "ltt", "ltt2", "tta", "ttc",
-    "aov", "lao", "lao2", "aoa", "aoc", "vli", "lim", "lli", "lli2", "lia", "lic"),
+    "ttr", "aov", "lao", "lao2", "aoa", "aoc", "vli", "lim", "lli", "lli2", "lia", "lic"),
   relative = TRUE,
   effectSize = 5,
   k = NULL,

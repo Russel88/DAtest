@@ -17,7 +17,7 @@ pruneTests <- function(tests, predictor, paired, covars, relative, decimal, zero
     tests <- tests[!tests %in% c("qpo","zpo","znb","bay","adx","ere","ere2","msf","aov","lao","lao2","aoa","aoc","kru","rai","spe","pea")]
     # Exclude tests that only work with one value for each combination of predictor and paired arguments
     if(!all(table(paired,predictor) == 1)){
-      tests <- tests[!tests %in% c("ttt","ltt","ltt2","wil","per","fri","qua","sam","tta","ttc")]
+      tests <- tests[!tests %in% c("ttt","ttr","ltt","ltt2","wil","per","fri","qua","sam","tta","ttc")]
     }
     # Exclude if too few levels
     if(length(unique(paired)) < 5){
