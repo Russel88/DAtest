@@ -44,16 +44,16 @@
 #' \donttest{
 #' # Include a paired variable for dependent/blocked samples
 #' subject <- rep(1:10, 2)
-#' res <- testDA(data = mat, predictor = pred, paired = subject)
+#' res <- testDA(data = mat, predictor = pred, paired = subject, cores = 1, R = 1)
 #' 
 #' # Include covariates
 #' covar1 <- rnorm(20)
 #' covar2 <- rep(c("A","B"), 10)
 #' res <- testDA(data = mat, predictor = pred, 
-#'               covars = list(FirstCovar = covar1, CallItWhatYouWant = covar2))
+#'               covars = list(FirstCovar = covar1, CallItWhatYouWant = covar2), cores = 1, R = 1)
 #' 
 #' # Data is absolute abundance
-#' res <- testDA(data = mat, predictor = pred, relative = FALSE)
+#' res <- testDA(data = mat, predictor = pred, relative = FALSE, cores = 1, R = 1)
 #' }
 #' 
 #' @import stats snow doSNOW foreach utils doParallel
@@ -66,7 +66,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
                              "erq","erq2","neb","qpo","poi","sam",
                              "lrm","llm","llm2","lma","lmc",
                              "ere","ere2","pea","spe",
-                             "wil","kru","qua","fri",
+                             "wil","kru","qua","fri","abc",
                              "ttt","ltt","ltt2","tta","ttc","ttr",
                              "aov","lao","lao2","aoa","aoc",
                              "vli","lim","lli","lli2","lia","lic"),
@@ -254,6 +254,7 @@ testDA <- function(data, predictor, paired = NULL, covars = NULL, R = 20,
                                ere2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]], p.adj), argsL[[i]])),
                                msf = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]], p.adj), argsL[[i]])),
                                zig = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars, p.adj), argsL[[i]])),
+                               abc = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],covars,out.all, p.adj), argsL[[i]])),
                                ds2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,out.all, p.adj), argsL[[i]])),
                                ds2x = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired,covars,out.all, p.adj), argsL[[i]])),
                                per = do.call(get(noquote(paste0("DA.",i))),c(list(count_tables[[run.no]],rands[[run.no]],paired, relative, p.adj), argsL[[i]])),

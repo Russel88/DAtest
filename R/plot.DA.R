@@ -20,7 +20,7 @@ plot.DA <- function(x, sort = "Score", p = FALSE, bins = 20, ...){
     pval.all <- lapply(x$results, function(x) lapply(x, function(y) y[,c("pval","Method","Spiked")]))
     df.all <- suppressWarnings(do.call(rbind, do.call(rbind,pval.all)))
     df.all <- df.all[df.all$Spiked == "No",]
-    df.all <- df.all[!df.all$Method %in% c("ANCOM (anc)","SAMseq (sam)"),]
+    df.all <- df.all[!df.all$Method %in% c("SAMseq (sam)"),]
     
     ## Plot
     ggplot(df.all, aes_string(x = "pval")) +

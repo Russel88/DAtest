@@ -84,15 +84,16 @@ summary(res)
 \donttest{
 # Include a paired variable for dependent/blocked samples
 subject <- rep(1:10, 2)
-res <- powerDA(data = mat, predictor = pred, paired = subject, test = "ttt")
+res <- powerDA(data = mat, predictor = pred, paired = subject, test = "ttt", cores = 1)
 
 # Include covariates
 covar1 <- rnorm(20)
 covar2 <- rep(c("A","B"), 10)
 res <- powerDA(data = mat, predictor = pred, 
-               covars = list(FirstCovar = covar1, CallItWhatYouWant = covar2), test = "lrm")
+               covars = list(FirstCovar = covar1, CallItWhatYouWant = covar2), 
+               test = "lrm", cores = 1)
 
 # Data is absolute abundance
-res <- powerDA(data = mat, predictor = pred, relative = FALSE, test = "ttt")
+res <- powerDA(data = mat, predictor = pred, relative = FALSE, test = "ttt", cores = 1)
 }
 }

@@ -44,16 +44,16 @@
 #' \donttest{
 #' # Include a paired variable for dependent/blocked samples
 #' subject <- rep(1:5, 2)
-#' res <- allDA(data = mat, predictor = pred, paired = subject)
+#' res <- allDA(data = mat, predictor = pred, paired = subject, cores = 1)
 #' 
 #' # Include covariates
 #' covar1 <- rnorm(10)
 #' covar2 <- rep(c("A","B"), 5)
 #' res <- allDA(data = mat, predictor = pred, 
-#'              covars = list(FirstCovar = covar1, CallItWhatYouWant = covar2))
+#'              covars = list(FirstCovar = covar1, CallItWhatYouWant = covar2), cores = 1)
 #' 
 #' # Data is absolute abundance
-#' res <- allDA(data = mat, predictor = pred, relative = FALSE)
+#' res <- allDA(data = mat, predictor = pred, relative = FALSE, cores = 1)
 #' }
 #' @export
 
@@ -62,7 +62,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
                             "erq","erq2","neb","qpo","poi","sam",
                             "lrm","llm","llm2","lma","lmc",
                             "ere","ere2","pea","spe",
-                            "wil","kru","qua","fri",
+                            "wil","kru","qua","fri","abc",
                             "ttt","ltt","ltt2","tta","ttc","ttr",
                             "aov","lao","lao2","aoa","aoc",
                             "vli","lim","lli","lli2","lia","lic"),
@@ -198,6 +198,7 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
                                ere2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor, p.adj), argsL[[i]])),
                                msf = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor, p.adj), argsL[[i]])),
                                zig = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars, p.adj), argsL[[i]])),
+                               abc = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,covars,out.all, p.adj), argsL[[i]])),
                                ds2 = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars,out.all, p.adj), argsL[[i]])),
                                ds2x = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired,covars,out.all, p.adj), argsL[[i]])),
                                per = do.call(get(noquote(paste0("DA.",i))),c(list(count_table,predictor,paired, relative, p.adj), argsL[[i]])),
@@ -347,7 +348,8 @@ allDA <- function(data, predictor, paired = NULL, covars = NULL,
                    zig = paste0("predictor",levels(as.factor(predictor))[2]),
                    ds2 = "log2FoldChange",
                    ds2x = "log2FoldChange",
-                   mva = "log2FC")
+                   mva = "log2FC",
+                   abc = "Beta")
 
   if(!is.numeric(predictor) & length(unique(predictor)) > 2){
     df.est <- NULL

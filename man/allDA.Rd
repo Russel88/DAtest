@@ -11,8 +11,9 @@ allDA(
   covars = NULL,
   tests = c("bay", "ds2", "ds2x", "per", "adx", "znb", "zpo", "msf", "zig", "erq",
     "erq2", "neb", "qpo", "poi", "sam", "lrm", "llm", "llm2", "lma", "lmc", "ere",
-    "ere2", "pea", "spe", "wil", "kru", "qua", "fri", "ttt", "ltt", "ltt2", "tta", "ttc",
-    "ttr", "aov", "lao", "lao2", "aoa", "aoc", "vli", "lim", "lli", "lli2", "lia", "lic"),
+    "ere2", "pea", "spe", "wil", "kru", "qua", "fri", "abc", "ttt", "ltt", "ltt2", "tta",
+    "ttc", "ttr", "aov", "lao", "lao2", "aoa", "aoc", "vli", "lim", "lli", "lli2", "lia",
+    "lic"),
   relative = TRUE,
   cores = (detectCores() - 1),
   p.adj = "fdr",
@@ -86,15 +87,15 @@ print(res$est)
 \donttest{
 # Include a paired variable for dependent/blocked samples
 subject <- rep(1:5, 2)
-res <- allDA(data = mat, predictor = pred, paired = subject)
+res <- allDA(data = mat, predictor = pred, paired = subject, cores = 1)
 
 # Include covariates
 covar1 <- rnorm(10)
 covar2 <- rep(c("A","B"), 5)
 res <- allDA(data = mat, predictor = pred, 
-             covars = list(FirstCovar = covar1, CallItWhatYouWant = covar2))
+             covars = list(FirstCovar = covar1, CallItWhatYouWant = covar2), cores = 1)
 
 # Data is absolute abundance
-res <- allDA(data = mat, predictor = pred, relative = FALSE)
+res <- allDA(data = mat, predictor = pred, relative = FALSE, cores = 1)
 }
 }

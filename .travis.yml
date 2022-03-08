@@ -11,6 +11,7 @@ bioc_packages:
 - DESeq2
 - ALDEx2
 - impute
+- ANCOMBC
 
 before_install:
 - sudo apt-get install libgsl-dev

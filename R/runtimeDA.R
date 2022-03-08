@@ -31,7 +31,7 @@
 #' runtimeDA(mat, pred, cores = 1, tests = c("ttt","wil"), tests.slow = c("neb"))
 #' @export
 runtimeDA <- function(data, predictor, paired = NULL, covars = NULL, subsamples = c(500,1000,1500,2000), subsamples.slow = c(100,150,200,250), 
-                      tests =  c("sam", "qua", "fri", "vli", "qpo", "pea", "wil", "ttt", "ttr", "ltt", "ltt2","ere", "ere2", "msf", "zig", "lim", "lli", "lli2", "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe", "aoa", "aoc", "tta", "ttc", "lma", "lmc", "lia", "lic"), 
+                      tests =  c("abc", "sam", "qua", "fri", "vli", "qpo", "pea", "wil", "ttt", "ttr", "ltt", "ltt2","ere", "ere2", "msf", "zig", "lim", "lli", "lli2", "aov", "lao", "lao2", "kru", "lrm", "llm", "llm2", "spe", "aoa", "aoc", "tta", "ttc", "lma", "lmc", "lia", "lic"), 
                       tests.slow = c("mva", "neb", "bay", "per", "ds2", "ds2x", "zpo", "znb", "adx", "poi", "erq", "erq2"), cores = (detectCores()-1), ...){
   
   stopifnot(exists("data"),exists("predictor"))
